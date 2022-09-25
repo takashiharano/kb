@@ -282,7 +282,6 @@ td.item-list {
     html += '<script src="' + ROOT_PATH + 'libs/debug.js"></script>'
     html += '<script src="' + ROOT_PATH + 'libs/util.js"></script>'
     html += '<script src="' + ROOT_PATH + 'websys/websys.js"></script>'
-    html += '<script src="' + ROOT_PATH + 'webcmd/webcmd.js"></script>'
     html += '''<script src="kb.js"></script>
 </head>
 <body>
