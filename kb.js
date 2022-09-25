@@ -144,7 +144,7 @@ kb.drawList = function(items, sortIdx, sortType) {
     var labelsHTML = kb.buildLabelsHTML(labels);
     htmlList += '<tr class="data-list-row">';
     htmlList += '<td style="padding-right:16px;">' + id + '</td>'
-    htmlList += '<td style="min-width:300px;"><span class="pseudo-link" onclick="kb.getData(\'' + id + '\');">' + title + '</span></td>';
+    htmlList += '<td style="min-width:300px;max-width:600px;padding-right:32px;overflow:hidden;text-overflow:ellipsis;"><span class="pseudo-link" onclick="kb.getData(\'' + id + '\');">' + title + '</span></td>';
     htmlList += '<td style="padding-right:8px;">' + cDateStr + '</td>';
     htmlList += '<td style="padding-right:16px;">' + data.C_USER + '</td>';
     htmlList += '<td style="padding-right:8px;">' + uDateStr + '</td>';
