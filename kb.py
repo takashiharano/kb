@@ -132,9 +132,9 @@ def is_matched_key(target, keywords):
         keyword = util.replace(keyword, 'id:', '')
         if keyword.startswith('label:') or keyword.startswith('body:'):
             continue
-        if target == keyword:
-            return True
-    return False
+        if target != keyword:
+            return False
+    return True
 
 def count_matched_key(target, keywords):
     if target == '':
@@ -144,7 +144,10 @@ def count_matched_key(target, keywords):
         keyword = keywords[i]
         if keyword.startswith('id:') or keyword.startswith('label:') or keyword.startswith('body:'):
             continue
-        count += target.count(keyword)
+        cnt = target.count(keyword)
+        if cnt == 0:
+            return 0
+        count += cnt
     return count
 
 def count_matched_body(target, keywords, and_search=True):
@@ -178,9 +181,9 @@ def exists_in_keywords(data, keywords):
     for i in range(len(keywords)):
         keyword = keywords[i]
         if not keyword.startswith('id:') and not keyword.startswith('label:'):
-            if util.match(data, keyword):
-                return True
-    return False
+            if not util.match(data, keyword):
+                return False
+    return True
 
 #------------------------------------------------------------------------------
 def get_data(id):
