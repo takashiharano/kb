@@ -224,6 +224,11 @@ kb.buildListHeader = function(columns, sortIdx, sortType) {
 kb.getListAll = function() {
   kb._clear();
   $el('#q').value = '';
+  kb.listAll();
+};
+kb.listAll = function() {
+  kb.listStatus.sortIdx = 4;
+  kb.listStatus.sortType = 2;
   kb.getList();
 };
 
@@ -236,9 +241,7 @@ kb.search = function() {
     var param = {q: util.encodeBase64(q)};
     kb.callApi('search', param, kb.onGetList);
   } else {
-    kb.listStatus.sortIdx = 4;
-    kb.listStatus.sortType = 2;
-    kb.getList();
+    kb.listAll();
   }
 };
 
