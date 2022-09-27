@@ -144,7 +144,11 @@ kb.drawList = function(items, sortIdx, sortType) {
     var labelsHTML = kb.buildLabelsHTML(labels);
     htmlList += '<tr class="data-list-row">';
     htmlList += '<td style="padding-right:16px;">' + id + '</td>'
-    htmlList += '<td style="min-width:300px;max-width:600px;padding-right:32px;overflow:hidden;text-overflow:ellipsis;"><span class="pseudo-link" onclick="kb.getData(\'' + id + '\');">' + title + '</span></td>';
+    htmlList += '<td style="min-width:300px;max-width:600px;padding-right:32px;overflow:hidden;text-overflow:ellipsis;"><span class="pseudo-link" onclick="kb.getData(\'' + id + '\');"';
+    if (title.length > 40) {
+      htmlList += ' data-tooltip="' + title + '"';
+    }
+    htmlList += '>' + title + '</span></td>';
     htmlList += '<td style="padding-right:8px;">' + cDateStr + '</td>';
     htmlList += '<td style="padding-right:16px;">' + data.C_USER + '</td>';
     htmlList += '<td style="padding-right:8px;">' + uDateStr + '</td>';
@@ -165,7 +169,7 @@ kb.drawList = function(items, sortIdx, sortType) {
   var infoHtml = items.length + ' ' + util.plural('item', items.length);
   $el('#info').innerHTML = infoHtml;
 
-  util.infotip.show('OK');
+  kb.showInfotip('OK');
 };
 
 kb.sortItemList = function(sortIdx, sortType) {
@@ -253,7 +257,7 @@ kb.labelSearch = function(label) {
 kb.getData = function(id) {
   kb.pendingId = id;
   if (kb.status & kb.ST_EDITING) {
-    util.confirm('Cancel?', kb.cancelAndGetData, kb.cancelAndGetDataN);
+    util.confirm('Cancel?', kb.cancelAndGetData, kb.cancelAndGetDataN, {focus: 'no'});
     return;
   }
   kb._getData();
@@ -309,7 +313,7 @@ kb.onGetData = function(xhr, res, req) {
     kb.showData(kb.content);
   } else {
     kb._clear();
-    util.infotip.show(status);
+    kb.showInfotip(status);
   }
 };
 
@@ -341,9 +345,8 @@ kb.edit = function() {
   $el('#all-button').disabled = true;
   $el('#clear-button').disabled = true;
   $el('#edit-button').disable();
-  $el('#delete-button').hide();
-  $el('#save-button').show();
-  $el('#cancel-button').show();
+  $el('#buttons-r').hide();
+  $el('#buttons-w').show();
 
   $el('#content-body').hide();
   $el('#content-body-edt-wrp').show();
@@ -393,14 +396,13 @@ kb.onEditEnd = function() {
 
   if (kb.content.id) {
     $el('#edit-button').enable();
-    $el('#delete-button').show();
+    $el('#buttons-r').show();
   } else {
     $el('#edit-button').disable();
-    $el('#delete-button').hide();
+    $el('#buttons-r').hide();
   }
 
-  $el('#save-button').hide();
-  $el('#cancel-button').hide();
+  $el('#buttons-w').hide();
 };
 
 kb.save = function() {
@@ -425,7 +427,7 @@ kb._save = function() {
   labels = labels.replace(/\s{2,}/g, ' ');
 
   if (!title) {
-    util.infotip.show('Title is required', 3000);
+    kb.showInfotip('Title is required', 3000);
     $el('#content-title-edt').focus();
     return;
   }
@@ -467,7 +469,7 @@ kb.onSaveData = function(xhr, res, req) {
       kb.getData(id);
       kb.status &= ~kb.ST_EXIT;
     } else {
-      util.infotip.show('OK');
+      kb.showInfotip('OK');
     }
   } else {
     log.e(res.status + ':' + res.body);
@@ -486,7 +488,7 @@ kb.onCheckExists = function(xhr, res, req) {
   if (res.status == 'OK') {
     var exists = res.body;
     if (exists) {
-      util.infotip.show('ALREADY_EXISTS');
+      kb.showInfotip('ALREADY_EXISTS');
     } else {
       kb.status &= ~kb.ST_NEW
       kb._save();
@@ -497,7 +499,7 @@ kb.onCheckExists = function(xhr, res, req) {
 };
 
 kb.cancel = function() {
-  util.confirm('Cancel?', kb._cancel);
+  util.confirm('Cancel?', kb._cancel, {focus: 'no'});
 };
 kb._cancel = function() {
   kb.onEditEnd();
@@ -528,10 +530,10 @@ kb.showData = function(content) {
   $el('#content-wrp').scrollTop = 0
   if (id) {
     $el('#edit-button').enable();
-    $el('#delete-button').show();
+    $el('#buttons-r').show();
   } else {
     $el('#edit-button').disable();
-    $el('#delete-button').hide();
+    $el('#buttons-r').hide();
   }
 };
 
@@ -554,7 +556,7 @@ kb.clearContent = function() {
 };
 
 kb.delete = function() {
-  util.confirm('Delete?', kb._delete);
+  util.confirm('Delete?', kb._delete, {focus: 'no'});
 };
 kb._delete = function() {
   var id = kb.content.id;
@@ -572,10 +574,10 @@ kb.onDelete = function(xhr, res, req) {
     return;
   }
   if (res.status == 'OK') {
-    util.infotip.show('OK');
+    kb.showInfotip('OK');
     kb.getList ();
   } else {
-    util.infotip.show(res.status);
+    kb.showInfotip(res.status);
     log.e(res.status + ':' + res.body);
   }
 };
@@ -593,13 +595,13 @@ kb._export = function() {
 kb.onHttpError = function(status) {
   var m = 'HTTP_ERROR: ' + status;
   log.e(m);
-  util.infotip.show(m);
+  kb.showInfotip(m);
 };
 kb.onApiError = function(res) {
   var m = res.status;
   if (res.body) m += ': ' + res.body;
   log.e(m);
-  util.infotip.show(m);
+  kb.showInfotip(m);
 };
 
 kb.onFontRangeChanged = function(el) {
@@ -615,6 +617,16 @@ kb.setFontSize = function(v) {
 };
 kb.resetFontSize = function() {
   kb.setFontSize(12);
+};
+
+kb.copyUrl = function() {
+  var url = location.href + '?id=' + kb.content.id;
+  util.copy(url);
+  kb.showInfotip('URL copied');
+};
+
+kb.showInfotip = function(m, d) {
+  util.infotip.show(m, d);
 };
 
 kb.onCtrlS = function(e) {

@@ -175,10 +175,11 @@ table {
 }
 #content-title {
   display: inline-block;
-  width: 400px;
+  min-width: 400px;
+  max-width: 800px;
 }
 #content-title-edt {
-  width: 400px;
+  width: 600px;
 }
 #content-labels {
   display: inline-block;
@@ -276,6 +277,10 @@ td.item-list {
 .sort-active {
   color: #ccc;
 }
+
+#labels-label {
+  margin-left: 16px;
+}
 </style>
 '''
 
@@ -288,7 +293,7 @@ td.item-list {
 <div id="body1">
   <div id="list-area" class="area">
     <div style="position:relative;">
-      <button id="new-button" style="margin-right:16px;" onclick="kb.createNew();">NEW</button>
+      <button id="new-button" style="margin-right:24px;" onclick="kb.createNew();">NEW</button>
       <input type="text" id="q" spellcheck="false" style="margin-left:4px;"><button id="search-button" style="margin-left:4px;min-width:32px;" onclick="kb.search();">SEARCH</button>
       <button id="all-button" style="margin-left:8px;min-width:32px;" onclick="kb.getListAll();">LIST ALL</button>
       <span style="position:absolute;right:5px;">
@@ -332,9 +337,14 @@ td.item-list {
         </span>
       </div>
       <div style="display:inline-block;position:absolute;right:10px;">
-        <button id="delete-button" class="red-button" style="min-width:32px;" onclick="kb.delete();">DELETE</button>
-        <button id="save-button" style="min-width:32px;" onclick="kb.save();">SAVE</button>
-        <button id="cancel-button" onclick="kb.cancel();">CANCEL</button>
+        <span id="buttons-r">
+          <button id="copy-url-button" onclick="kb.copyUrl();">Copy URL</button>
+          <button id="delete-button" class="red-button" style="min-width:32px;margin-left:8px;" onclick="kb.delete();">DELETE</button>
+        </span>
+        <span id="buttons-w">
+          <button id="save-button" style="min-width:32px;" onclick="kb.save();">SAVE</button>
+          <button id="cancel-button" onclick="kb.cancel();">CANCEL</button>
+        </span>
       </div>
     </div>
     <div style="height:calc(100% - 84px);">
