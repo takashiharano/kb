@@ -67,123 +67,87 @@ def search_data(q):
     q = util.replace(q, '\\s{2,}', ' ')
     keywords = q.split(' ')
 
-    data_id_list = get_data_id_list()
-    data_list = []
-    for i in range(len(data_id_list)):
-        id = data_id_list[i]
-        score = 0
+    id_list = get_data_id_list()
 
-        score += count_matched_key(id, keywords)
-        if is_matched_key(id, keywords):
-            score += 100
-
+    wk_data_list = []
+    for i in range(len(id_list)):
+        id = id_list[i]
         try:
             data = load_data(id)
+            data['score'] = 0
+            wk_data_list.append(data)
         except:
             continue
 
-        if match_for_id(data, keywords):
-            score += 100
+    for i in range(len(keywords)):
+        keyword = keywords[i]
 
-        if 'TITLE' in data:
-            title = data['TITLE']
-            if exists_in_keywords(title, keywords):
-                score += 1
+        macthed_data_list = []
+        for j in range(len(wk_data_list)):
+            data = wk_data_list[j]
+            score = calc_data_macthed_score(data, keyword)
+            if score > 0:
+                data['score'] += score
+                macthed_data_list.append(data)
 
-        if 'LABELS' in data:
-            labels = data['LABELS']
-            score += count_matched_labels(labels, keywords)
+        wk_data_list = macthed_data_list
 
-        body = data['BODY']
-        score += count_matched_body(body, keywords)
+    data_list = []
+    for i in range(len(wk_data_list)):
+        data = wk_data_list[i]
+        del data['BODY']
+        data['TITLE'] = util.encode_base64(data['TITLE'])
+        data['LABELS'] = util.encode_base64(data['LABELS'])
+        data_list.append(data)
 
-        if score > 0:
-            del data['BODY']
-            data['TITLE'] = util.encode_base64(data['TITLE'])
-            data['LABELS'] = util.encode_base64(data['LABELS'])
-            data['score'] = score
-            data_list.append(data)
+    data_list_obj = {'data_list': data_list}
 
-    list_data = {
-        'data_list': data_list
-    }
-    return list_data
+    return data_list_obj
 
-def count_matched_labels(labels, keywords):
+def calc_data_macthed_score(data, keyword):
+    score = 0
+
+    if keyword.startswith('id:'):
+        keyword = util.replace(keyword, 'id:', '')
+        if keyword == data['id']:
+            score = 100
+
+    elif keyword.startswith('title:'):
+        keyword = util.replace(keyword, 'title:', '')
+        if is_matches_labels(data['TITLE'], keyword):
+            score = 100
+
+    elif keyword.startswith('label:'):
+        keyword = util.replace(keyword, 'label:', '')
+        if is_matches_labels(data['LABELS'], keyword):
+            score = 10
+
+    elif keyword.startswith('body:'):
+        keyword = util.replace(keyword, 'body:', '')
+        score = count_matched_key(data['BODY'], keyword)
+
+    else:
+        score += count_matched_key(data['TITLE'], keyword) * 100
+        score += count_matched_key(data['LABELS'], keyword) * 10
+        score += count_matched_key(data['BODY'], keyword)
+
+    return score
+
+def is_matches_labels(labels, keyword):
     if labels == '':
-        return 0
-    count = 0
+        return False
     label_list = labels.split(' ')
     for i in range(len(label_list)):
         label = label_list[i]
-        for j in range(len(keywords)):
-            keyword = keywords[j]
-            keyword = util.replace(keyword, 'label:', '')
-            if label == keyword:
-                count += 1
-    return count
-
-def is_matched_key(target, keywords):
-    if target == '':
-        return False
-
-    for i in range(len(keywords)):
-        keyword = keywords[i]
-        keyword = util.replace(keyword, 'id:', '')
-        if keyword.startswith('label:') or keyword.startswith('body:'):
-            continue
-        if target != keyword:
-            return False
-    return True
-
-def count_matched_key(target, keywords):
-    if target == '':
-        return 0
-    count = 0
-    for i in range(len(keywords)):
-        keyword = keywords[i]
-        if keyword.startswith('id:') or keyword.startswith('label:') or keyword.startswith('body:'):
-            continue
-        cnt = target.count(keyword)
-        if cnt == 0:
-            return 0
-        count += cnt
-    return count
-
-def count_matched_body(target, keywords, and_search=True):
-    if target == '':
-        return 0
-    count = 0
-    for i in range(len(keywords)):
-        keyword = keywords[i]
-        keyword = util.replace(keyword, 'body:', '')
-        keyword = keyword.lower()
-        if keyword.startswith('id:') or keyword.startswith('label:'):
-            continue
-        target = target.lower()
-        cnt = target.count(keyword)
-        if and_search and cnt == 0:
-            return 0
-        count += cnt
-    return count
-
-def match_for_id(data, keywords):
-    id = data['id']
-    for i in range(len(keywords)):
-        keyword = keywords[i]
-        if keyword.startswith('id:'):
-            keyword = util.replace(keyword, 'id:', '')
-            if keyword == id:
-                return True
+        if label == keyword:
+            return True
     return False
 
-def exists_in_keywords(data, keywords):
-    for i in range(len(keywords)):
-        keyword = keywords[i]
-        if not keyword.startswith('id:') and not keyword.startswith('label:'):
-            if not util.match(data, keyword):
-                return False
-    return True
+def count_matched_key(target, keyword):
+    if target == '':
+        return 0
+    count = target.count(keyword)
+    return count
 
 #------------------------------------------------------------------------------
 def get_data(id):
