@@ -325,8 +325,7 @@ td.item-list {
         </span>
 
         <span id="info-edit">
-          <span>ID:</span>
-          <input type="text" id="content-id-edt" spellcheck="false">
+          <input type="text" id="content-id-edt" spellcheck="false" style="display:none;">
           <span style="margin-left:20px;">TITLE:</span>
           <input type="text" id="content-title-edt" spellcheck="false">
           <span style="margin-left:20px;">LABELS:</span>

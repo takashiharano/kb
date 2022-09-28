@@ -116,7 +116,9 @@ kb.drawList = function(items, sortIdx, sortType) {
     var uDate = data.U_DATE;
     var score = (data.score == undefined ? '' : data.score);
     var cDateStr = '';
+    var cUser = (data.C_USER ? data.C_USER : '');
     var uDateStr = '';
+    var uUser = (data.C_USER ? data.U_USER : '');
     if ((cDate == undefined) || (cDate == '')) {
       cDateStr = '---------- --:--:--';
     } else {
@@ -150,9 +152,9 @@ kb.drawList = function(items, sortIdx, sortType) {
     }
     htmlList += '>' + title + '</span></td>';
     htmlList += '<td style="padding-right:8px;">' + cDateStr + '</td>';
-    htmlList += '<td style="padding-right:16px;">' + data.C_USER + '</td>';
+    htmlList += '<td style="padding-right:16px;">' + cUser + '</td>';
     htmlList += '<td style="padding-right:8px;">' + uDateStr + '</td>';
-    htmlList += '<td style="padding-right:16px;">' + data.U_USER + '</td>';
+    htmlList += '<td style="padding-right:16px;">' + uUser + '</td>';
 
     htmlList += '<td>' + statusLabel + '</td>';
     htmlList += '<td style="padding-left:20px;">' + labelsHTML + '</td>';
