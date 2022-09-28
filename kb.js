@@ -135,7 +135,7 @@ kb.drawList = function(items, sortIdx, sortType) {
     var statusLabel = '';
     if (status == 'OK') {
       statusLabel = '<span class="status-label-ok">OK</span>';
-      if (data.encrypted == 'true') {
+      if (data.encrypted) {
         statusLabel += ' <span class="status-label-encrypted">ENCRYPTED</span>';
       }
     } else {
@@ -165,6 +165,7 @@ kb.drawList = function(items, sortIdx, sortType) {
 
   var html = htmlHead + htmlList; 
   $el('#list').innerHTML = html;
+  $el('#list-wrp').scrollTop = 0;
 
   var infoHtml = items.length + ' ' + util.plural('item', items.length);
   $el('#info').innerHTML = infoHtml;
@@ -226,9 +227,7 @@ kb.buildListHeader = function(columns, sortIdx, sortType) {
 };
 
 kb.getListAll = function() {
-  kb._clear();
-  $el('#q').value = '';
-  kb.listAll();
+  location.href = './';
 };
 kb.listAll = function() {
   kb.listStatus.sortIdx = 4;
@@ -302,6 +301,7 @@ kb.onGetData = function(xhr, res, req) {
   kb.content = {
     id: id,
     status: status,
+    encrypted: data.encrypted,
     C_DATE: cDate,
     U_DATE: uDate,
     TITLE: title,
@@ -351,19 +351,15 @@ kb.edit = function() {
   $el('#content-body').hide();
   $el('#content-body-edt-wrp').show();
 
-  //$el('#id-label').hide();
-  //$el('#id-edit').show();
 
-  $el('#title-label').hide();
-  $el('#title-edit').show();
-
-  $el('#labels-label').hide();
-  $el('#labels-edit').show();
+  $el('#info-label').hide();
+  $el('#info-edit').show();
 
   $el('#content-id-edt').value = kb.content.id;
   $el('#content-title-edt').value = kb.content.TITLE;
   $el('#content-body-edt').value = kb.content.BODY;
   $el('#content-labels-edt').value = kb.content.LABELS;
+  $el('#chk-encryption').checked = kb.content.encrypted;
 };
 
 kb.onEditEnd = function() {
@@ -372,19 +368,15 @@ kb.onEditEnd = function() {
 
   $el('#content-body').show();
 
-  //$el('#id-label').show();
-  $el('#id-edit').hide();
   $el('#content-id-edt').value = '';
 
-  $el('#title-label').show();
-  $el('#title-edit').hide();
+  $el('#info-label').show();
+  $el('#info-edit').hide();
   $el('#content-title-edt').value = '';
 
   $el('#content-body-edt-wrp').hide();
   $el('#content-body-edt').value = '';
 
-  $el('#labels-label').show();
-  $el('#labels-edit').hide();
   $el('#content-labels-edt').value = '';
 
   $el('#new-button').disabled = false;
@@ -420,6 +412,7 @@ kb._save = function() {
     }
   }
 
+  var encryption = ($el('#chk-encryption').checked ? '1' : '0');
   var title = $el('#content-title-edt').value;
   var body = $el('#content-body-edt').value;
   var labels = $el('#content-labels-edt').value;
@@ -446,6 +439,7 @@ kb._save = function() {
   }
 
   var data = {
+    encryption: encryption,
     TITLE: b64Title,
     LABELS: b64Labels,
     BODY: b64Body

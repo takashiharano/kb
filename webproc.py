@@ -168,9 +168,6 @@ table {
   display: inline-block;
 }
 
-#content-id-wrapper {
-  min-width: 50px;
-}
 #content-id {
   display: inline-block;
 }
@@ -187,9 +184,15 @@ table {
 }
 #content-labels {
   display: inline-block;
+  margin-left: 32px;
 }
 #content-labels-edt {
   width: 300px;
+}
+#chk-encryption {
+  position: relative;
+  top: 3px;
+  margin-left: 16px;
 }
 #content-left {
   display: inline-block;
@@ -287,7 +290,6 @@ td.item-list {
 }
 </style>
 '''
-
     html += '<script src="' + ROOT_PATH + 'libs/debug.js"></script>'
     html += '<script src="' + ROOT_PATH + 'libs/util.js"></script>'
     html += '<script src="' + ROOT_PATH + 'websys/websys.js"></script>'
@@ -316,28 +318,20 @@ td.item-list {
     <div>
       <div id="info-area">
         <button id="edit-button" style="min-width:32px;" onclick="kb.edit();">EDIT</button>
-        <span id="id-label">
+        <span id="info-label">
           <pre id="content-id"></pre>
-        </span>
-        <span id="id-edit">
-          <span>ID:</span>
-          <input type="text" id="content-id-edt" spellcheck="false">
-        </span>
-
-        <span id="title-label">
           <pre id="content-title"></pre>
-        </span>
-        <span id="title-edit">
-          <span style="margin-left:20px;">TITLE:</span>
-          <input type="text" id="content-title-edt" spellcheck="false">
-        </span>
-
-        <span id="labels-label">
           <pre id="content-labels"></pre>
         </span>
-        <span id="labels-edit">
+
+        <span id="info-edit">
+          <span>ID:</span>
+          <input type="text" id="content-id-edt" spellcheck="false">
+          <span style="margin-left:20px;">TITLE:</span>
+          <input type="text" id="content-title-edt" spellcheck="false">
           <span style="margin-left:20px;">LABELS:</span>
           <input type="text" id="content-labels-edt" spellcheck="false">
+          <input type="checkbox" id="chk-encryption"><label for="chk-encryption">ENCRYPTION</label>
         </span>
       </div>
       <div style="display:inline-block;position:absolute;right:10px;">
@@ -417,7 +411,7 @@ def web_process():
     data_json = get_request_param('data')
     data = util.from_json(data_json)
     user = get_current_user_name()
-    saved_id = kb.save_data(id, data, user, appconfig.data_encryption)
+    saved_id = kb.save_data(id, data, user)
     result_data = saved_id
   elif act == 'delete':
     id = get_request_param('id')

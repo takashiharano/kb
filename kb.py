@@ -20,7 +20,7 @@ DATA_DIR_PATH = WORKSPACE_PATH + 'data/'
 WK_PATH = WORKSPACE_PATH + 'wk/'
 
 ENCRYPTED_HEAD = '#DATA'
-BSB64_N = 3
+BSB64_N = appconfig.encryption_key
 
 def get_datafile_path(id):
     return DATA_DIR_PATH + id + '.txt'
@@ -174,7 +174,7 @@ def load_data(id, head_only=False):
     data = {
         'id': id,
         'status': 'OK',
-        'encrypted': 'false'
+        'encrypted': False
     }
 
     text_path = get_datafile_path(id)
@@ -185,7 +185,7 @@ def load_data(id, head_only=False):
 
     if text.startswith(ENCRYPTED_HEAD):
         text = bsb64.decode_string(text[len(ENCRYPTED_HEAD):], BSB64_N)
-        data['encrypted'] = 'true'
+        data['encrypted'] = True
 
     lines = util.text2list(text)
     idx = 0
@@ -215,7 +215,7 @@ def load_data(id, head_only=False):
     return data
 
 #------------------------------------------------------------------------------
-def save_data(id, new_data, user='', secure=False):
+def save_data(id, new_data, user=''):
     if id == '':
         next_id = get_max_id() + 1
         id = str(next_id)
@@ -244,6 +244,7 @@ def save_data(id, new_data, user='', secure=False):
     data['TITLE'] = util.decode_base64(new_data['TITLE'])
     data['LABELS'] = util.decode_base64(new_data['LABELS'])
     data['BODY'] = util.decode_base64(new_data['BODY'])
+    secure = True if new_data['encryption'] == '1' else False
 
     write_data(id, data, user, secure)
     return id
