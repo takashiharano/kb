@@ -159,6 +159,9 @@ table {
     html += '  background: ' + appconfig.background3 + ';'
     html += 'font-family: Consolas, Monaco, Menlo, monospace, sans-serif;'
     html += '}'
+    html += '.title {'
+    html += '  color: ' + appconfig.title_color + ';'
+    html += '}'
     html += '''
 #info-area {
   display: inline-block;

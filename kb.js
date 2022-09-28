@@ -144,7 +144,7 @@ kb.drawList = function(items, sortIdx, sortType) {
     var labelsHTML = kb.buildLabelsHTML(labels);
     htmlList += '<tr class="data-list-row">';
     htmlList += '<td style="padding-right:16px;">' + id + '</td>'
-    htmlList += '<td style="min-width:300px;max-width:600px;padding-right:32px;overflow:hidden;text-overflow:ellipsis;"><span class="pseudo-link" onclick="kb.getData(\'' + id + '\');"';
+    htmlList += '<td style="min-width:300px;max-width:600px;padding-right:32px;overflow:hidden;text-overflow:ellipsis;"><span class="pseudo-link title" onclick="kb.getData(\'' + id + '\');"';
     if (title.length > 40) {
       htmlList += ' data-tooltip="' + title + '"';
     }

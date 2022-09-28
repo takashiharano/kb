@@ -11,6 +11,7 @@ background2 = '#13181d'
 background3 = '#192027'
 background4 = '#252b32'
 
+title_color = '#def'
 list_hover_background = '#2f3a42'
 
 button_border = '#0275d8'
