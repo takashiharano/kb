@@ -1,6 +1,8 @@
 root_path = '../../'
 workspace_path = root_path + '../private/kb/'
 
+title = 'KB'
+
 data_encryption = True
 
 border_color = '#08e'

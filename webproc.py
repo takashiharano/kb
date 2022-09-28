@@ -24,8 +24,9 @@ def build_html():
 <meta name="robots" content="none">
 <meta name="referrer" content="no-referrer">
 <meta name="referrer" content="never">
-<meta name="viewport" content="width=device-width,initial-scale=1"><title>KB</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
 '''
+    html += '<title>' + appconfig.title + '</title>'
     html += '<style>'
     html += 'body{'
     html += '  width: 100%;'
