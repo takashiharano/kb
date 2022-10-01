@@ -191,8 +191,12 @@ table {
 }
 #chk-encryption {
   position: relative;
-  top: 3px;
+  top: 2px;
   margin-left: 16px;
+}
+#chk-dataurl-decode {
+  position: relative;
+  top: 2px;
 }
 #content-left {
   display: inline-block;
@@ -335,7 +339,8 @@ td.item-list {
       </div>
       <div style="display:inline-block;position:absolute;right:10px;">
         <span id="buttons-r">
-          <button id="copy-url-button" onclick="kb.copyUrl();">Copy URL</button>
+          <input type="checkbox" id="chk-dataurl-decode" style="position:relative;top:2px;"><label for="chk-dataurl-decode">Decode data-url</label>
+          <button id="copy-url-button" style="margin-left:8px;" onclick="kb.copyUrl();">Copy URL</button>
           <button id="delete-button" class="red-button" style="min-width:32px;margin-left:8px;" onclick="kb.delete();">DELETE</button>
         </span>
         <span id="buttons-w">

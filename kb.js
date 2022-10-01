@@ -34,6 +34,7 @@ $onReady = function() {
   util.addCtrlKeyHandler('S', kb.onCtrlS);
   util.addCtrlKeyHandler('Q', kb.onCtrlQ);
   $el('#q').addEventListener('keydown', kb.onKeyDownOnQ);
+  $el('#chk-dataurl-decode').addEventListener('change', kb.onDataUrlDecodeChange);
 
   util.textarea.addStatusInfo('#content-body-edt', '#content-body-st');
 
@@ -53,7 +54,8 @@ $onReady = function() {
 
 kb.onAppReady = function() {
   $el('#body1').style.display = 'block';
-  $el('#q').focus();
+  var q = util.getQuery('id');
+  if (!q) $el('#q').focus();
   kb.ready = true;
 };
 
@@ -512,10 +514,14 @@ kb.showData = function(content) {
   var uDateStr = '';
   if (cDate != undefined) cDateStr = util.getDateTimeString(+cDate, kb.DATE_FORMAT);
   if (uDate != undefined) uDateStr = util.getDateTimeString(+uDate, kb.DATE_FORMAT);
+  var labelsHTML = kb.buildLabelsHTML(labels);
+
   var contentBody = content.BODY;
   contentBody = util.escHtml(contentBody);
   contentBody = util.linkUrls(contentBody);
-  var labelsHTML = kb.buildLabelsHTML(labels);
+  if ($el('#chk-dataurl-decode').checked) {
+    contentBody = kb.decodeB64Image(contentBody);
+  }
 
   var idLabel = '';
   if (id != '') idLabel = id + ':';
@@ -531,6 +537,28 @@ kb.showData = function(content) {
     $el('#edit-button').disable();
     $el('#buttons-r').hide();
   }
+};
+
+kb.decodeB64Image = function(s) {
+  var m = s.match(/(data:image\/.+;base64,)([^]+?)\n\n/g);
+
+  var imgs = [];
+  if (m) {
+    for (var i = 0; i < m.length; i++) {
+      var w = m[i];
+      w = w.replace(/\n/g, '');
+      imgs.push(w);
+    }
+  }
+
+  for (i = 0; i < imgs.length; i++) {
+    s = s.replace(/[^"]data:image\/.+;base64,[^]+?\n\n/, '\n<img src="' + imgs[i] + '">\n\n');
+  }
+  return s;
+};
+
+kb.onDataUrlDecodeChange = function() {
+  kb.showData(kb.content);
 };
 
 kb.clear = function() {
