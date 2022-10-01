@@ -114,7 +114,7 @@ def calc_data_macthed_score(data, keyword):
 
     elif keyword.startswith('title:'):
         keyword = util.replace(keyword, 'title:', '')
-        if is_matches_labels(data['TITLE'], keyword):
+        if is_matches_title(data['TITLE'], keyword):
             score = 100
 
     elif keyword.startswith('label:'):
@@ -127,15 +127,28 @@ def calc_data_macthed_score(data, keyword):
         score = count_matched_key(data['BODY'], keyword)
 
     else:
+        if is_matches_title(data['TITLE'], keyword):
+            score += 100
         score += count_matched_key(data['TITLE'], keyword) * 100
         score += count_matched_key(data['LABELS'], keyword) * 10
         score += count_matched_key(data['BODY'], keyword)
 
     return score
 
+def is_matches_title(title, keyword):
+    if title == '':
+        return False
+    title = title.lower()
+    keyword = keyword.lower()
+    if title == keyword:
+        return True
+    return False
+
 def is_matches_labels(labels, keyword):
     if labels == '':
         return False
+    labels = labels.lower()
+    keyword = keyword.lower()
     label_list = labels.split(' ')
     for i in range(len(label_list)):
         label = label_list[i]
@@ -146,6 +159,8 @@ def is_matches_labels(labels, keyword):
 def count_matched_key(target, keyword):
     if target == '':
         return 0
+    target = target.lower()
+    keyword = keyword.lower()
     count = target.count(keyword)
     return count
 
