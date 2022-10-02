@@ -16,6 +16,7 @@ background4 = '#252b32'
 
 title_color = '#def'
 list_hover_background = '#2f3a42'
+title_disabled_color = '#aaa'
 
 button_border = '#0275d8'
 button_fgcolor = '#0275d8'

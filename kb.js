@@ -148,11 +148,17 @@ kb.drawList = function(items, sortIdx, sortType) {
     var labelsHTML = kb.buildLabelsHTML(labels);
     htmlList += '<tr class="data-list-row">';
     htmlList += '<td style="padding-right:16px;">' + id + '</td>'
-    htmlList += '<td style="min-width:300px;max-width:600px;padding-right:32px;overflow:hidden;text-overflow:ellipsis;"><span class="pseudo-link title" onclick="kb.getData(\'' + id + '\');"';
+    htmlList += '<td style="min-width:300px;max-width:600px;padding-right:32px;overflow:hidden;text-overflow:ellipsis;">';
+    if (status == 'OK') {
+      htmlList += '<span class="title  pseudo-link" onclick="kb.getData(\'' + id + '\');"';
+    } else {
+      htmlList += '<span class="title-disabled"';
+    }
     if (title.length > 40) {
       htmlList += ' data-tooltip="' + title + '"';
     }
-    htmlList += '>' + title + '</span></td>';
+    htmlList += '>';
+    htmlList += title + '</span></td>';
     htmlList += '<td style="padding-right:8px;">' + cDateStr + '</td>';
     htmlList += '<td style="padding-right:16px;">' + cUser + '</td>';
     htmlList += '<td style="padding-right:8px;">' + uDateStr + '</td>';

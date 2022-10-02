@@ -163,6 +163,9 @@ table {
     html += '.title {'
     html += '  color: ' + appconfig.title_color + ';'
     html += '}'
+    html += '.title-disabled {'
+    html += '  color: ' + appconfig.title_disabled_color + ';'
+    html += '}'
     html += '''
 #info-area {
   display: inline-block;
@@ -303,7 +306,7 @@ td.item-list {
 <div id="body1">
   <div id="list-area" class="area">
     <div style="position:relative;">
-      <button id="new-button" style="margin-right:24px;" onclick="kb.createNew();">NEW</button>
+      <button id="new-button" style="margin-right:32px;" onclick="kb.createNew();">NEW</button>
       <input type="text" id="q" spellcheck="false" style="margin-left:4px;"><button id="search-button" style="margin-left:4px;min-width:32px;" onclick="kb.search();">SEARCH</button>
       <button id="all-button" style="margin-left:8px;min-width:32px;" onclick="kb.getListAll();">LIST ALL</button>
       <span style="position:absolute;right:5px;">
