@@ -546,9 +546,8 @@ kb.showData = function(content) {
 };
 
 kb.decodeB64Image = function(s) {
-  var m = s.match(/(data:image\/.+;base64,)\n?([^\n][^]+?)\n\n/g);
-
   var imgs = [];
+  var m = s.match(/(data:image\/.+;base64,)\n?([^\n][A-za-z0-9+\-/=\n]+?)\n\n/g);
   if (m) {
     for (var i = 0; i < m.length; i++) {
       var w = m[i];
@@ -556,9 +555,8 @@ kb.decodeB64Image = function(s) {
       imgs.push(w);
     }
   }
-
   for (i = 0; i < imgs.length; i++) {
-    s = s.replace(/[^"]data:image\/.+;base64,\n?[^\n][^]+?\n\n/, '\n<img src="' + imgs[i] + '">\n\n');
+    s = s.replace(/[^"]data:image\/.+;base64,\n?[^\n][A-za-z0-9+\-/=\n]+?\n\n/, '\n<img src="' + imgs[i] + '">\n\n');
   }
   return s;
 };
