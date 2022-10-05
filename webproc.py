@@ -63,6 +63,10 @@ button:focus, input[type="button"]:focus, input[type="submit"]:focus {
   background: ' + appconfig.button_focus_background + ';'
   color: ' + appconfig.button_focus_fgcolor + ';'
 }
+input[type="checkbox"] {
+  position: relative;
+  top: 2px;
+}
 '''
     html += 'button:hover, input[type="button"]:hover, input[type="submit"]:hover {'
     html += '  cursor: pointer;'
@@ -193,13 +197,7 @@ table {
   width: 300px;
 }
 #chk-encryption {
-  position: relative;
-  top: 2px;
   margin-left: 16px;
-}
-#chk-dataurl-decode {
-  position: relative;
-  top: 2px;
 }
 #content-left {
   display: inline-block;
