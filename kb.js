@@ -34,7 +34,7 @@ $onReady = function() {
   util.addCtrlKeyHandler('S', kb.onCtrlS);
   util.addCtrlKeyHandler('Q', kb.onCtrlQ);
   $el('#q').addEventListener('keydown', kb.onKeyDownOnQ);
-  $el('#chk-dataurl-decode').addEventListener('change', kb.onDataUrlDecodeChange);
+  $el('#chk-raw-text').addEventListener('change', kb.onRawTextChange);
 
   util.textarea.addStatusInfo('#content-body-edt', '#content-body-st');
 
@@ -524,8 +524,9 @@ kb.showData = function(content) {
 
   var contentBody = content.BODY;
   contentBody = util.escHtml(contentBody);
-  contentBody = util.linkUrls(contentBody);
-  if ($el('#chk-dataurl-decode').checked) {
+
+  if (!$el('#chk-raw-text').checked) {
+    contentBody = util.linkUrls(contentBody);
     contentBody = kb.decodeB64Image(contentBody);
   }
 
@@ -561,7 +562,7 @@ kb.decodeB64Image = function(s) {
   return s;
 };
 
-kb.onDataUrlDecodeChange = function() {
+kb.onRawTextChange = function() {
   kb.showData(kb.content);
 };
 

@@ -342,7 +342,7 @@ td.item-list {
       </div>
       <div style="display:inline-block;position:absolute;right:10px;">
         <span id="buttons-r">
-          <input type="checkbox" id="chk-dataurl-decode" checked><label for="chk-dataurl-decode">Decode data-url</label>
+          <input type="checkbox" id="chk-raw-text"><label for="chk-raw-text">Raw text</label>
           <button id="copy-url-button" style="margin-left:8px;" onclick="kb.copyUrl();">Copy URL</button>
           <button id="delete-button" class="red-button" style="min-width:32px;margin-left:8px;" onclick="kb.delete();">DELETE</button>
         </span>
