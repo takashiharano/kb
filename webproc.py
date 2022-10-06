@@ -94,7 +94,7 @@ a {
     html += '  outline: none;'
     html += '  background: transparent;'
     html += '  color: ' + appconfig.fg_color + ';'
-    html += 'font-family: Consolas, Monaco, Menlo, monospace, sans-serif;'
+    html += '  font-family: Consolas, Monaco, Menlo, monospace, sans-serif;'
     html += '}'
 
     html += '''
@@ -221,7 +221,7 @@ table {
 }
 #content-body-edt {
   width: calc(100% - 8px);
-  height: calc(100% - 12px);
+  height: calc(100% - 1.3em);
 }
 #content-body-st {
   color: #a5afb7;
