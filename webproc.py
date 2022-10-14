@@ -123,6 +123,10 @@ table {
     html += '  background: ' + appconfig.button_red_hover_background + ';'
     html += '  color: ' + appconfig.button_red_hover_fgcolor + ';'
     html += '}'
+    html += '.text-red {'
+    html += '  color: ' + appconfig.text_red + ';'
+    html += '}'
+
     html += '''
 #q {
   width: 500px;
@@ -276,6 +280,9 @@ table.item-list,td.item-list,th.item-list {
 td.item-list {
   padding-right: 16px;
 }
+td.center {
+  text-align: center;
+}
 
 .sort-button {
   display: inline-block;
@@ -323,15 +330,15 @@ td.item-list {
     <div>
       <div id="info-area">
         <button id="edit-button" style="min-width:32px;" onclick="kb.edit();">EDIT</button>
+        <pre id="content-id"></pre>
         <span id="info-label">
-          <pre id="content-id"></pre>
           <pre id="content-title"></pre>
           <pre id="content-labels"></pre>
         </span>
 
         <span id="info-edit">
           <input type="text" id="content-id-edt" spellcheck="false" style="display:none;">
-          <span style="margin-left:20px;">TITLE:</span>
+          <span style="margin-left:4px;">TITLE:</span>
           <input type="text" id="content-title-edt" spellcheck="false">
           <span style="margin-left:20px;">LABELS:</span>
           <input type="text" id="content-labels-edt" spellcheck="false">

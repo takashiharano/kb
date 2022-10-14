@@ -101,10 +101,10 @@ kb.drawList = function(items, sortIdx, sortType) {
       var sortKey = kb.LIST_COLUMNS[sortIdx].key;
       var desc = (sortType == 2);
       items = util.copyObject(items);
-      items = util.sortObject(items, sortKey, desc);
+      var asNum = true;
+      items = util.sortObject(items, sortKey, desc, asNum);
     }
   }
-
   var dateFormat = '%YYYY-%MM-%DD %HH:%mm:%SS';
 
   var htmlList = '';
@@ -167,6 +167,9 @@ kb.drawList = function(items, sortIdx, sortType) {
     htmlList += '<td>' + statusLabel + '</td>';
     htmlList += '<td style="padding-left:20px;">' + labelsHTML + '</td>';
     htmlList += '<td>' + score + '</td>';
+    if (status != 'OK') {
+      htmlList += '<td class="center"><span class="pseudo-link text-red" data-tooltip="Delete" onclick="kb.delete(\'' + id + '\');">X</span></td>';
+    }
     htmlList += '</tr>';
   }
   htmlList += '</table>';
@@ -231,6 +234,7 @@ kb.buildListHeader = function(columns, sortIdx, sortType) {
 
     html += '<th class="item-list"><span>' + label + '</span> ' + sortButton + '</th>';
   }
+  html += '<th class="item-list" style="width:3em;"><span>&nbsp;</span></th>';
 
   html += '</tr>';
   return html;
@@ -584,11 +588,13 @@ kb.clearContent = function() {
   };
 };
 
-kb.delete = function() {
-  util.confirm('Delete?', kb._delete, {focus: 'no'});
+kb.delete = function(id) {
+  util.confirm('Delete?', kb._delete, {focus: 'no', data: id});
 };
-kb._delete = function() {
-  var id = kb.content.id;
+kb._delete = function(id) {
+  if (id == undefined) {
+    id = kb.content.id;
+  }
   var param = {id: id};
   kb.callApi('delete', param, kb.onDelete);
   kb._clear();

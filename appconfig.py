@@ -18,6 +18,8 @@ title_color = '#def'
 list_hover_background = '#2f3a42'
 title_disabled_color = '#aaa'
 
+text_red = '#faa'
+
 button_border = '#0275d8'
 button_fgcolor = '#0275d8'
 button_background = '#000'
