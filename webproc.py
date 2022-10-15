@@ -409,44 +409,44 @@ def send_result_json(status, body):
 
 #------------------------------------------------------------------------------
 def web_process():
-  web.on_access()
-  if not web.auth(False):
-    send_result_json('FORBIDDEN', None)
-    return
+    web.on_access()
+    if not web.auth(False):
+        send_result_json('FORBIDDEN', None)
+        return
 
-  status = 'OK'
-  result_data = None
+    status = 'OK'
+    result_data = None
 
-  act = get_request_param('act')
-  if act == 'list':
-    result_data = kb.send_list()
-  elif act == 'search':
-    q = get_request_param('q')
-    q = util.decode_base64(q)
-    result_data = kb.search_data(q)
-  elif act == 'get':
-    id = get_request_param('id')
-    result_data = kb.get_data(id)
-  elif act == 'save':
-    id = get_request_param('id')
-    data_json = get_request_param('data')
-    data = util.from_json(data_json)
-    user = get_current_user_name()
-    saved_id = kb.save_data(id, data, user)
-    result_data = saved_id
-  elif act == 'delete':
-    id = get_request_param('id')
-    status = kb.delete_data(id)
-  elif act == 'check_exists':
-    id = get_request_param('id')
-    result_data = kb.check_exists(id)
-  else:
-    act = web.get_raw_request_param('act')
-    if act == 'export':
-      b = kb.export_data()
-      util.send_binary(b, filename='kbdata.zip')
-      return
+    act = get_request_param('act')
+    if act == 'list':
+        result_data = kb.send_list()
+    elif act == 'search':
+        q = get_request_param('q')
+        q = util.decode_base64(q)
+        result_data = kb.search_data(q)
+    elif act == 'get':
+        id = get_request_param('id')
+        result_data = kb.get_data(id)
+    elif act == 'save':
+        id = get_request_param('id')
+        data_json = get_request_param('data')
+        data = util.from_json(data_json)
+        user = get_current_user_name()
+        saved_id = kb.save_data(id, data, user)
+        result_data = saved_id
+    elif act == 'delete':
+        id = get_request_param('id')
+        status = kb.delete_data(id)
+    elif act == 'check_exists':
+        id = get_request_param('id')
+        result_data = kb.check_exists(id)
+    else:
+        act = web.get_raw_request_param('act')
+        if act == 'export':
+            b = kb.export_data()
+            util.send_binary(b, filename='kbdata.zip')
+            return
 
-    status = 'ERR'
+        status = 'ERR'
 
-  send_result_json(status, result_data)
+    send_result_json(status, result_data)
