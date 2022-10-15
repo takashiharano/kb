@@ -347,5 +347,24 @@ def encdec_data(dst_base_dir, secure):
             text = load_data_as_text(id)
             util.write_text_file(dst_path, text)
 
-#if __name__ == '__main__':
-#    decrypt_data(WK_PATH + 'data/')
+#------------------------------------------------------------------------------
+def cmd_export(dest_path):
+    if (dest_path == ''):
+        print('dest pathis required')
+        return
+
+    data_bytes = export_data()
+    util.write_binary_file(dest_path, data_bytes)
+
+#------------------------------------------------------------------------------
+def main():
+    cmd = util.get_arg(1)
+    arg1 = util.get_arg(2)
+
+    if cmd == 'export':
+        cmd_export(arg1)
+    else:
+        print('Usage: python kb.py <COMMAND> [<ARG>]')
+
+if __name__ == '__main__':
+    main()
