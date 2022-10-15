@@ -6,6 +6,8 @@ var kb = {};
 kb.ST_NEW = 1;
 kb.ST_EDITING = 1 << 1;
 kb.ST_EXIT = 1 << 2;
+kb.UI_ST_NONE = 0;
+kb.UI_ST_AREA_RESIZING = 1;
 kb.DATE_FORMAT = '%YYYY-%MM-%DD %HH:%mm:%SS';
 kb.LIST_COLUMNS = [
   {key: 'id', label: 'ID'},
@@ -18,9 +20,11 @@ kb.LIST_COLUMNS = [
   {key: 'LABELS', label: 'LABELS'},
   {key: 'score', label: 'SCORE'}
 ];
+kb.onselectstart = document.onselectstart;
 
 kb.ready = false;
 kb.status = 0;
+kb.uiStatus = kb.UI_ST_NONE;
 kb.listStatus = {
   sortIdx: 4,
   sortType: 2
@@ -29,18 +33,27 @@ kb.itemList= [];
 kb.pendingId = null;
 kb.content;
 
+kb.areaSize = {
+  orgY: 0,
+  orgSP1: 0,
+  orgSP2: 0
+};
+
 $onReady = function() {
   kb.clearContent();
   util.addCtrlKeyHandler('S', kb.onCtrlS);
   util.addCtrlKeyHandler('Q', kb.onCtrlQ);
   $el('#q').addEventListener('keydown', kb.onKeyDownOnQ);
   $el('#chk-raw-text').addEventListener('change', kb.onRawTextChange);
-
   util.textarea.addStatusInfo('#content-body-edt', '#content-body-st');
+  $el('#adjuster').addEventListener('mousedown', kb.onAreaResizeStart);
 
   kb.onEditEnd();
   kb.setFontSize(12);
   util.clock('#clock');
+
+  window.addEventListener('mousemove', kb.onMouseMove, true);
+  window.addEventListener('mouseup', kb.onMouseUp, true);
 
   var q = util.getQuery('id');
   if (q) {
@@ -654,6 +667,61 @@ kb.resetFontSize = function() {
   kb.setFontSize(12);
 };
 
+kb.getSelfSizePos = function(el) {
+  var rect = el.getBoundingClientRect();
+  var resizeBoxSize = 6;
+  var sp = {};
+  sp.w = el.clientWidth;
+  sp.h = el.clientHeight;
+  sp.x1 = rect.left - resizeBoxSize / 2;
+  sp.y1 = rect.top - resizeBoxSize / 2;
+  sp.x2 = sp.x1 + el.clientWidth;
+  sp.y2 = sp.y1 + el.clientHeight;
+  return sp;
+},
+
+kb.nop = function() {
+  return false;
+};
+kb.disableTextSelect = function() {
+  document.onselectstart = kb.nop;
+};
+kb.enableTextSelect = function() {
+  document.onselectstart = kb.onselectstart;
+};
+
+kb.onAreaResizeStart = function(e) {
+  kb.uiStatus = kb.UI_ST_AREA_RESIZING;
+  var x = e.clientX;
+  var y = e.clientY;
+  var sp1 = kb.getSelfSizePos($el('#list-area'));
+  var sp2 = kb.getSelfSizePos($el('#content-area'));
+  kb.areaSize.orgY = y;
+  kb.areaSize.orgSP1 = sp1;
+  kb.areaSize.orgSP2 = sp2;
+  kb.disableTextSelect();
+  document.body.style.cursor = 'ns-resize';
+
+};
+kb.onAreaResize = function(e) {
+  var x = e.clientX;
+  var y = e.clientY;
+  var adj = 8;
+  var dH = kb.areaSize.orgY - y;
+  var h1 = kb.areaSize.orgSP1.h - dH - adj;
+  var h2 = kb.areaSize.orgSP2.h + dH - adj;
+  if ((h1 < 70) || (h2 < 100)) {
+    return;
+  }
+  $el('#list-area').style.height = h1 + 'px';
+  $el('#content-area').style.height = h2 + 'px';
+};
+kb.onAreaResizeEnd = function(e) {
+  kb.enableTextSelect();
+  document.body.style.cursor = 'default';
+  kb.uiStatus = kb.UI_ST_NONE;
+};
+
 kb.copyUrl = function() {
   var url = location.href + '?id=' + kb.content.id;
   util.copy(url);
@@ -676,6 +744,17 @@ kb.onCtrlQ = function(e) {
 kb.onKeyDownOnQ = function(e) {
   if (e.keyCode == 13) {
     kb.search();
+  }
+};
+
+kb.onMouseMove = function(e) {
+  if (kb.uiStatus == kb.UI_ST_AREA_RESIZING) {
+    kb.onAreaResize(e);
+  }
+};
+kb.onMouseUp = function(e) {
+  if (kb.uiStatus == kb.UI_ST_AREA_RESIZING) {
+    kb.onAreaResizeEnd(e);
   }
 };
 

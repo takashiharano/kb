@@ -106,6 +106,7 @@ table {
 }
 '''
     html += '.area {'
+    html += '  position; relative;'
     html += '  border: 1px solid ' + appconfig.border_color + ';'
     html += '  border-radius: 3px;'
     html += '  padding: 4px;'
@@ -156,6 +157,13 @@ table {
 }
 #list {
   margin-top: 4px;
+}
+#adjuster {
+  position: relative;
+  width: 100%;
+  height: 4px;
+  top: -8px;
+  cursor: ns-resize;
 }
 '''
     html += '.data-list-row:hover {'
@@ -327,6 +335,7 @@ td.center {
     </div>
   </div>
   <div id="content-area" class="area">
+    <div id="adjuster"></div>
     <div>
       <div id="info-area">
         <button id="edit-button" style="min-width:32px;" onclick="kb.edit();">EDIT</button>
