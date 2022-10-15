@@ -185,6 +185,13 @@ def get_data(id):
 
     return data
 
+def load_data_as_text(id):
+    text_path = get_datafile_path(id)
+    if not util.path_exists(text_path):
+        raise Exception('DATA_NOT_FOUND')
+    text = util.read_text_file(text_path)
+    return text
+
 def load_data(id, head_only=False):
     data = {
         'id': id,
@@ -192,11 +199,7 @@ def load_data(id, head_only=False):
         'encrypted': False
     }
 
-    text_path = get_datafile_path(id)
-    if not util.path_exists(text_path):
-        raise Exception('DATA_NOT_FOUND')
-
-    text = util.read_file(text_path, 't')
+    text = load_data_as_text(id)
 
     if text.startswith(ENCRYPTED_HEAD):
         text = bsb64.decode_string(text[len(ENCRYPTED_HEAD):], BSB64_N)
@@ -336,9 +339,13 @@ def encdec_data(dst_base_dir, secure):
     data_id_list = get_data_id_list()
     for i in range(len(data_id_list)):
         id = data_id_list[i]
-        data = load_data(id)
         dst_path = dst_base_dir + id + '.txt'
-        write_data(id, data, secure=secure, path=dst_path)
+        try:
+            data = load_data(id)
+            write_data(id, data, secure=secure, path=dst_path)
+        except:
+            text = load_data_as_text(id)
+            util.write_text_file(dst_path, text)
 
 #if __name__ == '__main__':
 #    decrypt_data(WK_PATH + 'data/')
