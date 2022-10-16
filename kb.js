@@ -722,10 +722,19 @@ kb.onAreaResizeEnd = function(e) {
   kb.uiStatus = kb.UI_ST_NONE;
 };
 
+kb.copyContent = function() {
+  kb.copy(kb.content.BODY);
+};
+
 kb.copyUrl = function() {
   var url = location.href + '?id=' + kb.content.id;
-  util.copy(url);
-  kb.showInfotip('URL copied');
+  var m = url + ' <button onclick="kb.copy(\'' + url + '\');">COPY</button>';
+  util.alert(m)
+};
+
+kb.copy = function(s) {
+  util.copy(s);
+  kb.showInfotip('Copied');
 };
 
 kb.showInfotip = function(m, d) {
