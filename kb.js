@@ -486,6 +486,8 @@ kb.onSaveData = function(xhr, res, req) {
   if (res.status == 'OK') {
     if (kb.status & kb.ST_EXIT) {
       var id = res.body;
+      kb.listStatus.sortIdx = 4;
+      kb.listStatus.sortType = 2;
       kb.getList ();
       kb.getData(id);
       kb.status &= ~kb.ST_EXIT;
