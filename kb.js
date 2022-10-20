@@ -49,7 +49,6 @@ $onReady = function() {
   $el('#adjuster').addEventListener('mousedown', kb.onAreaResizeStart);
 
   kb.onEditEnd();
-  kb.setFontSize(12);
   util.clock('#clock');
 
   window.addEventListener('mousemove', kb.onMouseMove, true);
@@ -57,6 +56,10 @@ $onReady = function() {
 
   var q = util.getQuery('q');
   var id = util.getQuery('id');
+  var fontSize = util.getQuery('fontsize') | 0;
+  if (!fontSize) fontSize = 12;
+  kb.setFontSize(fontSize);
+
   if (id) {
     $el('#q').value = 'id:' + id;
     kb.search();
