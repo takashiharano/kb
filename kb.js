@@ -55,11 +55,16 @@ $onReady = function() {
   window.addEventListener('mousemove', kb.onMouseMove, true);
   window.addEventListener('mouseup', kb.onMouseUp, true);
 
-  var q = util.getQuery('id');
-  if (q) {
-    $el('#q').value = 'id:' + q;
+  var q = util.getQuery('q');
+  var id = util.getQuery('id');
+  if (id) {
+    $el('#q').value = 'id:' + id;
     kb.search();
-    kb.getData(q);
+    kb.getData(id);
+  } else if (q) {
+    q = decodeURIComponent(q);
+    $el('#q').value = q;
+    kb.search();
   } else {
     kb.getList();
   }
@@ -118,11 +123,10 @@ kb.drawList = function(items, sortIdx, sortType) {
       items = util.sortObject(items, sortKey, desc, asNum);
     }
   }
-  var dateFormat = '%YYYY-%MM-%DD %HH:%mm:%SS';
 
   var htmlList = '';
-  for (i = 0; i < items.length; i++) {
-    data = items[i];
+  for (var i = 0; i < items.length; i++) {
+    var data = items[i];
     var id = data.id;
     var status = data.status;
     var b64Title = ((data.TITLE == undefined) ? '' : data.TITLE);
@@ -729,7 +733,9 @@ kb.copyContent = function() {
 };
 
 kb.copyUrl = function() {
-  var url = location.href + '?id=' + kb.content.id;
+  var url = location.href;
+  url = url.replace(/\?.*/, '');
+  url += '?id=' + kb.content.id;
   var m = url + ' <button onclick="kb.copy(\'' + url + '\');">COPY</button>';
   util.alert(m)
 };

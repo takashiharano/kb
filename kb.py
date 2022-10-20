@@ -110,12 +110,12 @@ def calc_data_macthed_score(data, keyword):
     if keyword.startswith('id:'):
         keyword = util.replace(keyword, 'id:', '')
         if keyword == data['id']:
-            score = 100
+            score += 100
 
     elif keyword.startswith('title:'):
         keyword = util.replace(keyword, 'title:', '')
-        if is_matches_title(data['TITLE'], keyword):
-            score = 100
+        score += is_matches_title(data['TITLE'], keyword)
+        return score
 
     elif keyword.startswith('label:'):
         keyword = util.replace(keyword, 'label:', '')
@@ -127,8 +127,6 @@ def calc_data_macthed_score(data, keyword):
         score = count_matched_key(data['BODY'], keyword)
 
     else:
-        if is_matches_title(data['TITLE'], keyword):
-            score += 100
         score += count_matched_key(data['TITLE'], keyword) * 100
         score += count_matched_key(data['LABELS'], keyword) * 10
         score += count_matched_key(data['BODY'], keyword)
@@ -137,12 +135,14 @@ def calc_data_macthed_score(data, keyword):
 
 def is_matches_title(title, keyword):
     if title == '':
-        return False
+        return 0
+    score = 0
     title = title.lower()
     keyword = keyword.lower()
     if title == keyword:
-        return True
-    return False
+        score += 100
+    score += title.count(keyword) * 10
+    return score
 
 def is_matches_labels(labels, keyword):
     if labels == '':
