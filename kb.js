@@ -400,7 +400,11 @@ kb.buildLabelsHTML = function(labels) {
   var html = '';
   for (var i = 0; i < labelList.length; i++) {
     var label = util.escHtml(labelList[i]);
-    html += '<span class="label" onclick="kb.labelSearch(\'' + label + '\');">' + label + '</span>';
+    html += '<span class="label"';
+    if (kb.mode != 'view') {
+      html += ' onclick="kb.labelSearch(\'' + label + '\');"';
+    }
+    html += '>' + label + '</span>';
   }
   return html;
 };
