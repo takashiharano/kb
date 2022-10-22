@@ -56,6 +56,21 @@ $onReady = function() {
 
 kb.onAppReady = function() {
   $el('#body1').style.display = 'block';
+
+  var q = util.getQuery('q');
+  var id = util.getQuery('id');
+  if (id) {
+    $el('#q').value = 'id:' + id;
+    kb.search();
+    kb.getData(id);
+  } else if (q) {
+    q = decodeURIComponent(q);
+    $el('#q').value = q;
+    kb.search();
+  } else {
+    kb.getList();
+  }
+
   var q = util.getQuery('id');
   if (!q) $el('#q').focus();
   kb.ready = true;
@@ -75,21 +90,7 @@ kb.init = function() {
   window.addEventListener('mousemove', kb.onMouseMove, true);
   window.addEventListener('mouseup', kb.onMouseUp, true);
 
-  var q = util.getQuery('q');
-  var id = util.getQuery('id');
   kb.getInitInfo();
-
-  if (id) {
-    $el('#q').value = 'id:' + id;
-    kb.search();
-    kb.getData(id);
-  } else if (q) {
-    q = decodeURIComponent(q);
-    $el('#q').value = q;
-    kb.search();
-  } else {
-    kb.getList();
-  }
 };
 
 kb.getInitInfo = function() {
@@ -150,7 +151,6 @@ kb.onGetList = function(xhr, res, req) {
     kb.onApiError(res);
     return;
   }
-  if (!kb.ready) kb.onAppReady();
   kb.itemList = res.body.data_list;
   kb.drawList(kb.itemList, kb.listStatus.sortIdx, kb.listStatus.sortType);
 };
