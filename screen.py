@@ -652,8 +652,9 @@ def main():
 
     web.on_access()
     context['authorized'] = web.auth(False)
+    id = util.get_request_param('id')
 
-    if context['authorized']:
+    if context['authorized'] or id is None:
         html = build_main_screen(context)
     else:
         html = build_view_screen(context)
