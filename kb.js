@@ -448,7 +448,7 @@ kb.buildLabelsHTML = function(labels) {
     var label = util.escHtml(labelList[i]);
     html += '<span class="label"';
     if (kb.mode != 'view') {
-      html += ' onclick="kb.kb.categorySearch(\'label\', \'' + label + '\');"';
+      html += ' onclick="kb.categorySearch(\'label\', \'' + label + '\');"';
     }
     html += '>' + label + '</span>';
   }
