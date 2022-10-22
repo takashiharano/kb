@@ -55,3 +55,5 @@ dialog_fgcolor = '#fff'
 dialog_background = '#000'
 
 clock_color = '#8f0'
+
+tokens = ['token1', 'token2']

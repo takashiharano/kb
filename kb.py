@@ -36,7 +36,7 @@ def get_data_id_list():
     return data_id_list
 
 #------------------------------------------------------------------------------
-def send_list():
+def get_list():
     data_id_list = get_data_id_list()
     data_list = []
     for i in range(len(data_id_list)):
@@ -57,10 +57,7 @@ def send_list():
 
         data_list.append(data)
 
-    list_data = {
-        'data_list': data_list
-    }
-    return list_data
+    return data_list
 
 #------------------------------------------------------------------------------
 def search_data(q):

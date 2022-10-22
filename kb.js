@@ -2,13 +2,12 @@
  * Knowledge Base System
  * Copyright (c) 2021 Takashi Harano
  */
-var kb = {};
+var kb = kb || {};
 kb.ST_NEW = 1;
 kb.ST_EDITING = 1 << 1;
 kb.ST_EXIT = 1 << 2;
 kb.UI_ST_NONE = 0;
 kb.UI_ST_AREA_RESIZING = 1;
-kb.DATE_FORMAT = '%YYYY-%MM-%DD %HH:%mm:%SS';
 kb.LIST_COLUMNS = [
   {key: 'id', label: 'ID'},
   {key: 'TITLE', label: 'TITLE'},
@@ -29,9 +28,11 @@ kb.listStatus = {
   sortIdx: 4,
   sortType: 2
 };
+kb.tokens = [];
 kb.itemList= [];
 kb.pendingId = null;
 kb.content;
+kb.contentUrl = '';
 
 kb.areaSize = {
   orgY: 0,
@@ -40,11 +41,26 @@ kb.areaSize = {
 };
 
 $onReady = function() {
+  $el('#chk-plain-text').addEventListener('change', kb.onPlainTextChange);
+  if (kb.mode == 'view') {
+    kb.view.init();
+  } else {
+    kb.init();
+  }
+};
+
+kb.onAppReady = function() {
+  $el('#body1').style.display = 'block';
+  var q = util.getQuery('id');
+  if (!q) $el('#q').focus();
+  kb.ready = true;
+};
+
+kb.init = function() {
   kb.clearContent();
   util.addCtrlKeyHandler('S', kb.onCtrlS);
   util.addCtrlKeyHandler('Q', kb.onCtrlQ);
   $el('#q').addEventListener('keydown', kb.onKeyDownOnQ);
-  $el('#chk-raw-text').addEventListener('change', kb.onRawTextChange);
   util.textarea.addStatusInfo('#content-body-edt', '#content-body-st');
   $el('#adjuster').addEventListener('mousedown', kb.onAreaResizeStart);
 
@@ -59,6 +75,7 @@ $onReady = function() {
   var fontSize = util.getQuery('fontsize') | 0;
   if (!fontSize) fontSize = 12;
   kb.setFontSize(fontSize);
+  kb.getInitInfo();
 
   if (id) {
     $el('#q').value = 'id:' + id;
@@ -73,11 +90,24 @@ $onReady = function() {
   }
 };
 
-kb.onAppReady = function() {
-  $el('#body1').style.display = 'block';
-  var q = util.getQuery('id');
-  if (!q) $el('#q').focus();
-  kb.ready = true;
+kb.getInitInfo = function() {
+  kb.callApi('get_init_info', null, kb.onGetInitInfo);
+};
+kb.onGetInitInfo = function(xhr, res, req) {
+  if (xhr.status != 200) {
+    kb.onHttpError();
+    return;
+  }
+  if (res.status == 'FORBIDDEN') {
+    kb.onForbidden();
+    return;
+  } else if (res.status != 'OK') {
+    kb.onApiError(res);
+    return;
+  }
+  kb.onAppReady();
+  var info = res.body;
+  kb.tokens = info.tokens;
 };
 
 kb.callApi = function(act, params, cb) {
@@ -144,12 +174,12 @@ kb.drawList = function(items, sortIdx, sortType) {
     if ((cDate == undefined) || (cDate == '')) {
       cDateStr = '---------- --:--:--';
     } else {
-      cDateStr = util.getDateTimeString(+cDate, kb.DATE_FORMAT);
+      cDateStr = kb.getDateTimeString(+cDate);
     }
     if ((uDate == undefined) || (uDate == '')) {
       uDateStr = '---------- --:--:--';
     } else {
-      uDateStr = util.getDateTimeString(+uDate, kb.DATE_FORMAT);
+      uDateStr = kb.getDateTimeString(+uDate);
     }
     var title = util.decodeBase64(b64Title);
     if (!title) {
@@ -307,6 +337,9 @@ kb._getData = function() {
   if (id == null) return;
   kb.pendingId = null;
   var param = {id: id};
+  if (kb.token) {
+    param.token = kb.token;
+  }
   kb.callApi('get', param, kb.onGetData);
 };
 kb.onGetData = function(xhr, res, req) {
@@ -316,6 +349,13 @@ kb.onGetData = function(xhr, res, req) {
   }
   if (res.status == 'FORBIDDEN') {
     kb.onForbidden();
+    return;
+  } else if (res.status != 'OK') {
+    if (res.status == 'NO_ACCESS_RIGHTS') {
+      kb.view.onNoRights();
+    } else {
+      kb.showInfotip(res.status, 3000);
+    }
     return;
   }
 
@@ -345,6 +385,7 @@ kb.onGetData = function(xhr, res, req) {
 
   if (status == 'OK') {
     kb.showData(kb.content);
+    $el('#buttons-r').show();
   } else {
     kb._clear();
     kb.showInfotip(status);
@@ -544,14 +585,14 @@ kb.showData = function(content) {
 
   var cDateStr = '';
   var uDateStr = '';
-  if (cDate != undefined) cDateStr = util.getDateTimeString(+cDate, kb.DATE_FORMAT);
-  if (uDate != undefined) uDateStr = util.getDateTimeString(+uDate, kb.DATE_FORMAT);
+  if (cDate != undefined) cDateStr = kb.getDateTimeString(+cDate);
+  if (uDate != undefined) uDateStr = kb.getDateTimeString(+uDate);
   var labelsHTML = kb.buildLabelsHTML(labels);
 
   var contentBody = content.BODY;
   contentBody = util.escHtml(contentBody);
 
-  if (!$el('#chk-raw-text').checked) {
+  if (!$el('#chk-plain-text').checked) {
     contentBody = util.linkUrls(contentBody);
     contentBody = kb.decodeB64Image(contentBody);
   }
@@ -588,7 +629,7 @@ kb.decodeB64Image = function(s) {
   return s;
 };
 
-kb.onRawTextChange = function() {
+kb.onPlainTextChange = function() {
   kb.showData(kb.content);
 };
 
@@ -735,12 +776,33 @@ kb.copyContent = function() {
   kb.copy(kb.content.BODY);
 };
 
-kb.copyUrl = function() {
+kb.showUrl = function() {
   var url = location.href;
   url = url.replace(/\?.*/, '');
   url += '?id=' + kb.content.id;
-  var m = url + ' <button onclick="kb.copy(\'' + url + '\');">COPY</button>';
+  kb.contentUrl = url;
+  var m = '<span id="content-url">' + url + '</span>';
+  m += '<button style="margin-left:16px;" onclick="kb.copyUrl();">COPY</button>\n\n';
+  var listTokens = '<div style="width:100%;text-align:left;">';
+  listTokens += 'Token:\n';
+  for (var i = 0; i < kb.tokens.length; i++) {
+    var token = kb.tokens[i];
+    listTokens += '<button style="margin-right:8px;" onclick="kb.applyToken(\'' + token + '\')">SELECT</button>' + token + '\n';
+  }
+  listTokens += '</div>';
+  m += listTokens;
   util.alert(m)
+};
+
+kb.copyUrl = function() {
+  var url = $el('#content-url').innerText;
+  kb.copy(url);
+  kb.contntUrl = '';
+};
+
+kb.applyToken = function(token) {
+  url = kb.contentUrl + '&token=' + token;
+  $el('#content-url').innerText = url;
 };
 
 kb.copy = function(s) {
@@ -750,6 +812,11 @@ kb.copy = function(s) {
 
 kb.showInfotip = function(m, d) {
   util.infotip.show(m, d);
+};
+
+kb.getDateTimeString = function(dt, fmt) {
+  if (!fmt) fmt = '%YYYY-%MM-%DD %HH:%mm:%SS';
+  return util.getDateTimeString(dt, fmt);
 };
 
 kb.onCtrlS = function(e) {
@@ -785,4 +852,19 @@ kb.http = function(req, cb) {
 kb.onForbidden = function() {
   websys.authRedirection(location.href);
 };
+
+kb.view = {};
+kb.view.init = function() {
+  $el('#buttons-r').hide();
+  var id = util.getQuery('id');
+  kb.getData(id);
+};
+
+kb.view.onNoRights = function() {
+  var msg = 'ERROR: NO_ACCESS_RIGHTS\n\n';
+  msg += 'You do not have permission to access.\n';
+  msg += 'Please contact the administrator and get your token.';
+  $el('#content-body').textseq(msg, {cursor: 3});
+};
+
 websys.init('../../');
