@@ -80,6 +80,7 @@ def proc_api(context, act):
         result_data = kb.check_exists(id)
     elif act == 'get_init_info':
         result_data = {
+            'state_list': appconfig.state_list,
             'tokens': appconfig.tokens
         }
     else:

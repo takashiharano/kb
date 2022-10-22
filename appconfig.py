@@ -56,4 +56,12 @@ dialog_background = '#000'
 
 clock_color = '#8f0'
 
-tokens = ['token1', 'token2']
+state_list = [
+    {'name': 'IN-PROGRESS', 'fgcolor': '#fff', 'bgcolor': '#0052cc'},
+    {'name': 'NEED-REVIEW', 'fgcolor': '#fff', 'bgcolor': '#064'},
+    {'name': 'FIXME', 'fgcolor': '#fff', 'bgcolor': '#c06020'},
+    {'name': 'UNRESOLVED', 'fgcolor': '#fff', 'bgcolor': '#400'},
+    {'name': 'OBSOLETE', 'fgcolor': '#a0a0a0', 'bgcolor': '#444'}
+]
+
+tokens = ['1']

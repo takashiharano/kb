@@ -52,7 +52,7 @@ def get_list():
         except:
             data = {
                 'id': id,
-                'status': 'LOAD_ERROR'
+                'data_status': 'LOAD_ERROR'
             }
 
         data_list.append(data)
@@ -119,6 +119,11 @@ def calc_data_macthed_score(data, keyword):
         if is_matches_labels(data['LABELS'], keyword):
             score = 10
 
+    elif keyword.startswith('status:'):
+        keyword = util.replace(keyword, 'status:', '')
+        if 'STATUS' in data and data['STATUS'] == keyword:
+            score = 10
+
     elif keyword.startswith('body:'):
         keyword = util.replace(keyword, 'body:', '')
         score = count_matched_key(data['BODY'], keyword)
@@ -167,7 +172,7 @@ def get_data(id):
         data = load_data(id)
     except Exception as e:
         data = {
-            'status': str(e)
+            'data_status': str(e)
         }
         return data
 
@@ -192,7 +197,7 @@ def load_data_as_text(id):
 def load_data(id, head_only=False):
     data = {
         'id': id,
-        'status': 'OK',
+        'data_status': 'OK',
         'encrypted': False
     }
 
@@ -249,16 +254,13 @@ def save_data(id, new_data, user=''):
         data['C_DATE'] = ''
     if not 'C_USER' in data:
         data['C_USER'] = ''
-    if not 'TITLE' in data:
-        data['TITLE'] = ''
-    if not 'LABELS' in data:
-        data['LABELS'] = ''
 
     data['U_DATE'] = str(now)
     data['U_USER'] = user
     data['TITLE'] = util.decode_base64(new_data['TITLE'])
     data['LABELS'] = util.decode_base64(new_data['LABELS'])
     data['BODY'] = util.decode_base64(new_data['BODY'])
+    data['STATUS'] = new_data['STATUS']
     secure = True if new_data['encryption'] == '1' else False
 
     write_data(id, data, user, secure)
@@ -268,11 +270,12 @@ def save_data(id, new_data, user=''):
 def write_data(id, data, user='', secure=False, path=None):
     text = ''
     text += 'TITLE: ' + data['TITLE'] + '\n'
-    text += 'LABELS: ' + data['LABELS'] + '\n'
     text += 'C_DATE: ' + data['C_DATE'] + '\n'
     text += 'C_USER: ' + data['C_USER'] + '\n'
     text += 'U_DATE: ' + data['U_DATE'] + '\n'
     text += 'U_USER: ' + data['U_USER'] + '\n'
+    text += 'LABELS: ' + data['LABELS'] + '\n'
+    text += 'STATUS: ' + data['STATUS'] + '\n'
     text += '\n'
     text += data['BODY']
 

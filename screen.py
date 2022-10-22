@@ -272,6 +272,12 @@ table {
     html += '}'
 
     html += '''
+.status {
+  border-radius: 3px;
+}
+.status:hover {
+  cursor: pointer;
+}
 table.item-list,td.item-list,th.item-list {
   border: 1px solid #888;
   border-top: none;
@@ -346,8 +352,10 @@ td.center {
           <input type="text" id="content-id-edt" spellcheck="false" style="display:none;">
           <span style="margin-left:4px;">TITLE:</span>
           <input type="text" id="content-title-edt" spellcheck="false">
-          <span style="margin-left:20px;">LABELS:</span>
+          <span style="margin-left:16px;">LABELS:</span>
           <input type="text" id="content-labels-edt" spellcheck="false">
+          <span style="margin-left:16px;">STATUS:</span>
+          <select id="select-status"></select>
           <input type="checkbox" id="chk-encryption"><label for="chk-encryption">ENCRYPTION</label>
         </span>
       </div>
@@ -374,7 +382,7 @@ td.center {
           </div>
         </div>
         <div style="height:25px;">
-          <input type="range" value="0" min="0" max="500" step="1" id="font-range" style="position:relative;top:6px;" oninput="kb.onFontRangeChanged(this);" onchange="kb.onFontRangeChanged(this);"><span id="fontsize"></span>
+          <input type="range" value="0" min="0" max="256" step="1" id="font-range" style="position:relative;top:6px;" oninput="kb.onFontRangeChanged(this);" onchange="kb.onFontRangeChanged(this);"><span id="fontsize"></span>
           <button onclick="kb.resetFontSize();">RESET</button>
         </div>
       </div>
@@ -545,11 +553,6 @@ table {
     html += '  background: ' + appconfig.status_label_err_background + ';'
     html += '}'
 
-    html += '.status-label-encrypted {'
-    html += '  color: ' + appconfig.status_label_encrypted_fgcolor + ';'
-    html += '  background: ' + appconfig.status_label_encrypted_background + ';'
-    html += '}'
-
     html += '#clock {'
     html += '  color: ' + appconfig.clock_color + ';'
     html += '}'
@@ -630,7 +633,7 @@ kb.mode = 'view'
           </div>
         </div>
         <div style="height:25px;">
-          <input type="range" value="0" min="0" max="500" step="1" id="font-range" style="position:relative;top:6px;" oninput="kb.onFontRangeChanged(this);" onchange="kb.onFontRangeChanged(this);"><span id="fontsize"></span>
+          <input type="range" value="0" min="0" max="256" step="1" id="font-range" style="position:relative;top:6px;" oninput="kb.onFontRangeChanged(this);" onchange="kb.onFontRangeChanged(this);"><span id="fontsize"></span>
           <button onclick="kb.resetFontSize();">RESET</button>
         </div>
       </div>

@@ -17,7 +17,8 @@ kb.LIST_COLUMNS = [
   {key: 'U_USER', label: 'BY'},
   {key: 'status', label: 'STATUS'},
   {key: 'LABELS', label: 'LABELS'},
-  {key: 'score', label: 'SCORE'}
+  {key: 'score', label: 'SCORE'},
+  {key: 'encrypted', label: ''}
 ];
 kb.onselectstart = document.onselectstart;
 
@@ -28,6 +29,7 @@ kb.listStatus = {
   sortIdx: 4,
   sortType: 2
 };
+kb.stateList = [];
 kb.tokens = [];
 kb.itemList= [];
 kb.pendingId = null;
@@ -108,6 +110,13 @@ kb.onGetInitInfo = function(xhr, res, req) {
   kb.onAppReady();
   var info = res.body;
   kb.tokens = info.tokens;
+  var stateList = info.state_list;
+  kb.stateList = stateList;
+  util.addSelectOption('#select-status', '');
+  for (var i = 0; i < stateList.length; i++) {
+    var state = stateList[i];
+    util.addSelectOption('#select-status', state.name);
+  }
 };
 
 kb.callApi = function(act, params, cb) {
@@ -161,7 +170,8 @@ kb.drawList = function(items, sortIdx, sortType) {
   for (var i = 0; i < items.length; i++) {
     var data = items[i];
     var id = data.id;
-    var status = data.status;
+    var data_status = data.data_status;
+    var status = data.STATUS;
     var b64Title = ((data.TITLE == undefined) ? '' : data.TITLE);
     var b64Labels = data.LABELS;
     var cDate = data.C_DATE;
@@ -187,19 +197,20 @@ kb.drawList = function(items, sortIdx, sortType) {
     }
     var labels = util.decodeBase64(b64Labels);
     var statusLabel = '';
-    if (status == 'OK') {
-      statusLabel = '<span class="status-label-ok">OK</span>';
-      if (data.encrypted) {
-        statusLabel += ' <span class="status-label-encrypted">ENCRYPTED</span>';
-      }
+    if (data_status == 'OK') {
+      statusLabel = kb.buildStatusHTML(status);
     } else {
       statusLabel = '<span class="status-label-err">' + status + '</span>';
+    }
+    var encrypted = '';
+    if (data.encrypted) {
+      encrypted = '<span data-tooltip="Encrypted">&#x1F512;</span>';
     }
     var labelsHTML = kb.buildLabelsHTML(labels);
     htmlList += '<tr class="data-list-row">';
     htmlList += '<td style="padding-right:16px;">' + id + '</td>'
     htmlList += '<td style="min-width:300px;max-width:600px;padding-right:32px;overflow:hidden;text-overflow:ellipsis;">';
-    if (status == 'OK') {
+    if (data_status == 'OK') {
       htmlList += '<span class="title  pseudo-link" onclick="kb.getData(\'' + id + '\');"';
     } else {
       htmlList += '<span class="title-disabled"';
@@ -217,7 +228,9 @@ kb.drawList = function(items, sortIdx, sortType) {
     htmlList += '<td>' + statusLabel + '</td>';
     htmlList += '<td style="padding-left:20px;">' + labelsHTML + '</td>';
     htmlList += '<td>' + score + '</td>';
-    if (status != 'OK') {
+    htmlList += '<td style="text-align:center;">' + encrypted + '</td>';
+
+    if (data_status != 'OK') {
       htmlList += '<td class="center"><span class="pseudo-link text-red" data-tooltip="Delete" onclick="kb.delete(\'' + id + '\');">X</span></td>';
     }
     htmlList += '</tr>';
@@ -312,8 +325,8 @@ kb.search = function() {
   }
 };
 
-kb.labelSearch = function(label) {
-  $el('#q').value = 'label:' + label;
+kb.categorySearch = function(category, label) {
+  $el('#q').value = category + ':' + label;
   kb.search();
 };
 
@@ -361,11 +374,12 @@ kb.onGetData = function(xhr, res, req) {
 
   var data = res.body;
   var id = data.id;
-  var status = data.status;
+  var data_status = data.data_status;
   var cDate = data.C_DATE;
   var uDate = data.U_DATE;
   var b64Title = ((data.TITLE == undefined) ? '' : data.TITLE);
   var b64Labels = data.LABELS;
+  var status = data.STATUS;
   var b64Body = data.BODY;
 
   var title = util.decodeBase64(b64Title);
@@ -374,22 +388,54 @@ kb.onGetData = function(xhr, res, req) {
 
   kb.content = {
     id: id,
-    status: status,
+    data_status: data_status,
     encrypted: data.encrypted,
     C_DATE: cDate,
     U_DATE: uDate,
     TITLE: title,
     LABELS: labels,
+    STATUS: status,
     BODY: body
   };
 
-  if (status == 'OK') {
+  if (data_status == 'OK') {
     kb.showData(kb.content);
     $el('#buttons-r').show();
   } else {
     kb._clear();
-    kb.showInfotip(status);
+    kb.showInfotip(data_status);
   }
+};
+
+kb.buildStatusHTML = function(status) {
+  if (!status) return '';
+  var html = '';
+  var st = {};
+  for (var i = 0; i < kb.stateList.length; i++) {
+    var state = kb.stateList[i];
+    if (state.name == status) {
+      st = state;
+      break;
+    }
+  }
+  var html = '<span class="status"';
+  if (st.fgcolor || st.bgcolor) {
+    html += ' style="';
+    if (st.fgcolor) {
+      html += 'color:' + st.fgcolor + ';';
+    }
+    if (st.bgcolor) {
+      html += 'background:' + st.bgcolor + ';';
+    }
+   html += '"';
+  }
+  if (kb.mode != 'view') {
+    html += ' onclick="kb.categorySearch(\'status\', \'' + status + '\');"';
+  }
+   html += '>';
+  html += status;
+  html += '</span>';
+  return html;
 };
 
 kb.buildLabelsHTML = function(labels) {
@@ -402,7 +448,7 @@ kb.buildLabelsHTML = function(labels) {
     var label = util.escHtml(labelList[i]);
     html += '<span class="label"';
     if (kb.mode != 'view') {
-      html += ' onclick="kb.labelSearch(\'' + label + '\');"';
+      html += ' onclick="kb.kb.categorySearch(\'label\', \'' + label + '\');"';
     }
     html += '>' + label + '</span>';
   }
@@ -497,6 +543,7 @@ kb._save = function() {
   var labels = $el('#content-labels-edt').value;
   labels = util.convertNewLine(labels, ' ');
   labels = labels.replace(/\s{2,}/g, ' ');
+  var status = $el('#select-status').value;
 
   if (!title) {
     kb.showInfotip('Title is required', 3000);
@@ -508,6 +555,7 @@ kb._save = function() {
   kb.content.TITLE = title;
   kb.content.BODY = body;
   kb.content.LABELS = labels;
+  kb.content.STATUS = status;
 
   var b64Title = util.encodeBase64(title);
   var b64Labels = util.encodeBase64(labels);
@@ -521,8 +569,10 @@ kb._save = function() {
     encryption: encryption,
     TITLE: b64Title,
     LABELS: b64Labels,
+    STATUS: status,
     BODY: b64Body
   };
+
   var j = util.toJSON(data);
   var param = {
     id: id,
@@ -586,6 +636,7 @@ kb.showData = function(content) {
   var uDate = content.U_DATE;
   var title = content.TITLE;
   var labels = content.LABELS;
+  var status = content.STATUS;
 
   var cDateStr = '';
   var uDateStr = '';
@@ -607,6 +658,7 @@ kb.showData = function(content) {
   $el('#content-title').innerHTML = util.escHtml(title);
   $el('#content-body').innerHTML = contentBody;
   $el('#content-labels').innerHTML = labelsHTML;
+  $el('#select-status').value = status;
   $el('#content-wrp').scrollTop = 0
   if (id) {
     $el('#edit-button').enable();
