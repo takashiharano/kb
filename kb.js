@@ -42,6 +42,9 @@ kb.areaSize = {
 
 $onReady = function() {
   $el('#chk-plain-text').addEventListener('change', kb.onPlainTextChange);
+  var fontSize = util.getQuery('fontsize') | 0;
+  if (!fontSize) fontSize = 12;
+  kb.setFontSize(fontSize);
   if (kb.mode == 'view') {
     kb.view.init();
   } else {
@@ -72,9 +75,6 @@ kb.init = function() {
 
   var q = util.getQuery('q');
   var id = util.getQuery('id');
-  var fontSize = util.getQuery('fontsize') | 0;
-  if (!fontSize) fontSize = 12;
-  kb.setFontSize(fontSize);
   kb.getInitInfo();
 
   if (id) {
