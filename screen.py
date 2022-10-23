@@ -26,293 +26,7 @@ def build_main_screen(context):
 <meta name="viewport" content="width=device-width,initial-scale=1">
 '''
     html += '<title>' + appconfig.title + '</title>'
-    html += '<style>'
-    html += 'body{'
-    html += '  width: 100%;'
-    html += '  height: calc(100vh - 10px);'
-    html += '  margin: 0;'
-    html += '  background: ' + appconfig.background1 + ';'
-    html += '  color: ' + appconfig.fg_color + ';'
-    html += '  font-size: 13px;'
-    html += '  font-family: Consolas, Monaco, Menlo, monospace, sans-serif;'
-    html += '}'
-    html += 'input {'
-    html += '  font-size: 13px;'
-    html += '  border: none;'
-    html += '  border-bottom: solid 1px #888;'
-    html += '  padding: 2px;'
-    html += '  color: ' + appconfig.fg_color + ';'
-    html += '  background: transparent;'
-    html += '  font-family: Consolas, Monaco, Menlo, monospace, sans-serif;'
-    html += '  outline: none;'
-    html += '}'
-    html += 'button, input[type="button"], input[type="submit"] {'
-    html += '  min-width: 45px;'
-    html += '  border: 1px solid ' + appconfig.button_border + ';'
-    html += '  border-radius: 3px;'
-    html += '  outline: none;'
-    html += '  color: ' + appconfig.button_fgcolor + ';'
-    html += '  background:  ' + appconfig.button_background + ';'
-    html += '  font-size: 13px;'
-    html += '  font-family: Consolas, Monaco, Menlo, monospace, sans-serif;'
-    html += '  transition: all 0.2s ease;'
-    html += '}'
-    html += '''
-button:focus, input[type="button"]:focus, input[type="submit"]:focus {
-  background: ' + appconfig.button_focus_background + ';'
-  color: ' + appconfig.button_focus_fgcolor + ';'
-}
-input[type="checkbox"] {
-  position: relative;
-  top: 2px;
-}
-'''
-    html += 'button:hover, input[type="button"]:hover, input[type="submit"]:hover {'
-    html += '  cursor: pointer;'
-    html += '  background: ' + appconfig.button_hover_background + ';'
-    html += '  color: ' + appconfig.button_hover_fgcolor + ';'
-    html += '  transition: all 0.2s ease;'
-    html += '}'
-    html += 'button:disabled, input[type="button"]:disabled, input[type="submit"]:disabled {'
-    html += '  border: 1px solid ' + appconfig.button_disabled_border + ';'
-    html += '  background: ' + appconfig.button_disabled_background + ';'
-    html += '  color: ' + appconfig.button_disabled_fgcolor + ';'
-    html += '}'
-
-    html += '''
-pre {
-  margin: 0;
-  font-family: Consolas, Monaco, Menlo, monospace, sans-serif;
-}
-a {
-  color:#cef;
-}
-'''
-
-    html += 'textarea {'
-    html += '  outline: none;'
-    html += '  background: transparent;'
-    html += '  color: ' + appconfig.fg_color + ';'
-    html += '  font-family: Consolas, Monaco, Menlo, monospace, sans-serif;'
-    html += '}'
-
-    html += '''
-h1, h2, h3 {
-  color: #a5afb7;
-}
-table {
-  border-collapse: collapse;
-}
-'''
-    html += '.area {'
-    html += '  position: relative;'
-    html += '  border: 1px solid ' + appconfig.border_color + ';'
-    html += '  border-radius: 3px;'
-    html += '  padding: 4px;'
-    html += '}'
-    html += '.red-button {'
-    html += '  border: 1px solid ' + appconfig.button_red_border + ';'
-    html += '  background: ' + appconfig.button_red_background + ';'
-    html += '  color: ' + appconfig.button_red_fgcolor + ';'
-    html += '}'
-    html += '.red-button:focus {'
-    html += '  background: ' + appconfig.button_red_focus_background + ';'
-    html += '  color: ' + appconfig.button_red_focus_fgcolor + ';'
-    html += '}'
-    html += '.red-button:hover {'
-    html += '  background: ' + appconfig.button_red_hover_background + ';'
-    html += '  color: ' + appconfig.button_red_hover_fgcolor + ';'
-    html += '}'
-    html += '.text-red {'
-    html += '  color: ' + appconfig.text_red + ';'
-    html += '}'
-
-    html += '''
-#q {
-  width: 500px;
-}
-#body1 {
-  display: none;
-  width: calc(100% - 17px);
-}
-.selected {
-  background: #2f3a42;
-}
-'''
-    html += '.item {'
-    html += '  background: ' + appconfig.background4 + ';'
-    html += '}'
-    html += '#list-area {'
-    html += '  width: 100%;'
-    html += '  height: 230px;'
-    html += '  margin: 4px 2px 2px 2px;'
-    html += '  background: ' + appconfig.background2 + ';'
-    html += '}'
-
-    html += '''
-#list-wrp {
-  height: calc(100% - 32px);
-  overflow: auto;
-}
-#list {
-  margin-top: 4px;
-}
-#adjuster {
-  position: relative;
-  width: 100%;
-  height: 4px;
-  top: -8px;
-  cursor: ns-resize;
-}
-'''
-    html += '.data-list-row:hover {'
-    html += '  background: ' + appconfig.list_hover_background + ';'
-    html += '}'
-    html += '#content-area {'
-    html += '  width: 100%;'
-    html += '  height: calc(100vh - 270px);'
-    html += '  margin: 2px;'
-    html += '  background: ' + appconfig.background3 + ';'
-    html += 'font-family: Consolas, Monaco, Menlo, monospace, sans-serif;'
-    html += '}'
-    html += '.title {'
-    html += '  color: ' + appconfig.title_color + ';'
-    html += '}'
-    html += '.title-disabled {'
-    html += '  color: ' + appconfig.title_disabled_color + ';'
-    html += '}'
-    html += '''
-#info-area {
-  display: inline-block;
-}
-
-#content-id {
-  display: inline-block;
-}
-#content-id-edt {
-  width: 50px;
-}
-#content-title {
-  display: inline-block;
-  min-width: 400px;
-  max-width: 800px;
-}
-#content-title-edt {
-  width: 600px;
-}
-#content-labels {
-  display: inline-block;
-  margin-left: 32px;
-}
-#content-labels-edt {
-  width: 300px;
-}
-#chk-encryption {
-  margin-left: 16px;
-}
-#content-wrp1 {
-  width: calc(100% - 6px);
-  min-width: 70%;
-  height: 100%;
-  float: left;
-  margin-top:10px;
-  margin-right:2px;
-}
-#content-wrp {
-  width: 100%;
-  height: 100%;
-  padding: 4px;
-  overflow: auto;
-}
-#content-body-edt-wrp {
-  width: 100%;
-  height: calc(100% - 10px);
-}
-#content-body-edt {
-  width: calc(100% - 8px);
-  height: calc(100% - 1.3em);
-}
-#content-body-st {
-  color: #a5afb7;
-}
-'''
-    html += '.label {'
-    html += '  border-radius: 3px;'
-    html += '  margin-right: 4px;'
-    html += '  padding: 1px 8px;'
-    html += '  background: ' + appconfig.label_background + ';'
-    html += '  color: ' + appconfig.label_fgcolor + ';'
-    html += '}'
-    html += '.label:hover {'
-    html += '  background: ' + appconfig.label_hover_background + ';'
-    html += '  cursor: pointer;'
-    html += '}'
-    html += '.dialog {'
-    html += '  border: 1px solid ' + appconfig.dialog_border + ';'
-    html += '  background: ' + appconfig.dialog_background + '!important;'
-    html += '  color: ' + appconfig.dialog_fgcolor + ' !important;'
-    html += '}'
-    html += '.status-label-ok {'
-    html += '  color: ' + appconfig.status_label_ok_fgcolor + ';'
-    html += '  background: ' + appconfig.status_label_ok_background + ';'
-    html += '}'
-
-    html += '.status-label-err {'
-    html += '  color: ' + appconfig.status_label_err_fgcolor + ';'
-    html += '  background: ' + appconfig.status_label_err_background + ';'
-    html += '}'
-
-    html += '.status-label-encrypted {'
-    html += '  color: ' + appconfig.status_label_encrypted_fgcolor + ';'
-    html += '  background: ' + appconfig.status_label_encrypted_background + ';'
-    html += '}'
-
-    html += '#clock {'
-    html += '  color: ' + appconfig.clock_color + ';'
-    html += '}'
-
-    html += '''
-.status {
-  border-radius: 3px;
-}
-.status:hover {
-  cursor: pointer;
-}
-table.item-list,td.item-list,th.item-list {
-  border: 1px solid #888;
-  border-top: none;
-  border-right: none;
-  border-left: none;
-  border-collapse: collapse;
-  white-space: nowrap;
-  font-family: Consolas, Monaco, Menlo, monospace, sans-serif;
-}
-
-td.item-list {
-  padding-right: 16px;
-}
-td.center {
-  text-align: center;
-}
-
-.sort-button {
-  display: inline-block;
-  line-height: 1em;
-  color: #555;
-  font-size: 8px;
-}
-.sort-button:hover {
-  cursor: pointer;
-}
-.sort-active {
-  color: #ccc;
-}
-
-#labels-label {
-  margin-left: 16px;
-}
-</style>
-'''
+    html += '<link rel="stylesheet" href="./?css=main" />'
     html += '<script src="' + ROOT_PATH + 'libs/debug.js"></script>'
     html += '<script src="' + ROOT_PATH + 'libs/util.js"></script>'
     html += '<script src="' + ROOT_PATH + 'websys/websys.js"></script>'
@@ -400,203 +114,16 @@ def build_view_screen(context):
 <meta name="viewport" content="width=device-width,initial-scale=1">
 '''
     html += '<title>' + appconfig.title + '</title>'
-    html += '<style>'
-    html += 'body{'
-    html += '  width: 100%;'
-    html += '  height: calc(100vh - 10px);'
-    html += '  margin: 0;'
-    html += '  background: ' + appconfig.background1 + ';'
-    html += '  color: ' + appconfig.fg_color + ';'
-    html += '  font-size: 13px;'
-    html += '  font-family: Consolas, Monaco, Menlo, monospace, sans-serif;'
-    html += '}'
-    html += 'input {'
-    html += '  font-size: 13px;'
-    html += '  border: none;'
-    html += '  border-bottom: solid 1px #888;'
-    html += '  padding: 2px;'
-    html += '  color: ' + appconfig.fg_color + ';'
-    html += '  background: transparent;'
-    html += '  font-family: Consolas, Monaco, Menlo, monospace, sans-serif;'
-    html += '  outline: none;'
-    html += '}'
-    html += 'button, input[type="button"], input[type="submit"] {'
-    html += '  min-width: 45px;'
-    html += '  border: 1px solid ' + appconfig.button_border + ';'
-    html += '  border-radius: 3px;'
-    html += '  outline: none;'
-    html += '  color: ' + appconfig.button_fgcolor + ';'
-    html += '  background:  ' + appconfig.button_background + ';'
-    html += '  font-size: 13px;'
-    html += '  font-family: Consolas, Monaco, Menlo, monospace, sans-serif;'
-    html += '  transition: all 0.2s ease;'
-    html += '}'
-    html += '''
-button:focus, input[type="button"]:focus, input[type="submit"]:focus {
-  background: ' + appconfig.button_focus_background + ';'
-  color: ' + appconfig.button_focus_fgcolor + ';'
-}
-input[type="checkbox"] {
-  position: relative;
-  top: 2px;
-}
-'''
-    html += 'button:hover, input[type="button"]:hover, input[type="submit"]:hover {'
-    html += '  cursor: pointer;'
-    html += '  background: ' + appconfig.button_hover_background + ';'
-    html += '  color: ' + appconfig.button_hover_fgcolor + ';'
-    html += '  transition: all 0.2s ease;'
-    html += '}'
-    html += 'button:disabled, input[type="button"]:disabled, input[type="submit"]:disabled {'
-    html += '  border: 1px solid ' + appconfig.button_disabled_border + ';'
-    html += '  background: ' + appconfig.button_disabled_background + ';'
-    html += '  color: ' + appconfig.button_disabled_fgcolor + ';'
-    html += '}'
-
-    html += '''
-pre {
-  margin: 0;
-  font-family: Consolas, Monaco, Menlo, monospace, sans-serif;
-}
-a {
-  color:#cef;
-}
-h1, h2, h3 {
-  color: #a5afb7;
-}
-table {
-  border-collapse: collapse;
-}
-'''
-    html += '.area {'
-    html += '  position: relative;'
-    html += '  border: 1px solid ' + appconfig.border_color + ';'
-    html += '  border-radius: 3px;'
-    html += '  padding: 4px;'
-    html += '}'
-    html += '''
-#q {
-  width: 500px;
-}
-#body1 {
-  width: calc(100% - 17px);
-}
-'''
-    html += '.data-list-row:hover {'
-    html += '  background: ' + appconfig.list_hover_background + ';'
-    html += '}'
-    html += '#content-area {'
-    html += '  width: 100%;'
-    html += '  height: calc(100vh - 18px);'
-    html += '  margin: 2px;'
-    html += '  background: ' + appconfig.background3 + ';'
-    html += 'font-family: Consolas, Monaco, Menlo, monospace, sans-serif;'
-    html += '}'
-    html += '.title {'
-    html += '  color: ' + appconfig.title_color + ';'
-    html += '}'
-    html += '.title-disabled {'
-    html += '  color: ' + appconfig.title_disabled_color + ';'
-    html += '}'
-    html += '''
-#info-area {
-  display: inline-block;
-}
-
-#content-title {
-  display: inline-block;
-  margin-left: 16px;
-  min-width: 400px;
-  max-width: 800px;
-}
-#content-labels {
-  display: inline-block;
-  margin-left: 32px;
-}
-#content-wrp1 {
-  width: calc(100% - 6px);
-  min-width: 70%;
-  height: 100%;
-  float: left;
-  margin-top:10px;
-  margin-right:2px;
-}
-#content-wrp {
-  width: 100%;
-  height: 100%;
-  padding: 4px;
-  overflow: auto;
-}
-#content-body-st {
-  color: #a5afb7;
-}
-'''
-    html += '.label {'
-    html += '  border-radius: 3px;'
-    html += '  margin-right: 4px;'
-    html += '  padding: 1px 8px;'
-    html += '  background: ' + appconfig.label_background + ';'
-    html += '  color: ' + appconfig.label_fgcolor + ';'
-    html += '}'
-    html += '.dialog {'
-    html += '  border: 1px solid ' + appconfig.dialog_border + ';'
-    html += '  background: ' + appconfig.dialog_background + '!important;'
-    html += '  color: ' + appconfig.dialog_fgcolor + ' !important;'
-    html += '}'
-    html += '.status-label-ok {'
-    html += '  color: ' + appconfig.status_label_ok_fgcolor + ';'
-    html += '  background: ' + appconfig.status_label_ok_background + ';'
-    html += '}'
-
-    html += '.status-label-err {'
-    html += '  color: ' + appconfig.status_label_err_fgcolor + ';'
-    html += '  background: ' + appconfig.status_label_err_background + ';'
-    html += '}'
-
-    html += '#clock {'
-    html += '  color: ' + appconfig.clock_color + ';'
-    html += '}'
-
-    html += '''
-table.item-list,td.item-list,th.item-list {
-  border: 1px solid #888;
-  border-top: none;
-  border-right: none;
-  border-left: none;
-  border-collapse: collapse;
-  white-space: nowrap;
-  font-family: Consolas, Monaco, Menlo, monospace, sans-serif;
-}
-
-td.item-list {
-  padding-right: 16px;
-}
-td.center {
-  text-align: center;
-}
-
-.sort-button {
-  display: inline-block;
-  line-height: 1em;
-  color: #555;
-  font-size: 8px;
-}
-.sort-button:hover {
-  cursor: pointer;
-}
-.sort-active {
-  color: #ccc;
-}
-
-#labels-label {
-  margin-left: 16px;
-}
-</style>
-'''
+    html += '<link rel="stylesheet" href="./?css=main" />'
     html += '<script src="' + ROOT_PATH + 'libs/debug.js"></script>'
     html += '<script src="' + ROOT_PATH + 'libs/util.js"></script>'
     html += '<script src="' + ROOT_PATH + 'websys/websys.js"></script>'
     html += '''
+<style>
+#content-area {
+  height: calc(100vh - 18px);
+}
+</style>
 <script>
 var kb = {};
 kb.mode = 'view'
@@ -643,7 +170,303 @@ kb.mode = 'view'
     return html
 
 #------------------------------------------------------------------------------
+def build_css():
+    css = ''
+    css += 'body{'
+    css += '  width: 100%;'
+    css += '  height: calc(100vh - 10px);'
+    css += '  margin: 0;'
+    css += '  background: ' + appconfig.background1 + ';'
+    css += '  color: ' + appconfig.fg_color + ';'
+    css += '  font-size: 13px;'
+    css += '  font-family: Consolas, Monaco, Menlo, monospace, sans-serif;'
+    css += '}'
+    css += 'input {'
+    css += '  font-size: 13px;'
+    css += '  border: none;'
+    css += '  border-bottom: solid 1px #888;'
+    css += '  padding: 2px;'
+    css += '  color: ' + appconfig.fg_color + ';'
+    css += '  background: transparent;'
+    css += '  font-family: Consolas, Monaco, Menlo, monospace, sans-serif;'
+    css += '  outline: none;'
+    css += '}'
+    css += 'button, input[type="button"], input[type="submit"] {'
+    css += '  min-width: 45px;'
+    css += '  border: 1px solid ' + appconfig.button_border + ';'
+    css += '  border-radius: 3px;'
+    css += '  outline: none;'
+    css += '  color: ' + appconfig.button_fgcolor + ';'
+    css += '  background:  ' + appconfig.button_background + ';'
+    css += '  font-size: 13px;'
+    css += '  font-family: Consolas, Monaco, Menlo, monospace, sans-serif;'
+    css += '  transition: all 0.2s ease;'
+    css += '}'
+    css += '''
+button:focus, input[type="button"]:focus, input[type="submit"]:focus {
+  background: ' + appconfig.button_focus_background + ';'
+  color: ' + appconfig.button_focus_fgcolor + ';'
+}
+input[type="checkbox"] {
+  position: relative;
+  top: 2px;
+}
+'''
+    css += 'button:hover, input[type="button"]:hover, input[type="submit"]:hover {'
+    css += '  cursor: pointer;'
+    css += '  background: ' + appconfig.button_hover_background + ';'
+    css += '  color: ' + appconfig.button_hover_fgcolor + ';'
+    css += '  transition: all 0.2s ease;'
+    css += '}'
+    css += 'button:disabled, input[type="button"]:disabled, input[type="submit"]:disabled {'
+    css += '  border: 1px solid ' + appconfig.button_disabled_border + ';'
+    css += '  background: ' + appconfig.button_disabled_background + ';'
+    css += '  color: ' + appconfig.button_disabled_fgcolor + ';'
+    css += '}'
+
+    css += '''
+pre {
+  margin: 0;
+  font-family: Consolas, Monaco, Menlo, monospace, sans-serif;
+}
+a {
+  color:#cef;
+}
+'''
+
+    css += 'textarea {'
+    css += '  outline: none;'
+    css += '  background: transparent;'
+    css += '  color: ' + appconfig.fg_color + ';'
+    css += '  font-family: Consolas, Monaco, Menlo, monospace, sans-serif;'
+    css += '}'
+
+    css += '''
+h1, h2, h3 {
+  color: #a5afb7;
+}
+table {
+  border-collapse: collapse;
+}
+'''
+    css += '.area {'
+    css += '  position: relative;'
+    css += '  border: 1px solid ' + appconfig.border_color + ';'
+    css += '  border-radius: 3px;'
+    css += '  padding: 4px;'
+    css += '}'
+    css += '.red-button {'
+    css += '  border: 1px solid ' + appconfig.button_red_border + ';'
+    css += '  background: ' + appconfig.button_red_background + ';'
+    css += '  color: ' + appconfig.button_red_fgcolor + ';'
+    css += '}'
+    css += '.red-button:focus {'
+    css += '  background: ' + appconfig.button_red_focus_background + ';'
+    css += '  color: ' + appconfig.button_red_focus_fgcolor + ';'
+    css += '}'
+    css += '.red-button:hover {'
+    css += '  background: ' + appconfig.button_red_hover_background + ';'
+    css += '  color: ' + appconfig.button_red_hover_fgcolor + ';'
+    css += '}'
+    css += '.text-red {'
+    css += '  color: ' + appconfig.text_red + ';'
+    css += '}'
+
+    css += '''
+#q {
+  width: 500px;
+}
+#body1 {
+  display: none;
+  width: calc(100% - 17px);
+}
+.selected {
+  background: #2f3a42;
+}
+'''
+    css += '.item {'
+    css += '  background: ' + appconfig.background4 + ';'
+    css += '}'
+    css += '#list-area {'
+    css += '  width: 100%;'
+    css += '  height: 230px;'
+    css += '  margin: 4px 2px 2px 2px;'
+    css += '  background: ' + appconfig.background2 + ';'
+    css += '}'
+
+    css += '''
+#list-wrp {
+  height: calc(100% - 32px);
+  overflow: auto;
+}
+#list {
+  margin-top: 4px;
+}
+#adjuster {
+  position: relative;
+  width: 100%;
+  height: 4px;
+  top: -8px;
+  cursor: ns-resize;
+}
+'''
+    css += '.data-list-row:hover {'
+    css += '  background: ' + appconfig.list_hover_background + ';'
+    css += '}'
+    css += '#content-area {'
+    css += '  width: 100%;'
+    css += '  height: calc(100vh - 270px);'
+    css += '  margin: 2px;'
+    css += '  background: ' + appconfig.background3 + ';'
+    css += 'font-family: Consolas, Monaco, Menlo, monospace, sans-serif;'
+    css += '}'
+    css += '.title {'
+    css += '  color: ' + appconfig.title_color + ';'
+    css += '}'
+    css += '.title-disabled {'
+    css += '  color: ' + appconfig.title_disabled_color + ';'
+    css += '}'
+    css += '''
+#info-area {
+  display: inline-block;
+}
+
+#content-id {
+  display: inline-block;
+}
+#content-id-edt {
+  width: 50px;
+}
+#content-title {
+  display: inline-block;
+  min-width: 400px;
+  max-width: 800px;
+}
+#content-title-edt {
+  width: 600px;
+}
+#content-labels {
+  display: inline-block;
+  margin-left: 32px;
+}
+#content-labels-edt {
+  width: 300px;
+}
+#chk-encryption {
+  margin-left: 16px;
+}
+#content-wrp1 {
+  width: calc(100% - 6px);
+  min-width: 70%;
+  height: 100%;
+  float: left;
+  margin-top:10px;
+  margin-right:2px;
+}
+#content-wrp {
+  width: 100%;
+  height: 100%;
+  padding: 4px;
+  overflow: auto;
+}
+#content-body-edt-wrp {
+  width: 100%;
+  height: calc(100% - 10px);
+}
+#content-body-edt {
+  width: calc(100% - 8px);
+  height: calc(100% - 1.3em);
+}
+#content-body-st {
+  color: #a5afb7;
+}
+'''
+    css += '.label {'
+    css += '  border-radius: 3px;'
+    css += '  margin-right: 4px;'
+    css += '  padding: 1px 8px;'
+    css += '  background: ' + appconfig.label_background + ';'
+    css += '  color: ' + appconfig.label_fgcolor + ';'
+    css += '}'
+    css += '.label:hover {'
+    css += '  background: ' + appconfig.label_hover_background + ';'
+    css += '  cursor: pointer;'
+    css += '}'
+    css += '.dialog {'
+    css += '  border: 1px solid ' + appconfig.dialog_border + ';'
+    css += '  background: ' + appconfig.dialog_background + '!important;'
+    css += '  color: ' + appconfig.dialog_fgcolor + ' !important;'
+    css += '}'
+    css += '.status-label-ok {'
+    css += '  color: ' + appconfig.status_label_ok_fgcolor + ';'
+    css += '  background: ' + appconfig.status_label_ok_background + ';'
+    css += '}'
+
+    css += '.status-label-err {'
+    css += '  color: ' + appconfig.status_label_err_fgcolor + ';'
+    css += '  background: ' + appconfig.status_label_err_background + ';'
+    css += '}'
+
+    css += '.status-label-encrypted {'
+    css += '  color: ' + appconfig.status_label_encrypted_fgcolor + ';'
+    css += '  background: ' + appconfig.status_label_encrypted_background + ';'
+    css += '}'
+
+    css += '#clock {'
+    css += '  color: ' + appconfig.clock_color + ';'
+    css += '}'
+
+    css += '''
+.status {
+  border-radius: 3px;
+}
+.status:hover {
+  cursor: pointer;
+}
+table.item-list,td.item-list,th.item-list {
+  border: 1px solid #888;
+  border-top: none;
+  border-right: none;
+  border-left: none;
+  border-collapse: collapse;
+  white-space: nowrap;
+  font-family: Consolas, Monaco, Menlo, monospace, sans-serif;
+}
+
+td.item-list {
+  padding-right: 16px;
+}
+td.center {
+  text-align: center;
+}
+
+.sort-button {
+  display: inline-block;
+  line-height: 1em;
+  color: #555;
+  font-size: 8px;
+}
+.sort-button:hover {
+  cursor: pointer;
+}
+.sort-active {
+  color: #ccc;
+}
+
+#labels-label {
+  margin-left: 16px;
+}
+'''
+    return css
+
+#------------------------------------------------------------------------------
 def main():
+    p_css = util.get_request_param('css')
+    if p_css == 'main':
+        css = build_css()
+        util.send_response('text/css', css)
+        return
+
     context = {
         'user': '',
         'authorized': False

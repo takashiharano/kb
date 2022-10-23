@@ -22,7 +22,6 @@ kb.LIST_COLUMNS = [
 ];
 kb.onselectstart = document.onselectstart;
 
-kb.ready = false;
 kb.status = 0;
 kb.uiStatus = kb.UI_ST_NONE;
 kb.listStatus = {
@@ -49,6 +48,7 @@ $onReady = function() {
   kb.setFontSize(fontSize);
   if (kb.mode == 'view') {
     kb.view.init();
+    kb.onAppReady();
   } else {
     kb.init();
   }
@@ -56,7 +56,12 @@ $onReady = function() {
 
 kb.onAppReady = function() {
   $el('#body1').style.display = 'block';
+  if (kb.mode != 'view') {
+    kb.onAppReady1();
+  }
+};
 
+kb.onAppReady1 = function() {
   var q = util.getQuery('q');
   var id = util.getQuery('id');
   if (id) {
@@ -73,7 +78,6 @@ kb.onAppReady = function() {
 
   var q = util.getQuery('id');
   if (!q) $el('#q').focus();
-  kb.ready = true;
 };
 
 kb.init = function() {
