@@ -390,17 +390,10 @@ kb.onGetData = function(xhr, res, req) {
   var labels = util.decodeBase64(b64Labels);
   var body = util.decodeBase64(b64Body);
 
-  kb.content = {
-    id: id,
-    data_status: data_status,
-    encrypted: data.encrypted,
-    C_DATE: cDate,
-    U_DATE: uDate,
-    TITLE: title,
-    LABELS: labels,
-    STATUS: status,
-    BODY: body
-  };
+  kb.content = util.copyObject(data, kb.content);
+  kb.content.TITLE = title;
+  kb.content.LABELS = labels;
+  kb.content.BODY = body;
 
   if (data_status == 'OK') {
     kb.showData(kb.content);
@@ -663,6 +656,19 @@ kb.showData = function(content) {
   $el('#content-body').innerHTML = contentBody;
   $el('#content-labels').innerHTML = labelsHTML;
   $el('#select-status').value = status;
+
+  if (content.STATUS == 'EMPTY') {
+    $el('#content-created-date').innerHTML = '';
+    $el('#content-created-by').innerHTML = '';
+    $el('#content-updated-date').innerHTML = '';
+    $el('#content-updated-by').innerHTML = '';
+  } else {
+    $el('#content-created-date').innerHTML = 'CREATED: ' + cDateStr;
+    $el('#content-created-by').innerHTML = 'by ' + content.C_USER;
+    $el('#content-updated-date').innerHTML = 'UPDATED: ' + uDateStr;
+    $el('#content-updated-by').innerHTML = 'by ' + content.U_USER;
+  }
+
   $el('#content-wrp').scrollTop = 0
   if (id) {
     $el('#edit-button').enable();
@@ -704,9 +710,12 @@ kb.clearContent = function() {
   kb.content = {
     id: '',
     C_DATE: '',
+    C_USER: '',
     U_DATE: '',
+    U_USER: '',
     TITLE: '',
     LABELS: '',
+    STATUS: 'EMPTY',
     BODY: ''
   };
 };

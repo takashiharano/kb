@@ -86,7 +86,7 @@ def build_main_screen(context):
         </span>
       </div>
     </div>
-    <div style="height:calc(100% - 80px);">
+    <div style="height:calc(100% - 70px);">
       <div id="content-wrp1">
         <div id="content-wrp">
           <pre id="content-body"></pre>
@@ -137,14 +137,14 @@ kb.mode = 'view'
 <div id="body1">
   <div id="content-area" class="area">
     <div>
-      <div id="info-area">'''
-
-    html += '<span id="content-id"></span>'
-    html += '<span id="content-title"></span>'
-    html += '<span id="info-label">'
-    html += '<span id="content-labels"></span>'
-    html += '''
-        </span>
+      <div id="meta-info">
+        <span id="content-created-date"></span> <span id="content-created-by"></span><span id="content-updated-date" style="margin-left:32px;"></span> <span id="content-updated-by"></span>
+      </div>
+      <div id="info-area">
+        <span id="content-id"></span>
+        <span id="content-title"></span>
+        <span id="info-label">
+        <span id="content-labels"></span>
       </div>
       <div style="display:inline-block;position:absolute;right:10px;">
         <span id="buttons-r">
@@ -153,7 +153,7 @@ kb.mode = 'view'
         </span>
       </div>
     </div>
-    <div style="height:calc(100% - 60px);">
+    <div style="height:calc(100% - 70px);">
       <div id="content-wrp1">
         <div id="content-wrp">
           <pre id="content-body"></pre>
@@ -330,6 +330,10 @@ table {
 #info-area {
   display: inline-block;
 }
+#meta-info {
+  height: 1.2em;
+  color: #ccc;
+}
 
 #content-id {
   display: inline-block;
@@ -455,6 +459,10 @@ td.center {
 
 #labels-label {
   margin-left: 16px;
+}
+
+#font-range {
+  width: 256px;
 }
 '''
     return css
