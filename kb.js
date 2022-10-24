@@ -204,7 +204,7 @@ kb.drawList = function(items, sortIdx, sortType) {
     if (data_status == 'OK') {
       statusLabel = kb.buildStatusHTML(status);
     } else {
-      statusLabel = '<span class="status-label-err">' + status + '</span>';
+      statusLabel = '<span class="status-label-err">' + data_status + '</span>';
     }
     var encrypted = '';
     if (data.encrypted) {
