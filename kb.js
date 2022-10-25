@@ -526,11 +526,11 @@ kb.save = function() {
 kb._save = function() {
   var id = $el('#content-id-edt').value.trim();
   if (kb.status & kb.ST_NEW) {
-    if (id != '') {
+    if (id == '') {
+      kb.status &= ~kb.ST_NEW;
+    } else {
       kb.checkExists(id);
       return;
-    } else {
-      kb.status &= ~kb.ST_NEW;
     }
   }
 
@@ -538,9 +538,9 @@ kb._save = function() {
   var title = $el('#content-title-edt').value;
   var body = $el('#content-body-edt').value;
   var labels = $el('#content-labels-edt').value;
-  labels = util.convertNewLine(labels, ' ');
   labels = labels.replace(/\s{2,}/g, ' ');
   var status = $el('#select-status').value;
+  var orgUdate = kb.content.U_DATE;
 
   if (!title) {
     kb.showInfotip('Title is required', 3000);
@@ -564,6 +564,7 @@ kb._save = function() {
 
   var data = {
     encryption: encryption,
+    org_u_date: orgUdate,
     TITLE: b64Title,
     LABELS: b64Labels,
     STATUS: status,
@@ -584,7 +585,7 @@ kb.onSaveData = function(xhr, res, req) {
   }
   if (res.status == 'OK') {
     if (kb.status & kb.ST_EXIT) {
-      var id = res.body;
+      var id = res.body.saved_id;
       kb.listStatus.sortIdx = 4;
       kb.listStatus.sortType = 2;
       kb.getList ();
@@ -593,6 +594,12 @@ kb.onSaveData = function(xhr, res, req) {
     } else {
       kb.showInfotip('OK');
     }
+  } else if (res.status == 'CONFLICT') {
+    var data = res.body;
+    var dt = util.getDateTimeString(+data.U_DATE);
+    var msg = 'DATE: ' + dt + '\n';
+    msg += 'BY: ' + data.U_USER;
+    util.alert('Conflict!', msg);
   } else {
     log.e(res.status + ':' + res.body);
   }

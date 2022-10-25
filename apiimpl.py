@@ -55,6 +55,32 @@ def get_data(context):
     send_result_json(status, result_data)
 
 #------------------------------------------------------------------------------
+def proc_save(context):
+    id = get_request_param('id')
+    data_json = get_request_param('data')
+    new_data = util.from_json(data_json)
+    data = kb.get_data(id)
+
+    if id == '' or data['U_DATE'] == new_data['org_u_date']:
+        user = context['user']
+        saved_id = kb.save_data(id, new_data, user)
+        result = {
+            'status': 'OK',
+            'saved_id': saved_id,
+            'U_DATE': None,
+            'U_USER': None
+        }
+    else:
+        result = {
+            'status': 'CONFLICT',
+            'saved_id': None,
+            'U_DATE': data['U_DATE'],
+            'U_USER': data['U_USER']
+        }
+
+    return result
+
+#------------------------------------------------------------------------------
 def proc_api(context, act):
     status = 'OK'
     if act == 'list':
@@ -65,12 +91,13 @@ def proc_api(context, act):
         q = util.decode_base64(q)
         result_data = kb.search_data(q)
     elif act == 'save':
-        id = get_request_param('id')
-        data_json = get_request_param('data')
-        data = util.from_json(data_json)
-        user = context['user']
-        saved_id = kb.save_data(id, data, user)
-        result_data = saved_id
+        result = proc_save(context)
+        status = result['status']
+        result_data = {
+            'saved_id': result['saved_id'],
+            'U_DATE': result['U_DATE'],
+            'U_USER': result['U_USER']
+        }
     elif act == 'delete':
         id = get_request_param('id')
         status = kb.delete_data(id)
