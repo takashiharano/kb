@@ -107,12 +107,11 @@ def calc_data_macthed_score(data, keyword):
     if keyword.startswith('id:'):
         keyword = util.replace(keyword, 'id:', '')
         if keyword == data['id']:
-            score += 100
+            score = 100
 
     elif keyword.startswith('title:'):
         keyword = util.replace(keyword, 'title:', '')
-        score += is_matches_title(data['TITLE'], keyword)
-        return score
+        score = is_matches_title(data['TITLE'], keyword)
 
     elif keyword.startswith('label:'):
         keyword = util.replace(keyword, 'label:', '')
@@ -128,12 +127,123 @@ def calc_data_macthed_score(data, keyword):
         keyword = util.replace(keyword, 'body:', '')
         score = count_matched_key(data['BODY'], keyword)
 
+    elif keyword.startswith('createdat:'):
+        keyword = util.replace(keyword, 'createdat:', '')
+        if is_date_matches(data['C_DATE'], keyword):
+            score = 10
+
+    elif keyword.startswith('updatedat:'):
+        keyword = util.replace(keyword, 'updatedat:', '')
+        if is_date_matches(data['U_DATE'], keyword):
+            score = 10
+
+    elif keyword.startswith('createdby:'):
+        keyword = util.replace(keyword, 'createdby:', '')
+        score = is_target_matches(data['C_USER'], keyword)
+
+    elif keyword.startswith('updatedby:'):
+        keyword = util.replace(keyword, 'updatedby:', '')
+        score = is_target_matches(data['U_USER'], keyword)
+
     else:
         score += count_matched_key(data['TITLE'], keyword) * 100
         score += count_matched_key(data['LABELS'], keyword) * 10
         score += count_matched_key(data['BODY'], keyword)
 
     return score
+
+def is_target_matches(target, keyword):
+    if target == '':
+        return 0
+    score = 0
+    target = target.lower()
+    keyword = keyword.lower()
+    if target == keyword:
+        score += 100
+    return score
+
+def is_date_matches(target, search_val):
+    try:
+        target = int(target)
+    except:
+        return False
+
+    search_val = util.replace(search_val, '-', '')
+    search_val = util.replace(search_val, '/', '')
+    search_val = util.replace(search_val, ':', '')
+    search_val = util.replace(search_val, '\\.', '')
+
+    if search_val.startswith('>='):
+        str_datetime = search_val[2:]
+    elif search_val.startswith('<='):
+        str_datetime = search_val[2:]
+        str_datetime = fill2359(str_datetime)
+    elif search_val.startswith('>'):
+        str_datetime = search_val[1:]
+        str_datetime = fill2359(str_datetime)
+    elif search_val.startswith('<'):
+       str_datetime = search_val[1:]
+    elif search_val.startswith('='):
+       str_datetime = search_val[1:]
+    else:
+        return False
+
+    millis = util.get_timestamp_in_millis(str_datetime)
+
+    if search_val.startswith('>='):
+        if target >= millis:
+            return True
+    elif search_val.startswith('<='):
+        if target <= millis:
+            return True
+    elif search_val.startswith('>'):
+        if target > millis:
+            return True
+    elif search_val.startswith('<'):
+        if target <  millis:
+            return True
+    elif search_val.startswith('='):
+        target = floor_target_datetime(target, str_datetime)
+        if target == millis:
+            return True
+
+    return False
+
+def floor_target_datetime(target, val):
+    if len(val) == 4:
+        scale = 'Y'
+    elif len(val) == 6:
+        scale = 'M'
+    elif len(val) == 8:
+        scale = 'D'
+    elif len(val) == 11:
+        scale = 'H'
+    elif len(val) == 13:
+        scale = 'm'
+    elif len(val) == 15:
+        scale = 'S'
+    else:
+        return target
+
+    s = target / 1000
+    unixtime = util.floor_unixtime(s, scale)
+    unixmillis = int(unixtime * 1000)
+    return unixmillis
+
+def fill2359(src):
+    if len(src) == 8:
+        # YYYYMMDD
+        return src + 'T' + '235959999'
+    elif len(src) == 11:
+        # YYYYMMDDTHH
+        return src + '5959999'
+    elif len(src) == 13:
+        # YYYYMMDDTHHMI
+        return src + '59999'
+    elif len(src) == 15:
+        # YYYYMMDDTHHMISS
+        return src + '999'
+    return src
 
 def is_matches_title(title, keyword):
     if title == '':
