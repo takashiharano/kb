@@ -37,11 +37,13 @@ def get_data_id_list():
     return data_id_list
 
 #------------------------------------------------------------------------------
-def get_list():
+def get_list(target_id=None):
     data_id_list = get_data_id_list()
     data_list = []
     for i in range(len(data_id_list)):
         id = data_id_list[i]
+        if target_id is not None and target_id != id:
+            continue
         try:
             data = load_data(id, True)
 
@@ -106,12 +108,7 @@ def calc_data_macthed_score(data, keyword):
     score = 0
 
     keyword_lc = keyword.lower()
-    if keyword_lc.startswith('id:'):
-        keyword = util.replace(keyword_lc, 'id:', '', flags=re.IGNORECASE)
-        if keyword == data['id']:
-            score = 100
-
-    elif keyword_lc.startswith('title:'):
+    if keyword_lc.startswith('title:'):
         keyword = util.replace(keyword, 'title:', '', flags=re.IGNORECASE)
         score = is_matches_title(data['TITLE'], keyword)
 

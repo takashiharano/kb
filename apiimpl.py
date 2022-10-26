@@ -84,12 +84,17 @@ def proc_save(context):
 def proc_api(context, act):
     status = 'OK'
     if act == 'list':
-        data_list = kb.get_list()
+        id = get_request_param('id')
+        data_list = kb.get_list(id)
         result_data = {'data_list': data_list}
     elif act == 'search':
-        q = get_request_param('q')
-        q = util.decode_base64(q)
-        result_data = kb.search_data(q)
+        id = get_request_param('id')
+        if id is None:
+            q = get_request_param('q')
+            q = util.decode_base64(q)
+            result_data = kb.search_data(q)
+        else:
+            result_data = kb.get_data(id)
     elif act == 'save':
         result = proc_save(context)
         status = result['status']

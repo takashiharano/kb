@@ -65,9 +65,7 @@ kb.onAppReady1 = function() {
   var q = util.getQuery('q');
   var id = util.getQuery('id');
   if (id) {
-    $el('#q').value = 'id:' + id;
-    kb.search();
-    kb.getData(id);
+    kb.showDataById(id);
   } else if (q) {
     q = decodeURIComponent(q);
     $el('#q').value = q;
@@ -84,13 +82,15 @@ kb.init = function() {
   kb.clearContent();
   util.addCtrlKeyHandler('S', kb.onCtrlS);
   util.addCtrlKeyHandler('Q', kb.onCtrlQ);
-  $el('#q').addEventListener('keydown', kb.onKeyDownOnQ);
+  $el('#id-txt').addEventListener('input', kb.onInputId);
+  $el('#q').addEventListener('input', kb.onInputQ);
   util.textarea.addStatusInfo('#content-body-edt', '#content-body-st');
   $el('#adjuster').addEventListener('mousedown', kb.onAreaResizeStart);
 
   kb.onEditEnd();
   util.clock('#clock');
 
+  window.addEventListener('keydown', kb.onKeyDown);
   window.addEventListener('mousemove', kb.onMouseMove, true);
   window.addEventListener('mouseup', kb.onMouseUp, true);
 
@@ -140,8 +140,12 @@ kb.callApi = function(act, params, cb) {
   kb.http(req, cb);
 };
 
-kb.getList = function() {
-  kb.callApi('list', null, kb.onGetList);
+kb.getList = function(id) {
+  var param = null;
+  if (id != undefined) {
+    param = {id: id};
+  }
+  kb.callApi('list', param, kb.onGetList);
 };
 kb.onGetList = function(xhr, res, req) {
   if (xhr.status != 200) {
@@ -249,8 +253,6 @@ kb.drawList = function(items, sortIdx, sortType) {
 
   var infoHtml = items.length + ' ' + util.plural('item', items.length);
   $el('#info').innerHTML = infoHtml;
-
-  kb.showInfotip('OK');
 };
 
 kb.sortItemList = function(sortIdx, sortType) {
@@ -319,7 +321,10 @@ kb.listAll = function() {
 kb.search = function() {
   kb._clear();
   var q = $el('#q').value.trim();
-  if (q) {
+  var id = $el('#id-txt').value.trim();
+  if (id != '') {
+    kb.showDataById(id);
+  } else if (q) {
     kb.listStatus.sortIdx = 8;
     kb.listStatus.sortType = 2;
     var param = {q: util.encodeBase64(q)};
@@ -327,6 +332,12 @@ kb.search = function() {
   } else {
     kb.listAll();
   }
+};
+
+kb.showDataById = function(id) {
+  $el('#content-body').innerHTML = '<span class="progdot">Loading</span>';
+  kb.getList(id);
+  kb.getData(id);
 };
 
 kb.categorySearch = function(category, label) {
@@ -588,12 +599,11 @@ kb.onSaveData = function(xhr, res, req) {
       var id = res.body.saved_id;
       kb.listStatus.sortIdx = 4;
       kb.listStatus.sortType = 2;
-      kb.getList ();
+      kb.getList();
       kb.getData(id);
       kb.status &= ~kb.ST_EXIT;
-    } else {
-      kb.showInfotip('OK');
     }
+    kb.showInfotip('OK');
   } else if (res.status == 'CONFLICT') {
     var data = res.body;
     var dt = util.getDateTimeString(+data.U_DATE);
@@ -903,13 +913,44 @@ kb.onCtrlQ = function(e) {
   e.preventDefault();
   if (kb.status & kb.ST_EDITING) kb.cancel();
 };
-
-kb.onKeyDownOnQ = function(e) {
-  if (e.keyCode == 13) {
-    kb.search();
+kb.onInputId = function() {
+  if ($el('#id-txt').value) {
+    kb.disableQ();
+  } else {
+    kb.enableQ();
+  }
+}
+kb.disableId = function() {
+  $el('#id-txt').disabled = true;
+  $el('#id-label').addClass('input-disable');
+};
+kb.enableId = function() {
+  $el('#id-txt').disabled = false;
+  $el('#id-label').removeClass('input-disable');
+};
+kb.onInputQ = function(e) {
+  if ($el('#q').value) {
+    kb.disableId();
+  } else {
+    kb.enableId();
   }
 };
+kb.disableQ = function() {
+  $el('#q').disabled = true;
+  $el('#keyqord-label').addClass('input-disable');
+};
+kb.enableQ = function() {
+  $el('#q').disabled = false;
+  $el('#keyqord-label').removeClass('input-disable');
+};
 
+kb.onKeyDown = function(e) {
+  if (e.keyCode == 13) {
+    if ($el('.q-txt').hasFocus()) {
+      kb.search();
+    }
+  }
+};
 kb.onMouseMove = function(e) {
   if (kb.uiStatus == kb.UI_ST_AREA_RESIZING) {
     kb.onAreaResize(e);

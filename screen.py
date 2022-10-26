@@ -37,7 +37,8 @@ def build_main_screen(context):
   <div id="list-area" class="area">
     <div style="position:relative;">
       <button id="new-button" style="margin-right:32px;" onclick="kb.createNew();">NEW</button>
-      <input type="text" id="q" spellcheck="false" style="margin-left:4px;"><button id="search-button" style="margin-left:4px;min-width:32px;" onclick="kb.search();">SEARCH</button>
+      <span id="id-label">ID:</span> <input type="text" id="id-txt" class="q-txt" spellcheck="false" style="width:46px;">
+      <span id="keyqord-label" style="margin-left:8px;">KEYWORD:</span> <input type="text" id="q" class="q-txt" spellcheck="false" style="margin-left:4px;"><button id="search-button" style="margin-left:4px;min-width:32px;" onclick="kb.search();">SEARCH</button>
       <button id="all-button" style="margin-left:8px;min-width:32px;" onclick="kb.getListAll();">LIST ALL</button>
       <span style="position:absolute;right:5px;">
         <span id="clock"></span>
@@ -463,6 +464,10 @@ td.center {
 
 #font-range {
   width: 256px;
+}
+
+.input-disable {
+  color: #888;
 }
 '''
     return css
