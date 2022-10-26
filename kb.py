@@ -4,6 +4,7 @@
 #==============================================================================
 import os
 import sys
+import re
 
 import appconfig
 
@@ -104,45 +105,46 @@ def search_data(q):
 def calc_data_macthed_score(data, keyword):
     score = 0
 
-    if keyword.startswith('id:'):
-        keyword = util.replace(keyword, 'id:', '')
+    keyword_lc = keyword.lower()
+    if keyword_lc.startswith('id:'):
+        keyword = util.replace(keyword_lc, 'id:', '', flags=re.IGNORECASE)
         if keyword == data['id']:
             score = 100
 
-    elif keyword.startswith('title:'):
-        keyword = util.replace(keyword, 'title:', '')
+    elif keyword_lc.startswith('title:'):
+        keyword = util.replace(keyword, 'title:', '', flags=re.IGNORECASE)
         score = is_matches_title(data['TITLE'], keyword)
 
-    elif keyword.startswith('label:'):
-        keyword = util.replace(keyword, 'label:', '')
+    elif keyword_lc.startswith('label:'):
+        keyword = util.replace(keyword, 'label:', '', flags=re.IGNORECASE)
         if is_matches_labels(data['LABELS'], keyword):
             score = 10
 
-    elif keyword.startswith('status:'):
-        keyword = util.replace(keyword, 'status:', '')
+    elif keyword_lc.startswith('status:'):
+        keyword = util.replace(keyword, 'status:', '', flags=re.IGNORECASE)
         if 'STATUS' in data and data['STATUS'] == keyword:
             score = 10
 
-    elif keyword.startswith('body:'):
-        keyword = util.replace(keyword, 'body:', '')
+    elif keyword_lc.startswith('body:'):
+        keyword = util.replace(keyword, 'body:', '', flags=re.IGNORECASE)
         score = count_matched_key(data['BODY'], keyword)
 
-    elif keyword.startswith('createdat:'):
-        keyword = util.replace(keyword, 'createdat:', '')
+    elif keyword_lc.startswith('createdat:'):
+        keyword = util.replace(keyword, 'createdat:', '', flags=re.IGNORECASE)
         if is_date_matches(data['C_DATE'], keyword):
             score = 10
 
-    elif keyword.startswith('updatedat:'):
-        keyword = util.replace(keyword, 'updatedat:', '')
+    elif keyword_lc.startswith('updatedat:'):
+        keyword = util.replace(keyword, 'updatedat:', '', flags=re.IGNORECASE)
         if is_date_matches(data['U_DATE'], keyword):
             score = 10
 
-    elif keyword.startswith('createdby:'):
-        keyword = util.replace(keyword, 'createdby:', '')
+    elif keyword_lc.startswith('createdby:'):
+        keyword = util.replace(keyword, 'createdby:', '', flags=re.IGNORECASE)
         score = is_target_matches(data['C_USER'], keyword)
 
-    elif keyword.startswith('updatedby:'):
-        keyword = util.replace(keyword, 'updatedby:', '')
+    elif keyword_lc.startswith('updatedby:'):
+        keyword = util.replace(keyword, 'updatedby:', '', flags=re.IGNORECASE)
         score = is_target_matches(data['U_USER'], keyword)
 
     else:
