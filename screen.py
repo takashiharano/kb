@@ -26,7 +26,9 @@ def build_main_screen(context):
 <meta name="viewport" content="width=device-width,initial-scale=1">
 '''
     html += '<title>' + appconfig.title + '</title>'
-    html += '<link rel="stylesheet" href="./?css=main" />'
+    html += '<style>'
+    html += build_css(mode='main')
+    html += '</style>'
     html += '<script src="' + ROOT_PATH + 'libs/debug.js"></script>'
     html += '<script src="' + ROOT_PATH + 'libs/util.js"></script>'
     html += '<script src="' + ROOT_PATH + 'websys/websys.js"></script>'
@@ -115,7 +117,9 @@ def build_view_screen(context):
 <meta name="viewport" content="width=device-width,initial-scale=1">
 '''
     html += '<title>' + appconfig.title + '</title>'
-    html += '<link rel="stylesheet" href="./?css=main" />'
+    html += '<style>'
+    html += build_css(mode='view')
+    html += '</style>'
     html += '<script src="' + ROOT_PATH + 'libs/debug.js"></script>'
     html += '<script src="' + ROOT_PATH + 'libs/util.js"></script>'
     html += '<script src="' + ROOT_PATH + 'websys/websys.js"></script>'
@@ -140,6 +144,9 @@ kb.mode = 'view'
     <div>
       <div id="meta-info">
         <span id="content-created-date"></span> <span id="content-created-by"></span><span id="content-updated-date" style="margin-left:32px;"></span> <span id="content-updated-by"></span>
+        <span style="position:absolute;right:5px;">
+          <span id="clock"></span>
+        </span>
       </div>
       <div id="info-area">
         <span id="content-id"></span>
@@ -154,7 +161,7 @@ kb.mode = 'view'
         </span>
       </div>
     </div>
-    <div style="height:calc(100% - 70px);">
+    <div style="height:calc(100% - 74px);">
       <div id="content-wrp1">
         <div id="content-wrp">
           <pre id="content-body"></pre>
@@ -171,7 +178,7 @@ kb.mode = 'view'
     return html
 
 #------------------------------------------------------------------------------
-def build_css():
+def build_css(mode=''):
     css = ''
     css += 'body{'
     css += '  width: 100%;'
@@ -332,6 +339,7 @@ table {
   display: inline-block;
 }
 #meta-info {
+  margin-bottom: 4px;
   height: 1.2em;
   color: #ccc;
 }
@@ -393,10 +401,13 @@ table {
     css += '  background: ' + appconfig.label_background + ';'
     css += '  color: ' + appconfig.label_fgcolor + ';'
     css += '}'
-    css += '.label:hover {'
-    css += '  background: ' + appconfig.label_hover_background + ';'
-    css += '  cursor: pointer;'
-    css += '}'
+
+    if mode != 'view':
+        css += '.label:hover {'
+        css += '  background: ' + appconfig.label_hover_background + ';'
+        css += '  cursor: pointer;'
+        css += '}'
+
     css += '.dialog {'
     css += '  border: 1px solid ' + appconfig.dialog_border + ';'
     css += '  background: ' + appconfig.dialog_background + '!important;'
@@ -474,12 +485,6 @@ td.center {
 
 #------------------------------------------------------------------------------
 def main():
-    p_css = util.get_request_param('css')
-    if p_css == 'main':
-        css = build_css()
-        util.send_response('text/css', css)
-        return
-
     context = {
         'user': '',
         'authorized': False

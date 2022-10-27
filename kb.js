@@ -46,6 +46,7 @@ $onReady = function() {
   var fontSize = util.getQuery('fontsize') | 0;
   if (!fontSize) fontSize = 12;
   kb.setFontSize(fontSize);
+  util.clock('#clock');
   if (kb.mode == 'view') {
     kb.view.init();
     kb.onAppReady();
@@ -88,7 +89,6 @@ kb.init = function() {
   $el('#adjuster').addEventListener('mousedown', kb.onAreaResizeStart);
 
   kb.onEditEnd();
-  util.clock('#clock');
 
   window.addEventListener('keydown', kb.onKeyDown);
   window.addEventListener('mousemove', kb.onMouseMove, true);
