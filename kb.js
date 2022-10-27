@@ -15,7 +15,7 @@ kb.LIST_COLUMNS = [
   {key: 'C_USER', label: 'BY'},
   {key: 'U_DATE', label: 'UPDATED'},
   {key: 'U_USER', label: 'BY'},
-  {key: 'status', label: 'STATUS'},
+  {key: 'STATUS', label: 'STATUS'},
   {key: 'LABELS', label: 'LABELS'},
   {key: 'score', label: 'SCORE'},
   {key: 'encrypted', label: ''}
@@ -674,7 +674,7 @@ kb.showData = function(content) {
   $el('#content-labels').innerHTML = labelsHTML;
   $el('#select-status').value = status;
 
-  if (content.STATUS == 'EMPTY') {
+  if (content.data_status == 'EMPTY') {
     $el('#content-created-date').innerHTML = '';
     $el('#content-created-by').innerHTML = '';
     $el('#content-updated-date').innerHTML = '';
@@ -726,13 +726,14 @@ kb._clear = function() {
 kb.clearContent = function() {
   kb.content = {
     id: '',
+    data_status: 'EMPTY',
     C_DATE: '',
     C_USER: '',
     U_DATE: '',
     U_USER: '',
     TITLE: '',
     LABELS: '',
-    STATUS: 'EMPTY',
+    STATUS: '',
     BODY: ''
   };
 };
