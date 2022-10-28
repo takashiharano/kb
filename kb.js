@@ -325,7 +325,13 @@ kb.search = function() {
   if (id != '') {
     kb.showDataById(id);
   } else if (q) {
-    kb.listStatus.sortIdx = 8;
+    if (q.match(/^label:[^\s]+?$/) || q.match(/^status:[^\s]+?$/) || q.match(/^updated..:[^\s]+?$/)) {
+      kb.listStatus.sortIdx = 4;
+    } else if (q.match(/^created..:[^\s]+?$/)) {
+      kb.listStatus.sortIdx = 2;
+    } else {
+      kb.listStatus.sortIdx = 8;
+    }
     kb.listStatus.sortType = 2;
     var param = {q: util.encodeBase64(q)};
     kb.callApi('search', param, kb.onGetList);
