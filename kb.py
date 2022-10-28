@@ -65,6 +65,7 @@ def get_list(target_id=None):
 #------------------------------------------------------------------------------
 def search_data(q):
     q = util.replace(q, '\\s{2,}', ' ')
+    q = util.replace(q, '\u3000', ' ')
     keywords = q.split(' ')
 
     id_list = get_data_id_list()
