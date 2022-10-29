@@ -22,9 +22,6 @@ import kb
 def get_request_param(key):
     return web.get_request_param(key)
 
-def get_current_user_name():
-    return web.get_current_user_name()
-
 def send_result_json(status, body):
     web.send_result_json(status, body)
 
@@ -62,7 +59,7 @@ def proc_save(context):
     data = kb.get_data(id)
 
     if id == '' or data['U_DATE'] == new_data['org_u_date']:
-        user = context['user']
+        user = get_user_name(context)
         saved_id = kb.save_data(id, new_data, user)
         result = {
             'status': 'OK',
@@ -79,6 +76,13 @@ def proc_save(context):
         }
 
     return result
+
+def get_user_name(context):
+    if 'user_info' in context:
+        user_info = context['user_info']
+        if 'name' in user_info:
+            return user_info['name']
+    return ''
 
 #------------------------------------------------------------------------------
 def proc_api(context, act):
@@ -128,15 +132,9 @@ def proc_api(context, act):
     send_result_json(status, result_data)
 
 #------------------------------------------------------------------------------
-def web_process():
-    web.on_access()
-    authorized = web.auth(False)
-    user = get_current_user_name()
-
-    context = {
-        'user': user,
-        'authorized': authorized
-    }
+def main():
+    context = web.on_access()
+    context['authorized'] = web.auth(False)
 
     act = get_request_param('act')
     if act == 'get':

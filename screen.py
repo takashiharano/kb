@@ -44,7 +44,11 @@ def build_main_screen(context):
       <button id="all-button" style="margin-left:8px;min-width:32px;" onclick="kb.getListAll();">LIST ALL</button>
       <span style="position:absolute;right:5px;">
         <span id="clock"></span>
-        <button id="export-button" style="margin-left:8px;min-width:32px;" onclick="kb.export();">EXPORT</button>
+'''
+    if web.has_permission(context, 'kb.export'):
+        html += '        <button id="export-button" style="margin-left:8px;min-width:32px;" onclick="kb.export();">EXPORT</button>'
+
+    html += '''
       </span>
     </div>
     <div style="height:1em;">
@@ -485,12 +489,7 @@ td.center {
 
 #------------------------------------------------------------------------------
 def main():
-    context = {
-        'user': '',
-        'authorized': False
-    }
-
-    web.on_access()
+    context = web.on_access()
     context['authorized'] = web.auth(False)
 
     id = util.get_request_param('id')
