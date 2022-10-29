@@ -146,6 +146,9 @@ kb.getList = function(id) {
     param = {id: id};
   }
   kb.callApi('list', param, kb.onGetList);
+
+  kb.drawInfo('<span class="progdot">Loading</span>');
+  kb.drawListContent('');
 };
 kb.onGetList = function(xhr, res, req) {
   if (xhr.status != 200) {
@@ -161,6 +164,15 @@ kb.onGetList = function(xhr, res, req) {
   }
   kb.itemList = res.body.data_list;
   kb.drawList(kb.itemList, kb.listStatus.sortIdx, kb.listStatus.sortType);
+};
+
+kb.drawInfo = function(html) {
+  $el('#info').innerHTML = html;
+};
+
+kb.drawListContent = function(html) {
+  $el('#list').innerHTML = html;
+  $el('#list-wrp').scrollTop = 0;
 };
 
 kb.drawList = function(items, sortIdx, sortType) {
@@ -246,13 +258,11 @@ kb.drawList = function(items, sortIdx, sortType) {
   htmlList += '</table>';
 
   var htmlHead = kb.buildListHeader(kb.LIST_COLUMNS, sortIdx, sortType);
-
   var html = htmlHead + htmlList; 
-  $el('#list').innerHTML = html;
-  $el('#list-wrp').scrollTop = 0;
+  kb.drawListContent(html);
 
   var infoHtml = items.length + ' ' + util.plural('item', items.length);
-  $el('#info').innerHTML = infoHtml;
+  kb.drawInfo(infoHtml);
 };
 
 kb.sortItemList = function(sortIdx, sortType) {
@@ -347,7 +357,10 @@ kb.showDataById = function(id) {
 };
 
 kb.categorySearch = function(category, label) {
+  $el('#id-txt').value = '';
+  kb.onInputId();
   $el('#q').value = category + ':' + label;
+  kb.onInputQ();
   kb.search();
 };
 
@@ -414,7 +427,7 @@ kb.onGetData = function(xhr, res, req) {
 
   if (data_status == 'OK') {
     kb.showData(kb.content);
-    $el('#buttons-r').show();
+    $el('.for-view').show();
   } else {
     kb._clear();
     kb.showInfotip(data_status);
@@ -483,9 +496,8 @@ kb.edit = function() {
   $el('#search-button').disabled = true;
   $el('#all-button').disabled = true;
   $el('#clear-button').disabled = true;
-  $el('#edit-button').disable();
-  $el('#buttons-r').hide();
-  $el('#buttons-w').show();
+  $el('.for-view').hide();
+  $el('.for-edit').show();
 
   $el('#content-body').hide();
   $el('#content-body-edt-wrp').show();
@@ -526,14 +538,12 @@ kb.onEditEnd = function() {
   if (kb.content) kb.showData(kb.content);
 
   if (kb.content.id) {
-    $el('#edit-button').enable();
-    $el('#buttons-r').show();
+    $el('.for-view').show();
   } else {
-    $el('#edit-button').disable();
-    $el('#buttons-r').hide();
+    $el('.for-view').hide();
   }
 
-  $el('#buttons-w').hide();
+  $el('.for-edit').hide();
 };
 
 kb.save = function() {
@@ -605,7 +615,7 @@ kb.onSaveData = function(xhr, res, req) {
       var id = res.body.saved_id;
       kb.listStatus.sortIdx = 4;
       kb.listStatus.sortType = 2;
-      kb.getList();
+      kb.search();
       kb.getData(id);
       kb.status &= ~kb.ST_EXIT;
     }
@@ -694,11 +704,9 @@ kb.showData = function(content) {
 
   $el('#content-wrp').scrollTop = 0
   if (id) {
-    $el('#edit-button').enable();
-    $el('#buttons-r').show();
+    $el('.for-view').show();
   } else {
-    $el('#edit-button').disable();
-    $el('#buttons-r').hide();
+    $el('.for-view').hide();
   }
 };
 
@@ -979,7 +987,7 @@ kb.onForbidden = function() {
 
 kb.view = {};
 kb.view.init = function() {
-  $el('#buttons-r').hide();
+  $el('.for-view').hide();
   var id = util.getQuery('id');
   kb.getData(id);
 };

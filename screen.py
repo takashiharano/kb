@@ -58,7 +58,7 @@ def build_main_screen(context):
     <div id="adjuster"></div>
     <div>
       <div id="info-area">
-        <button id="edit-button" style="min-width:32px;" onclick="kb.edit();">EDIT</button>
+        <button id="edit-button" class="for-view" style="min-width:32px;" onclick="kb.edit();">EDIT</button>
         <pre id="content-id"></pre>
         <span id="info-label">
           <pre id="content-title"></pre>
@@ -77,13 +77,13 @@ def build_main_screen(context):
         </span>
       </div>
       <div style="display:inline-block;position:absolute;right:10px;">
-        <span id="buttons-r">
+        <span id="buttons-r" class="for-view">
           <input type="checkbox" id="chk-plain-text"><label for="chk-plain-text">Plain text</label>
           <button id="copy-url-button" style="margin-left:8px;" onclick="kb.copyContent();">COPY</button>
           <button id="copy-url-button" style="margin-left:2px;" onclick="kb.showUrl();">URL</button>
           <button id="delete-button" class="red-button" style="min-width:32px;margin-left:8px;" onclick="kb.delete();">DELETE</button>
         </span>
-        <span id="buttons-w">
+        <span id="buttons-w" class="for-edit">
           <button id="save-button" style="min-width:32px;" onclick="kb.save();">SAVE</button>
           <button id="cancel-button" onclick="kb.cancel();">CANCEL</button>
         </span>
@@ -492,6 +492,7 @@ def main():
 
     web.on_access()
     context['authorized'] = web.auth(False)
+
     id = util.get_request_param('id')
 
     if context['authorized'] or id is None:
