@@ -235,8 +235,9 @@ kb.drawList = function(items, sortIdx, sortType) {
     } else {
       htmlList += '<span class="title-disabled"';
     }
-    if (title.length > 40) {
-      htmlList += ' data-tooltip="' + title + '"';
+    if (util.lenW(title) > 76) {
+      var escTitle = util.escHtml(title);
+      htmlList += ' data-tooltip="' + escTitle + '"';
     }
     htmlList += '>';
     htmlList += title + '</span></td>';
