@@ -37,7 +37,7 @@ def get_data_id_list():
     return data_id_list
 
 #------------------------------------------------------------------------------
-def get_list(target_id=None):
+def get_list(target_id=None, need_encode_b64=False):
     data_id_list = get_data_id_list()
     data_list = []
     for i in range(len(data_id_list)):
@@ -47,11 +47,12 @@ def get_list(target_id=None):
         try:
             data = load_data(id, True)
 
-            if 'TITLE' in data:
-                data['TITLE'] = util.encode_base64(data['TITLE'])
+            if need_encode_b64:
+                if 'TITLE' in data:
+                    data['TITLE'] = util.encode_base64(data['TITLE'])
 
-            if 'LABELS' in data:
-                data['LABELS'] = util.encode_base64(data['LABELS'])
+                if 'LABELS' in data:
+                    data['LABELS'] = util.encode_base64(data['LABELS'])
         except:
             data = {
                 'id': id,
@@ -63,7 +64,7 @@ def get_list(target_id=None):
     return data_list
 
 #------------------------------------------------------------------------------
-def search_data(q):
+def search_data(q, need_encode_b64=False):
     q = util.replace(q, '\\s{2,}', ' ')
     q = util.replace(q, '\u3000', ' ')
     keywords = q.split(' ')
@@ -97,8 +98,11 @@ def search_data(q):
     for i in range(len(wk_data_list)):
         data = wk_data_list[i]
         del data['BODY']
-        data['TITLE'] = util.encode_base64(data['TITLE'])
-        data['LABELS'] = util.encode_base64(data['LABELS'])
+
+        if need_encode_b64:
+            data['TITLE'] = util.encode_base64(data['TITLE'])
+            data['LABELS'] = util.encode_base64(data['LABELS'])
+
         data_list.append(data)
 
     data_list_obj = {'data_list': data_list}
@@ -277,7 +281,7 @@ def count_matched_key(target, keyword):
     return count
 
 #------------------------------------------------------------------------------
-def get_data(id):
+def get_data(id, need_encode_b64=False):
     try:
         data = load_data(id)
     except Exception as e:
@@ -286,14 +290,15 @@ def get_data(id):
         }
         return data
 
-    if 'TITLE' in data:
-        data['TITLE'] = util.encode_base64(data['TITLE'])
+    if need_encode_b64:
+        if 'TITLE' in data:
+            data['TITLE'] = util.encode_base64(data['TITLE'])
 
-    if 'LABELS' in data:
-        data['LABELS'] = util.encode_base64(data['LABELS'])
+        if 'LABELS' in data:
+            data['LABELS'] = util.encode_base64(data['LABELS'])
 
-    if 'BODY' in data:
-        data['BODY'] = util.encode_base64(data['BODY'])
+        if 'BODY' in data:
+            data['BODY'] = util.encode_base64(data['BODY'])
 
     return data
 

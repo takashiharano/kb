@@ -44,7 +44,7 @@ def get_data(context):
     if has_privilege(context):
         status = 'OK'
         id = get_request_param('id')
-        result_data = kb.get_data(id)
+        result_data = kb.get_data(id, True)
     else:
         status = 'NO_ACCESS_RIGHTS'
         result_data = None
@@ -89,16 +89,16 @@ def proc_api(context, act):
     status = 'OK'
     if act == 'list':
         id = get_request_param('id')
-        data_list = kb.get_list(id)
+        data_list = kb.get_list(id, True)
         result_data = {'data_list': data_list}
     elif act == 'search':
         id = get_request_param('id')
         if id is None:
             q = get_request_param('q')
             q = util.decode_base64(q)
-            result_data = kb.search_data(q)
+            result_data = kb.search_data(q, True)
         else:
-            result_data = kb.get_data(id)
+            result_data = kb.get_data(id, True)
     elif act == 'save':
         result = proc_save(context)
         status = result['status']
