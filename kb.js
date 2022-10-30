@@ -679,6 +679,7 @@ kb.showData = function(content) {
   contentBody = util.escHtml(contentBody);
 
   if (!$el('#chk-plain-text').checked) {
+    contentBody = contentBody.replace(/&quot;/g, '"');
     contentBody = util.linkUrls(contentBody);
     contentBody = kb.decodeB64Image(contentBody);
   }
