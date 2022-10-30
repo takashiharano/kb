@@ -85,7 +85,11 @@ def build_main_screen(context):
           <input type="checkbox" id="chk-plain-text"><label for="chk-plain-text">Plain text</label>
           <button id="copy-url-button" style="margin-left:8px;" onclick="kb.copyContent();">COPY</button>
           <button id="copy-url-button" style="margin-left:2px;" onclick="kb.showUrl();">URL</button>
-          <button id="delete-button" class="red-button" style="min-width:32px;margin-left:8px;" onclick="kb.delete();">DELETE</button>
+'''
+    if web.has_permission(context, 'kb.delete'):
+        html += '          <button id="delete-button" class="red-button" style="min-width:32px;margin-left:8px;" onclick="kb.delete();">DELETE</button>'
+
+    html += '''
         </span>
         <span id="buttons-w" class="for-edit">
           <button id="save-button" style="min-width:32px;" onclick="kb.save();">SAVE</button>
