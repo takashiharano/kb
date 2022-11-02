@@ -78,9 +78,8 @@ kb.onAppReady1 = function() {
   } else {
     kb.getList();
   }
-
-  var q = util.getQuery('id');
-  if (!q) $el('#q').focus();
+  var id = util.getQuery('id');
+  if (!id) $el('#q').focus();
 };
 
 kb.init = function() {
@@ -469,7 +468,7 @@ kb.buildStatusHTML = function(status) {
       break;
     }
   }
-  var html = '<span class="status"';
+  html = '<span class="status"';
   if (st.fgcolor || st.bgcolor) {
     html += ' style="';
     if (st.fgcolor) {
