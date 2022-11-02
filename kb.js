@@ -3,11 +3,15 @@
  * Copyright (c) 2021 Takashi Harano
  */
 var kb = kb || {};
-kb.ST_NEW = 1;
-kb.ST_EDITING = 1 << 1;
-kb.ST_EXIT = 1 << 2;
+kb.ST_LIST_LOADING = 1;
+kb.ST_DATA_LOADING = 1 << 1;
+kb.ST_NEW = 1 << 2;
+kb.ST_EDITING = 1 << 3;
+kb.ST_EXIT = 1 << 4;
+
 kb.UI_ST_NONE = 0;
 kb.UI_ST_AREA_RESIZING = 1;
+
 kb.LIST_COLUMNS = [
   {key: 'id', label: 'ID'},
   {key: 'TITLE', label: 'TITLE'},
@@ -145,12 +149,14 @@ kb.getList = function(id) {
   if (id != undefined) {
     param = {id: id};
   }
+  kb.onStartListLoading();
   kb.callApi('list', param, kb.onGetList);
 
   kb.drawInfo('<span class="progdot">Loading</span>');
   kb.drawListContent('');
 };
 kb.onGetList = function(xhr, res, req) {
+  kb.onEndListLoading();
   if (xhr.status != 200) {
     kb.onHttpError();
     return;
@@ -231,7 +237,7 @@ kb.drawList = function(items, sortIdx, sortType) {
     htmlList += '<td style="padding-right:16px;">' + id + '</td>'
     htmlList += '<td style="min-width:300px;max-width:600px;padding-right:32px;overflow:hidden;text-overflow:ellipsis;">';
     if (data_status == 'OK') {
-      htmlList += '<span class="title  pseudo-link" onclick="kb.getData(\'' + id + '\');"';
+      htmlList += '<span class="title  pseudo-link" onclick="kb.openData(\'' + id + '\');"';
     } else {
       htmlList += '<span class="title-disabled"';
     }
@@ -324,12 +330,18 @@ kb.getListAll = function() {
   location.href = './';
 };
 kb.listAll = function() {
-  kb.listStatus.sortIdx = 4;
-  kb.listStatus.sortType = 2;
-  kb.getList();
+  if (!kb.isLoading()) {
+    kb.listStatus.sortIdx = 4;
+    kb.listStatus.sortType = 2;
+    kb.getList();
+  }
 };
 
 kb.search = function() {
+  if (kb.isLoading()) {
+    return;
+  }
+
   kb._clear();
   var q = $el('#q').value.trim();
   var id = $el('#id-txt').value.trim();
@@ -345,6 +357,7 @@ kb.search = function() {
     }
     kb.listStatus.sortType = 2;
     var param = {q: util.encodeBase64(q)};
+    kb.onStartListLoading();
     kb.callApi('search', param, kb.onGetList);
   } else {
     kb.listAll();
@@ -352,9 +365,11 @@ kb.search = function() {
 };
 
 kb.showDataById = function(id) {
-  $el('#content-body').innerHTML = '<span class="progdot">Loading</span>';
-  kb.getList(id);
-  kb.getData(id);
+  if (!kb.isLoading()) {
+    $el('#content-body').innerHTML = '<span class="progdot">Loading</span>';
+    kb.getList(id);
+    kb.getData(id);
+  }
 };
 
 kb.categorySearch = function(category, label) {
@@ -363,6 +378,12 @@ kb.categorySearch = function(category, label) {
   $el('#q').value = category + ':' + label;
   kb.onInputQ();
   kb.search();
+};
+
+kb.openData = function(id) {
+  if (!kb.isLoading()) {
+    kb.getData(id);
+  }
 };
 
 kb.getData = function(id) {
@@ -388,9 +409,11 @@ kb._getData = function() {
   if (kb.token) {
     param.token = kb.token;
   }
+  kb.onStartDataLoading();
   kb.callApi('get', param, kb.onGetData);
 };
 kb.onGetData = function(xhr, res, req) {
+  kb.onEndDataLoading();
   if (xhr.status != 200) {
     kb.onHttpError();
     return;
@@ -922,6 +945,37 @@ kb.getDateTimeString = function(dt, fmt) {
   return util.getDateTimeString(dt, fmt);
 };
 
+kb.onStartListLoading = function() {
+  kb.status |= kb.ST_LIST_LOADING;
+  kb.onStartLoading();
+};
+kb.onEndListLoading = function() {
+  kb.status &= ~kb.ST_LIST_LOADING;
+  kb.onEndLoading();
+};
+
+kb.onStartDataLoading = function() {
+  kb.status |= kb.ST_DATA_LOADING;
+  kb.onStartLoading();
+};
+kb.onEndDataLoading = function() {
+  kb.status &= ~kb.ST_DATA_LOADING;
+  kb.onEndLoading();
+};
+
+kb.onStartLoading = function() {
+  $el('#search-button').disabled = true;
+  $el('#all-button').disabled = true;
+};
+kb.onEndLoading = function() {
+  $el('#search-button').disabled = false;
+  $el('#all-button').disabled = false;
+};
+
+kb.isLoading = function() {
+  return ((kb.state & kb.ST_LIST_LOADING) || (kb.state & kb.ST_DATA_LOADING));
+};
+
 kb.onCtrlS = function(e) {
   e.preventDefault();
   if (kb.status & kb.ST_EDITING) kb.save();
@@ -964,7 +1018,9 @@ kb.enableQ = function() {
 kb.onKeyDown = function(e) {
   if (e.keyCode == 13) {
     if ($el('.q-txt').hasFocus()) {
-      kb.search();
+      if (!kb.isLoading()) {
+        kb.search();
+      }
     }
   }
 };
