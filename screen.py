@@ -494,7 +494,6 @@ td.center {
 #------------------------------------------------------------------------------
 def main():
     context = web.on_access()
-    context['authorized'] = web.auth(False)
 
     id = util.get_request_param('id')
 

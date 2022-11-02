@@ -134,7 +134,6 @@ def proc_api(context, act):
 #------------------------------------------------------------------------------
 def main():
     context = web.on_access()
-    context['authorized'] = web.auth(False)
 
     act = get_request_param('act')
     if act == 'get':
