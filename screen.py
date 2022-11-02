@@ -484,11 +484,11 @@ td.center {
 #font-range {
   width: 256px;
 }
-
-.input-disable {
-  color: #888;
-}
 '''
+    css += '.input-disable {'
+    css += '  color: ' + appconfig.text_disabled + ';'
+    css += '}'
+
     return css
 
 #------------------------------------------------------------------------------

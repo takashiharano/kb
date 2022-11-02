@@ -19,6 +19,7 @@ list_hover_background = '#2f3a42'
 title_disabled_color = '#aaa'
 
 text_red = '#faa'
+text_disabled = '#888'
 
 button_border = '#0275d8'
 button_fgcolor = '#0275d8'
@@ -58,8 +59,10 @@ clock_color = '#8f0'
 
 state_list = [
     {'name': 'IN-PROGRESS', 'fgcolor': '#fff', 'bgcolor': '#0052cc'},
+    {'name': 'FIXME', 'fgcolor': '#fff', 'bgcolor': '#c84643'},
+    {'name': 'TODO', 'fgcolor': '#fff', 'bgcolor': '#c06020'},
+    {'name': '???', 'fgcolor': '#fff', 'bgcolor': '#238'},
     {'name': 'NEED-REVIEW', 'fgcolor': '#fff', 'bgcolor': '#064'},
-    {'name': 'FIXME', 'fgcolor': '#fff', 'bgcolor': '#c06020'},
     {'name': 'UNRESOLVED', 'fgcolor': '#fff', 'bgcolor': '#400'},
     {'name': 'OBSOLETE', 'fgcolor': '#a0a0a0', 'bgcolor': '#444'}
 ]
