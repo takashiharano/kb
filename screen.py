@@ -525,16 +525,16 @@ td.center {
 #------------------------------------------------------------------------------
 def main():
     context = web.on_access()
-
     id = util.get_request_param('id')
 
-    if context['authorized'] or id is None:
+    if context['authorized']:
        if web.has_permission(context, 'kb'):
             html = build_main_screen(context)
        else:
             html = build_forbidden_screen(context)
-
+    elif id is None:
+        html = build_main_screen(context)
     else:
-        html = build_view_screen(context)
+        html = build_main_screen(context)
 
     util.send_html(html)
