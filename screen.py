@@ -532,8 +532,8 @@ def main():
             html = build_main_screen(context)
        else:
             html = build_forbidden_screen(context)
-    elif id is None:
-        html = build_main_screen(context)
+    elif id is not None:
+        html = build_view_screen(context)
     else:
         html = build_main_screen(context)
 

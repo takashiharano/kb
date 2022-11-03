@@ -898,7 +898,9 @@ kb.onAreaResizeEnd = function(e) {
 };
 
 kb.copyContent = function() {
-  kb.copy(kb.content.BODY);
+  if (kb.content) {
+    kb.copy(kb.content.BODY);
+  }
 };
 
 kb.showUrl = function() {
