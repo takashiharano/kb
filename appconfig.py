@@ -58,6 +58,7 @@ dialog_background = '#000'
 clock_color = '#8f0'
 
 state_list = [
+    {'name': 'LOCK', 'fgcolor': '#fff', 'bgcolor': '#f00'},
     {'name': 'IN-PROGRESS', 'fgcolor': '#fff', 'bgcolor': '#0052cc'},
     {'name': 'FIXME', 'fgcolor': '#fff', 'bgcolor': '#c84643'},
     {'name': 'TODO', 'fgcolor': '#fff', 'bgcolor': '#c06020'},
