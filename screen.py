@@ -38,7 +38,11 @@ def build_main_screen(context):
 <div id="body1">
   <div id="list-area" class="area">
     <div style="position:relative;">
-      <button id="new-button" style="margin-right:32px;" onclick="kb.createNew();">NEW</button>
+'''
+    if web.has_permission(context, 'kb.write'):
+        html += '      <button id="new-button" style="margin-right:32px;" onclick="kb.createNew();">NEW</button>'
+
+    html += '''
       <span id="id-label">ID:</span> <input type="text" id="id-txt" class="q-txt" spellcheck="false" style="width:46px;">
       <span id="keyqord-label" style="margin-left:8px;">KEYWORD:</span> <input type="text" id="q" class="q-txt" spellcheck="false" style="margin-left:4px;"><button id="search-button" style="margin-left:4px;min-width:32px;" onclick="kb.search();">SEARCH</button>
       <button id="all-button" style="margin-left:8px;min-width:32px;" onclick="kb.getListAll();">LIST ALL</button>
@@ -62,7 +66,11 @@ def build_main_screen(context):
     <div id="adjuster"></div>
     <div>
       <div id="info-area">
-        <button id="edit-button" class="for-view" style="min-width:32px;" onclick="kb.edit();">EDIT</button>
+'''
+    if web.has_permission(context, 'kb.write'):
+        html += '        <button id="edit-button" class="for-view" style="min-width:32px;" onclick="kb.edit();">EDIT</button>'
+
+    html += '''
         <pre id="content-id"></pre>
         <span id="info-label">
           <pre id="content-title"></pre>
@@ -183,6 +191,29 @@ kb.mode = 'view'
     </div>
   </div>
 </div></body></html>'''
+    return html
+
+#------------------------------------------------------------------------------
+def build_forbidden_screen(context):
+    html = '''<!DOCTYPE html><html><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="robots" content="none">
+<meta name="referrer" content="no-referrer">
+<meta name="referrer" content="never">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+'''
+    html += '<title>' + appconfig.title + '</title>'
+    html += '<style>'
+    html += build_css(mode='main')
+    html += '</style>'
+    html += '<script src="' + ROOT_PATH + 'libs/debug.js"></script>'
+    html += '<script src="' + ROOT_PATH + 'libs/util.js"></script>'
+    html += '<script src="' + ROOT_PATH + 'websys/websys.js"></script>'
+    html += '''
+</head>
+<body>
+KB SYSTEM<br>
+ACCESS PERMISSION IS REQUIRED.
+</body></html>'''
     return html
 
 #------------------------------------------------------------------------------
@@ -498,7 +529,11 @@ def main():
     id = util.get_request_param('id')
 
     if context['authorized'] or id is None:
-        html = build_main_screen(context)
+       if web.has_permission(context, 'kb'):
+            html = build_main_screen(context)
+       else:
+            html = build_forbidden_screen(context)
+
     else:
         html = build_view_screen(context)
 
