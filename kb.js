@@ -35,6 +35,7 @@ kb.listStatus = {
 kb.stateList = [];
 kb.tokens = [];
 kb.itemList= [];
+kb.totalCount = 0;
 kb.pendingId = null;
 kb.content;
 kb.contentUrl = '';
@@ -78,7 +79,6 @@ kb.onAppReady1 = function() {
   } else {
     kb.getList();
   }
-  var id = util.getQuery('id');
   if (!id) $el('#q').focus();
 };
 
@@ -167,8 +167,10 @@ kb.onGetList = function(xhr, res, req) {
     kb.onApiError(res);
     return;
   }
-  kb.itemList = res.body.data_list;
-  kb.drawList(kb.itemList, kb.listStatus.sortIdx, kb.listStatus.sortType);
+  var data = res.body;
+  kb.itemList = data.data_list;
+  kb.totalCount = data.total_count;
+  kb.drawList(kb.itemList, kb.listStatus.sortIdx, kb.listStatus.sortType, kb.totalCount);
 };
 
 kb.drawInfo = function(html) {
@@ -180,7 +182,7 @@ kb.drawListContent = function(html) {
   $el('#list-wrp').scrollTop = 0;
 };
 
-kb.drawList = function(items, sortIdx, sortType) {
+kb.drawList = function(items, sortIdx, sortType, totalCount) {
   if (sortIdx >= 0) {
     if (sortType > 0) {
       var sortKey = kb.LIST_COLUMNS[sortIdx].key;
@@ -268,6 +270,10 @@ kb.drawList = function(items, sortIdx, sortType) {
   kb.drawListContent(html);
 
   var infoHtml = items.length + ' ' + util.plural('item', items.length);
+  if ((kb.config.list_max > 0) && (kb.totalCount > kb.config.list_max)) {
+    infoHtml += ' (' + kb.totalCount + ' in total)';
+  }
+
   kb.drawInfo(infoHtml);
 };
 
@@ -277,7 +283,7 @@ kb.sortItemList = function(sortIdx, sortType) {
   }
   kb.listStatus.sortIdx = sortIdx;
   kb.listStatus.sortType = sortType;
-  kb.drawList(kb.itemList, sortIdx, sortType);
+  kb.drawList(kb.itemList, sortIdx, sortType, kb.totalCount);
 };
 
 //---------------------------------------------------------
@@ -509,7 +515,7 @@ kb.createNew = function() {
   kb.status |= kb.ST_NEW;
   kb._clear();
   kb.edit();
-  $el('#chk-encryption').checked = kb.default_data_encryption;
+  $el('#chk-encryption').checked = kb.config.default_data_encryption;
   $el('#content-title-edt').focus();
 };
 

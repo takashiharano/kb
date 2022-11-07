@@ -3,6 +3,8 @@ workspace_path = root_path + '../private/kb/'
 
 title = 'KB'
 
+list_max = 0
+
 default_data_encryption = True
 encryption_key = 3
 

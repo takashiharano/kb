@@ -19,9 +19,12 @@ import web
 #------------------------------------------------------------------------------
 def build_js(context):
     js = ''
-    js += 'kb.default_data_encryption = '
+    js += 'kb.config = {\n'
+    js += '  default_data_encryption: '
     js += 'true' if appconfig.default_data_encryption else 'false'
-    js += ';\n'
+    js += ',\n'
+    js += '  list_max: ' + str(appconfig.list_max) + '\n';
+    js += '};\n'
     js += 'websys.init(\'' + ROOT_PATH + '\');'
     return js
 

@@ -89,8 +89,7 @@ def proc_api(context, act):
     status = 'OK'
     if act == 'list':
         id = get_request_param('id')
-        data_list = kb.get_list(id, True)
-        result_data = {'data_list': data_list}
+        result_data = kb.get_list(id, True)
     elif act == 'search':
         id = get_request_param('id')
         if id is None:

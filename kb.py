@@ -40,13 +40,13 @@ def get_data_id_list():
 def get_list(target_id=None, need_encode_b64=False):
     data_id_list = get_data_id_list()
     data_list = []
+    cnt = 0
     for i in range(len(data_id_list)):
         id = data_id_list[i]
         if target_id is not None and target_id != id:
             continue
         try:
             data = load_data(id, True)
-
             if need_encode_b64:
                 if 'TITLE' in data:
                     data['TITLE'] = util.encode_base64(data['TITLE'])
@@ -59,9 +59,16 @@ def get_list(target_id=None, need_encode_b64=False):
                 'data_status': 'LOAD_ERROR'
             }
 
-        data_list.append(data)
+        if appconfig.list_max == 0 or cnt < appconfig.list_max:
+            data_list.append(data)
+        cnt += 1
 
-    return data_list
+    data_list_obj = {
+        'total_count': cnt,
+        'data_list': data_list
+    }
+
+    return data_list_obj
 
 #------------------------------------------------------------------------------
 def search_data(q, need_encode_b64=False):
@@ -95,6 +102,7 @@ def search_data(q, need_encode_b64=False):
         wk_data_list = macthed_data_list
 
     data_list = []
+    cnt = 0
     for i in range(len(wk_data_list)):
         data = wk_data_list[i]
         del data['BODY']
@@ -103,9 +111,14 @@ def search_data(q, need_encode_b64=False):
             data['TITLE'] = util.encode_base64(data['TITLE'])
             data['LABELS'] = util.encode_base64(data['LABELS'])
 
-        data_list.append(data)
+        if appconfig.list_max == 0 or cnt < appconfig.list_max:
+            data_list.append(data)
+        cnt += 1
 
-    data_list_obj = {'data_list': data_list}
+    data_list_obj = {
+        'total_count': cnt,
+        'data_list': data_list
+    }
 
     return data_list_obj
 
