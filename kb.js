@@ -509,6 +509,7 @@ kb.createNew = function() {
   kb.status |= kb.ST_NEW;
   kb._clear();
   kb.edit();
+  $el('#chk-encryption').checked = kb.default_data_encryption;
   $el('#content-title-edt').focus();
 };
 
@@ -1057,5 +1058,3 @@ kb.view.onNoRights = function() {
   msg += 'Please contact the administrator and get your token.';
   $el('#content-body').textseq(msg, {cursor: 3});
 };
-
-websys.init('../../');

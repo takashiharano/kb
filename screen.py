@@ -16,6 +16,7 @@ util.append_system_path(__file__, ROOT_PATH)
 util.append_system_path(__file__, ROOT_PATH + 'websys/bin')
 import web
 import kb
+import js
 
 #------------------------------------------------------------------------------
 def build_main_screen(context):
@@ -32,7 +33,8 @@ def build_main_screen(context):
     html += '<script src="' + ROOT_PATH + 'libs/debug.js"></script>'
     html += '<script src="' + ROOT_PATH + 'libs/util.js"></script>'
     html += '<script src="' + ROOT_PATH + 'websys/websys.js"></script>'
-    html += '''<script src="kb.js"></script>
+    html += '<script src="kb.js"></script>'
+    html += '''<script src="./?res=js"></script>
 </head>
 <body>
 <div id="body1">
@@ -152,6 +154,7 @@ kb.mode = 'view'
     html += 'kb.token = \'' + web.get_raw_request_param('token', '') + '\';\n'
     html += '</script>'
     html += '<script src="kb.js"></script>'
+    html += '<script src="./?res=js"></script>'
     html += '''
 </head>
 <body>
@@ -525,6 +528,11 @@ td.center {
 #------------------------------------------------------------------------------
 def main():
     context = web.on_access()
+    res = util.get_request_param('res')
+    if res == 'js':
+        js.main()
+        return
+
     id = util.get_request_param('id')
 
     if context['authorized']:

@@ -3,7 +3,7 @@ workspace_path = root_path + '../private/kb/'
 
 title = 'KB'
 
-data_encryption = True
+default_data_encryption = True
 encryption_key = 3
 
 border_color = '#08e'
