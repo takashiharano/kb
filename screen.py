@@ -477,6 +477,7 @@ table {
     css += '''
 .status {
   border-radius: 3px;
+  padding: 0 3px;
 }
 .status:hover {
   cursor: pointer;
