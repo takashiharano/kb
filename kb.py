@@ -81,6 +81,7 @@ def get_list(target_id=None, need_encode_b64=False):
 
 #------------------------------------------------------------------------------
 def search_data(q, need_encode_b64=False):
+    q = util.to_half_width(q)
     q = util.replace(q, '\\s{2,}', ' ')
     q = util.replace(q, '\u3000', ' ')
     keywords = q.split(' ')
@@ -92,6 +93,7 @@ def search_data(q, need_encode_b64=False):
         id = id_list[i]
         try:
             data = load_data(id)
+            data = convert_data_to_half_width(data)
             data['score'] = 0
             wk_data_list.append(data)
         except:
@@ -139,6 +141,15 @@ def search_data(q, need_encode_b64=False):
     }
 
     return data_list_obj
+
+def convert_data_to_half_width(data):
+    if 'TITLE' in data:
+        data['TITLE'] = util.to_half_width(data['TITLE'])
+    if 'LABELS' in data:
+        data['LABELS'] = util.to_half_width(data['LABELS'])
+    if 'BODY' in data:
+        data['BODY'] = util.to_half_width(data['BODY'])
+    return data
 
 def calc_data_macthed_score(data, keyword):
     score = 0
