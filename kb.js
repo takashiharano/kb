@@ -31,7 +31,7 @@ kb.onselectstart = document.onselectstart;
 kb.status = 0;
 kb.uiStatus = kb.UI_ST_NONE;
 kb.listStatus = {
-  sortIdx: 4,
+  sortIdx: 5,
   sortType: 2
 };
 kb.stateList = [];
@@ -381,7 +381,7 @@ kb.getListAll = function() {
 };
 kb.listAll = function() {
   if (!kb.isLoading()) {
-    kb.listStatus.sortIdx = 4;
+    kb.listStatus.sortIdx = 5;
     kb.listStatus.sortType = 2;
     kb.getList();
   }
@@ -399,11 +399,11 @@ kb.search = function() {
     kb.showDataById(id);
   } else if (q) {
     if (q.match(/^label:[^\s]+?$/) || q.match(/^status:[^\s]+?$/) || q.match(/^updated..:[^\s]+?$/)) {
-      kb.listStatus.sortIdx = 4;
+      kb.listStatus.sortIdx = 5;
     } else if (q.match(/^created..:[^\s]+?$/)) {
-      kb.listStatus.sortIdx = 2;
+      kb.listStatus.sortIdx = 3;
     } else {
-      kb.listStatus.sortIdx = 8;
+      kb.listStatus.sortIdx = 9;
     }
     kb.listStatus.sortType = 2;
     var param = {q: util.encodeBase64(q)};
@@ -685,7 +685,7 @@ kb.onSaveData = function(xhr, res, req) {
   if (res.status == 'OK') {
     if (kb.status & kb.ST_EXIT) {
       var id = res.body.saved_id;
-      kb.listStatus.sortIdx = 4;
+      kb.listStatus.sortIdx = 5;
       kb.listStatus.sortType = 2;
       kb.search();
       kb.getData(id);
