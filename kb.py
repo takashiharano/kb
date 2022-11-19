@@ -351,14 +351,25 @@ def load_data_as_text(id):
     text = util.read_text_file(text_path)
     return text
 
+def get_datafile_info(id):
+    path = get_datafile_path(id)
+    if not util.path_exists(path):
+        return None
+    return util.get_file_info(path)
+
 def load_data(id, head_only=False):
+    fileinfo = get_datafile_info(id)
+    text = load_data_as_text(id)
+
     data = {
         'id': id,
         'data_status': 'OK',
-        'encrypted': False
+        'encrypted': False,
+        'size': 0
     }
 
-    text = load_data_as_text(id)
+    if fileinfo is not None:
+        data['size'] = fileinfo['size']
 
     if text.startswith(ENCRYPTED_HEAD):
         text = bsb64.decode_string(text[len(ENCRYPTED_HEAD):], BSB64_N)

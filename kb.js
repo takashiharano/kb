@@ -22,7 +22,8 @@ kb.LIST_COLUMNS = [
   {key: 'STATUS', label: 'STATUS'},
   {key: 'LABELS', label: 'LABELS'},
   {key: 'score', label: 'SCORE'},
-  {key: 'encrypted', label: ''}
+  {key: 'encrypted', label: ''},
+  {key: 'size', label: 'SIZE'}
 ];
 kb.onselectstart = document.onselectstart;
 
@@ -273,6 +274,7 @@ kb.drawList = function(items, sortIdx, sortType, totalCount) {
     if (data.encrypted) {
       encrypted = '<span data-tooltip="Encrypted">&#x1F512;</span>';
     }
+    var size = util.formatNumber(data.size);
     var labelsHTML = kb.buildLabelsHTML(labels);
     htmlList += '<tr class="data-list-row">';
     htmlList += '<td style="padding-right:16px;">' + id + '</td>'
@@ -297,6 +299,7 @@ kb.drawList = function(items, sortIdx, sortType, totalCount) {
     htmlList += '<td style="padding-left:20px;">' + labelsHTML + '</td>';
     htmlList += '<td>' + score + '</td>';
     htmlList += '<td style="text-align:center;">' + encrypted + '</td>';
+    htmlList += '<td style="text-align:right;padding-left:1em;">' + size + '</td>';
 
     if (data_status != 'OK') {
       htmlList += '<td class="center"><span class="pseudo-link text-red" data-tooltip="Delete" onclick="kb.delete(\'' + id + '\');">X</span></td>';
