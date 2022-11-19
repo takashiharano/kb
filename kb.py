@@ -364,8 +364,8 @@ def load_data(id, head_only=False):
     data = {
         'id': id,
         'data_status': 'OK',
-        'encrypted': False,
-        'size': 0
+        'size': 0,
+        'encrypted': False
     }
 
     if fileinfo is not None:
@@ -423,16 +423,25 @@ def save_data(id, new_data, user=''):
     if not 'C_USER' in data:
         data['C_USER'] = ''
 
+    body = util.decode_base64(new_data['BODY'])
+    isdataurl = is_dataurl(body)
+
     data['U_DATE'] = str(now)
     data['U_USER'] = user
     data['TITLE'] = util.decode_base64(new_data['TITLE'])
     data['LABELS'] = util.decode_base64(new_data['LABELS'])
-    data['BODY'] = util.decode_base64(new_data['BODY'])
     data['STATUS'] = new_data['STATUS']
+    data['IS_DATAURL'] = 'Y' if isdataurl else 'N'
+    data['BODY'] = body
     secure = True if new_data['encryption'] == '1' else False
 
     write_data(id, data, user, secure)
     return id
+
+#------------------------------------------------------------------------------
+def is_dataurl(s):
+  s = s.strip()
+  return util.match(s, '^data:.+;base64,[A-Za-z0-9+/=\n]+$')
 
 #------------------------------------------------------------------------------
 def write_data(id, data, user='', secure=False, path=None):
@@ -444,6 +453,7 @@ def write_data(id, data, user='', secure=False, path=None):
     text += 'U_USER: ' + data['U_USER'] + '\n'
     text += 'LABELS: ' + data['LABELS'] + '\n'
     text += 'STATUS: ' + data['STATUS'] + '\n'
+    text += 'IS_DATAURL: ' + data['IS_DATAURL'] + '\n'
     text += '\n'
     text += data['BODY']
 
@@ -538,7 +548,7 @@ def send_b64content_as_binary(s, ext=None):
     if ext is None:
         ext = 'txt'
 
-    filename = 'file.' + ext
+    filename = 'data.' + ext
 
     try:
         b = util.decode_base64(s, bin=True)

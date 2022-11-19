@@ -15,6 +15,7 @@ kb.UI_ST_AREA_RESIZING = 1;
 kb.LIST_COLUMNS = [
   {key: 'id', label: 'ID'},
   {key: 'TITLE', label: 'TITLE'},
+  {key: 'IS_DATAURL', label: ''},
   {key: 'C_DATE', label: 'CREATED'},
   {key: 'C_USER', label: 'BY'},
   {key: 'U_DATE', label: 'UPDATED'},
@@ -22,8 +23,8 @@ kb.LIST_COLUMNS = [
   {key: 'STATUS', label: 'STATUS'},
   {key: 'LABELS', label: 'LABELS'},
   {key: 'score', label: 'SCORE'},
-  {key: 'encrypted', label: ''},
-  {key: 'size', label: 'SIZE'}
+  {key: 'size', label: 'SIZE'},
+  {key: 'encrypted', label: ''}
 ];
 kb.onselectstart = document.onselectstart;
 
@@ -146,7 +147,7 @@ kb.getInitInfo = function() {
 };
 kb.onGetInitInfo = function(xhr, res, req) {
   if (xhr.status != 200) {
-    kb.onHttpError();
+    kb.onHttpError(xhr.status);
     return;
   }
   if (res.status == 'FORBIDDEN') {
@@ -198,7 +199,7 @@ kb.getList = function(id) {
 kb.onGetList = function(xhr, res, req) {
   kb.onEndListLoading();
   if (xhr.status != 200) {
-    kb.onHttpError();
+    kb.onHttpError(xhr.status);
     return;
   }
   if (res.status == 'FORBIDDEN') {
@@ -270,11 +271,15 @@ kb.drawList = function(items, sortIdx, sortType, totalCount) {
     } else {
       statusLabel = '<span class="status-label-err">' + data_status + '</span>';
     }
+    var size = util.formatNumber(data.size);
     var encrypted = '';
     if (data.encrypted) {
       encrypted = '<span data-tooltip="Encrypted">&#x1F512;</span>';
     }
-    var size = util.formatNumber(data.size);
+    var dlLink = '';
+    if (data.IS_DATAURL == 'Y') {
+      dlLink = '<span class="pseudo-link" onclick="kb.dlB64Content(\'' + id + '\');">DL</span>';
+    }
     var labelsHTML = kb.buildLabelsHTML(labels);
     htmlList += '<tr class="data-list-row">';
     htmlList += '<td style="padding-right:16px;">' + id + '</td>'
@@ -290,16 +295,16 @@ kb.drawList = function(items, sortIdx, sortType, totalCount) {
     }
     htmlList += '>';
     htmlList += title + '</span></td>';
+    htmlList += '<td style="padding-right:16px;text-align:center;">' + dlLink + '</td>';
     htmlList += '<td style="padding-right:8px;">' + cDateStr + '</td>';
     htmlList += '<td style="padding-right:16px;">' + cUser + '</td>';
     htmlList += '<td style="padding-right:8px;">' + uDateStr + '</td>';
     htmlList += '<td style="padding-right:16px;">' + uUser + '</td>';
-
     htmlList += '<td>' + statusLabel + '</td>';
     htmlList += '<td style="padding-left:20px;">' + labelsHTML + '</td>';
     htmlList += '<td>' + score + '</td>';
-    htmlList += '<td style="text-align:center;">' + encrypted + '</td>';
-    htmlList += '<td style="text-align:right;padding-left:1em;">' + size + '</td>';
+    htmlList += '<td style="text-align:right;padding-left:0.5em;">' + size + '</td>';
+    htmlList += '<td style="text-align:center;cursor:default;">' + encrypted + '</td>';
 
     if (data_status != 'OK') {
       htmlList += '<td class="center"><span class="pseudo-link text-red" data-tooltip="Delete" onclick="kb.delete(\'' + id + '\');">X</span></td>';
@@ -313,8 +318,8 @@ kb.drawList = function(items, sortIdx, sortType, totalCount) {
   kb.drawListContent(html);
 
   var infoHtml = items.length + ' ' + util.plural('item', items.length);
-  if ((kb.config.list_max > 0) && (kb.totalCount > kb.config.list_max)) {
-    infoHtml += ' (' + kb.totalCount + ' in total)';
+  if ((kb.config.list_max > 0) && (totalCount > kb.config.list_max)) {
+    infoHtml += ' (' + totalCount + ' in total)';
   }
 
   kb.drawInfo(infoHtml);
@@ -463,7 +468,7 @@ kb._getData = function() {
 kb.onGetData = function(xhr, res, req) {
   kb.onEndDataLoading();
   if (xhr.status != 200) {
-    kb.onHttpError();
+    kb.onHttpError(xhr.status);
     return;
   }
   if (res.status == 'FORBIDDEN') {
@@ -479,19 +484,16 @@ kb.onGetData = function(xhr, res, req) {
   }
 
   var data = res.body;
-  var id = data.id;
   var data_status = data.data_status;
-  var cDate = data.C_DATE;
-  var uDate = data.U_DATE;
   var b64Title = ((data.TITLE == undefined) ? '' : data.TITLE);
   var b64Labels = data.LABELS;
-  var status = data.STATUS;
   var b64Body = data.BODY;
 
   var title = util.decodeBase64(b64Title);
   var labels = util.decodeBase64(b64Labels);
   var body = util.decodeBase64(b64Body);
 
+  kb.content = {};
   kb.content = util.copyObject(data, kb.content);
   kb.content.TITLE = title;
   kb.content.LABELS = labels;
@@ -680,7 +682,7 @@ kb._save = function() {
 };
 kb.onSaveData = function(xhr, res, req) {
   if (xhr.status != 200) {
-    kb.onHttpError();
+    kb.onHttpError(xhr.status);
     return;
   }
   if (res.status == 'OK') {
@@ -710,7 +712,7 @@ kb.checkExists = function(id) {
 };
 kb.onCheckExists = function(xhr, res, req) {
   if (xhr.status != 200) {
-    kb.onHttpError();
+    kb.onHttpError(xhr.status);
     return;
   }
   if (res.status == 'OK') {
@@ -748,7 +750,7 @@ kb.showData = function(content) {
   var labelsHTML = kb.buildLabelsHTML(labels);
 
   var contentBody = content.BODY;
-  if (contentBody.trim().match(/^data:.+;base64,[A-Za-z0-9+/=\n]+$/)) {
+  if (content.IS_DATAURL == 'Y') {
     $el('#dl-button').show();
   } else {
     $el('#dl-button').hide();
@@ -845,7 +847,7 @@ kb._delete = function(id) {
 };
 kb.onDelete = function(xhr, res, req) {
   if (xhr.status != 200) {
-    kb.onHttpError();
+    kb.onHttpError(xhr.status);
     return;
   }
   if (res.status == 'FORBIDDEN') {
@@ -994,7 +996,12 @@ kb.copy = function(s) {
 };
 
 kb.showInfotip = function(m, d) {
-  util.infotip.show(m, d);
+  var opt = {
+    style: {
+      'font-size': '14px'
+    }
+  };
+  util.infotip.show(m, d, opt);
 };
 
 kb.getDateTimeString = function(dt, fmt) {
@@ -1034,12 +1041,15 @@ kb.isLoading = function() {
 };
 
 kb.dlContent = function() {
-  util.confirm('Download?', kb.dlB64Content);
+  util.confirm('Download?', kb._dlContent);
 };
-kb.dlB64Content = function() {
+kb._dlContent = function() {
+  kb.dlB64Content(kb.content.id);
+};
+kb.dlB64Content = function(id) {
   param = {
     act: 'dlb64content',
-    id: kb.content.id
+    id: id
   };
   util.postSubmit('api.cgi', param);
 };
