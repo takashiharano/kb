@@ -521,11 +521,14 @@ td.center {
 #font-range {
   width: 256px;
 }
+
+.dl-link:hover {
+  cursor: pointer;
+}
 '''
     css += '.input-disable {'
     css += '  color: ' + appconfig.text_disabled + ';'
     css += '}'
-
     return css
 
 #------------------------------------------------------------------------------

@@ -275,7 +275,7 @@ kb.drawList = function(items, sortIdx, sortType, totalCount) {
     }
     var dlLink = '';
     if (data.IS_DATAURL == 'Y') {
-      dlLink = '<span class="pseudo-link" onclick="kb.dlB64Content(\'' + id + '\');" data-tooltip="Download">&#x1F517;</span>';
+      dlLink = '<span class="dl-link" onclick="kb.dlB64Content(\'' + id + '\');" data-tooltip="Download">&#x1F517;</span>';
     }
     var labelsHTML = kb.buildLabelsHTML(labels);
     htmlList += '<tr class="data-list-row">';
