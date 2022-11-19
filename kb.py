@@ -212,6 +212,12 @@ def is_target_matches(target, keyword):
 
 def is_date_matches(target, search_val):
     try:
+        return _is_date_matches(target, search_val)
+    except:
+        return False
+
+def _is_date_matches(target, search_val):
+    try:
         target = int(target)
     except:
         return False
@@ -234,7 +240,7 @@ def is_date_matches(target, search_val):
     elif search_val.startswith('='):
        str_datetime = search_val[1:]
     else:
-        return False
+       str_datetime = search_val
 
     millis = util.get_timestamp_in_millis(str_datetime)
 
@@ -250,7 +256,7 @@ def is_date_matches(target, search_val):
     elif search_val.startswith('<'):
         if target <  millis:
             return True
-    elif search_val.startswith('='):
+    else:
         target = floor_target_datetime(target, str_datetime)
         if target == millis:
             return True
