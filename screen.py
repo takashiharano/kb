@@ -92,8 +92,9 @@ def build_main_screen(context):
       </div>
       <div style="display:inline-block;position:absolute;right:10px;">
         <span id="buttons-r" class="for-view">
+          <button id="dl-button" style="margin-right:8px;" onclick="kb.dlContent();">DL</button>
           <input type="checkbox" id="enrich" checked><label for="enrich">Enrich</label>
-          <button id="copy-url-button" style="margin-left:8px;" onclick="kb.copyContent();">COPY</button>
+          <button id="copy-text-button" style="margin-left:8px;" onclick="kb.copyContent();">COPY</button>
           <button id="copy-url-button" style="margin-left:2px;" onclick="kb.showUrl();">URL</button>
 '''
     if web.has_permission(context, 'kb.delete'):
@@ -175,8 +176,9 @@ kb.mode = 'view'
       </div>
       <div style="display:inline-block;position:absolute;right:10px;">
         <span id="buttons-r">
-          <input type="checkbox" id="chk-plain-text"><label for="chk-plain-text">Plain text</label>
-          <button id="copy-url-button" style="margin-left:8px;" onclick="kb.copyContent();">COPY</button>
+          <button id="dl-button" style="margin-right:8px;" onclick="kb.dlContent();">DL</button>
+          <input type="checkbox" id="enrich" checked><label for="enrich">Enrich</label>
+          <button id="copy-text-button" style="margin-left:8px;" onclick="kb.copyContent();">COPY</button>
         </span>
       </div>
     </div>

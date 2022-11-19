@@ -505,6 +505,94 @@ def encdec_data(dst_base_dir, secure):
             util.write_text_file(dst_path, text)
 
 #------------------------------------------------------------------------------
+def download_b64content(id):
+    data = get_data(id)
+    s = data['BODY']
+    s = util.remove_space_newline(s)
+    p = s.find(',')
+
+    if p == -1:
+        send_error_file('NOT_BASE64_DATA')
+        return
+
+    p += 1
+    prefix = s[0:p]
+    b64content = s[p:]
+    ext = get_ext_from_mimetype(prefix)
+    send_b64content_as_binary(b64content, ext)
+
+def send_b64content_as_binary(s, ext=None):
+    if ext is None:
+        ext = get_ext_from_base64(s)
+    if ext is None:
+        ext = 'txt'
+
+    filename = 'file.' + ext
+
+    try:
+        b = util.decode_base64(s, bin=True)
+    except:
+        send_error_file('DECODE_ERROR')
+        return
+
+    util.send_binary(b, filename=filename)
+
+def send_error_file(s):
+    b = s.encode()
+    util.send_binary(b, filename='error.txt')
+
+#------------------------------------------------------------------------------
+# s: data:text/plain;base64,
+def get_ext_from_mimetype(s):
+    filetypes = {
+        'bmp': 'image/bmp',
+        'css': 'text/css',
+        'csv': 'text/csv',
+        'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'exe': 'application/x-msdownload',
+        'gif': 'image/gif',
+        'html': 'text/html',
+        'jpg': 'image/jpeg',
+        'js': 'text/javascript',
+        'json': 'application/json',
+        'mp3': 'audio/mpeg',
+        'mp4': 'video/mp4',
+        'pdf': 'application/pdf',
+        'png': 'image/png',
+        'pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        'py': 'text/x-python',
+        'txt': 'text/plain',
+        'wav': 'audio/wav',
+        'xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'xml': 'text/xml',
+        'zip': 'application/x-zip-compressed'
+    }
+    type = util.replace(s, 'data:', '')
+    type = util.replace(type, ';base64,', '')
+    ext = None
+    for k in filetypes:
+        if type == filetypes[k]:
+            ext = k
+            break
+    return ext
+
+def get_ext_from_base64(s):
+    filetypes = {
+        'bmp': 'Qk0',
+        'gif': 'R0lGO',
+        'jpg': '/9',
+        'png': 'iVBORw0KGgo',
+        'xml': 'PD94bWw',
+        'zip': 'UEsDB'
+    }
+    ext = None
+    for k in filetypes:
+        if s.startswith(filetypes[k]):
+            ext = k
+            break
+    return ext
+
+#------------------------------------------------------------------------------
 def cmd_export(dest_path):
     if (dest_path == ''):
         print('dest pathis required')

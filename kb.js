@@ -105,9 +105,6 @@ kb.init = function() {
 kb.initDnD = function() {
   var opt = {
     mode: 'data',
-    onloadstart: kb.onFileLoadStart,
-    onprogress: kb.onFileLoadProg,
-    //onload: kb.onFileLoad,
     onabort: kb.onAbortLoadFile,
     onerror: kb.onFileLoadError
   };
@@ -748,6 +745,12 @@ kb.showData = function(content) {
   var labelsHTML = kb.buildLabelsHTML(labels);
 
   var contentBody = content.BODY;
+  if (contentBody.trim().match(/^data:.+;base64,[A-Za-z0-9+/=\n]+$/)) {
+    $el('#dl-button').show();
+  } else {
+    $el('#dl-button').hide();
+  }
+
   contentBody = util.escHtml(contentBody);
 
   if ($el('#enrich').checked) {
@@ -1025,6 +1028,17 @@ kb.onEndLoading = function() {
 
 kb.isLoading = function() {
   return ((kb.state & kb.ST_LIST_LOADING) || (kb.state & kb.ST_DATA_LOADING));
+};
+
+kb.dlContent = function() {
+  util.confirm('Download?', kb.dlB64Content);
+};
+kb.dlB64Content = function() {
+  param = {
+    act: 'dlb64content',
+    id: kb.content.id
+  };
+  util.postSubmit('api.cgi', param);
 };
 
 kb.onCtrlS = function(e) {

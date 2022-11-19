@@ -124,6 +124,11 @@ def proc_api(context, act):
             b = kb.export_data()
             util.send_binary(b, filename='kbdata.zip')
             return
+        elif act == 'dlb64content':
+            id = web.get_raw_request_param('id')
+            b = kb.download_b64content(id)
+            # the response will be sent in the function
+            return
         else:
             status = 'NO_SUCH_ACTION'
             result_data = None
