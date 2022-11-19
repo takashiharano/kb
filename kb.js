@@ -39,6 +39,7 @@ kb.totalCount = 0;
 kb.pendingId = null;
 kb.content;
 kb.contentUrl = '';
+kb.dndHandler = null;
 
 kb.areaSize = {
   orgY: 0,
@@ -47,7 +48,7 @@ kb.areaSize = {
 };
 
 $onReady = function() {
-  $el('#chk-plain-text').addEventListener('change', kb.onPlainTextChange);
+  $el('#enrich').addEventListener('change', kb.onEnrichChange);
   var fontSize = util.getQuery('fontsize') | 0;
   if (!fontSize) fontSize = 12;
   kb.setFontSize(fontSize);
@@ -96,8 +97,50 @@ kb.init = function() {
   window.addEventListener('keydown', kb.onKeyDown);
   window.addEventListener('mousemove', kb.onMouseMove, true);
   window.addEventListener('mouseup', kb.onMouseUp, true);
+  kb.initDnD();
 
   kb.getInitInfo();
+};
+
+kb.initDnD = function() {
+  var opt = {
+    mode: 'data',
+    onloadstart: kb.onFileLoadStart,
+    onprogress: kb.onFileLoadProg,
+    //onload: kb.onFileLoad,
+    onabort: kb.onAbortLoadFile,
+    onerror: kb.onFileLoadError
+  };
+  kb.dndHandler = util.addDndHandler('#content-body-edt', kb.onDnd, opt);
+};
+kb.onDnd = function(data) {
+  var el = $el('#content-body-edt');
+  var cp = el.selectionStart;
+  var v = el.value;
+  var v1 = v.substr(0, cp);
+  var v2 = v.substr(cp);
+
+  var p = data.indexOf(',');
+  if (p == -1) {
+    el.value = v1 + data + v2;
+    return;
+  }
+
+  p++;
+  var h = data.substr(0, p);
+  var d = data.substr(p);
+  d = util.insertCh(d, '\n', 76);
+  var s = h + '\n' + d + '\n';
+  el.value = v1 + s + v2;
+  cp += s.length;
+  el.selectionStart = cp;
+  el.selectionEnd = cp;
+};
+kb.onAbortLoadFile = function() {
+  kb.showInfotip('File loading aborted');
+};
+kb.onFileLoadError = function() {
+  kb.showInfotip('File loading error');
 };
 
 kb.getInitInfo = function() {
@@ -707,7 +750,7 @@ kb.showData = function(content) {
   var contentBody = content.BODY;
   contentBody = util.escHtml(contentBody);
 
-  if (!$el('#chk-plain-text').checked) {
+  if ($el('#enrich').checked) {
     contentBody = contentBody.replace(/&quot;/g, '"');
     contentBody = util.linkUrls(contentBody);
     contentBody = kb.decodeB64Image(contentBody);
@@ -757,7 +800,7 @@ kb.decodeB64Image = function(s) {
   return s;
 };
 
-kb.onPlainTextChange = function() {
+kb.onEnrichChange = function() {
   kb.showData(kb.content);
 };
 

@@ -92,7 +92,7 @@ def build_main_screen(context):
       </div>
       <div style="display:inline-block;position:absolute;right:10px;">
         <span id="buttons-r" class="for-view">
-          <input type="checkbox" id="chk-plain-text"><label for="chk-plain-text">Plain text</label>
+          <input type="checkbox" id="enrich" checked><label for="enrich">Enrich</label>
           <button id="copy-url-button" style="margin-left:8px;" onclick="kb.copyContent();">COPY</button>
           <button id="copy-url-button" style="margin-left:2px;" onclick="kb.showUrl();">URL</button>
 '''
