@@ -15,7 +15,7 @@ kb.UI_ST_AREA_RESIZING = 1;
 kb.LIST_COLUMNS = [
   {key: 'id', label: 'ID'},
   {key: 'TITLE', label: 'TITLE'},
-  {key: 'IS_DATAURL', label: ''},
+  {key: 'IS_DATAURL', label: 'DL'},
   {key: 'C_DATE', label: 'CREATED'},
   {key: 'C_USER', label: 'BY'},
   {key: 'U_DATE', label: 'UPDATED'},
@@ -190,11 +190,8 @@ kb.getList = function(id) {
   if (id != undefined) {
     param = {id: id};
   }
-  kb.onStartListLoading();
+  kb.onStartListLoading('Loading');
   kb.callApi('list', param, kb.onGetList);
-
-  kb.drawInfo('<span class="progdot">Loading</span>');
-  kb.drawListContent('');
 };
 kb.onGetList = function(xhr, res, req) {
   kb.onEndListLoading();
@@ -278,7 +275,7 @@ kb.drawList = function(items, sortIdx, sortType, totalCount) {
     }
     var dlLink = '';
     if (data.IS_DATAURL == 'Y') {
-      dlLink = '<span class="pseudo-link" onclick="kb.dlB64Content(\'' + id + '\');">DL</span>';
+      dlLink = '<span class="pseudo-link" onclick="kb.dlB64Content(\'' + id + '\');" data-tooltip="Download">&#x1F517;</span>';
     }
     var labelsHTML = kb.buildLabelsHTML(labels);
     htmlList += '<tr class="data-list-row">';
@@ -410,7 +407,7 @@ kb.search = function() {
     }
     kb.listStatus.sortType = 2;
     var param = {q: util.encodeBase64(q)};
-    kb.onStartListLoading();
+    kb.onStartListLoading('Searching');
     kb.callApi('search', param, kb.onGetList);
   } else {
     kb.listAll();
@@ -1009,8 +1006,10 @@ kb.getDateTimeString = function(dt, fmt) {
   return util.getDateTimeString(dt, fmt);
 };
 
-kb.onStartListLoading = function() {
+kb.onStartListLoading = function(msg) {
   kb.status |= kb.ST_LIST_LOADING;
+  kb.drawInfo('<span class="progdot">' + msg + '</span>');
+  kb.drawListContent('');
   kb.onStartLoading();
 };
 kb.onEndListLoading = function() {

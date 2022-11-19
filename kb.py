@@ -194,7 +194,9 @@ def calc_data_macthed_score(data, keyword):
     else:
         score += count_matched_key(data['TITLE'], keyword) * 100
         score += count_matched_key(data['LABELS'], keyword) * 10
-        score += count_matched_key(data['BODY'], keyword)
+
+        if not 'IS_DATAURL' in data or data['IS_DATAURL'] != 'Y':
+            score += count_matched_key(data['BODY'], keyword)
 
     return score
 
