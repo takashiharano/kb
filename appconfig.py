@@ -58,6 +58,7 @@ dialog_fgcolor = '#fff'
 dialog_background = '#000'
 
 clock_color = '#8f0'
+link_color = '#cef'
 
 state_list = [
     {'name': 'LOCK', 'fgcolor': '#fff', 'bgcolor': '#f00'},

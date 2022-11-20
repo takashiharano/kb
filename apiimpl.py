@@ -19,6 +19,7 @@ import web
 import kb
 
 #------------------------------------------------------------------------------
+# Returns None if the value not found
 def get_request_param(key):
     return web.get_request_param(key)
 
@@ -56,7 +57,12 @@ def download_b64content(context):
     if has_privilege(context):
         status = 'OK'
         id = get_request_param('id')
-        kb.download_b64content(id)
+        p_idx = get_request_param('idx')
+        try:
+            idx = int(p_idx)
+        except:
+            idx = 0
+        kb.download_b64content(id, idx)
     else:
         kb.send_error_file('NO_ACCESS_RIGHTS')
 

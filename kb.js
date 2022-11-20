@@ -275,14 +275,14 @@ kb.drawList = function(items, sortIdx, sortType, totalCount) {
     }
     var dlLink = '';
     if (data.DATA_TYPE == 'dataurl') {
-      dlLink = '<span class="dl-link" onclick="kb.dlB64Content(\'' + id + '\');" data-tooltip="Download">&#x1F517;</span>';
+      dlLink = '<span class="dl-link" onclick="kb.dlContent(\'' + id + '\');" data-tooltip="Download">&#x1F517;</span>';
     }
     var labelsHTML = kb.buildLabelsHTML(labels);
     htmlList += '<tr class="data-list-row">';
     htmlList += '<td style="padding-right:16px;">' + id + '</td>'
     htmlList += '<td style="min-width:300px;max-width:600px;padding-right:32px;overflow:hidden;text-overflow:ellipsis;">';
     if (data_status == 'OK') {
-      htmlList += '<span class="title  pseudo-link" onclick="kb.openData(\'' + id + '\');"';
+      htmlList += '<span class="title pseudo-link" onclick="kb.openData(\'' + id + '\');"';
     } else {
       htmlList += '<span class="title-disabled"';
     }
@@ -747,17 +747,17 @@ kb.showData = function(content) {
   var labelsHTML = kb.buildLabelsHTML(labels);
 
   var contentBody = content.BODY;
-  if (content.DATA_TYPE == 'dataurl') {
-    $el('#dl-button').show();
-  } else {
-    $el('#dl-button').hide();
-  }
-
   contentBody = util.escHtml(contentBody);
 
   if ($el('#enrich').checked) {
     contentBody = contentBody.replace(/&quot;/g, '"');
     contentBody = util.linkUrls(contentBody);
+
+    var w = kb.linkDataUrl(contentBody, false, -1);
+    contentBody = w.s;
+    if (w.i == -1) w.i = 0;
+    w = kb.linkDataUrl(contentBody, true, w.i);
+    contentBody = w.s;
     contentBody = kb.decodeB64Image(contentBody);
   }
 
@@ -789,15 +789,37 @@ kb.showData = function(content) {
   }
 };
 
+kb.linkDataUrl = function(s, f, index) {
+  var items = [];
+  var m = s.match(/data:.+;base64,\n?[^\n][A-za-z0-9+\-/=\n]+?\n{2}/g);
+  if (f) {
+    m = s.match(/data:.+;base64,\n?[^\n][A-za-z0-9+\-/=\n]+?\n*$/g);
+  }
+  if (!m) return {s: s, i: -1};
+  for (var i = 0; i < m.length; i++) {
+    items.push(m[i]);
+  }
+  var idx = index;
+  for (i = 0; i < items.length; i++) {
+    var w = items[i];
+    if (!w.match(/^data:image/)) {
+      var t = w.match(/data:(.+);/)[1];
+      if (index == -1) idx = i;
+      var a = '<span class="pseudo-link link" onclick="kb.dlContent(\'' + kb.content.id + '\', \'' + idx + '\');" data-tooltip="Download">[DATA] ' + t + '</span>' + '\n\n'
+      s = s.replace(w, a);
+    }
+  }
+  return {s: s, i: i};
+};
+
 kb.decodeB64Image = function(s) {
   var imgs = [];
   var m = s.match(/(data:image\/.+;base64,)\n?([^\n][A-za-z0-9+\-/=\n]+?)\n\n/g);
-  if (m) {
-    for (var i = 0; i < m.length; i++) {
-      var w = m[i];
-      w = w.replace(/\n/g, '');
-      imgs.push(w);
-    }
+  if (!m) return s;
+  for (var i = 0; i < m.length; i++) {
+    var w = m[i];
+    w = w.replace(/\n/g, '');
+    imgs.push(w);
   }
   for (i = 0; i < imgs.length; i++) {
     s = s.replace(/[^"]data:image\/.+;base64,\n?[^\n][A-za-z0-9+\-/=\n]+?\n\n/, '\n<img src="' + imgs[i] + '">\n\n');
@@ -1040,18 +1062,28 @@ kb.isLoading = function() {
   return ((kb.state & kb.ST_LIST_LOADING) || (kb.state & kb.ST_DATA_LOADING));
 };
 
-kb.dlContent = function() {
-  util.confirm('Download?', kb._dlContent);
+kb.dlContent = function(id, idx) {
+  if (id == undefined) id = kb.content.id;
+  var opt = {
+    data: {
+      id: id,
+      idx: idx
+    }
+  };
+  util.confirm('Download?', kb._dlContent, opt);
 };
-kb._dlContent = function() {
-  kb.dlB64Content(kb.content.id);
+kb._dlContent = function(data) {
+  kb.dlB64Content(data.id, data.idx);
 };
-kb.dlB64Content = function(id) {
+kb.dlB64Content = function(id, idx) {
   var token = util.getQuery('token');
   param = {
     act: 'dlb64content',
     id: id
   };
+  if (idx != undefined) {
+    param.idx = idx;
+  }
   if (token) {
     param.token = token;
   }

@@ -534,16 +534,18 @@ def encdec_data(dst_base_dir, secure):
             util.write_text_file(dst_path, text)
 
 #------------------------------------------------------------------------------
-def download_b64content(id):
-    data = get_data(id)
-    s = data['BODY']
-    s = util.remove_space_newline(s)
-    p = s.find(',')
+def download_b64content(id, idx=None):
+    if idx is None:
+        idx = 0
 
-    if p == -1:
-        send_error_file('NOT_BASE64_DATA')
+    data = get_data(id)
+    s = get_dataurl_content(data['BODY'], idx)
+    if s is None:
+        send_error_file('NO_BASE64_CONTENT')
         return
 
+    s = util.remove_space_newline(s)
+    p = s.find(',')
     p += 1
     prefix = s[0:p]
     b64content = s[p:]
@@ -569,6 +571,23 @@ def send_b64content_as_binary(s, ext=None):
 def send_error_file(s):
     b = s.encode()
     util.send_binary(b, filename='error.txt')
+
+#------------------------------------------------------------------------------
+def get_dataurl_content(s, idx):
+    # prevent to fetch '\n\ndata:' pattern
+    s = util.replace(s, '\n{2,}', '#')
+
+    pattern = 'data:.+;base64,[A-Za-z0-9+/=\n]+'
+    match_itrs = re.finditer(pattern, s)
+    cnt = 0
+    for itr in match_itrs:
+        dataurl = itr.group()
+        if cnt == idx:
+            return dataurl
+
+        cnt += 1
+
+    return None
 
 #------------------------------------------------------------------------------
 # s: data:text/plain;base64,
