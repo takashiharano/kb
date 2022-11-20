@@ -520,7 +520,7 @@ td.center {
 }
 
 #font-range {
-  width: 256px;
+  width: 300px;
 }
 
 .dl-link:hover {

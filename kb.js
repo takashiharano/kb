@@ -42,12 +42,13 @@ kb.pendingId = null;
 kb.content;
 kb.contentUrl = '';
 kb.dndHandler = null;
-
 kb.areaSize = {
   orgY: 0,
   orgSP1: 0,
   orgSP2: 0
 };
+kb.requestedId = null;
+kb.dataLoadingTmrId = 0;
 
 $onReady = function() {
   $el('#enrich').addEventListener('change', kb.onEnrichChange);
@@ -454,12 +455,12 @@ kb._getData = function() {
   var id = kb.pendingId;
   if (id == null) return;
   kb.pendingId = null;
+  kb.requestedId = id;
   var param = {id: id};
   if (kb.token) {
     param.token = kb.token;
   }
   kb.onStartDataLoading();
-  $el('#content-body').innerHTML = '<span class="progdot">Loading</span>';
   kb.callApi('get', param, kb.onGetData);
 };
 kb.onGetData = function(xhr, res, req) {
@@ -481,6 +482,10 @@ kb.onGetData = function(xhr, res, req) {
   }
 
   var data = res.body;
+  if (data.id != kb.requestedId) {
+    return;
+  }
+
   var data_status = data.data_status;
   var b64Title = ((data.TITLE == undefined) ? '' : data.TITLE);
   var b64Labels = data.LABELS;
@@ -1042,9 +1047,17 @@ kb.onEndListLoading = function() {
 kb.onStartDataLoading = function() {
   kb.status |= kb.ST_DATA_LOADING;
   kb.onStartLoading();
+  kb.dataLoadingTmrId = setTimeout(kb.onDataLoading, 200);
+};
+kb.onDataLoading = function() {
+  if (kb.dataLoadingTmrId > 0) {
+    $el('#content-body').innerHTML = '<span class="progdot">Loading</span>';
+  }
 };
 kb.onEndDataLoading = function() {
   kb.status &= ~kb.ST_DATA_LOADING;
+  clearTimeout(kb.dataLoadingTmrId);
+  kb.dataLoadingTmrId = 0;
   kb.onEndLoading();
 };
 
