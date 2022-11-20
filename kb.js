@@ -416,7 +416,6 @@ kb.search = function() {
 
 kb.showDataById = function(id) {
   if (!kb.isLoading()) {
-    $el('#content-body').innerHTML = '<span class="progdot">Loading</span>';
     kb.getList(id);
     kb.getData(id);
   }
@@ -460,6 +459,7 @@ kb._getData = function() {
     param.token = kb.token;
   }
   kb.onStartDataLoading();
+  $el('#content-body').innerHTML = '<span class="progdot">Loading</span>';
   kb.callApi('get', param, kb.onGetData);
 };
 kb.onGetData = function(xhr, res, req) {
@@ -1029,6 +1029,7 @@ kb.onEndDataLoading = function() {
 kb.onStartLoading = function() {
   $el('#search-button').disabled = true;
   $el('#all-button').disabled = true;
+  kb.clear();
 };
 kb.onEndLoading = function() {
   $el('#search-button').disabled = false;
@@ -1046,10 +1047,14 @@ kb._dlContent = function() {
   kb.dlB64Content(kb.content.id);
 };
 kb.dlB64Content = function(id) {
+  var token = util.getQuery('token');
   param = {
     act: 'dlb64content',
     id: id
   };
+  if (token) {
+    param.token = token;
+  }
   util.postSubmit('api.cgi', param);
 };
 

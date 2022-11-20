@@ -52,6 +52,15 @@ def get_data(context):
     send_result_json(status, result_data)
 
 #------------------------------------------------------------------------------
+def download_b64content(context):
+    if has_privilege(context):
+        status = 'OK'
+        id = get_request_param('id')
+        kb.download_b64content(id)
+    else:
+        kb.send_error_file('NO_ACCESS_RIGHTS')
+
+#------------------------------------------------------------------------------
 def proc_save(context):
     id = get_request_param('id')
     data_json = get_request_param('data')
@@ -124,11 +133,6 @@ def proc_api(context, act):
             b = kb.export_data()
             util.send_binary(b, filename='kbdata.zip')
             return
-        elif act == 'dlb64content':
-            id = web.get_raw_request_param('id')
-            b = kb.download_b64content(id)
-            # the response will be sent in the function
-            return
         else:
             status = 'NO_SUCH_ACTION'
             result_data = None
@@ -142,6 +146,8 @@ def main():
     act = get_request_param('act')
     if act == 'get':
         get_data(context)
+    elif act == 'dlb64content':
+        download_b64content(context)
     else:
         if context['authorized']:
             proc_api(context, act)
