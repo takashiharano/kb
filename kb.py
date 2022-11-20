@@ -195,7 +195,7 @@ def calc_data_macthed_score(data, keyword):
         score += count_matched_key(data['TITLE'], keyword) * 100
         score += count_matched_key(data['LABELS'], keyword) * 10
 
-        if not 'IS_DATAURL' in data or data['IS_DATAURL'] != 'Y':
+        if not 'DATA_TYPE' in data or data['DATA_TYPE'] != 'dataurl':
             score += count_matched_key(data['BODY'], keyword)
 
     return score
@@ -439,7 +439,7 @@ def save_data(id, new_data, user=''):
     data['TITLE'] = util.decode_base64(new_data['TITLE'])
     data['LABELS'] = util.decode_base64(new_data['LABELS'])
     data['STATUS'] = new_data['STATUS']
-    data['IS_DATAURL'] = 'Y' if isdataurl else 'N'
+    data['DATA_TYPE'] = 'dataurl' if isdataurl else ''
     data['BODY'] = body
     secure = True if new_data['encryption'] == '1' else False
 
@@ -461,7 +461,7 @@ def write_data(id, data, user='', secure=False, path=None):
     text += 'U_USER: ' + data['U_USER'] + '\n'
     text += 'LABELS: ' + data['LABELS'] + '\n'
     text += 'STATUS: ' + data['STATUS'] + '\n'
-    text += 'IS_DATAURL: ' + data['IS_DATAURL'] + '\n'
+    text += 'DATA_TYPE: ' + data['DATA_TYPE'] + '\n'
     text += '\n'
     text += data['BODY']
 

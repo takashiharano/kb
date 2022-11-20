@@ -15,7 +15,7 @@ kb.UI_ST_AREA_RESIZING = 1;
 kb.LIST_COLUMNS = [
   {key: 'id', label: 'ID'},
   {key: 'TITLE', label: 'TITLE'},
-  {key: 'IS_DATAURL', label: 'DL'},
+  {key: 'DATA_TYPE', label: 'DL'},
   {key: 'C_DATE', label: 'CREATED'},
   {key: 'C_USER', label: 'BY'},
   {key: 'U_DATE', label: 'UPDATED'},
@@ -274,7 +274,7 @@ kb.drawList = function(items, sortIdx, sortType, totalCount) {
       encrypted = '<span data-tooltip="Encrypted">&#x1F512;</span>';
     }
     var dlLink = '';
-    if (data.IS_DATAURL == 'Y') {
+    if (data.DATA_TYPE == 'dataurl') {
       dlLink = '<span class="dl-link" onclick="kb.dlB64Content(\'' + id + '\');" data-tooltip="Download">&#x1F517;</span>';
     }
     var labelsHTML = kb.buildLabelsHTML(labels);
@@ -747,7 +747,7 @@ kb.showData = function(content) {
   var labelsHTML = kb.buildLabelsHTML(labels);
 
   var contentBody = content.BODY;
-  if (content.IS_DATAURL == 'Y') {
+  if (content.DATA_TYPE == 'dataurl') {
     $el('#dl-button').show();
   } else {
     $el('#dl-button').hide();
