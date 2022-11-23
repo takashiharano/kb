@@ -433,11 +433,13 @@ def save_data(id, new_data, user=''):
 
     body = util.decode_base64(new_data['BODY'])
     isdataurl = is_dataurl(body)
+    labels = util.decode_base64(new_data['LABELS'])
+    labels = to_set(labels)
 
     data['U_DATE'] = str(now)
     data['U_USER'] = user
     data['TITLE'] = util.decode_base64(new_data['TITLE'])
-    data['LABELS'] = util.decode_base64(new_data['LABELS'])
+    data['LABELS'] = labels
     data['STATUS'] = new_data['STATUS']
     data['DATA_TYPE'] = 'dataurl' if isdataurl else ''
     data['BODY'] = body
@@ -445,6 +447,21 @@ def save_data(id, new_data, user=''):
 
     write_data(id, data, user, secure)
     return id
+
+#------------------------------------------------------------------------------
+def to_set(s):
+    s = util.to_half_width(s)
+    s = s.lower()
+    data_list = s.split(' ')
+    data_set = util.to_set(data_list)
+    s = ''
+    i = 0
+    for v in data_set:
+        if i > 0:
+            s += ' '
+        s += v
+        i += 1
+    return s
 
 #------------------------------------------------------------------------------
 def is_dataurl(s):
