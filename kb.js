@@ -818,17 +818,23 @@ kb.linkDataUrl = function(s, f, index) {
 };
 
 kb.decodeB64Image = function(s) {
-  var m = s.match(/data:image\/.+;base64,\n?[[A-za-z0-9+\-/=][A-za-z0-9+\-/=\n]+\n\n/g);
+  var m = s.match(/^\n*data:image\/.+;base64,\n?[A-za-z0-9+/=][A-za-z0-9+/=\n]+$/);
+  if (m) {
+    var w =m[0].replace(/\n/g, '');
+    s = s.replace(/data:image\/.+;base64,\n?[A-za-z0-9+/=][A-za-z0-9+/=\n]+/, '<img src="' + w + '">');
+    return s;
+  }
+  m = s.match(/data:image\/.+;base64,\n?[A-za-z0-9+/=][A-za-z0-9+/=\n]+\n\n/g);
   if (!m) return s;
   var imgs = [];
   for (var i = 0; i < m.length; i++) {
     var a = m[i];
-    b = a.match(/(data:image\/.+;base64,)\n?([[A-za-z0-9+\-/=][A-za-z0-9+\-/=\n]+)\n\n/);
-    var w = b[1] + b[2].replace(/\n/g, '');
+    var b = a.match(/(data:image\/.+;base64,)\n?([A-za-z0-9+/=][A-za-z0-9+/=\n]+)\n\n/);
+    w = b[1] + b[2].replace(/\n/g, '');
     imgs.push(w);
   }
   for (i = 0; i < imgs.length; i++) {
-    s = s.replace(/(?<!")data:image\/.+;base64,\n?[[A-za-z0-9+\-/=][A-za-z0-9+\-/=\n]+/, '\n<img src="' + imgs[i] + '">\n\n');
+    s = s.replace(/(?<!")data:image\/.+;base64,\n?[A-za-z0-9+/=][A-za-z0-9+/=\n]+\n\n/, '\n<img src="' + imgs[i] + '">\n\n');
   }
   return s;
 };
