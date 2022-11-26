@@ -79,6 +79,31 @@ def get_list(target_id=None, need_encode_b64=False):
 
     return data_list_obj
 
+def filter_by_ids(all_id_list, keywords):
+    filtered_id_list = []
+    new_keywords = []
+    for i in range(len(keywords)):
+        keyword = keywords[i]
+        if not keyword.startswith('id:'):
+            new_keywords.append(keyword)
+            continue
+
+        keyword = util.replace(keyword, 'id:', '', flags=re.IGNORECASE)
+        ids = keyword.split('-')
+        st_id =  util.to_int(ids[0])
+        if len(ids) == 1:
+            ed_id = util.to_int(ids[0])
+        else:
+            ed_id = util.to_int(ids[1])
+        ed_id += 1
+
+        for j in range(st_id, ed_id):
+            id = str(j)
+            if id in all_id_list:
+                filtered_id_list.append(id)
+
+    return {'id_list': filtered_id_list, 'keywords': new_keywords}
+
 #------------------------------------------------------------------------------
 def search_data(q, need_encode_b64=False):
     q = util.to_half_width(q)
@@ -87,21 +112,28 @@ def search_data(q, need_encode_b64=False):
     keywords = q.split(' ')
 
     id_list = get_data_id_list()
+    filtered = filter_by_ids(id_list, keywords)
+    id_filtering = False
+    if len(filtered['id_list']) > 0:
+        id_filtering = True
+        id_list = filtered['id_list']
+        keywords = filtered['keywords']
 
-    wk_data_list = []
+    all_data = []
     for i in range(len(id_list)):
         id = id_list[i]
         try:
             data = load_data(id)
             data = convert_data_to_half_width(data)
             data['score'] = 0
-            wk_data_list.append(data)
+            all_data.append(data)
         except:
             continue
 
+    wk_data_list = all_data
+    keyword_matched = False
     for i in range(len(keywords)):
         keyword = keywords[i]
-
         macthed_data_list = []
         for j in range(len(wk_data_list)):
             data = wk_data_list[j]
@@ -109,8 +141,12 @@ def search_data(q, need_encode_b64=False):
             if score > 0:
                 data['score'] += score
                 macthed_data_list.append(data)
+                keyword_matched = True
 
         wk_data_list = macthed_data_list
+
+    if id_filtering and not keyword_matched:
+        wk_data_list = all_data
 
     data_list = []
     for i in range(len(wk_data_list)):

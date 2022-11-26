@@ -83,6 +83,7 @@ kb.onAppReady1 = function() {
   } else {
     kb.getList();
   }
+  kb.storeAreaSize();
   if (!id) $el('#q').focus();
 };
 
@@ -94,6 +95,7 @@ kb.init = function() {
   $el('#q').addEventListener('input', kb.onInputQ);
   util.textarea.addStatusInfo('#content-body-edt', '#content-body-st');
   $el('#adjuster').addEventListener('mousedown', kb.onAreaResizeStart);
+  $el('#adjuster').addEventListener('dblclick', kb.resetAreaSize);
 
   kb.onEditEnd();
 
@@ -397,22 +399,39 @@ kb.search = function() {
   var q = $el('#q').value.trim();
   var id = $el('#id-txt').value.trim();
   if (id != '') {
-    kb.showDataById(id);
-  } else if (q) {
-    if (q.match(/^label:[^\s]+?$/) || q.match(/^status:[^\s]+?$/) || q.match(/^updated..:[^\s]+?$/)) {
-      kb.listStatus.sortIdx = 5;
-    } else if (q.match(/^created..:[^\s]+?$/)) {
-      kb.listStatus.sortIdx = 3;
+    if (id.match(/[ -]/)) {
+      kb.searchByIds(id);
     } else {
-      kb.listStatus.sortIdx = 9;
+      kb.showDataById(id);
     }
-    kb.listStatus.sortType = 2;
-    var param = {q: util.encodeBase64(q)};
-    kb.onStartListLoading('Searching');
-    kb.callApi('search', param, kb.onGetList);
+  } else if (q) {
+    kb.searchByKeyword(q);
   } else {
     kb.listAll();
   }
+};
+kb.searchByIds = function(ids) {
+  var q = '';
+  ids = util.toSingleSP(ids);
+  ids = ids.split(' ');
+  for (var i = 0; i < ids.length; i++) {
+    if (i > 0) q += ' ';
+    q += 'id:' + ids[i];
+  }
+  kb.searchByKeyword(q);
+};
+kb.searchByKeyword = function(q) {
+  if (q.match(/^label:[^\s]+?$/) || q.match(/^status:[^\s]+?$/) || q.match(/^updated..:[^\s]+?$/)) {
+    kb.listStatus.sortIdx = 5;
+  } else if (q.match(/^created..:[^\s]+?$/)) {
+    kb.listStatus.sortIdx = 3;
+  } else {
+    kb.listStatus.sortIdx = 9;
+  }
+  kb.listStatus.sortType = 2;
+  var param = {q: util.encodeBase64(q)};
+  kb.onStartListLoading('Searching');
+  kb.callApi('search', param, kb.onGetList);
 };
 
 kb.showDataById = function(id) {
@@ -977,6 +996,20 @@ kb.onAreaResize = function(e) {
   if ((h1 < 70) || (h2 < 100)) {
     return;
   }
+  kb.setAreaSize(h1, h2);
+};
+kb.storeAreaSize = function() {
+  var sp1 = kb.getSelfSizePos($el('#list-area'));
+  var sp2 = kb.getSelfSizePos($el('#content-area'));
+  var adj = 8;
+  var h1 = sp1.h - adj;
+  var h2 = sp2.h - adj;
+  kb.orgH = {h1: h1, h2: h2};
+};
+kb.resetAreaSize = function() {
+  kb.setAreaSize(kb.orgH.h1, kb.orgH.h2);
+};
+kb.setAreaSize = function(h1, h2) {
   $el('#list-area').style.height = h1 + 'px';
   $el('#content-area').style.height = h2 + 'px';
 };
