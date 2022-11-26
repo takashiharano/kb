@@ -763,6 +763,7 @@ kb.showData = function(content) {
   var title = content.TITLE;
   var labels = content.LABELS;
   var status = content.STATUS;
+  var data_status = content.data_status;
 
   var cDateStr = '';
   var uDateStr = '';
@@ -787,8 +788,12 @@ kb.showData = function(content) {
 
   var idLabel = '';
   if (id != '') idLabel = id + ':';
+
+  var titleLabel = util.escHtml(title);
+  titleLabel = '<span class="pseudo-link" onclick="kb.openData(\'' + id + '\');">' + titleLabel + '</span>';
+
   $el('#content-id').innerHTML = idLabel;
-  $el('#content-title').innerHTML = util.escHtml(title);
+  $el('#content-title').innerHTML = titleLabel;
   $el('#content-body').innerHTML = contentBody;
   $el('#content-labels').innerHTML = labelsHTML;
   $el('#select-status').value = status;
@@ -799,11 +804,19 @@ kb.showData = function(content) {
     $el('#content-updated-date').innerHTML = '';
     $el('#content-updated-by').innerHTML = '';
   } else {
-    $el('#content-created-date').innerHTML = 'CREATED: ' + cDateStr;
+    $el('#content-created-date').innerHTML = cDateStr;
     $el('#content-created-by').innerHTML = 'by ' + content.C_USER;
-    $el('#content-updated-date').innerHTML = 'UPDATED: ' + uDateStr;
+    $el('#content-updated-date').innerHTML = uDateStr;
     $el('#content-updated-by').innerHTML = 'by ' + content.U_USER;
   }
+
+  var statusLabel = '';
+  if (data_status == 'OK') {
+    statusLabel = kb.buildStatusHTML(status);
+  } else {
+    statusLabel = '<span class="status-label-err">' + data_status + '</span>';
+  }
+  $el('#status').innerHTML = statusLabel;
 
   $el('#content-wrp').scrollTop = 0
   if (id) {

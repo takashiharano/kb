@@ -76,7 +76,6 @@ def build_main_screen(context):
         <pre id="content-id"></pre>
         <span id="info-label">
           <pre id="content-title"></pre>
-          <pre id="content-labels"></pre>
         </span>
 
         <span id="info-edit">
@@ -92,6 +91,10 @@ def build_main_screen(context):
       </div>
       <div style="display:inline-block;position:absolute;right:10px;">
         <span id="buttons-r" class="for-view">
+          <span class="meta-info" style="margin-right:16px;">
+            <span>CREATED: <span id="content-created-date"></span> <span id="content-created-by"></span></span><span style="margin-left:24px;">UPDATED: <span id="content-updated-date"></span> <span id="content-updated-by"></span></span>
+          </span>
+          <span id="status" style="margin-right:8px;"></span>
           <input type="checkbox" id="enrich" checked><label for="enrich">Enrich</label>
           <button id="copy-text-button" style="margin-left:8px;" onclick="kb.copyContent();">COPY</button>
           <button id="copy-url-button" style="margin-left:2px;" onclick="kb.showUrl();">URL</button>
@@ -119,6 +122,9 @@ def build_main_screen(context):
         <div style="height:25px;">
           <input type="range" value="0" min="0" max="256" step="1" id="font-range" style="position:relative;top:6px;" oninput="kb.onFontRangeChanged(this);" onchange="kb.onFontRangeChanged(this);"><span id="fontsize"></span>
           <button onclick="kb.resetFontSize();">RESET</button>
+          <span class="for-view">
+            <span id="content-labels"></span>
+          </span>
         </div>
       </div>
     </div>
@@ -161,8 +167,8 @@ kb.mode = 'view'
 <div id="body1">
   <div id="content-area" class="area">
     <div>
-      <div id="meta-info">
-        <span id="content-created-date"></span> <span id="content-created-by"></span><span id="content-updated-date" style="margin-left:32px;"></span> <span id="content-updated-by"></span>
+      <div id="meta-info" class="meta-info">
+        <span>CREATED: <span id="content-created-date"></span> <span id="content-created-by"></span></span><span style="margin-left:32px;">UPDATED: <span id="content-updated-date"></span> <span id="content-updated-by"></span></span>
         <span style="position:absolute;right:5px;">
           <span id="clock"></span>
         </span>
@@ -386,6 +392,8 @@ table {
 #meta-info {
   margin-bottom: 4px;
   height: 1.2em;
+}
+.meta-info {
   color: #ccc;
 }
 
