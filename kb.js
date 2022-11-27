@@ -694,6 +694,8 @@ kb._save = function() {
     BODY: b64Body
   };
 
+  kb.drawContentBodyArea4Progress('Saving');
+
   var j = util.toJSON(data);
   var param = {
     id: id,
@@ -1104,7 +1106,7 @@ kb.onStartDataLoading = function() {
 };
 kb.onDataLoading = function() {
   if (kb.dataLoadingTmrId > 0) {
-    $el('#content-body').innerHTML = '<span class="progdot">Loading</span>';
+    kb.drawContentBodyArea4Progress('Loading');
   }
 };
 kb.onEndDataLoading = function() {
@@ -1126,6 +1128,10 @@ kb.onEndLoading = function() {
 
 kb.isLoading = function() {
   return ((kb.state & kb.ST_LIST_LOADING) || (kb.state & kb.ST_DATA_LOADING));
+};
+
+kb.drawContentBodyArea4Progress = function(msg) {
+  $el('#content-body').innerHTML = '<span class="progdot">' + msg + '</span>';
 };
 
 kb.dlContent = function(id, idx) {
