@@ -79,7 +79,7 @@ def get_list(target_id=None, need_encode_b64=False):
 
     return data_list_obj
 
-def filter_by_ids(all_id_list, keywords):
+def filter_by_id(all_id_list, keywords):
     filtered_id_list = []
     new_keywords = []
     for i in range(len(keywords)):
@@ -89,20 +89,46 @@ def filter_by_ids(all_id_list, keywords):
             continue
 
         keyword = util.replace(keyword, 'id:', '', flags=re.IGNORECASE)
-        ids = keyword.split('-')
-        st_id =  util.to_int(ids[0])
-        if len(ids) == 1:
-            ed_id = util.to_int(ids[0])
+        if util.match(keyword, '-'):
+            filtered_id_list = filter_by_id_range(all_id_list, keyword, filtered_id_list)
+        elif util.match(keyword, ','):
+            filtered_id_list = filter_by_ids(all_id_list, keyword, filtered_id_list)
         else:
-            ed_id = util.to_int(ids[1])
-        ed_id += 1
-
-        for j in range(st_id, ed_id):
-            id = str(j)
+            id = keyword
             if id in all_id_list:
                 filtered_id_list.append(id)
 
     return {'id_list': filtered_id_list, 'keywords': new_keywords}
+
+def filter_by_ids(all_id_list, keyword, filtered_id_list):
+    ids = keyword.split(',')
+    for i in range(len(ids)):
+        id = ids[i]
+        if id in all_id_list:
+            filtered_id_list.append(id)
+    return filtered_id_list
+
+def filter_by_id_range(all_id_list, keyword, filtered_id_list):
+    ids = keyword.split('-')
+    st_id =  util.to_int(ids[0])
+    if len(ids) == 1:
+        ed_id = util.to_int(ids[0])
+    else:
+        ed_id = util.to_int(ids[1])
+
+    if st_id > ed_id:
+        tmp = ed_id
+        ed_id = st_id
+        st_id = tmp
+
+    ed_id += 1
+
+    for i in range(st_id, ed_id):
+        id = str(i)
+        if id in all_id_list:
+            filtered_id_list.append(id)
+
+    return filtered_id_list
 
 #------------------------------------------------------------------------------
 def search_data(q, need_encode_b64=False):
@@ -112,7 +138,7 @@ def search_data(q, need_encode_b64=False):
     keywords = q.split(' ')
 
     id_list = get_data_id_list()
-    filtered = filter_by_ids(id_list, keywords)
+    filtered = filter_by_id(id_list, keywords)
     id_filtering = False
     if len(filtered['id_list']) > 0:
         id_filtering = True

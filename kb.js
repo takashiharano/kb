@@ -394,12 +394,11 @@ kb.search = function() {
   if (kb.isLoading()) {
     return;
   }
-
   kb._clear();
   var q = $el('#q').value.trim();
   var id = $el('#id-txt').value.trim();
   if (id != '') {
-    if (id.match(/[ -]/)) {
+    if (id.match(/[ ,-]/)) {
       kb.searchByIds(id);
     } else {
       kb.showDataById(id);
@@ -411,12 +410,13 @@ kb.search = function() {
   }
 };
 kb.searchByIds = function(ids) {
-  var q = '';
+  var q = 'id:';
   ids = util.toSingleSP(ids);
-  ids = ids.split(' ');
+  ids = ids.replace(/\s/g, ',');
+  ids = ids.split(',');
   for (var i = 0; i < ids.length; i++) {
-    if (i > 0) q += ' ';
-    q += 'id:' + ids[i];
+    if (i > 0) q += ',';
+    q += ids[i];
   }
   kb.searchByKeyword(q);
 };
