@@ -18,6 +18,7 @@ background4 = '#252b32'
 
 title_color = '#def'
 list_hover_background = '#2f3a42'
+list_row_selected_bg = '#35414a'
 title_disabled_color = '#aaa'
 
 text_red = '#faa'

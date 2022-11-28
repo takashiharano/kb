@@ -281,7 +281,7 @@ kb.drawList = function(items, sortIdx, sortType, totalCount) {
       dlLink = '<span class="dl-link" onclick="kb.dlContent(\'' + id + '\');" data-tooltip="Download">&#x1F517;</span>';
     }
     var labelsHTML = kb.buildLabelsHTML(labels);
-    htmlList += '<tr class="data-list-row">';
+    htmlList += '<tr id="row-' + id + '" class="data-list-row">';
     htmlList += '<td style="padding-right:16px;">' + id + '</td>'
     htmlList += '<td style="min-width:300px;max-width:600px;padding-right:32px;overflow:hidden;text-overflow:ellipsis;">';
     if (data_status == 'OK') {
@@ -323,6 +323,10 @@ kb.drawList = function(items, sortIdx, sortType, totalCount) {
   }
 
   kb.drawInfo(infoHtml);
+
+  if (kb.content && kb.content.id != '') {
+    kb.highlightSelectedRow(kb.content.id);
+  }
 };
 
 kb.sortItemList = function(sortIdx, sortType) {
@@ -451,8 +455,14 @@ kb.categorySearch = function(category, label) {
 
 kb.openData = function(id) {
   if (!kb.isLoading()) {
+    kb.highlightSelectedRow(id);
     kb.getData(id);
   }
+};
+
+kb.highlightSelectedRow = function(id) {
+  $el('.data-list-row').removeClass('row-selected');
+  $el('#row-' + id).addClass('row-selected');
 };
 
 kb.getData = function(id) {

@@ -538,6 +538,11 @@ td.center {
     css += '.input-disable {'
     css += '  color: ' + appconfig.text_disabled + ';'
     css += '}'
+
+    css += '.row-selected {'
+    css += '  background: ' + appconfig.list_row_selected_bg + ';'
+    css += '}'
+
     return css
 
 #------------------------------------------------------------------------------
