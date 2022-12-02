@@ -1247,8 +1247,13 @@ kb.view.init = function() {
 };
 
 kb.view.onNoRights = function() {
-  var msg = 'ERROR: NO_ACCESS_RIGHTS\n\n';
-  msg += 'You do not have permission to access.\n';
-  msg += 'Please contact the administrator and get your token.';
-  $el('#content-body').textseq(msg, {cursor: 3});
+  var token = util.getQuery('token');
+  if (token) {
+    var msg = 'ERROR: NO_ACCESS_RIGHTS\n\n';
+    msg += 'You do not have permission to access.\n';
+    msg += 'Please contact the administrator and get your token.';
+    $el('#content-body').textseq(msg, {cursor: 3});
+  } else {
+    kb.onForbidden();
+  }
 };

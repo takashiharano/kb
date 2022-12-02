@@ -189,7 +189,7 @@ kb.mode = 'view'
     <div style="height:calc(100% - 74px);">
       <div id="content-wrp1">
         <div id="content-wrp">
-          <pre id="content-body"></pre>
+          <pre id="content-body"><span class="progdot">Please wait</span></pre>
           </div>
         </div>
         <div style="height:25px;">
