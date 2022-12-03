@@ -19,6 +19,7 @@ import web
 #------------------------------------------------------------------------------
 def build_js(context):
     js = ''
+    js += 'var kb = kb || {};\n'
     js += 'kb.config = {\n'
     js += '  default_data_encryption: '
     js += 'true' if appconfig.default_data_encryption else 'false'

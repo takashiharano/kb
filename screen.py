@@ -226,6 +226,30 @@ ACCESS PERMISSION IS REQUIRED.
     return html
 
 #------------------------------------------------------------------------------
+def build_auth_redirection_screen():
+    html = '''<!DOCTYPE html><html><head><meta charset="utf-8">
+<meta name="robots" content="none">
+<meta name="referrer" content="no-referrer">
+<meta name="referrer" content="never">
+'''
+    html += '<title>' + appconfig.title + '</title>'
+    html += '<style>'
+    html += build_css(mode='view')
+    html += '</style>'
+    html += '<script src="' + ROOT_PATH + 'libs/debug.js"></script>'
+    html += '<script src="' + ROOT_PATH + 'libs/util.js"></script>'
+    html += '<script src="' + ROOT_PATH + 'websys/websys.js"></script>'
+    html += '<script src="./?res=js"></script>'
+    html += '''
+<script>
+$onLoad = function() {
+  websys.authRedirection(location.href);
+};
+</script>
+</head><body></body></html>'''
+    return html
+
+#------------------------------------------------------------------------------
 def build_css(mode=''):
     css = ''
     css += 'body{'
@@ -561,7 +585,11 @@ def main():
        else:
             html = build_forbidden_screen(context)
     elif id is not None:
-        html = build_view_screen(context)
+        token = util.get_request_param('token')
+        if token is None:
+            html = build_auth_redirection_screen()
+        else:
+            html = build_view_screen(context)
     else:
         html = build_main_screen(context)
 
