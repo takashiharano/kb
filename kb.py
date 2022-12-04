@@ -398,6 +398,7 @@ def get_data(id, need_encode_b64=False):
         data = load_data(id)
     except Exception as e:
         data = {
+            'id': id,
             'data_status': str(e)
         }
         return data
