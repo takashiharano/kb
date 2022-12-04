@@ -304,7 +304,7 @@ def _is_date_matches(target, search_val):
     else:
        str_datetime = search_val
 
-    millis = util.get_timestamp_in_millis(str_datetime)
+    millis = util.get_unixtime_millis(str_datetime)
 
     if search_val.startswith('>='):
         if target >= millis:
@@ -479,7 +479,7 @@ def save_data(id, new_data, user=''):
         next_id = get_max_id() + 1
         id = str(next_id)
 
-    now = util.get_timestamp_in_millis()
+    now = util.get_unixtime_millis()
 
     try:
         data = load_data(id, True)

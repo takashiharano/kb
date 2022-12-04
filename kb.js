@@ -34,8 +34,7 @@ kb.listStatus = {
   sortIdx: 5,
   sortType: 2
 };
-kb.stateList = [];
-kb.tokens = [];
+kb.configInfo = null;
 kb.itemList= [];
 kb.totalCount = 0;
 kb.pendingId = null;
@@ -162,8 +161,8 @@ kb.onGetInitInfo = function(xhr, res, req) {
   }
   kb.onAppReady();
   var info = res.body;
-  kb.tokens = info.tokens;
-  var stateList = info.state_list;
+  kb.configInfo = res.body;
+  var stateList = kb.configInfo.state_list;
   kb.stateList = stateList;
   util.addSelectOption('#select-status', '');
   for (var i = 0; i < stateList.length; i++) {
@@ -543,8 +542,12 @@ kb.buildStatusHTML = function(status) {
   if (!status) return '';
   var html = '';
   var st = {};
-  for (var i = 0; i < kb.stateList.length; i++) {
-    var state = kb.stateList[i];
+  var stateList = [];
+  if (kb.configInfo && kb.configInfo.stateList) {
+    stateList = kb.configInfo.stateList;
+  }
+  for (var i = 0; i < stateList.length; i++) {
+    var state = stateList[i];
     if (state.name == status) {
       st = state;
       break;
@@ -1051,17 +1054,23 @@ kb.copyContent = function() {
 };
 
 kb.showUrl = function() {
+  var id = kb.content.id;
   var url = location.href;
   url = url.replace(/\?.*/, '');
-  url += '?id=' + kb.content.id;
+  url += '?id=' + id;
   kb.contentUrl = url;
   var m = '<span id="content-url">' + url + '</span>';
   m += '<button style="margin-left:16px;" onclick="kb.copyUrl();">COPY</button>\n\n';
   var listTokens = '<div style="width:100%;text-align:left;">';
   listTokens += 'Token:\n';
-  for (var i = 0; i < kb.tokens.length; i++) {
-    var token = kb.tokens[i];
-    listTokens += '<button style="margin-right:8px;" onclick="kb.applyToken(\'' + token + '\')">SELECT</button>' + token + '\n';
+  var tokenKeys = [];
+  if (kb.configInfo && kb.configInfo.token_keys) {
+    tokenKeys = kb.configInfo.token_keys;
+  }
+  listTokens += '<button style="margin-right:8px;" onclick="kb.applyToken(\'' + id + '\', null)">DESELECT</button>\n';
+  for (var i = 0; i < tokenKeys.length; i++) {
+    var tokenKey = tokenKeys[i];
+    listTokens += '<button style="margin-right:8px;" onclick="kb.applyToken(\'' + id + '\', \'' + tokenKey + '\')">SELECT</button>' + tokenKey + '\n';
   }
   listTokens += '</div>';
   m += listTokens;
@@ -1074,7 +1083,15 @@ kb.copyUrl = function() {
   kb.contntUrl = '';
 };
 
-kb.applyToken = function(token) {
+kb.applyToken = function(id, tokenKey) {
+  if (tokenKey == null) {
+    $el('#content-url').innerText = kb.contentUrl;
+    return;
+  }
+  var now = Date.now();
+  var srcToken = id + ':' + tokenKey + ':' + now;
+  var token = util.encodeBSB64(srcToken, 0);
+  token = encodeURIComponent(token);
   url = kb.contentUrl + '&token=' + token;
   $el('#content-url').innerText = url;
 };
@@ -1249,6 +1266,6 @@ kb.view.init = function() {
 kb.view.onNoRights = function() {
   var msg = 'ERROR: NO_ACCESS_RIGHTS\n\n';
   msg += 'You do not have permission to access.\n';
-  msg += 'Please contact the administrator and get your token.';
+  msg += 'Please contact the administrator and get valid token.';
   $el('#content-body').textseq(msg, {cursor: 3});
 };
