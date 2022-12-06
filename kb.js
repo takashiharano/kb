@@ -223,14 +223,19 @@ kb.drawListContent = function(html) {
   $el('#list-wrp').scrollTop = 0;
 };
 
+kb.sortList = function(items, sortKey, desc) {
+  items = util.copyObject(items);
+  var asNum = true;
+  items = util.sortObject(items, sortKey, desc, asNum);
+  return items;
+};
+
 kb.drawList = function(items, sortIdx, sortType, totalCount) {
   if (sortIdx >= 0) {
     if (sortType > 0) {
       var sortKey = kb.LIST_COLUMNS[sortIdx].key;
       var desc = (sortType == 2);
-      items = util.copyObject(items);
-      var asNum = true;
-      items = util.sortObject(items, sortKey, desc, asNum);
+      items = kb.sortList(items, sortKey, desc);
     }
   }
 
@@ -434,7 +439,19 @@ kb.searchByKeyword = function(q) {
   kb.listStatus.sortType = 2;
   var param = {q: util.encodeBase64(q)};
   kb.onStartListLoading('Searching');
-  kb.callApi('search', param, kb.onGetList);
+  kb.callApi('search', param, kb.onSearchCb);
+};
+kb.onSearchCb = function(xhr, res, req) {
+  kb.onGetList(xhr, res, req);
+  var index = parseInt(util.getQuery('index'));
+  if (!isNaN(index)) {
+    var items = kb.sortList(kb.itemList, 'score', true);
+    var item = items[index];
+    if (item) {
+      var id = item.id;
+      kb.getData(id);
+    }
+  }
 };
 
 kb.showDataById = function(id) {
