@@ -449,7 +449,7 @@ kb.onSearchCb = function(xhr, res, req) {
     var item = items[index];
     if (item) {
       var id = item.id;
-      kb.getData(id);
+      kb.openData(id);
     }
   }
 };
