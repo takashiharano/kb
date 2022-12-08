@@ -362,6 +362,7 @@ table {
 #body1 {
   display: none;
   width: calc(100% - 17px);
+  min-width: 1200px;
 }
 .selected {
   background: #2f3a42;
