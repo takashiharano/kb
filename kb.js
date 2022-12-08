@@ -289,7 +289,7 @@ kb.drawList = function(items, sortIdx, sortType, totalCount) {
     htmlList += '<td style="padding-right:16px;">' + id + '</td>'
     htmlList += '<td style="min-width:300px;max-width:600px;padding-right:32px;overflow:hidden;text-overflow:ellipsis;">';
     if (data_status == 'OK') {
-      htmlList += '<span class="title pseudo-link" onclick="kb.openData(\'' + id + '\');"';
+      htmlList += '<span style="display:inline-block;width:100%;" class="title pseudo-link" onclick="kb.openData(\'' + id + '\');"';
     } else {
       htmlList += '<span class="title-disabled"';
     }
