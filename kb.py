@@ -42,7 +42,7 @@ def get_list(target_id=None, need_encode_b64=False):
     data_list = []
     for i in range(len(data_id_list)):
         id = data_id_list[i]
-        if target_id is not None and target_id != id:
+        if target_id is not None and target_id != id or target_id is None and id == '0':
             continue
         try:
             data = load_data(id, True)
