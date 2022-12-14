@@ -121,7 +121,7 @@ def build_main_screen(context):
           <input type="range" value="0" min="0" max="256" step="1" id="font-range" style="position:relative;top:6px;" oninput="kb.onFontRangeChanged(this);" onchange="kb.onFontRangeChanged(this);"><span id="fontsize"></span>
           <button onclick="kb.resetFontSize();">RESET</button>
           <span class="for-view">
-            <span class="meta-info" style="margin-left:16px;">
+            <span class="meta-info" style="position:absolute;right:16px;margin-top:8px;">
               <span>CREATED: <span id="content-created-date"></span> <span id="content-created-by"></span></span><span style="margin-left:24px;">UPDATED: <span id="content-updated-date"></span> <span id="content-updated-by"></span></span>
             </span>
           </span>
