@@ -91,9 +91,7 @@ def build_main_screen(context):
       </div>
       <div style="display:inline-block;position:absolute;right:10px;">
         <span id="buttons-r" class="for-view">
-          <span class="meta-info" style="margin-right:16px;">
-            <span>CREATED: <span id="content-created-date"></span> <span id="content-created-by"></span></span><span style="margin-left:24px;">UPDATED: <span id="content-updated-date"></span> <span id="content-updated-by"></span></span>
-          </span>
+          <span id="content-labels"></span>
           <span id="status" style="margin-right:8px;"></span>
           <input type="checkbox" id="enrich" checked><label for="enrich">Enrich</label>
           <button id="copy-text-button" style="margin-left:8px;" onclick="kb.copyContent();">COPY</button>
@@ -123,7 +121,9 @@ def build_main_screen(context):
           <input type="range" value="0" min="0" max="256" step="1" id="font-range" style="position:relative;top:6px;" oninput="kb.onFontRangeChanged(this);" onchange="kb.onFontRangeChanged(this);"><span id="fontsize"></span>
           <button onclick="kb.resetFontSize();">RESET</button>
           <span class="for-view">
-            <span id="content-labels"></span>
+            <span class="meta-info" style="margin-left:16px;">
+              <span>CREATED: <span id="content-created-date"></span> <span id="content-created-by"></span></span><span style="margin-left:24px;">UPDATED: <span id="content-updated-date"></span> <span id="content-updated-by"></span></span>
+            </span>
           </span>
         </div>
       </div>
@@ -439,6 +439,7 @@ table {
 #content-labels {
   display: inline-block;
   margin-left: 32px;
+  margin-right: 32px;
 }
 #content-labels-edt {
   width: 300px;
