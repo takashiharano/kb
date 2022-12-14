@@ -1245,15 +1245,17 @@ kb.enableQ = function() {
   $el('#keyqord-label').removeClass('input-disable');
 };
 
-kb.onKeyDown = function(e) {
-  if (e.keyCode == 13) {
-    if ($el('.q-txt').hasFocus()) {
-      if (!kb.isLoading()) {
-        kb.search();
-      }
+$onEnterKey = function(e) {
+  if ($el('.q-txt').hasFocus()) {
+    if (!kb.isLoading()) {
+      kb.search();
     }
   }
 };
+$onEscKey = function(e) {
+  util.dialog.close();
+};
+
 kb.onMouseMove = function(e) {
   if (kb.uiStatus == kb.UI_ST_AREA_RESIZING) {
     kb.onAreaResize(e);
