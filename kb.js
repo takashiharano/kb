@@ -105,7 +105,7 @@ kb.init = function() {
 
   kb.onAppReady();
 
-  var stateList = kb.configInfo.stateList;
+  var stateList = kb.configInfo.state_list;
   util.addSelectOption('#select-status', '');
   for (var i = 0; i < stateList.length; i++) {
     var state = stateList[i];
@@ -540,8 +540,8 @@ kb.buildStatusHTML = function(status) {
   var html = '';
   var st = {};
   var stateList = [];
-  if (kb.configInfo && kb.configInfo.stateList) {
-    stateList = kb.configInfo.stateList;
+  if (kb.configInfo && kb.configInfo.state_list) {
+    stateList = kb.configInfo.state_list;
   }
   for (var i = 0; i < stateList.length; i++) {
     var state = stateList[i];
@@ -825,7 +825,7 @@ kb.showData = function(content) {
   var statusLabel = '';
   if (data_status == 'OK') {
     statusLabel = kb.buildStatusHTML(status);
-  } else {
+  } else if (data_status != 'EMPTY') {
     statusLabel = '<span class="status-label-err">' + data_status + '</span>';
   }
   $el('#status').innerHTML = statusLabel;
@@ -1056,19 +1056,19 @@ kb.showUrl = function() {
   url = url.replace(/\?.*/, '');
   url += '?id=' + id;
   kb.contentUrl = url;
-  var m = '<span id="content-url">' + url + '</span>';
-  m += '<button style="margin-left:16px;" onclick="kb.copyUrl();">COPY</button>\n\n';
-  var listTokens = '<div style="width:100%;text-align:left;">';
-  listTokens += 'Token:\n';
-  var tokenKeys = [];
-  if (kb.configInfo && kb.configInfo.tokenKeys) {
-    tokenKeys = kb.configInfo.tokenKeys;
+  var m = '<span id="content-url" class="pseudo-link" onclick="kb.copyUrl();" data-tooltip="Click to copy">' + url + '</span>\n\n';
+  var listTokens = '<div style="width:100%;text-align:left;line-height:1.8em;">';
+  listTokens += 'Token: ';
+  listTokens +=  '<span id="valid-until"></span>\n';
+    var tokenKeys = [];
+  if (kb.configInfo && kb.configInfo.token_keys) {
+    tokenKeys = kb.configInfo.token_keys;
   }
-  listTokens += '<button style="margin-right:8px;" onclick="kb.applyToken(\'' + id + '\', null)">DESELECT</button>\n';
   for (var i = 0; i < tokenKeys.length; i++) {
     var tokenKey = tokenKeys[i];
-    listTokens += '<button style="margin-right:8px;" onclick="kb.applyToken(\'' + id + '\', \'' + tokenKey + '\')">SELECT</button>' + tokenKey + '\n';
+    listTokens += '<button style="margin-right:8px;" onclick="kb.applyToken(\'' + id + '\', \'' + tokenKey + '\')"> SELECT </button>' + tokenKey + '\n';
   }
+  listTokens += '<button style="margin-right:8px;" onclick="kb.applyToken(\'' + id + '\', null)">DESELECT</button>\n';
   listTokens += '</div>';
   m += listTokens;
   util.alert(m)
@@ -1083,14 +1083,18 @@ kb.copyUrl = function() {
 kb.applyToken = function(id, tokenKey) {
   if (tokenKey == null) {
     $el('#content-url').innerText = kb.contentUrl;
+    $el('#valid-until').innerText = '';
     return;
   }
   var now = Date.now();
+  var validUntilTime = now + kb.configInfo.token_valid_sec * 1000;
+  var validUntil = util.getDateTimeString(validUntilTime);
   var srcToken = id + ':' + tokenKey + ':' + now;
   var token = util.encodeBSB64(srcToken, 0);
   token = encodeURIComponent(token);
   url = kb.contentUrl + '&token=' + token;
   $el('#content-url').innerText = url;
+  $el('#valid-until').innerText = 'Valid until ' + validUntil;
 };
 
 kb.copy = function(s) {

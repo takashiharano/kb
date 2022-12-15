@@ -28,7 +28,7 @@ def build_js(context):
     js += '};\n'
 
     js += 'kb.configInfo = {\n'
-    js += '  stateList: [\n';
+    js += '  state_list: [\n';
     for i in range(len(appconfig.state_list)):
         obj = appconfig.state_list[i]
         if i > 0:
@@ -41,14 +41,17 @@ def build_js(context):
 
     js += '],\n'
 
-    js += 'tokenKeys: [\n'
+    js += 'token_keys: [\n'
     for i in range(len(appconfig.token_keys)):
         key = appconfig.token_keys[i]
         if i > 0:
             js += ','
         js += '\'' + key + '\''
 
-    js += ']\n'
+    js += '],\n'
+
+    js += 'token_valid_sec: ' + str(appconfig.token_valid_sec) + ','
+
     js += '};\n'
 
     js += 'websys.init(\'' + ROOT_PATH + '\');'
