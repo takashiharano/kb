@@ -254,6 +254,7 @@ def calc_data_macthed_score(data, keyword):
         score = is_target_matches(data['U_USER'], keyword)
 
     else:
+        score += is_matches_title(data['TITLE'], keyword) * 2
         score += count_matched_key(data['TITLE'], keyword) * 100
         score += count_matched_key(data['LABELS'], keyword) * 10
 
