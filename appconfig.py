@@ -69,6 +69,7 @@ state_list = [
     {'name': '???', 'fgcolor': '#fff', 'bgcolor': '#238'},
     {'name': 'NEED-REVIEW', 'fgcolor': '#fff', 'bgcolor': '#064'},
     {'name': 'ON-HOLD', 'fgcolor': '#220', 'bgcolor': '#e1ab39'},
+    {'name': 'INCOMPLETE', 'fgcolor': '#fff', 'bgcolor': '#424'},
     {'name': 'UNRESOLVED', 'fgcolor': '#fff', 'bgcolor': '#400'},
     {'name': 'OBSOLETE', 'fgcolor': '#a0a0a0', 'bgcolor': '#444'}
 ]
