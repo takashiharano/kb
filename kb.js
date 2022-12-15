@@ -88,8 +88,6 @@ kb.onAppReady1 = function() {
 
 kb.init = function() {
   kb.clearContent();
-  util.addCtrlKeyHandler('S', kb.onCtrlS);
-  util.addCtrlKeyHandler('Q', kb.onCtrlQ);
   $el('#id-txt').addEventListener('input', kb.onInputId);
   $el('#q').addEventListener('input', kb.onInputQ);
   util.textarea.addStatusInfo('#content-body-edt', '#content-body-st');
@@ -98,7 +96,6 @@ kb.init = function() {
 
   kb.onEditEnd();
 
-  window.addEventListener('keydown', kb.onKeyDown);
   window.addEventListener('mousemove', kb.onMouseMove, true);
   window.addEventListener('mouseup', kb.onMouseUp, true);
   kb.initDnD();
@@ -1088,7 +1085,7 @@ kb.applyToken = function(id, tokenKey) {
   }
   var now = Date.now();
   var validUntilTime = now + kb.configInfo.token_valid_sec * 1000;
-  var validUntil = util.getDateTimeString(validUntilTime);
+  var validUntil = util.getDateTimeString(validUntilTime, '%YYYY-%MM-%DD %HH:%mm:%SS %Z');
   var srcToken = id + ':' + tokenKey + ':' + now;
   var token = util.encodeBSB64(srcToken, 0);
   token = encodeURIComponent(token);
@@ -1190,14 +1187,10 @@ kb.dlB64Content = function(id, idx) {
   util.postSubmit('api.cgi', param);
 };
 
-kb.onCtrlS = function(e) {
-  e.preventDefault();
+$onCtrlS = function(e) {
   if (kb.status & kb.ST_EDITING) kb.save();
 };
-kb.onCtrlQ = function(e) {
-  e.preventDefault();
-  if (kb.status & kb.ST_EDITING) kb.cancel();
-};
+
 kb.onInputId = function() {
   if ($el('#id-txt').value) {
     kb.disableQ();
