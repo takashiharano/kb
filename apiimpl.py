@@ -158,11 +158,6 @@ def proc_api(context, act):
     elif act == 'check_exists':
         id = get_request_param('id')
         result_data = kb.check_exists(id)
-    elif act == 'get_init_info':
-        result_data = {
-            'state_list': appconfig.state_list,
-            'token_keys': appconfig.token_keys
-        }
     else:
         act = web.get_raw_request_param('act')
         if act == 'export':

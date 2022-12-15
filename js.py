@@ -26,6 +26,31 @@ def build_js(context):
     js += ',\n'
     js += '  list_max: ' + str(appconfig.list_max) + '\n';
     js += '};\n'
+
+    js += 'kb.configInfo = {\n'
+    js += '  stateList: [\n';
+    for i in range(len(appconfig.state_list)):
+        obj = appconfig.state_list[i]
+        if i > 0:
+            js += ','
+        js += '{'
+        js += '  name: \'' + obj['name'] + '\', '
+        js += '  fgcolor: \'' + obj['fgcolor'] + '\', '
+        js += '  bgcolor: \'' + obj['bgcolor'] + '\', '
+        js += '}'
+
+    js += '],\n'
+
+    js += 'tokenKeys: [\n'
+    for i in range(len(appconfig.token_keys)):
+        key = appconfig.token_keys[i]
+        if i > 0:
+            js += ','
+        js += '\'' + key + '\''
+
+    js += ']\n'
+    js += '};\n'
+
     js += 'websys.init(\'' + ROOT_PATH + '\');'
     return js
 

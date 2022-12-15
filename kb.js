@@ -103,7 +103,14 @@ kb.init = function() {
   window.addEventListener('mouseup', kb.onMouseUp, true);
   kb.initDnD();
 
-  kb.getInitInfo();
+  kb.onAppReady();
+
+  var stateList = kb.configInfo.stateList;
+  util.addSelectOption('#select-status', '');
+  for (var i = 0; i < stateList.length; i++) {
+    var state = stateList[i];
+    util.addSelectOption('#select-status', state.name);
+  }
 };
 
 kb.initDnD = function() {
@@ -142,33 +149,6 @@ kb.onAbortLoadFile = function() {
 };
 kb.onFileLoadError = function() {
   kb.showInfotip('File loading error');
-};
-
-kb.getInitInfo = function() {
-  kb.callApi('get_init_info', null, kb.onGetInitInfo);
-};
-kb.onGetInitInfo = function(xhr, res, req) {
-  if (xhr.status != 200) {
-    kb.onHttpError(xhr.status);
-    return;
-  }
-  if (res.status == 'FORBIDDEN') {
-    kb.onForbidden();
-    return;
-  } else if (res.status != 'OK') {
-    kb.onApiError(res);
-    return;
-  }
-  kb.onAppReady();
-  var info = res.body;
-  kb.configInfo = res.body;
-  var stateList = kb.configInfo.state_list;
-  kb.stateList = stateList;
-  util.addSelectOption('#select-status', '');
-  for (var i = 0; i < stateList.length; i++) {
-    var state = stateList[i];
-    util.addSelectOption('#select-status', state.name);
-  }
 };
 
 kb.callApi = function(act, params, cb) {
@@ -1081,8 +1061,8 @@ kb.showUrl = function() {
   var listTokens = '<div style="width:100%;text-align:left;">';
   listTokens += 'Token:\n';
   var tokenKeys = [];
-  if (kb.configInfo && kb.configInfo.token_keys) {
-    tokenKeys = kb.configInfo.token_keys;
+  if (kb.configInfo && kb.configInfo.tokenKeys) {
+    tokenKeys = kb.configInfo.tokenKeys;
   }
   listTokens += '<button style="margin-right:8px;" onclick="kb.applyToken(\'' + id + '\', null)">DESELECT</button>\n';
   for (var i = 0; i < tokenKeys.length; i++) {

@@ -121,7 +121,7 @@ def build_main_screen(context):
           <input type="range" value="0" min="0" max="256" step="1" id="font-range" style="position:relative;top:6px;" oninput="kb.onFontRangeChanged(this);" onchange="kb.onFontRangeChanged(this);"><span id="fontsize"></span>
           <button onclick="kb.resetFontSize();">RESET</button>
           <span class="for-view">
-            <span class="meta-info" style="position:absolute;right:16px;margin-top:8px;">
+            <span class="meta-info" style="position:absolute;right:8px;margin-top:10px;">
               <span>CREATED: <span id="content-created-date"></span> <span id="content-created-by"></span></span><span style="margin-left:24px;">UPDATED: <span id="content-updated-date"></span> <span id="content-updated-by"></span></span>
             </span>
           </span>
@@ -169,6 +169,7 @@ kb.mode = 'view'
     <div>
       <div id="meta-info" class="meta-info">
         <span>CREATED: <span id="content-created-date"></span> <span id="content-created-by"></span></span><span style="margin-left:32px;">UPDATED: <span id="content-updated-date"></span> <span id="content-updated-by"></span></span>
+        <span id="status" style="margin-left:32px;"></span>
         <span style="position:absolute;right:5px;">
           <span id="clock"></span>
         </span>
@@ -177,9 +178,9 @@ kb.mode = 'view'
         <span id="content-id"></span>
         <span id="content-title"></span>
         <span id="info-label">
-        <span id="content-labels"></span>
       </div>
       <div style="display:inline-block;position:absolute;right:10px;">
+        <span id="content-labels"></span>
         <span id="buttons-r">
           <input type="checkbox" id="enrich" checked><label for="enrich">Enrich</label>
           <button id="copy-text-button" style="margin-left:8px;" onclick="kb.copyContent();">COPY</button>
@@ -282,11 +283,11 @@ def build_css(mode=''):
     css += '  font-family: Consolas, Monaco, Menlo, monospace, sans-serif;'
     css += '  transition: all 0.2s ease;'
     css += '}'
+    css += 'button:focus, input[type="button"]:focus, input[type="submit"]:focus {'
+    css += '  background: ' + appconfig.button_focus_background + ';'
+    css += '  color: ' + appconfig.button_focus_fgcolor + ';'
+    css += '}'
     css += '''
-button:focus, input[type="button"]:focus, input[type="submit"]:focus {
-  background: ' + appconfig.button_focus_background + ';'
-  color: ' + appconfig.button_focus_fgcolor + ';'
-}
 input[type="checkbox"] {
   position: relative;
   top: 2px;
@@ -516,9 +517,14 @@ table {
   border-radius: 3px;
   padding: 0 3px;
 }
-.status:hover {
-  cursor: pointer;
-}
+'''
+
+    if mode != 'view':
+        css += '.status:hover {'
+        css += '  cursor: pointer;'
+        css += '}'
+
+    css += '''
 table.item-list,td.item-list,th.item-list {
   border: 1px solid #888;
   border-top: none;
