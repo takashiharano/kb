@@ -726,14 +726,19 @@ kb.onSaveData = function(xhr, res, req) {
     }
     kb.showInfotip('OK');
   } else if (res.status == 'CONFLICT') {
+    $el('#content-body').innerHTML = 'ERROR!';
     var data = res.body;
     var dt = util.getDateTimeString(+data.U_DATE);
     var msg = 'DATE: ' + dt + '\n';
     msg += 'BY: ' + data.U_USER;
-    util.alert('Conflict!', msg);
+    util.alert('Conflict!', msg, kb.onConflictOK);
   } else {
     log.e(res.status + ':' + res.body);
   }
+};
+
+kb.onConflictOK = function() {
+  kb.edit();
 };
 
 kb.checkExists = function(id) {
@@ -832,6 +837,14 @@ kb.showData = function(content) {
     $el('.for-view').show();
   } else {
     $el('.for-view').hide();
+  }
+
+  if (id == '0') {
+    $el('#delete-button').hide();
+    $el('#clear-button').show();
+  } else {
+    $el('#delete-button').show();
+    $el('#clear-button').hide();
   }
 };
 
@@ -933,6 +946,19 @@ kb.onDelete = function(xhr, res, req) {
     kb.showInfotip(res.status);
     log.e(res.status + ':' + res.body);
   }
+};
+
+kb.clearData = function(id) {
+  util.confirm('Clear?', kb._clearData, {focus: 'no', data: id});
+};
+kb._clearData = function(id) {
+  if (id == undefined) {
+    id = kb.content.id;
+  }
+  kb.edit();
+  $el('#content-body-edt').value = '';
+  kb.status |= kb.ST_EXIT;
+  kb._save();
 };
 
 kb.export = function() {

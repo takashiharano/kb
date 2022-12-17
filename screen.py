@@ -100,6 +100,8 @@ def build_main_screen(context):
     if web.has_permission(context, 'kb.delete'):
         html += '          <button id="delete-button" class="red-button" style="min-width:32px;margin-left:8px;" onclick="kb.delete();">DELETE</button>'
 
+    html += '          <button id="clear-button" class="red-button" style="min-width:32px;margin-left:8px;display:hidden;" onclick="kb.clearData();">CLEAR</button>'
+
     html += '''
         </span>
         <span id="buttons-w" class="for-edit">
