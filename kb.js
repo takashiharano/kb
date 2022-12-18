@@ -321,7 +321,7 @@ kb.sortItemList = function(sortIdx, sortType) {
 
 //---------------------------------------------------------
 kb.buildListHeader = function(columns, sortIdx, sortType) {
-  var html = '<table id="list-table" class="list-table item-list">';
+  var html = '<table id="list-table" class="item list-table item-list">';
   html += '<tr class="item-list">';
 
   for (var i = 0; i < columns.length; i++) {

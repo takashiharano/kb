@@ -61,7 +61,7 @@ def build_main_screen(context):
       <pre id="info"></pre>
     </div>
     <div id="list-wrp">
-      <pre id="list" class="item"></pre>
+      <pre id="list"></pre>
     </div>
   </div>
   <div id="content-area" class="area">
@@ -372,6 +372,7 @@ table {
 }
 '''
     css += '.item {'
+    css += '  width: 100%;'
     css += '  background: ' + appconfig.background4 + ';'
     css += '}'
     css += '#list-area {'
