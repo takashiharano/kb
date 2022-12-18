@@ -601,6 +601,6 @@ def main():
         else:
             html = build_view_screen(context)
     else:
-        html = build_main_screen(context)
+        html = build_auth_redirection_screen()
 
     util.send_html(html)
