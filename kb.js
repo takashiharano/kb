@@ -383,6 +383,7 @@ kb.search = function() {
   var q = $el('#q').value.trim();
   var id = $el('#id-txt').value.trim();
   if (id != '') {
+    id = util.toHalfWidth(id);
     if (id.match(/[ ,-]/)) {
       kb.searchByIds(id);
     } else {
