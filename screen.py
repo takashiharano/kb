@@ -423,7 +423,7 @@ table {
   height: 1.2em;
 }
 .meta-info {
-  color: #ccc;
+  color: #aaa;
 }
 
 #content-id {
