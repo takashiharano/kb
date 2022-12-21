@@ -35,7 +35,7 @@ kb.listStatus = {
   sortType: 2
 };
 kb.configInfo = null;
-kb.itemList= [];
+kb.itemList = [];
 kb.totalCount = 0;
 kb.pendingId = null;
 kb.content;
@@ -47,6 +47,7 @@ kb.areaSize = {
   orgSP2: 0
 };
 kb.requestedId = null;
+kb.loadPendingTmrId = 0;
 kb.dataLoadingTmrId = 0;
 
 $onReady = function() {
@@ -266,7 +267,7 @@ kb.drawList = function(items, sortIdx, sortType, totalCount) {
     htmlList += '<td style="padding-right:16px;">' + id + '</td>'
     htmlList += '<td style="min-width:300px;max-width:600px;padding-right:32px;overflow:hidden;text-overflow:ellipsis;">';
     if (data_status == 'OK') {
-      htmlList += '<span style="display:inline-block;width:100%;" class="title pseudo-link" onclick="kb.openData(\'' + id + '\');"';
+      htmlList += '<span style="display:inline-block;width:100%;" class="title pseudo-link" onclick="kb.onClickTitle(\'' + id + '\');"';
     } else {
       htmlList += '<span class="title-disabled"';
     }
@@ -368,7 +369,7 @@ kb.getListAll = function() {
   location.href = './';
 };
 kb.listAll = function() {
-  if (!kb.isLoading()) {
+  if (!kb.isListLoading()) {
     kb.listStatus.sortIdx = 5;
     kb.listStatus.sortType = 2;
     kb.getList();
@@ -376,7 +377,7 @@ kb.listAll = function() {
 };
 
 kb.search = function() {
-  if (kb.isLoading()) {
+  if (kb.isListLoading()) {
     return;
   }
   kb._clear();
@@ -433,10 +434,8 @@ kb.onSearchCb = function(xhr, res, req) {
 };
 
 kb.showDataById = function(id) {
-  if (!kb.isLoading()) {
-    kb.getList(id);
-    kb.getData(id);
-  }
+  kb.getList(id);
+  kb.getData(id);
 };
 
 kb.categorySearch = function(category, label) {
@@ -447,11 +446,36 @@ kb.categorySearch = function(category, label) {
   kb.search();
 };
 
-kb.openData = function(id) {
-  if (!kb.isLoading()) {
-    kb.highlightSelectedRow(id);
-    kb.getData(id);
+kb.onClickTitle = function(id) {
+  if (kb.loadPendingTmrId) {
+    clearTimeout(kb.loadPendingTmrId);
+    kb.loadPendingTmrId = 0;
   }
+  var item = kb.getMetaData(id);
+  if (item.size < 1048576) {
+    kb.openData(id);
+  } else {
+    kb.loadPendingTmrId = setTimeout(kb.onLoadPendingExpr, 500, id);
+  }
+  kb.highlightSelectedRow(id);
+};
+
+kb.onLoadPendingExpr = function(id) {
+  kb.loadPendingTmrId = 0;
+  kb.openData(id);
+};
+
+kb.getMetaData = function(id) {
+  for (var i = 0; i < kb.itemList.length; i++) {
+    var item = kb.itemList[i];
+    if (item.id == id) return item;
+  }
+  return null;
+};
+
+kb.openData = function(id) {
+  kb.highlightSelectedRow(id);
+  kb.getData(id);
 };
 
 kb.highlightSelectedRow = function(id) {
@@ -1178,8 +1202,8 @@ kb.onEndLoading = function() {
   $el('#all-button').disabled = false;
 };
 
-kb.isLoading = function() {
-  return ((kb.state & kb.ST_LIST_LOADING) || (kb.state & kb.ST_DATA_LOADING));
+kb.isListLoading = function() {
+  return (kb.status & kb.ST_LIST_LOADING);
 };
 
 kb.drawContentBodyArea4Progress = function(msg) {
@@ -1251,7 +1275,7 @@ kb.enableQ = function() {
 
 $onEnterKey = function(e) {
   if ($el('.q-txt').hasFocus()) {
-    if (!kb.isLoading()) {
+    if (!kb.isListLoading()) {
       kb.search();
     }
   }
