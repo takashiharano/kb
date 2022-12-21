@@ -74,5 +74,5 @@ state_list = [
     {'name': 'OBSOLETE', 'fgcolor': '#a0a0a0', 'bgcolor': '#444'}
 ]
 
-token_valid_sec = 2592000
+token_valid_sec = 259200
 token_keys = ['1']
