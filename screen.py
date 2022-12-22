@@ -366,6 +366,7 @@ table {
   display: none;
   width: calc(100% - 17px);
   min-width: 1200px;
+  min-height: calc(100vh - 4px);
 }
 .selected {
   background: #2f3a42;
@@ -471,7 +472,7 @@ table {
 }
 #content-body-edt {
   width: calc(100% - 8px);
-  height: calc(100% - 1.3em);
+  height: calc(100% - 16px);
 }
 #content-body-st {
   color: #a5afb7;
