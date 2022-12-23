@@ -265,7 +265,7 @@ kb.drawList = function(items, sortIdx, sortType, totalCount) {
     var labelsHTML = kb.buildLabelsHTML(labels);
     htmlList += '<tr id="row-' + id + '" class="data-list-row">';
     htmlList += '<td style="padding-right:16px;">' + id + '</td>'
-    htmlList += '<td style="min-width:300px;max-width:600px;padding-right:32px;overflow:hidden;text-overflow:ellipsis;">';
+    htmlList += '<td style="min-width:300px;max-width:600px;overflow:hidden;text-overflow:ellipsis;">';
     if (data_status == 'OK') {
       htmlList += '<span style="display:inline-block;width:100%;" class="title pseudo-link" onclick="kb.onClickTitle(\'' + id + '\');"';
     } else {
@@ -864,7 +864,7 @@ kb.showData = function(content) {
     $el('.for-view').hide();
   }
 
-  if (id == '0') {
+  if ((id == '0') || (isNaN(id))) {
     $el('#delete-button').hide();
     $el('#clear-button').show();
   } else {
