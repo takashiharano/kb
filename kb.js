@@ -1023,6 +1023,15 @@ kb.resetFontSize = function() {
   kb.setFontSize(12);
 };
 
+kb.onFontChanged = function(el) {
+  var v = el.value;
+  kb.setFont(v);
+};
+kb.setFont = function(v) {
+  $el('#content-body').style.fontFamily = v;
+  $el('#content-body-edt').style.fontFamily = v;
+};
+
 kb.getSelfSizePos = function(el) {
   var rect = el.getBoundingClientRect();
   var resizeBoxSize = 6;

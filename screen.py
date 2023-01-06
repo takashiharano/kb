@@ -122,6 +122,7 @@ def build_main_screen(context):
         <div style="height:25px;">
           <input type="range" value="0" min="0" max="256" step="1" id="font-range" style="position:relative;top:6px;" oninput="kb.onFontRangeChanged(this);" onchange="kb.onFontRangeChanged(this);"><span id="fontsize"></span>
           <button onclick="kb.resetFontSize();">RESET</button>
+          <span style="margin-left:16px;">Font: </sapn><input type="text" id="font" oninput="kb.onFontChanged(this);" onchange="kb.onFontChanged(this);">
           <span class="for-view">
             <span class="meta-info" style="position:absolute;right:8px;margin-top:10px;">
               <span>CREATED: <span id="content-created-date"></span> <span id="content-created-by"></span></span><span style="margin-left:24px;">UPDATED: <span id="content-updated-date"></span> <span id="content-updated-by"></span></span>
@@ -198,6 +199,7 @@ kb.mode = 'view'
         <div style="height:25px;">
           <input type="range" value="0" min="0" max="256" step="1" id="font-range" style="position:relative;top:6px;" oninput="kb.onFontRangeChanged(this);" onchange="kb.onFontRangeChanged(this);"><span id="fontsize"></span>
           <button onclick="kb.resetFontSize();">RESET</button>
+          <span style="margin-left:16px;">Font: </sapn><input type="text" id="font" oninput="kb.onFontChanged(this);" onchange="kb.onFontChanged(this);">
         </div>
       </div>
     </div>
@@ -565,6 +567,10 @@ td.center {
 
 #font-range {
   width: 300px;
+}
+
+#font {
+  width: 100px;
 }
 
 .dl-link:hover {
