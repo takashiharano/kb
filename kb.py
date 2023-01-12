@@ -262,8 +262,8 @@ def calc_data_macthed_score(data, keyword):
 
     else:
         score += is_matches_title(data['TITLE'], keyword) * 2
-        score += count_matched_key(data['TITLE'], keyword) * 100
-        score += count_matched_key(data['LABELS'], keyword) * 10
+        score += count_matched_key(data['TITLE'], keyword) * 300
+        score += count_matched_key(data['LABELS'], keyword) * 100
 
         if not 'DATA_TYPE' in data or data['DATA_TYPE'] != 'dataurl':
             score += count_matched_key(data['BODY'], keyword)
@@ -376,7 +376,7 @@ def is_matches_title(title, keyword):
     title = title.lower()
     keyword = keyword.lower()
     if title == keyword:
-        score += 100
+        score += 300
     score += title.count(keyword) * 10
     return score
 
