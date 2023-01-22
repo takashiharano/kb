@@ -42,7 +42,7 @@ def get_list(target_id=None, need_encode_b64=False):
     data_list = []
     for i in range(len(data_id_list)):
         id = data_id_list[i]
-        if target_id is not None and target_id != id or target_id is None and should_omit_id_for_list(id):
+        if target_id is not None and target_id != id or target_id is None and is_special_id(id):
             continue
         try:
             data = load_data(id, True)
@@ -79,7 +79,7 @@ def get_list(target_id=None, need_encode_b64=False):
 
     return data_list_obj
 
-def should_omit_id_for_list(id):
+def is_special_id(id):
     if id == '0':
         return True
     if util.match(id, '^[^0-9]'):
@@ -155,6 +155,8 @@ def search_data(q, need_encode_b64=False):
     all_data = []
     for i in range(len(id_list)):
         id = id_list[i]
+        if is_special_id(id):
+            continue
         try:
             data = load_data(id)
             data = convert_data_to_half_width(data)
