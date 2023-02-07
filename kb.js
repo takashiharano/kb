@@ -904,7 +904,10 @@ kb.decodeB64Image = function(s) {
     return s;
   }
   m = s.match(/data:image\/.+;base64,\n?[A-za-z0-9+/=][A-za-z0-9+/=\n]+\n\n/g);
-  if (!m) return s;
+  if (!m) {
+    s = s.replace(/(data:image\/.+;base64,\n?[A-za-z0-9+/=][A-za-z0-9+/=\n]+)$/, '<img src="$1">');
+    return s;
+  }
   var imgs = [];
   for (var i = 0; i < m.length; i++) {
     var a = m[i];
@@ -915,6 +918,7 @@ kb.decodeB64Image = function(s) {
   for (i = 0; i < imgs.length; i++) {
     s = s.replace(/(?<!")data:image\/.+;base64,\n?[A-za-z0-9+/=][A-za-z0-9+/=\n]+\n\n/, '\n<img src="' + imgs[i] + '">\n\n');
   }
+  s = s.replace(/(data:image\/.+;base64,\n?[A-za-z0-9+/=][A-za-z0-9+/=\n]+)$/, '<img src="$1">');
   return s;
 };
 
