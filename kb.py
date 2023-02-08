@@ -236,9 +236,11 @@ def calc_data_macthed_score(data, keyword):
             score = 10
 
     elif keyword_lc.startswith('status:'):
-        keyword = util.replace(keyword, 'status:', '', flags=re.IGNORECASE)
-        if 'STATUS' in data and data['STATUS'] == keyword:
-            score = 10
+        keyword_lc = util.replace(keyword_lc, 'status:', '', flags=re.IGNORECASE)
+        if 'STATUS' in data and data['STATUS']:
+            status_lc = data['STATUS'].lower()
+            if status_lc == keyword_lc:
+                score = 10
 
     elif keyword_lc.startswith('body:'):
         keyword = util.replace(keyword, 'body:', '', flags=re.IGNORECASE)
