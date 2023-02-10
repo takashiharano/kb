@@ -29,7 +29,7 @@ def send_result_json(status, body):
 
 #------------------------------------------------------------------------------
 def has_privilege(context, id):
-    if not context['authorized']:
+    if not kb.is_access_allowed(context):
         token = get_request_param('token')
         try:
             if not is_valid_token(token, id):
@@ -125,7 +125,7 @@ def proc_save(context):
 def get_user_name(context):
     if 'user_info' in context:
         user_info = context['user_info']
-        if 'name' in user_info:
+        if user_info is not None and 'name' in user_info:
             return user_info['name']
     return ''
 
@@ -180,7 +180,7 @@ def main():
     elif act == 'dlb64content':
         download_b64content(context)
     else:
-        if context['authorized']:
+        if kb.is_access_allowed(context):
             proc_api(context, act)
         else:
             send_result_json('FORBIDDEN', None)

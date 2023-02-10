@@ -1,6 +1,9 @@
 root_path = '../../'
 workspace_path = root_path + '../private/kb/'
 
+# auth / read|write|delete|export / full
+access_control = 'auth'
+
 title = 'KB'
 
 list_max = 100

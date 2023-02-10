@@ -41,7 +41,7 @@ def build_main_screen(context):
   <div id="list-area" class="area">
     <div style="position:relative;">
 '''
-    if web.has_permission(context, 'kb.write'):
+    if kb.has_permission(context, 'kb.write'):
         html += '      <button id="new-button" style="margin-right:32px;" onclick="kb.createNew();">NEW</button>'
 
     html += '''
@@ -51,7 +51,7 @@ def build_main_screen(context):
       <span style="position:absolute;right:5px;">
         <span id="clock"></span>
 '''
-    if web.has_permission(context, 'kb.export'):
+    if kb.has_permission(context, 'kb.export'):
         html += '        <button id="export-button" style="margin-left:8px;min-width:32px;" onclick="kb.export();">EXPORT</button>'
 
     html += '''
@@ -69,7 +69,7 @@ def build_main_screen(context):
     <div>
       <div id="info-area">
 '''
-    if web.has_permission(context, 'kb.write'):
+    if kb.has_permission(context, 'kb.write'):
         html += '        <button id="edit-button" class="for-view" style="min-width:32px;" onclick="kb.edit();">EDIT</button>'
 
     html += '''
@@ -97,7 +97,7 @@ def build_main_screen(context):
           <button id="copy-text-button" style="margin-left:8px;" onclick="kb.copyContent();">COPY</button>
           <button id="copy-url-button" style="margin-left:2px;" onclick="kb.showUrl();">URL</button>
 '''
-    if web.has_permission(context, 'kb.delete'):
+    if kb.has_permission(context, 'kb.delete'):
         html += '          <button id="delete-button" class="red-button" style="min-width:32px;margin-left:8px;" onclick="kb.delete();">DELETE</button>'
 
     html += '          <button id="clear-button" class="red-button" style="min-width:32px;margin-left:8px;display:hidden;" onclick="kb.clearData();">CLEAR</button>'
@@ -597,8 +597,8 @@ def main():
 
     id = util.get_request_param('id')
 
-    if context['authorized']:
-       if web.has_permission(context, 'kb'):
+    if kb.is_access_allowed(context):
+       if kb.has_permission(context, 'kb'):
             html = build_main_screen(context)
        else:
             html = build_forbidden_screen(context)

@@ -15,6 +15,8 @@ import util
 import bsb64
 
 util.append_system_path(__file__, ROOT_PATH)
+util.append_system_path(__file__, ROOT_PATH + 'websys/bin')
+import web
 
 WORKSPACE_PATH = appconfig.workspace_path
 DATA_DIR_PATH = WORKSPACE_PATH + 'data/'
@@ -740,6 +742,31 @@ def cmd_export(dest_path):
 
     data_bytes = export_data()
     util.write_binary_file(dest_path, data_bytes)
+
+#------------------------------------------------------------------------------
+def is_access_allowed(context):
+    if appconfig.access_control != 'auth' or context['authorized']:
+        return True
+    return False
+
+def has_permission(context, permission):
+    access_control = appconfig.access_control
+    if access_control == 'auth':
+        # permission = kb.xxx
+        return web.has_permission(context, permission)
+    elif access_control == 'full':
+        return True
+    else:
+        permission = util.replace(permission, 'kb', '')
+        permission = util.replace(permission, '\.', '')
+        if permission == '':
+            return True
+        privs = access_control.split('|')
+        for i in range(len(privs)):
+            priv = privs[i]
+            if permission == priv:
+                return True
+    return False
 
 #------------------------------------------------------------------------------
 def main():
