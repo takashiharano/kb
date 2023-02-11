@@ -450,7 +450,15 @@ def load_data(id, head_only=False):
         'id': id,
         'data_status': 'OK',
         'size': 0,
-        'encrypted': False
+        'encrypted': False,
+        'TITLE': '',
+        'C_DATE': '',
+        'C_USER': '',
+        'U_DATE': '',
+        'U_USER': '',
+        'LABELS': '',
+        'STATUS': '',
+        'DATA_TYPE': ''
     }
 
     if fileinfo is not None:
@@ -601,11 +609,16 @@ def get_max_id():
             max_id = n
     return max_id
 
-def export_data():
+def export_data(asis=False):
     wk_data_path = WK_PATH + 'data/'
-    util.mkdir(wk_data_path)
-    decrypt_data(wk_data_path)
-    b = util.zip(None, wk_data_path)
+    if asis:
+        target_path = DATA_DIR_PATH
+    else:
+        util.mkdir(wk_data_path)
+        decrypt_data(wk_data_path)
+        target_path = wk_data_path
+
+    b = util.zip(None, target_path)
     util.delete(WK_PATH, True)
     return b
 
@@ -623,8 +636,9 @@ def encdec_data(dst_base_dir, secure):
         try:
             data = load_data(id)
             write_data(id, data, secure=secure, path=dst_path)
-        except:
-            text = load_data_as_text(id)
+        except Exception as e:
+            text = 'Error: ' + str(e) + '\n'
+            text += load_data_as_text(id)
             util.write_text_file(dst_path, text)
 
 #------------------------------------------------------------------------------
@@ -735,12 +749,21 @@ def get_ext_from_base64(s):
     return ext
 
 #------------------------------------------------------------------------------
-def cmd_export(dest_path):
-    if (dest_path == ''):
-        print('dest pathis required')
+def cmd_export():
+    arg1 = util.get_arg(2)
+    arg2 = util.get_arg(3)
+
+    dest_path = arg1
+    asis = False
+    if arg2 == '-asis':
+        asis = True
+
+    if dest_path == '' or dest_path.startswith('-'):
+        print('Dest file path is required. (e.g., /tmp/data.zip)')
+        print('Usage: python kb.py export <DEST_FILE_PATH> [-asis]')
         return
 
-    data_bytes = export_data()
+    data_bytes = export_data(asis)
     util.write_binary_file(dest_path, data_bytes)
 
 #------------------------------------------------------------------------------
@@ -771,10 +794,8 @@ def has_permission(context, permission):
 #------------------------------------------------------------------------------
 def main():
     cmd = util.get_arg(1)
-    arg1 = util.get_arg(2)
-
     if cmd == 'export':
-        cmd_export(arg1)
+        cmd_export()
     else:
         print('Usage: python kb.py <COMMAND> [<ARG>]')
 

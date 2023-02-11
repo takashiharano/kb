@@ -161,7 +161,11 @@ def proc_api(context, act):
     else:
         act = web.get_raw_request_param('act')
         if act == 'export':
-            b = kb.export_data()
+            p_asis = web.get_raw_request_param('asis')
+            asis = False
+            if p_asis == 'true':
+                asis = True
+            b = kb.export_data(asis)
             util.send_binary(b, filename='kbdata.zip')
             return
         else:
