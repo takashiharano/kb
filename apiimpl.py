@@ -130,6 +130,13 @@ def get_user_name(context):
     return ''
 
 #------------------------------------------------------------------------------
+def proc_on_forbidden(act):
+    if act == 'export':
+        util.send_result_json('FORBIDDEN', None)
+    else:
+        send_result_json('FORBIDDEN', None)
+
+#------------------------------------------------------------------------------
 def proc_api(context, act):
     status = 'OK'
     if act == 'list':
@@ -175,6 +182,15 @@ def proc_api(context, act):
     send_result_json(status, result_data)
 
 #------------------------------------------------------------------------------
+def has_valid_apitoken():
+    apitoken = get_request_param('apitoken')
+    for i in range(len(appconfig.api_tokens)):
+        token = appconfig.api_tokens[i]
+        if apitoken == token:
+            return True
+    return False
+
+#------------------------------------------------------------------------------
 def main():
     context = web.on_access()
 
@@ -184,7 +200,7 @@ def main():
     elif act == 'dlb64content':
         download_b64content(context)
     else:
-        if kb.is_access_allowed(context):
+        if kb.is_access_allowed(context) or has_valid_apitoken():
             proc_api(context, act)
         else:
-            send_result_json('FORBIDDEN', None)
+            proc_on_forbidden(act)
