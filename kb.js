@@ -3,11 +3,12 @@
  * Copyright (c) 2021 Takashi Harano
  */
 var kb = kb || {};
-kb.ST_LIST_LOADING = 1;
-kb.ST_DATA_LOADING = 1 << 1;
-kb.ST_NEW = 1 << 2;
-kb.ST_EDITING = 1 << 3;
-kb.ST_EXIT = 1 << 4;
+kb.ST_APP_READY = 1;
+kb.ST_LIST_LOADING = 1 << 1;
+kb.ST_DATA_LOADING = 1 << 2;
+kb.ST_NEW = 1 << 3;
+kb.ST_EDITING = 1 << 4;
+kb.ST_EXIT = 1 << 5;
 
 kb.UI_ST_NONE = 0;
 kb.UI_ST_AREA_RESIZING = 1;
@@ -62,6 +63,7 @@ $onReady = function() {
   } else {
     kb.init();
   }
+  kb.status |= kb.ST_APP_READY;
 };
 
 kb.onAppReady = function() {
@@ -833,9 +835,11 @@ kb.showData = function(content) {
 
   $el('#content-id').innerHTML = idLabel;
   $el('#content-title').innerHTML = titleLabel;
-  $el('#content-body').innerHTML = contentBody;
   $el('#content-labels').innerHTML = labelsHTML;
   $el('#select-status').value = status;
+  if (kb.status & kb.ST_APP_READY) {
+    $el('#content-body').innerHTML = contentBody;
+  }
 
   if (content.data_status == 'EMPTY') {
     $el('#content-created-date').innerHTML = '';

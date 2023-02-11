@@ -20,6 +20,10 @@ import js
 
 #------------------------------------------------------------------------------
 def build_main_screen(context):
+    workspace_path = kb.get_workspace_path()
+    msg_path = workspace_path + 'message.txt'
+    message = util.read_text_file(msg_path, default='')
+
     html = '''<!DOCTYPE html><html><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=Edge">
 <meta name="robots" content="none">
 <meta name="referrer" content="no-referrer">
@@ -113,7 +117,9 @@ def build_main_screen(context):
     <div style="height:calc(100% - 70px);">
       <div id="content-wrp1">
         <div id="content-wrp">
-          <pre id="content-body"></pre>
+'''
+    html += '          <pre id="content-body">' + message + '</pre>'
+    html += '''
           <div id="content-body-edt-wrp">
             <textarea id="content-body-edt" spellcheck="false"></textarea>
             <div id="content-body-st"></div>

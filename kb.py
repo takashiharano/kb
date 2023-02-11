@@ -25,6 +25,10 @@ WK_PATH = WORKSPACE_PATH + 'wk/'
 ENCRYPTED_HEAD = '#DATA'
 BSB64_N = appconfig.encryption_key
 
+#------------------------------------------------------------------------------
+def get_workspace_path():
+    return WORKSPACE_PATH
+
 def get_datafile_path(id):
     return DATA_DIR_PATH + id + '.txt'
 
