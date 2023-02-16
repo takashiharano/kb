@@ -1040,6 +1040,12 @@ kb.setFont = function(v) {
   $el('#content-body-edt').style.fontFamily = v;
 };
 
+kb.setMonospaceFont = function(f) {
+  var n = (f ? 'monospace' : '');
+  $el('#font').value = n;
+  kb.setFont(n);
+};
+
 kb.getSelfSizePos = function(el) {
   var rect = el.getBoundingClientRect();
   var resizeBoxSize = 6;
