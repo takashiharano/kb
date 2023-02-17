@@ -1326,6 +1326,10 @@ kb.onForbidden = function() {
   websys.authRedirection(location.href);
 };
 
+$onBeforeUnload = function(e) {
+  if (kb.status & kb.ST_EDITING) e.returnValue = '';
+};
+
 kb.view = {};
 kb.view.init = function() {
   $el('.for-view').hide();
