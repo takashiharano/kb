@@ -126,6 +126,9 @@ kb.initDnD = function() {
   kb.dndHandler = util.addDndHandler('#content-body-edt', kb.onDnd, opt);
 };
 kb.onDnd = function(data) {
+  kb.insertBinData(data);
+};
+kb.insertBinData = function(data) {
   var el = $el('#content-body-edt');
   var cp = el.selectionStart;
   var v = el.value;
@@ -1302,9 +1305,9 @@ kb.closeDialog = function() {
 };
 
 $onKeyDown = function(e) {
-  var FNC_TBL = {78: kb.onKeyDownN, 89: kb.onKeyDownY};
+  var FNC_TBL = {78: kb.onKeyDownN, 86: kb.onKeyDownV, 89: kb.onKeyDownY};
   var fn = FNC_TBL[e.keyCode];
-  if (fn) fn();
+  if (fn) fn(e);
 };
 $onCtrlS = function(e) {
   if (kb.status & kb.ST_EDITING) {
@@ -1315,7 +1318,7 @@ $onCtrlS = function(e) {
     }
   }
 };
-kb.onKeyDownY = function() {
+kb.onKeyDownY = function(e) {
   if (kb.status & kb.ST_SAVE_CONFIRMING) {
     util.dialog.close();
     kb.saveAndExit();
@@ -1327,9 +1330,15 @@ kb.onKeyDownY = function() {
     kb._touch();
   }
 };
-kb.onKeyDownN = function() {
+kb.onKeyDownN = function(e) {
   if ((kb.status & kb.ST_SAVE_CONFIRMING) || (kb.status & kb.ST_CANCEL_CONFIRMING) || (kb.status & kb.ST_TOUCH_CONFIRMING)) {
     kb.closeDialog();
+  }
+};
+
+kb.onKeyDownV = function(e) {
+  if ((e.ctrlKey) && (kb.status & kb.ST_EDITING)) {
+    kb.pasteImage();
   }
 };
 
@@ -1394,6 +1403,28 @@ kb.onForbidden = function() {
   websys.authRedirection(location.href);
 };
 
+kb.pasteImage = async function() {
+  var permission = await navigator.permissions.query({name: 'clipboard-read'});
+  if (permission.state === 'denied') {
+    log.e('Not allowed to read clipboard.');
+    return;
+  }
+  var contents = await navigator.clipboard.read();
+  for (var item of contents) {
+    if (!item.types.includes('image/png')) {
+      break;
+    }
+    var blob = await item.getType('image/png');
+    var reader = new FileReader();
+    reader.readAsDataURL(blob);
+    reader.onload = function() {
+      var dataUrl = reader.result;
+      if (dataUrl) kb.insertBinData(dataUrl);
+    };
+  }
+};
+
+//-------------------------------------------------------------------------
 $onBeforeUnload = function(e) {
   if (kb.status & kb.ST_EDITING) e.returnValue = '';
 };
