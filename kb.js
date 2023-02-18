@@ -54,6 +54,7 @@ kb.areaSize = {
 kb.requestedId = null;
 kb.loadPendingTmrId = 0;
 kb.dataLoadingTmrId = 0;
+kb.clipboardEnabled = false;
 
 $onReady = function(e) {
   $el('#enrich').addEventListener('change', kb.onEnrichChange);
@@ -1338,7 +1339,7 @@ kb.onKeyDownN = function(e) {
 
 kb.onKeyDownV = function(e) {
   if ((e.ctrlKey) && (kb.status & kb.ST_EDITING)) {
-    kb.pasteImage();
+    if (kb.clipboardEnabled) kb.pasteImage();
   }
 };
 
@@ -1405,8 +1406,7 @@ kb.onForbidden = function() {
 
 kb.pasteImage = async function() {
   var permission = await navigator.permissions.query({name: 'clipboard-read'});
-  if (permission.state === 'denied') {
-    log.e('Not allowed to read clipboard.');
+  if (permission.state == 'denied') {
     return;
   }
   var contents = await navigator.clipboard.read();
