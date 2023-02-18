@@ -9,6 +9,8 @@ kb.ST_DATA_LOADING = 1 << 2;
 kb.ST_NEW = 1 << 3;
 kb.ST_EDITING = 1 << 4;
 kb.ST_EXIT = 1 << 5;
+kb.ST_CONFLICTING = 1 << 6;
+kb.ST_SAVE_CONFIRMING = 1 << 7;
 
 kb.UI_ST_NONE = 0;
 kb.UI_ST_AREA_RESIZING = 1;
@@ -51,7 +53,7 @@ kb.requestedId = null;
 kb.loadPendingTmrId = 0;
 kb.dataLoadingTmrId = 0;
 
-$onReady = function() {
+$onReady = function(e) {
   $el('#enrich').addEventListener('change', kb.onEnrichChange);
   var fontSize = util.getQuery('fontsize') | 0;
   if (!fontSize) fontSize = 12;
@@ -491,6 +493,7 @@ kb.getData = function(id) {
     util.confirm('Cancel?', kb.cancelAndGetData, kb.cancelAndGetDataN, {focus: 'no'});
     return;
   }
+  kb.status &= ~kb.ST_CONFLICTING;
   kb._getData();
 };
 kb.cancelAndGetData = function() {
@@ -676,11 +679,19 @@ kb.onEditEnd = function() {
   $el('.for-edit').hide();
 };
 
-kb.save = function() {
+kb.saveAndExit = function() {
   kb.status |= kb.ST_EXIT;
-  util.confirm('Save?', kb._save);
+  kb.status |= kb.ST_SAVE_CONFIRMING;
+  util.confirm('Save?', kb.save);
 };
-kb._save = function() {
+
+kb.onSaveYes = function() {
+  util.dialog.close();
+  kb.save();
+};
+
+kb.save = function() {
+  kb.status &= ~kb.ST_SAVE_CONFIRMING;
   var id = $el('#content-id-edt').value.trim();
   if (kb.status & kb.ST_NEW) {
     if (id == '') {
@@ -743,25 +754,35 @@ kb.onSaveData = function(xhr, res, req) {
     return;
   }
   if (res.status == 'OK') {
+    var savedData = res.body;
     if (kb.status & kb.ST_EXIT) {
-      var id = res.body.saved_id;
-      kb.listStatus.sortIdx = 5;
-      kb.listStatus.sortType = 2;
-      kb.search();
-      kb.getData(id);
+      var id = savedData.saved_id;
+      kb.reloadListAndData(id);
       kb.status &= ~kb.ST_EXIT;
     }
+    kb.content.U_DATE = savedData.U_DATE;
     kb.showInfotip('OK');
   } else if (res.status == 'CONFLICT') {
+    kb.status |= kb.ST_CONFLICTING;
     $el('#content-body').innerHTML = 'ERROR!';
     var data = res.body;
     var dt = util.getDateTimeString(+data.U_DATE);
-    var msg = 'DATE: ' + dt + '\n';
-    msg += 'BY: ' + data.U_USER;
+    var msg = 'The data is already updated.\n\n'
+    msg += '<div style="text-align:left;">';
+    msg += 'DATE: ' + dt + '\n';
+    msg += 'BY  : ' + data.U_USER;
+    msg += '</div>';
     util.alert('Conflict!', msg, kb.onConflictOK);
   } else {
     log.e(res.status + ':' + res.body);
   }
+};
+
+kb.reloadListAndData = function(id) {
+  kb.listStatus.sortIdx = 5;
+  kb.listStatus.sortType = 2;
+  kb.search();
+  kb.getData(id);
 };
 
 kb.onConflictOK = function() {
@@ -783,7 +804,7 @@ kb.onCheckExists = function(xhr, res, req) {
       kb.showInfotip('ALREADY_EXISTS');
     } else {
       kb.status &= ~kb.ST_NEW
-      kb._save();
+      kb.save();
     }
   } else {
     log.e(res.status + ':' + res.body);
@@ -795,6 +816,9 @@ kb.cancel = function() {
 };
 kb._cancel = function() {
   kb.onEditEnd();
+  if (kb.status & kb.ST_CONFLICTING) {
+    kb.reloadListAndData(kb.content.id);
+  }
 };
 
 kb.showData = function(content) {
@@ -990,8 +1014,7 @@ kb._clearData = function(id) {
   }
   kb.edit();
   $el('#content-body-edt').value = '';
-  kb.status |= kb.ST_EXIT;
-  kb._save();
+  kb.save();
 };
 
 kb.export = function() {
@@ -1261,8 +1284,33 @@ kb.dlB64Content = function(id, idx) {
   util.postSubmit('api.cgi', param);
 };
 
+kb.closeDialog = function() {
+  kb.status &= ~kb.ST_SAVE_CONFIRMING;
+  util.dialog.close();
+};
+
+$onKeyDown = function(e) {
+  switch (e.keyCode) {
+    case 78: // N
+      if (kb.status & kb.ST_SAVE_CONFIRMING) {
+        kb.closeDialog();
+      }
+      break;
+    case 89: // Y
+      if (kb.status & kb.ST_SAVE_CONFIRMING) {
+        kb.onSaveYes();
+      }
+      break;
+  }
+};
 $onCtrlS = function(e) {
-  if (kb.status & kb.ST_EDITING) kb.save();
+  if (kb.status & kb.ST_EDITING) {
+    if (e.shiftKey) {
+      kb.save();
+    } else {
+      kb.saveAndExit();
+    }
+  }
 };
 
 kb.onInputId = function() {
@@ -1304,7 +1352,7 @@ $onEnterKey = function(e) {
   }
 };
 $onEscKey = function(e) {
-  util.dialog.close();
+  kb.closeDialog();
 };
 
 kb.onMouseMove = function(e) {

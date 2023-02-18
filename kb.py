@@ -534,8 +534,13 @@ def save_data(id, new_data, user=''):
     data['BODY'] = body
     secure = True if new_data['encryption'] == '1' else False
 
-    write_data(id, data, user, secure)
-    return id
+    write_data(id, data, secure)
+
+    saved_data = {
+        'id': id,
+        'data': data
+    }
+    return saved_data
 
 #------------------------------------------------------------------------------
 def to_set(s):
@@ -558,7 +563,7 @@ def is_dataurl(s):
   return util.match(s, '^data:.+;base64,[A-Za-z0-9+/=\n]+$')
 
 #------------------------------------------------------------------------------
-def write_data(id, data, user='', secure=False, path=None):
+def write_data(id, data, secure=False, path=None):
     text = ''
     text += 'TITLE: ' + data['TITLE'] + '\n'
     text += 'C_DATE: ' + data['C_DATE'] + '\n'

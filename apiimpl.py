@@ -104,21 +104,24 @@ def proc_save(context):
     data = kb.get_data(id)
 
     if id == '' or data['U_DATE'] == new_data['org_u_date']:
+        status = 'OK'
         user = get_user_name(context)
-        saved_id = kb.save_data(id, new_data, user)
-        result = {
-            'status': 'OK',
-            'saved_id': saved_id,
-            'U_DATE': None,
-            'U_USER': None
-        }
+        saved_data = kb.save_data(id, new_data, user)
+        saved_id = saved_data['id']
+        saved_date = saved_data['data']['U_DATE']
+        saved_user = saved_data['data']['U_USER']
     else:
-        result = {
-            'status': 'CONFLICT',
-            'saved_id': None,
-            'U_DATE': data['U_DATE'],
-            'U_USER': data['U_USER']
-        }
+        status = 'CONFLICT'
+        saved_id = None
+        saved_date = data['U_DATE']
+        saved_user = data['U_USER']
+
+    result = {
+        'status': status,
+        'saved_id': saved_id,
+        'U_DATE': saved_date,
+        'U_USER': saved_user
+    }
 
     return result
 
