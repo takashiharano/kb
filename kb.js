@@ -11,6 +11,8 @@ kb.ST_EDITING = 1 << 4;
 kb.ST_EXIT = 1 << 5;
 kb.ST_CONFLICTING = 1 << 6;
 kb.ST_SAVE_CONFIRMING = 1 << 7;
+kb.ST_CANCEL_CONFIRMING = 1 << 8;
+kb.ST_TOUCH_CONFIRMING = 1 << 9;
 
 kb.UI_ST_NONE = 0;
 kb.UI_ST_AREA_RESIZING = 1;
@@ -679,14 +681,12 @@ kb.onEditEnd = function() {
   $el('.for-edit').hide();
 };
 
+kb.confirmSaveAndExit = function() {
+  kb.status |= kb.ST_SAVE_CONFIRMING;
+  util.confirm('Save and Exit?', kb.saveAndExit);
+};
 kb.saveAndExit = function() {
   kb.status |= kb.ST_EXIT;
-  kb.status |= kb.ST_SAVE_CONFIRMING;
-  util.confirm('Save?', kb.save);
-};
-
-kb.onSaveYes = function() {
-  util.dialog.close();
   kb.save();
 };
 
@@ -778,6 +778,15 @@ kb.onSaveData = function(xhr, res, req) {
   }
 };
 
+kb.touch = function() {
+  kb.status |= kb.ST_TOUCH_CONFIRMING;
+  util.confirm('Update the last update date to now?', kb._touch);
+};
+kb._touch = function() {
+  kb.edit();
+  kb.saveAndExit();
+};
+
 kb.reloadListAndData = function(id) {
   kb.listStatus.sortIdx = 5;
   kb.listStatus.sortType = 2;
@@ -812,6 +821,7 @@ kb.onCheckExists = function(xhr, res, req) {
 };
 
 kb.cancel = function() {
+  kb.status |= kb.ST_CANCEL_CONFIRMING;
   util.confirm('Cancel?', kb._cancel, {focus: 'no'});
 };
 kb._cancel = function() {
@@ -1286,30 +1296,40 @@ kb.dlB64Content = function(id, idx) {
 
 kb.closeDialog = function() {
   kb.status &= ~kb.ST_SAVE_CONFIRMING;
+  kb.status &= ~kb.ST_CANCEL_CONFIRMING;
+  kb.status &= ~kb.ST_TOUCH_CONFIRMING;
   util.dialog.close();
 };
 
 $onKeyDown = function(e) {
-  switch (e.keyCode) {
-    case 78: // N
-      if (kb.status & kb.ST_SAVE_CONFIRMING) {
-        kb.closeDialog();
-      }
-      break;
-    case 89: // Y
-      if (kb.status & kb.ST_SAVE_CONFIRMING) {
-        kb.onSaveYes();
-      }
-      break;
-  }
+  var FNC_TBL = {78: kb.onKeyDownN, 89: kb.onKeyDownY};
+  var fn = FNC_TBL[e.keyCode];
+  if (fn) fn();
 };
 $onCtrlS = function(e) {
   if (kb.status & kb.ST_EDITING) {
     if (e.shiftKey) {
       kb.save();
     } else {
-      kb.saveAndExit();
+      kb.confirmSaveAndExit();
     }
+  }
+};
+kb.onKeyDownY = function() {
+  if (kb.status & kb.ST_SAVE_CONFIRMING) {
+    util.dialog.close();
+    kb.saveAndExit();
+  } else if (kb.status & kb.ST_CANCEL_CONFIRMING) {
+    util.dialog.close();
+    kb._cancel();
+  } else if (kb.status & kb.ST_TOUCH_CONFIRMING) {
+    util.dialog.close();
+    kb._touch();
+  }
+};
+kb.onKeyDownN = function() {
+  if ((kb.status & kb.ST_SAVE_CONFIRMING) || (kb.status & kb.ST_CANCEL_CONFIRMING) || (kb.status & kb.ST_TOUCH_CONFIRMING)) {
+    kb.closeDialog();
   }
 };
 

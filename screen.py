@@ -101,6 +101,9 @@ def build_main_screen(context):
           <button id="copy-text-button" style="margin-left:8px;" onclick="kb.copyContent();">COPY</button>
           <button id="copy-url-button" style="margin-left:2px;" onclick="kb.showUrl();">URL</button>
 '''
+    if kb.has_permission(context, 'kb.write'):
+        html += '        <button id="edit-button" class="for-view" style="margin-left:8px;" onclick="kb.touch();">TOUCH</button>'
+
     if kb.has_permission(context, 'kb.delete'):
         html += '          <button id="delete-button" class="red-button" style="min-width:32px;margin-left:8px;" onclick="kb.delete();">DELETE</button>'
 
@@ -109,7 +112,7 @@ def build_main_screen(context):
     html += '''
         </span>
         <span id="buttons-w" class="for-edit">
-          <button id="save-button" style="min-width:32px;" onclick="kb.save();">SAVE</button>
+          <button id="save-button" style="min-width:32px;" onclick="kb.confirmSaveAndExit();">SAVE</button>
           <button id="cancel-button" onclick="kb.cancel();">CANCEL</button>
         </span>
       </div>
