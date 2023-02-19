@@ -508,7 +508,7 @@ def save_data(id, new_data, user=''):
     now = util.get_unixtime_millis()
 
     try:
-        data = load_data(id, True)
+        data = load_data(id)
     except:
         data = {
             'C_DATE': str(now),
@@ -520,19 +520,24 @@ def save_data(id, new_data, user=''):
     if not 'C_USER' in data:
         data['C_USER'] = ''
 
-    body = util.decode_base64(new_data['BODY'])
-    isdataurl = is_dataurl(body)
     labels = util.decode_base64(new_data['LABELS'])
     labels = to_set(labels)
 
-    data['U_DATE'] = str(now)
-    data['U_USER'] = user
-    data['TITLE'] = util.decode_base64(new_data['TITLE'])
-    data['LABELS'] = labels
-    data['STATUS'] = new_data['STATUS']
-    data['DATA_TYPE'] = 'dataurl' if isdataurl else ''
-    data['BODY'] = body
-    secure = True if new_data['encryption'] == '1' else False
+    if new_data['only_labels']:
+        data['LABELS'] = labels
+        secure = data['encrypted']
+    else:
+        body = util.decode_base64(new_data['BODY'])
+        isdataurl = is_dataurl(body)
+
+        data['U_DATE'] = str(now)
+        data['U_USER'] = user
+        data['TITLE'] = util.decode_base64(new_data['TITLE'])
+        data['LABELS'] = labels
+        data['STATUS'] = new_data['STATUS']
+        data['DATA_TYPE'] = 'dataurl' if isdataurl else ''
+        data['BODY'] = body
+        secure = True if new_data['encryption'] == '1' else False
 
     write_data(id, data, secure)
 

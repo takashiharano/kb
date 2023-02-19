@@ -95,7 +95,13 @@ def build_main_screen(context):
       </div>
       <div style="display:inline-block;position:absolute;right:10px;">
         <span id="buttons-r" class="for-view">
-          <span id="content-labels"></span>
+          <span id="content-labels-area">
+            <span id="content-labels"></span>'''
+    if kb.has_permission(context, 'kb.write'):
+        html += '<span id="edit-labels-button" class="for-view pseudo-link subfunc" style="margin-left:4px;" onclick="kb.editLabels();">[EDIT]</span>'
+
+    html += '''
+          </span>
           <span id="status" style="margin-right:8px;"></span>
           <input type="checkbox" id="enrich" checked><label for="enrich">Enrich</label>
           <button id="copy-text-button" style="margin-left:8px;" onclick="kb.copyContent();">COPY</button>
@@ -132,8 +138,8 @@ def build_main_screen(context):
           <input type="range" value="0" min="0" max="256" step="1" id="font-range" style="position:relative;top:6px;" oninput="kb.onFontRangeChanged(this);" onchange="kb.onFontRangeChanged(this);"><span id="fontsize"></span>
           <button onclick="kb.resetFontSize();">RESET</button>
           <span style="margin-left:16px;">Font: </sapn><input type="text" id="font" oninput="kb.onFontChanged(this);" onchange="kb.onFontChanged(this);">
-          <span class="pseudo-link title" onclick="kb.setMonospaceFont(true);">[monospace]</span>
-          <span class="pseudo-link title" onclick="kb.setMonospaceFont(false);">[RESET]</span>
+          <span class="pseudo-link subfunc" onclick="kb.setMonospaceFont(true);">[monospace]</span>
+          <span class="pseudo-link subfunc" onclick="kb.setMonospaceFont(false);">[RESET]</span>
           <span class="for-view">
             <span class="meta-info" style="position:absolute;right:8px;margin-top:10px;">
               <span>CREATED: <span id="content-created-date"></span> <span id="content-created-by"></span></span><span style="margin-left:24px;">UPDATED: <span id="content-updated-date"></span> <span id="content-updated-by"></span></span>
@@ -194,7 +200,9 @@ kb.mode = 'view'
         <span id="info-label">
       </div>
       <div style="display:inline-block;position:absolute;right:10px;">
-        <span id="content-labels"></span>
+        <span id="content-labels-area">
+          <span id="content-labels"></span>
+        </span>
         <span id="buttons-r">
           <input type="checkbox" id="enrich" checked><label for="enrich">Enrich</label>
           <button id="copy-text-button" style="margin-left:8px;" onclick="kb.copyContent();">COPY</button>
@@ -428,6 +436,9 @@ table {
     css += '.title-disabled {'
     css += '  color: ' + appconfig.title_disabled_color + ';'
     css += '}'
+    css += '.subfunc {'
+    css += '  color: ' + appconfig.subfunc_color + ';'
+    css += '}'
     css += '''
 #info-area {
   display: inline-block;
@@ -454,7 +465,7 @@ table {
 #content-title-edt {
   width: 600px;
 }
-#content-labels {
+#content-labels-area {
   display: inline-block;
   margin-left: 32px;
   margin-right: 32px;
@@ -588,7 +599,7 @@ td.center {
   cursor: pointer;
 }
 '''
-    css += '.input-disable {'
+    css += 'input[type="text"]:disabled,textarea:disabled,.input-label-disable {'
     css += '  color: ' + appconfig.text_disabled + ';'
     css += '}'
 

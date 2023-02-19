@@ -8,11 +8,12 @@ kb.ST_LIST_LOADING = 1 << 1;
 kb.ST_DATA_LOADING = 1 << 2;
 kb.ST_NEW = 1 << 3;
 kb.ST_EDITING = 1 << 4;
-kb.ST_EXIT = 1 << 5;
-kb.ST_CONFLICTING = 1 << 6;
-kb.ST_SAVE_CONFIRMING = 1 << 7;
-kb.ST_CANCEL_CONFIRMING = 1 << 8;
-kb.ST_TOUCH_CONFIRMING = 1 << 9;
+kb.ST_EDIT_ONLY_LABELS = 1 << 5;
+kb.ST_EXIT = 1 << 6;
+kb.ST_CONFLICTING = 1 << 7;
+kb.ST_SAVE_CONFIRMING = 1 << 8;
+kb.ST_CANCEL_CONFIRMING = 1 << 9;
+kb.ST_TOUCH_CONFIRMING = 1 << 10;
 
 kb.UI_ST_NONE = 0;
 kb.UI_ST_AREA_RESIZING = 1;
@@ -628,6 +629,16 @@ kb.createNew = function() {
   $el('#content-title-edt').focus();
 };
 
+kb.editLabels = function() {
+  kb.status |= kb.ST_EDIT_ONLY_LABELS;
+  kb.edit();
+  $el('#content-title-edt').disabled = true;
+  $el('#content-body-edt').disabled = true;
+  $el('#select-status').disabled = true;
+  $el('#chk-encryption').disabled = true;
+  $el('#content-labels-edt').focus();
+};
+
 kb.edit = function() {
   kb.status |= kb.ST_EDITING;
 
@@ -641,9 +652,13 @@ kb.edit = function() {
   $el('#content-body').hide();
   $el('#content-body-edt-wrp').show();
 
-
   $el('#info-label').hide();
   $el('#info-edit').show();
+
+  $el('#content-title-edt').disabled = false;
+  $el('#content-body-edt').disabled = false;
+  $el('#select-status').disabled = false;
+  $el('#chk-encryption').disabled = false;
 
   $el('#content-id-edt').value = kb.content.id;
   $el('#content-title-edt').value = kb.content.TITLE;
@@ -654,6 +669,7 @@ kb.edit = function() {
 
 kb.onEditEnd = function() {
   kb.status &= ~kb.ST_EDITING;
+  kb.status &= ~kb.ST_EDIT_ONLY_LABELS;
   kb.status &= ~kb.ST_NEW;
 
   $el('#content-body').show();
@@ -730,18 +746,21 @@ kb.save = function() {
   var b64Labels = util.encodeBase64(labels);
   var b64Body = util.encodeBase64(body);
 
-  if (kb.status & kb.ST_EXIT) {
-    kb.onEditEnd();
-  }
-
   var data = {
     encryption: encryption,
-    org_u_date: orgUdate,
-    TITLE: b64Title,
-    LABELS: b64Labels,
-    STATUS: status,
-    BODY: b64Body
+    org_u_date: orgUdate
   };
+
+  if (kb.status & kb.ST_EDIT_ONLY_LABELS) {
+    data.only_labels = true;
+    data.LABELS = b64Labels;
+  } else {
+    data.only_labels = false;
+    data.TITLE = b64Title;
+    data.LABELS = b64Labels;
+    data.STATUS = status;
+    data.BODY = b64Body;
+  }
 
   kb.drawContentBodyArea4Progress('Saving');
 
@@ -751,6 +770,10 @@ kb.save = function() {
     data: j
   };
   kb.callApi('save', param, kb.onSaveData);
+
+  if (kb.status & kb.ST_EXIT) {
+    kb.onEditEnd();
+  }
 };
 kb.onSaveData = function(xhr, res, req) {
   if (xhr.status != 200) {
@@ -1352,11 +1375,11 @@ kb.onInputId = function() {
 }
 kb.disableId = function() {
   $el('#id-txt').disabled = true;
-  $el('#id-label').addClass('input-disable');
+  $el('#id-label').addClass('input-label-disable');
 };
 kb.enableId = function() {
   $el('#id-txt').disabled = false;
-  $el('#id-label').removeClass('input-disable');
+  $el('#id-label').removeClass('input-label-disable');
 };
 kb.onInputQ = function(e) {
   if ($el('#q').value) {
@@ -1367,11 +1390,11 @@ kb.onInputQ = function(e) {
 };
 kb.disableQ = function() {
   $el('#q').disabled = true;
-  $el('#keyqord-label').addClass('input-disable');
+  $el('#keyqord-label').addClass('input-label-disable');
 };
 kb.enableQ = function() {
   $el('#q').disabled = false;
-  $el('#keyqord-label').removeClass('input-disable');
+  $el('#keyqord-label').removeClass('input-label-disable');
 };
 
 $onEnterKey = function(e) {

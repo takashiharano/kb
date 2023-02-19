@@ -64,6 +64,8 @@ dialog_background = '#000'
 clock_color = '#8f0'
 link_color = '#cef'
 
+subfunc_color = '#cde'
+
 state_list = [
     {'name': 'LOCK', 'fgcolor': '#fff', 'bgcolor': '#f00'},
     {'name': 'IN-PROGRESS', 'fgcolor': '#fff', 'bgcolor': '#0052cc'},
