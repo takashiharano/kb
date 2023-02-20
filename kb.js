@@ -276,18 +276,19 @@ kb.drawList = function(items, sortIdx, sortType, totalCount) {
     var labelsHTML = kb.buildLabelsHTML(labels);
     htmlList += '<tr id="row-' + id + '" class="data-list-row">';
     htmlList += '<td style="padding-right:16px;">' + id + '</td>'
-    htmlList += '<td style="min-width:300px;max-width:600px;overflow:hidden;text-overflow:ellipsis;">';
+    htmlList += '<td style="min-width:300px;max-width:600px;">';
     if (data_status == 'OK') {
-      htmlList += '<span class="title pseudo-link" onclick="kb.onClickTitle(\'' + id + '\');"';
+      htmlList += '<span style="display:inline-block;width:100%;overflow:hidden;text-overflow:ellipsis;" class="title pseudo-link" onclick="kb.onClickTitle(\'' + id + '\');">';
     } else {
-      htmlList += '<span class="title-disabled"';
+      htmlList += '<span class="title-disabled">';
     }
+    htmlList += '<span';
     if (util.lenW(title) > 76) {
       var escTitle = util.escHtml(title);
       htmlList += ' data-tooltip="' + escTitle + '"';
     }
-    htmlList += '>';
-    htmlList += title + '</span></td>';
+    htmlList += '>' + title + '</span>';
+    htmlList += '</span></td>';
     htmlList += '<td style="padding-right:16px;text-align:center;">' + dlLink + '</td>';
     htmlList += '<td style="padding-right:8px;">' + cDateStr + '</td>';
     htmlList += '<td style="padding-right:16px;">' + cUser + '</td>';
