@@ -57,6 +57,8 @@ kb.loadPendingTmrId = 0;
 kb.dataLoadingTmrId = 0;
 kb.clipboardEnabled = false;
 
+kb.bsb64 = {n: 1};
+
 $onReady = function(e) {
   $el('#enrich').addEventListener('change', kb.onEnrichChange);
   var fontSize = util.getQuery('fontsize') | 0;
@@ -69,6 +71,8 @@ $onReady = function(e) {
   } else {
     kb.init();
   }
+  util.addKeyHandler('D', 'down', kb.keyHandlerD, {ctrl: true, alt: true});
+  util.addKeyHandler('E', 'down', kb.keyHandlerE, {ctrl: true, alt: true});
   kb.status |= kb.ST_APP_READY;
 };
 
@@ -1446,6 +1450,57 @@ kb.pasteImage = async function() {
       if (dataUrl) kb.insertBinData(dataUrl);
     };
   }
+};
+
+kb.selectText = function(el, st, ed) {
+  el.focus();
+  el.selectionStart = st;
+  el.selectionEnd = ed;
+};
+
+kb.keyHandlerD = function(e) {
+  if (kb.status & kb.ST_EDITING) {
+    var el = $el('#content-body-edt');
+    var st = el.selectionStart;
+    var ed = el.selectionEnd;
+  }
+  var t = kb.extractSelectedText(s);
+  var m;
+  try {
+    var s = util.decodeBSB64(t, kb.bsb64.n);
+    util.copy(s);
+    m = 'Decoded';
+  } catch(e) {
+    m = '<span style="color:#f77;">DECODE ERROR</span>';
+  }
+  if (kb.status & kb.ST_EDITING) {
+    kb.selectText(el, st, ed);
+  }
+  util.infotip.show(m);
+};
+kb.keyHandlerE = function(e) {
+  if (kb.status & kb.ST_EDITING) {
+    var el = $el('#content-body-edt');
+    var st = el.selectionStart;
+    var ed = el.selectionEnd;
+  }
+  var t = kb.extractSelectedText(s);
+  var m;
+  try {
+    var s = util.encodeBSB64(t, kb.bsb64.n);
+    util.copy(s);
+    m = 'Encoded';
+  } catch(e) {
+    m = '<span style="color:#f77;">ENCODE ERROR</span>';
+  }
+  if (kb.status & kb.ST_EDITING) {
+    kb.selectText(el, st, ed);
+  }
+  util.infotip.show(m);
+};
+kb.extractSelectedText = function() {
+  var s = window.getSelection();
+  return s.toString();
 };
 
 //-------------------------------------------------------------------------
