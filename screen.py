@@ -90,7 +90,12 @@ def build_main_screen(context):
           <input type="text" id="content-labels-edt" spellcheck="false">
           <span style="margin-left:16px;">STATUS:</span>
           <select id="select-status"></select>
-          <input type="checkbox" id="chk-encryption"><label for="chk-encryption">ENCRYPTION</label>
+          <input type="checkbox" id="chk-encryption"><label for="chk-encryption">Encrypt</label>
+'''
+    if web.is_admin(context):
+        html += '          <input type="checkbox" id="chk-silent"><label for="chk-silent">Silent</label>'
+
+    html += '''
         </span>
       </div>
       <div style="display:inline-block;position:absolute;right:10px;">
@@ -463,7 +468,7 @@ table {
   max-width: 800px;
 }
 #content-title-edt {
-  width: 600px;
+  width: 550px;
 }
 #content-labels-area {
   display: inline-block;
@@ -471,7 +476,7 @@ table {
   margin-right: 32px;
 }
 #content-labels-edt {
-  width: 300px;
+  width: 250px;
 }
 #chk-encryption {
   margin-left: 16px;

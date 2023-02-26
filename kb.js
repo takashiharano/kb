@@ -632,6 +632,7 @@ kb.createNew = function() {
   kb.edit();
   $el('#chk-encryption').checked = kb.config.default_data_encryption;
   $el('#content-title-edt').focus();
+  $el('#chk-silent').disabled = true;
 };
 
 kb.editLabels = function() {
@@ -642,6 +643,7 @@ kb.editLabels = function() {
   $el('#select-status').disabled = true;
   $el('#chk-encryption').disabled = true;
   $el('#content-labels-edt').focus();
+  $el('#chk-silent').checked = true;
 };
 
 kb.edit = function() {
@@ -670,6 +672,7 @@ kb.edit = function() {
   $el('#content-body-edt').value = kb.content.BODY;
   $el('#content-labels-edt').value = kb.content.LABELS;
   $el('#chk-encryption').checked = kb.content.encrypted;
+  $el('#chk-silent').checked = false;
 };
 
 kb.onEditEnd = function() {
@@ -727,13 +730,14 @@ kb.save = function() {
     }
   }
 
+  var orgUdate = kb.content.U_DATE;
   var encryption = ($el('#chk-encryption').checked ? '1' : '0');
+  var silent = ($el('#chk-silent').checked ? '1' : '0');
   var title = $el('#content-title-edt').value;
   var body = $el('#content-body-edt').value;
   var labels = $el('#content-labels-edt').value;
   labels = labels.replace(/\s{2,}/g, ' ');
   var status = $el('#select-status').value;
-  var orgUdate = kb.content.U_DATE;
 
   if (!title) {
     kb.showInfotip('Title is required', 3000);
@@ -752,8 +756,9 @@ kb.save = function() {
   var b64Body = util.encodeBase64(body);
 
   var data = {
+    org_u_date: orgUdate,
     encryption: encryption,
-    org_u_date: orgUdate
+    silent: silent
   };
 
   if (kb.status & kb.ST_EDIT_ONLY_LABELS) {

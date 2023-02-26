@@ -506,14 +506,17 @@ def save_data(id, new_data, user=''):
         id = str(next_id)
 
     now = util.get_unixtime_millis()
+    str_now = str(now)
 
+    silent = True if new_data['silent'] == '1' else False
     try:
         data = load_data(id)
     except:
         data = {
-            'C_DATE': str(now),
+            'C_DATE': str_now,
             'C_USER': user
         }
+        silent = False
 
     if not 'C_DATE' in data:
         data['C_DATE'] = ''
@@ -529,15 +532,17 @@ def save_data(id, new_data, user=''):
     else:
         body = util.decode_base64(new_data['BODY'])
         isdataurl = is_dataurl(body)
+        secure = True if new_data['encryption'] == '1' else False
 
-        data['U_DATE'] = str(now)
-        data['U_USER'] = user
         data['TITLE'] = util.decode_base64(new_data['TITLE'])
         data['LABELS'] = labels
         data['STATUS'] = new_data['STATUS']
         data['DATA_TYPE'] = 'dataurl' if isdataurl else ''
         data['BODY'] = body
-        secure = True if new_data['encryption'] == '1' else False
+
+    if not silent:
+        data['U_DATE'] = str_now
+        data['U_USER'] = user
 
     write_data(id, data, secure)
 
