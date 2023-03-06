@@ -1061,7 +1061,7 @@ kb._clearData = function(id) {
   }
   kb.edit();
   $el('#content-body-edt').value = '';
-  kb.save();
+  kb.saveAndExit();
 };
 
 kb.export = function() {
