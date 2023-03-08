@@ -118,7 +118,8 @@ def build_main_screen(context):
     if kb.has_permission(context, 'kb.delete'):
         html += '          <button id="delete-button" class="red-button" style="min-width:32px;margin-left:8px;" onclick="kb.delete();">DELETE</button>'
 
-    html += '          <button id="clear-button" class="red-button" style="min-width:32px;margin-left:8px;display:hidden;" onclick="kb.clearData();">CLEAR</button>'
+    if kb.has_permission(context, 'kb.write'):
+        html += '          <button id="clear-button" class="red-button" style="min-width:32px;margin-left:8px;display:hidden;" onclick="kb.clearData();">CLEAR</button>'
 
     html += '''
         </span>
