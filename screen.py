@@ -21,7 +21,7 @@ import js
 #------------------------------------------------------------------------------
 def build_main_screen(context):
     workspace_path = kb.get_workspace_path()
-    msg_path = workspace_path + 'message.txt'
+    msg_path = workspace_path + 'info.txt'
     message = util.read_text_file(msg_path, default='')
 
     html = '''<!DOCTYPE html><html><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=Edge">

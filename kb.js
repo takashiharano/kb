@@ -710,8 +710,10 @@ kb.onEditEnd = function() {
 };
 
 kb.confirmSaveAndExit = function() {
-  kb.status |= kb.ST_SAVE_CONFIRMING;
-  util.confirm('Save and Exit?', kb.saveAndExit);
+  if (!(kb.status & kb.ST_SAVE_CONFIRMING)) {
+    kb.status |= kb.ST_SAVE_CONFIRMING;
+    util.confirm('Save and Exit?', kb.saveAndExit);
+  }
 };
 kb.saveAndExit = function() {
   kb.status |= kb.ST_EXIT;
@@ -939,7 +941,7 @@ kb.showData = function(content) {
     $el('.for-view').hide();
   }
 
-  if ((id == '0') || (isNaN(id))) {
+  if (kb.hasFlag(content, 'NODELETE')) {
     $el('#delete-button').hide();
     $el('#clear-button').show();
   } else {
@@ -1506,6 +1508,16 @@ kb.keyHandlerE = function(e) {
 kb.extractSelectedText = function() {
   var s = window.getSelection();
   return s.toString();
+};
+
+kb.hasFlag = function(content, flag) {
+  var flgs = content.FLAGS;
+  if (!flgs) return false;
+  flgs = flgs.split('|');
+  for (var i = 0; i < flgs.length; i++) {
+    if (flgs[i] == flag) return true;
+  }
+  return false;
 };
 
 //-------------------------------------------------------------------------

@@ -48,7 +48,7 @@ def get_list(target_id=None, need_encode_b64=False):
     data_list = []
     for i in range(len(data_id_list)):
         id = data_id_list[i]
-        if target_id is not None and target_id != id or target_id is None and is_special_id(id):
+        if target_id is not None and target_id != id or target_id is None and should_omit_listing(id):
             continue
         try:
             data = load_data(id, True)
@@ -63,6 +63,10 @@ def get_list(target_id=None, need_encode_b64=False):
                 'id': id,
                 'data_status': 'LOAD_ERROR'
             }
+
+        if target_id is None and should_omit_listing(id, data):
+            continue
+
         data_list.append(data)
 
     total_count = len(data_list)
@@ -85,11 +89,24 @@ def get_list(target_id=None, need_encode_b64=False):
 
     return data_list_obj
 
-def is_special_id(id):
-    if id == '0':
+def should_omit_listing(id, data=None):
+    if is_special_id(id):
         return True
+    if data is not None and 'FLAGS' in data and has_flag(data['FLAGS'], 'HIDDEN'):
+        return True
+    return False
+
+def is_special_id(id):
     if util.match(id, '^[^0-9]'):
         return True
+    return False
+
+def has_flag(flags_text, target_flag):
+    flags = flags_text.split('|')
+    for i in range(len(flags)):
+        flag = flags[i]
+        if flag == target_flag:
+            return True
     return False
 
 def filter_by_id(all_id_list, keywords):
@@ -161,7 +178,7 @@ def search_data(q, need_encode_b64=False):
     all_data = []
     for i in range(len(id_list)):
         id = id_list[i]
-        if is_special_id(id):
+        if should_omit_listing(id):
             continue
         try:
             data = load_data(id)
@@ -462,6 +479,7 @@ def load_data(id, head_only=False):
         'U_USER': '',
         'LABELS': '',
         'STATUS': '',
+        'FLAGS': '',
         'DATA_TYPE': ''
     }
 
@@ -522,6 +540,8 @@ def save_data(id, new_data, user=''):
         data['C_DATE'] = ''
     if not 'C_USER' in data:
         data['C_USER'] = ''
+    if not 'FLAGS' in data:
+        data['FLAGS'] = ''
 
     labels = util.decode_base64(new_data['LABELS'])
     labels = to_set(labels)
@@ -537,6 +557,7 @@ def save_data(id, new_data, user=''):
         data['TITLE'] = util.decode_base64(new_data['TITLE'])
         data['LABELS'] = labels
         data['STATUS'] = new_data['STATUS']
+        data['FLAGS'] = data['FLAGS']
         data['DATA_TYPE'] = 'dataurl' if isdataurl else ''
         data['BODY'] = body
 
@@ -582,6 +603,7 @@ def write_data(id, data, secure=False, path=None):
     text += 'U_USER: ' + data['U_USER'] + '\n'
     text += 'LABELS: ' + data['LABELS'] + '\n'
     text += 'STATUS: ' + data['STATUS'] + '\n'
+    text += 'FLAGS: ' + data['FLAGS'] + '\n'
     text += 'DATA_TYPE: ' + data['DATA_TYPE'] + '\n'
     text += '\n'
     text += data['BODY']
