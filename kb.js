@@ -87,7 +87,7 @@ kb.onAppReady1 = function() {
   var q = util.getQuery('q');
   var id = util.getQuery('id');
   if (id) {
-    kb.showDataById(id);
+    kb.listAndShowDataById(id);
   } else if (q) {
     q = decodeURIComponent(q);
     $el('#q').value = q;
@@ -404,7 +404,7 @@ kb.search = function() {
     if (id.match(/[ ,-]/)) {
       kb.searchByIds(id);
     } else {
-      kb.showDataById(id);
+      kb.listAndShowDataById(id);
     }
   } else if (q) {
     kb.searchByKeyword(q);
@@ -449,7 +449,7 @@ kb.onSearchCb = function(xhr, res, req) {
   }
 };
 
-kb.showDataById = function(id) {
+kb.listAndShowDataById = function(id) {
   kb.getList(id);
   kb.getData(id);
 };
@@ -469,7 +469,7 @@ kb.onClickTitle = function(id) {
   }
   var item = kb.getMetaData(id);
   if (item.size < 1048576) {
-    kb.openData(id);
+    kb.showData(id);
   } else {
     kb.loadPendingTmrId = setTimeout(kb.onLoadPendingExpr, 500, id);
   }
@@ -478,7 +478,7 @@ kb.onClickTitle = function(id) {
 
 kb.onLoadPendingExpr = function(id) {
   kb.loadPendingTmrId = 0;
-  kb.openData(id);
+  kb.showData(id);
 };
 
 kb.getMetaData = function(id) {
@@ -487,6 +487,10 @@ kb.getMetaData = function(id) {
     if (item.id == id) return item;
   }
   return null;
+};
+
+kb.showData = function(id) {
+  kb.openData(id);
 };
 
 kb.openData = function(id) {
@@ -566,7 +570,7 @@ kb.onGetData = function(xhr, res, req) {
   kb.content.BODY = body;
 
   if (data_status == 'OK') {
-    kb.showData(kb.content);
+    kb.drawData(kb.content);
     $el('.for-view').show();
   } else {
     kb._clear();
@@ -649,6 +653,10 @@ kb.editLabels = function() {
 kb.edit = function() {
   kb.status |= kb.ST_EDITING;
 
+  $el('#id-txt').disabled = true;
+  $el('#q').disabled = true;
+  kb.updateSearchLabels();
+
   $el('#new-button').disabled = true;
   $el('#search-button').disabled = true;
   $el('#all-button').disabled = true;
@@ -693,12 +701,17 @@ kb.onEditEnd = function() {
 
   $el('#content-labels-edt').value = '';
 
+  $el('#id-txt').disabled = false;
+  $el('#q').disabled = false;
+  kb.onInputId();
+  kb.onInputQ();
+
   $el('#new-button').disabled = false;
   $el('#search-button').disabled = false;
   $el('#all-button').disabled = false;
   $el('#clear-button').disabled = false;
 
-  if (kb.content) kb.showData(kb.content);
+  if (kb.content) kb.drawData(kb.content);
 
   if (kb.content.id) {
     $el('.for-view').show();
@@ -870,7 +883,7 @@ kb._cancel = function() {
   }
 };
 
-kb.showData = function(content) {
+kb.drawData = function(content) {
   var id = content.id;
   var cDate = content.C_DATE;
   var uDate = content.U_DATE;
@@ -904,7 +917,7 @@ kb.showData = function(content) {
   if (id != '') idLabel = id + ':';
 
   var titleLabel = util.escHtml(title);
-  titleLabel = '<span class="pseudo-link" onclick="kb.openData(\'' + id + '\');">' + titleLabel + '</span>';
+  titleLabel = '<span class="pseudo-link" onclick="kb.showData(\'' + id + '\');">' + titleLabel + '</span>';
 
   $el('#content-id').innerHTML = idLabel;
   $el('#content-title').innerHTML = titleLabel;
@@ -1000,7 +1013,7 @@ kb.decodeB64Image = function(s) {
 };
 
 kb.onEnrichChange = function() {
-  kb.showData(kb.content);
+  kb.drawData(kb.content);
 };
 
 kb.clear = function() {
@@ -1008,7 +1021,7 @@ kb.clear = function() {
 };
 kb._clear = function() {
   kb.clearContent();
-  kb.showData(kb.content);
+  kb.drawData(kb.content);
 };
 kb.clearContent = function() {
   kb.content = {
@@ -1021,6 +1034,8 @@ kb.clearContent = function() {
     TITLE: '',
     LABELS: '',
     STATUS: '',
+    FLAGS: '',
+    DATATYPE: '',
     BODY: ''
   };
 };
@@ -1193,11 +1208,15 @@ kb.copyContent = function() {
   }
 };
 
+kb.getUrl4Id = function(id) {
+  var url = location.href;
+  url = url.replace(/\?.*/, '') + '?id=' + id;
+  return url;
+};
+
 kb.showUrl = function() {
   var id = kb.content.id;
-  var url = location.href;
-  url = url.replace(/\?.*/, '');
-  url += '?id=' + id;
+  var url = kb.getUrl4Id(id);
   kb.contentUrl = url;
   var m = '<span id="content-url" class="pseudo-link" onclick="kb.copyUrl();" data-tooltip="Click to copy">' + url + '</span>\n\n';
   var listTokens = '<div style="width:100%;text-align:left;line-height:1.8em;">';
@@ -1384,14 +1403,13 @@ kb.onInputId = function() {
   } else {
     kb.enableQ();
   }
+  kb.updateSearchLabels();
 }
 kb.disableId = function() {
   $el('#id-txt').disabled = true;
-  $el('#id-label').addClass('input-label-disable');
 };
 kb.enableId = function() {
   $el('#id-txt').disabled = false;
-  $el('#id-label').removeClass('input-label-disable');
 };
 kb.onInputQ = function(e) {
   if ($el('#q').value) {
@@ -1399,14 +1417,20 @@ kb.onInputQ = function(e) {
   } else {
     kb.enableId();
   }
+  kb.updateSearchLabels();
 };
 kb.disableQ = function() {
   $el('#q').disabled = true;
-  $el('#keyqord-label').addClass('input-label-disable');
 };
 kb.enableQ = function() {
   $el('#q').disabled = false;
+};
+
+kb.updateSearchLabels = function() {
+  $el('#id-label').removeClass('input-label-disable');
+  if ($el('#id-txt').disabled) $el('#id-label').addClass('input-label-disable');
   $el('#keyqord-label').removeClass('input-label-disable');
+  if ($el('#q').disabled) $el('#keyqord-label').addClass('input-label-disable');
 };
 
 $onEnterKey = function(e) {
