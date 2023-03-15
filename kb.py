@@ -182,6 +182,8 @@ def search_data(q, need_encode_b64=False):
             continue
         try:
             data = load_data(id)
+            if should_omit_listing(id, data):
+                dontinue
             data = convert_data_to_half_width(data)
             data['score'] = 0
             all_data.append(data)
