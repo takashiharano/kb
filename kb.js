@@ -1495,7 +1495,8 @@ kb.keyHandlerD = function(e) {
     var st = el.selectionStart;
     var ed = el.selectionEnd;
   }
-  var t = kb.extractSelectedText(s);
+  var t = kb.extractSelectedText();
+  if (!t) return;
   var m;
   try {
     var s = util.decodeBSB64(t, kb.bsb64.n);
@@ -1515,7 +1516,8 @@ kb.keyHandlerE = function(e) {
     var st = el.selectionStart;
     var ed = el.selectionEnd;
   }
-  var t = kb.extractSelectedText(s);
+  var t = kb.extractSelectedText();
+  if (!t) return;
   var m;
   try {
     var s = util.encodeBSB64(t, kb.bsb64.n);
