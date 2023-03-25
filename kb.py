@@ -832,6 +832,8 @@ def has_permission(context, permission):
             priv = privs[i]
             if permission == priv:
                 return True
+            elif priv == 'auth' and web.has_permission(context, permission):
+                return True
     return False
 
 #------------------------------------------------------------------------------
