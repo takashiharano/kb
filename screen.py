@@ -52,9 +52,13 @@ def build_main_screen(context):
       <span id="id-label">ID:</span> <input type="text" id="id-txt" class="q-txt" spellcheck="false" style="width:46px;">
       <span id="keyqord-label" style="margin-left:8px;">KEYWORD:</span> <input type="text" id="q" class="q-txt" spellcheck="false" style="margin-left:4px;"><button id="search-button" style="margin-left:4px;min-width:32px;" onclick="kb.search();">SEARCH</button>
       <button id="all-button" style="margin-left:8px;min-width:32px;" onclick="kb.getListAll();">LIST ALL</button>
-      <span style="position:absolute;right:5px;">
-        <span id="clock"></span>
 '''
+    if kb.has_permission(context, 'kb.write'):
+        html += '        <button id="touch-button" style="margin-left:16px;" onclick="kb.touch();" disabled>TOUCH</button>'
+
+    html += '      <span style="position:absolute;right:5px;">'
+    html += '        <span id="clock"></span>'
+
     if kb.has_permission(context, 'kb.export'):
         html += '        <button id="export-button" style="margin-left:8px;min-width:32px;" onclick="kb.export();">EXPORT</button>'
 
@@ -112,9 +116,6 @@ def build_main_screen(context):
           <button id="copy-text-button" style="margin-left:8px;" onclick="kb.copyContent();">COPY</button>
           <button id="copy-url-button" style="margin-left:2px;" onclick="kb.showUrl();">URL</button>
 '''
-    if kb.has_permission(context, 'kb.write'):
-        html += '        <button id="edit-button" class="for-view" style="margin-left:8px;" onclick="kb.touch();">TOUCH</button>'
-
     if kb.has_permission(context, 'kb.delete'):
         html += '          <button id="delete-button" class="red-button" style="min-width:32px;margin-left:8px;" onclick="kb.delete();">DELETE</button>'
 

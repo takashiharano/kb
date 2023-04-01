@@ -279,6 +279,9 @@ kb.drawList = function(items, sortIdx, sortType, totalCount) {
     }
     var labelsHTML = kb.buildLabelsHTML(labels);
     htmlList += '<tr id="row-' + id + '" class="data-list-row">';
+    htmlList += '<td><input type="checkbox" onchange="kb.checkItem(\'' + id + '\', this)"';
+    if (kb.checkedIds.includes(id)) htmlList += ' checked';
+    htmlList += '></td>'
     htmlList += '<td style="padding-right:16px;">' + id + '</td>'
     htmlList += '<td style="min-width:300px;max-width:600px;">';
     if (data_status == 'OK') {
@@ -336,11 +339,28 @@ kb.sortItemList = function(sortIdx, sortType) {
   kb.drawList(kb.itemList, sortIdx, sortType, kb.totalCount);
 };
 
+kb.checkedIds = [];
+kb.checkItem = function(id, el) {
+  if (el.checked) {
+    kb.checkedIds.push(id);
+    $el('#touch-button').disabled = false;
+    return;
+  }
+  var newList = [];
+  for (var i = 0; i < kb.checkedIds.length; i++) {
+    var v = kb.checkedIds[i];
+    if (v != id) newList.push(v);
+  }
+  kb.checkedIds = newList;
+  if (newList.length == 0) $el('#touch-button').disabled = true;
+};
+
 //---------------------------------------------------------
 kb.buildListHeader = function(columns, sortIdx, sortType) {
   var html = '<table id="list-table" class="item list-table item-list">';
   html += '<tr class="item-list">';
 
+  html += '<th class="item-list">&nbsp;</th>';
   for (var i = 0; i < columns.length; i++) {
     var column = columns[i];
     var label = column['label'];
@@ -660,6 +680,7 @@ kb.edit = function() {
   $el('#new-button').disabled = true;
   $el('#search-button').disabled = true;
   $el('#all-button').disabled = true;
+  $el('#touch-button').disabled = true;
   $el('#clear-button').disabled = true;
   $el('.for-view').hide();
   $el('.for-edit').show();
@@ -710,6 +731,7 @@ kb.onEditEnd = function() {
   $el('#search-button').disabled = false;
   $el('#all-button').disabled = false;
   $el('#clear-button').disabled = false;
+  kb.enableTouchButton();
 
   if (kb.content) kb.drawData(kb.content);
 
@@ -720,6 +742,10 @@ kb.onEditEnd = function() {
   }
 
   $el('.for-edit').hide();
+};
+
+kb.enableTouchButton = function() {
+  if (kb.checkedIds.length > 0) $el('#touch-button').disabled = false;
 };
 
 kb.confirmSaveAndExit = function() {
@@ -835,8 +861,32 @@ kb.touch = function() {
   util.confirm('Update the last update date to now?', kb._touch);
 };
 kb._touch = function() {
-  kb.edit();
-  kb.saveAndExit();
+  var ids = '';
+  for (var i = 0; i < kb.checkedIds.length; i++) {
+    if (i > 0) ids += ',';
+    ids += kb.checkedIds[i];
+  }
+  var param = {ids: ids};
+  kb.callApi('touch', param, kb.onTouchDone);
+  kb.drawContentBodyArea4Progress('Updating');
+};
+kb.onTouchDone = function(xhr, res, req) {
+  if (xhr.status != 200) {
+    kb.onHttpError(xhr.status);
+    return;
+  }
+  if (res.status == 'OK') {
+    kb.checkedIds = [];
+    if (kb.content && kb.content.id != '') {
+      kb.reloadListAndData(kb.content.id);
+    } else {
+      $el('#content-body').innerHTML = '';
+      kb.search();
+    }
+    kb.showInfotip('OK');
+  } else {
+    log.e(res.status + ':' + res.body);
+  }
 };
 
 kb.reloadListAndData = function(id) {
@@ -1309,11 +1359,13 @@ kb.onEndDataLoading = function() {
 kb.onStartLoading = function() {
   $el('#search-button').disabled = true;
   $el('#all-button').disabled = true;
+  $el('#touch-button').disabled = true;
   kb.clear();
 };
 kb.onEndLoading = function() {
   $el('#search-button').disabled = false;
   $el('#all-button').disabled = false;
+  kb.enableTouchButton();
 };
 
 kb.isListLoading = function() {

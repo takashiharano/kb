@@ -125,6 +125,23 @@ def proc_save(context):
 
     return result
 
+#------------------------------------------------------------------------------
+def proc_touch(context):
+    p_ids = get_request_param('ids')
+    ids = p_ids.split(',')
+    user = get_user_name(context)
+    for i in range(len(ids)):
+        id = ids[i]
+        data = kb.get_data(id)
+        if data['data_status'] != 'OK':
+            continue
+        now = util.get_unixtime_millis()
+        data['U_DATE'] = now
+        data['U_USER'] = user
+        secure = data['encrypted']
+        kb.write_data(id, data, secure)
+
+#------------------------------------------------------------------------------
 def get_user_name(context):
     if 'user_info' in context:
         user_info = context['user_info']
@@ -161,6 +178,10 @@ def proc_api(context, act):
             'U_DATE': result['U_DATE'],
             'U_USER': result['U_USER']
         }
+    elif act == 'touch':
+        status = 'OK'
+        proc_touch(context)
+        result_data = None
     elif act == 'delete':
         id = get_request_param('id')
         status = kb.delete_data(id)

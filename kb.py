@@ -526,14 +526,13 @@ def save_data(id, new_data, user=''):
         id = str(next_id)
 
     now = util.get_unixtime_millis()
-    str_now = str(now)
 
     silent = True if new_data['silent'] == '1' else False
     try:
         data = load_data(id)
     except:
         data = {
-            'C_DATE': str_now,
+            'C_DATE': now,
             'C_USER': user
         }
         silent = False
@@ -564,7 +563,7 @@ def save_data(id, new_data, user=''):
         data['BODY'] = body
 
     if not silent:
-        data['U_DATE'] = str_now
+        data['U_DATE'] = now
         data['U_USER'] = user
 
     write_data(id, data, secure)
@@ -599,9 +598,9 @@ def is_dataurl(s):
 def write_data(id, data, secure=False, path=None):
     text = ''
     text += 'TITLE: ' + data['TITLE'] + '\n'
-    text += 'C_DATE: ' + data['C_DATE'] + '\n'
+    text += 'C_DATE: ' + str(data['C_DATE']) + '\n'
     text += 'C_USER: ' + data['C_USER'] + '\n'
-    text += 'U_DATE: ' + data['U_DATE'] + '\n'
+    text += 'U_DATE: ' + str(data['U_DATE']) + '\n'
     text += 'U_USER: ' + data['U_USER'] + '\n'
     text += 'LABELS: ' + data['LABELS'] + '\n'
     text += 'STATUS: ' + data['STATUS'] + '\n'
