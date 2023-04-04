@@ -101,20 +101,26 @@ def proc_save(context):
     id = get_request_param('id')
     data_json = get_request_param('data')
     new_data = util.from_json(data_json)
-    data = kb.get_data(id)
 
-    if id == '' or data['U_DATE'] == new_data['org_u_date']:
+    content = None
+    if id != '':
+        data = kb.get_data(id)
+        content = data['content']
+
+    if id == '' or content is not None and content['U_DATE'] == new_data['org_u_date']:
         status = 'OK'
         user = get_user_name(context)
-        saved_data = kb.save_data(id, new_data, user)
-        saved_id = saved_data['id']
-        saved_date = saved_data['data']['U_DATE']
-        saved_user = saved_data['data']['U_USER']
+        saved_obj = kb.save_data(id, new_data, user)
+        saved_data = saved_obj['data']
+        saved_content = saved_data['content']
+        saved_id = saved_obj['id']
+        saved_date = saved_content['U_DATE']
+        saved_user = saved_content['U_USER']
     else:
         status = 'CONFLICT'
         saved_id = None
-        saved_date = data['U_DATE']
-        saved_user = data['U_USER']
+        saved_date = content['U_DATE']
+        saved_user = content['U_USER']
 
     result = {
         'status': status,
@@ -133,13 +139,14 @@ def proc_touch(context):
     for i in range(len(ids)):
         id = ids[i]
         data = kb.get_data(id)
-        if data['data_status'] != 'OK':
+        if data['status'] != 'OK':
             continue
         now = util.get_unixtime_millis()
-        data['U_DATE'] = now
-        data['U_USER'] = user
+        content = data['content']
+        content['U_DATE'] = now
+        content['U_USER'] = user
         secure = data['encrypted']
-        kb.write_data(id, data, secure)
+        kb.write_data(id, content, secure)
 
 #------------------------------------------------------------------------------
 def get_user_name(context):

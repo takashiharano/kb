@@ -25,6 +25,18 @@ WK_PATH = WORKSPACE_PATH + 'wk/'
 ENCRYPTED_HEAD = '#DATA'
 BSB64_N = appconfig.encryption_key
 
+DEFAULT_CONTENT = {
+    'TITLE': '',
+    'C_DATE': '',
+    'C_USER': '',
+    'U_DATE': '',
+    'U_USER': '',
+    'LABELS': '',
+    'STATUS': '',
+    'FLAGS': '',
+    'DATA_TYPE': ''
+}
+
 #------------------------------------------------------------------------------
 def get_workspace_path():
     return WORKSPACE_PATH
@@ -52,26 +64,28 @@ def get_list(target_id=None, need_encode_b64=False):
             continue
         try:
             data = load_data(id, True)
+            content = data['content']
             if need_encode_b64:
-                if 'TITLE' in data:
-                    data['TITLE'] = util.encode_base64(data['TITLE'])
+                if 'TITLE' in content:
+                    content['TITLE'] = util.encode_base64(content['TITLE'])
 
-                if 'LABELS' in data:
-                    data['LABELS'] = util.encode_base64(data['LABELS'])
+                if 'LABELS' in content:
+                    content['LABELS'] = util.encode_base64(content['LABELS'])
         except:
             data = {
                 'id': id,
-                'data_status': 'LOAD_ERROR'
+                'status': 'LOAD_ERROR',
+                'content': DEFAULT_CONTENT.copy()
             }
 
-        if target_id is None and should_omit_listing(id, data):
+        if target_id is None and should_omit_listing(id, content):
             continue
 
         data_list.append(data)
 
     total_count = len(data_list)
     if appconfig.list_max > 0 and total_count > appconfig.list_max:
-        data_list2 = sorted(data_list, key=lambda x: x['U_DATE'], reverse=True)
+        data_list2 = sorted(data_list, key=lambda x: x['content']['U_DATE'], reverse=True)
         data_list = []
         cnt = 0
         for i in range(len(data_list2)):
@@ -89,10 +103,10 @@ def get_list(target_id=None, need_encode_b64=False):
 
     return data_list_obj
 
-def should_omit_listing(id, data=None):
+def should_omit_listing(id, content=None):
     if is_special_id(id):
         return True
-    if data is not None and 'FLAGS' in data and has_flag(data['FLAGS'], 'HIDDEN'):
+    if content is not None and 'FLAGS' in content and has_flag(content['FLAGS'], 'HIDDEN'):
         return True
     return False
 
@@ -182,9 +196,10 @@ def search_data(q, need_encode_b64=False):
             continue
         try:
             data = load_data(id)
-            if should_omit_listing(id, data):
+            content = data['content']
+            if should_omit_listing(id, content):
                 dontinue
-            data = convert_data_to_half_width(data)
+            data['content'] = convert_data_to_half_width(content)
             data['score'] = 0
             all_data.append(data)
         except:
@@ -197,7 +212,8 @@ def search_data(q, need_encode_b64=False):
         macthed_data_list = []
         for j in range(len(wk_data_list)):
             data = wk_data_list[j]
-            score = calc_data_macthed_score(data, keyword)
+            content = data['content']
+            score = calc_data_macthed_score(content, keyword)
             if score > 0:
                 data['score'] += score
                 macthed_data_list.append(data)
@@ -211,11 +227,14 @@ def search_data(q, need_encode_b64=False):
     data_list = []
     for i in range(len(wk_data_list)):
         data = wk_data_list[i]
-        del data['BODY']
+        content = data['content']
+        del content['BODY']
 
         if need_encode_b64:
-            data['TITLE'] = util.encode_base64(data['TITLE'])
-            data['LABELS'] = util.encode_base64(data['LABELS'])
+            content['TITLE'] = util.encode_base64(content['TITLE'])
+            content['LABELS'] = util.encode_base64(content['LABELS'])
+
+        data['content'] = content
         data_list.append(data)
 
     total_count = len(data_list)
@@ -238,64 +257,64 @@ def search_data(q, need_encode_b64=False):
 
     return data_list_obj
 
-def convert_data_to_half_width(data):
-    if 'TITLE' in data:
-        data['TITLE'] = util.to_half_width(data['TITLE'])
-    if 'LABELS' in data:
-        data['LABELS'] = util.to_half_width(data['LABELS'])
-    if 'BODY' in data:
-        data['BODY'] = util.to_half_width(data['BODY'])
-    return data
+def convert_data_to_half_width(content):
+    if 'TITLE' in content:
+        content['TITLE'] = util.to_half_width(content['TITLE'])
+    if 'LABELS' in content:
+        content['LABELS'] = util.to_half_width(content['LABELS'])
+    if 'BODY' in content:
+        content['BODY'] = util.to_half_width(content['BODY'])
+    return content
 
-def calc_data_macthed_score(data, keyword):
+def calc_data_macthed_score(content, keyword):
     score = 0
 
     keyword_lc = keyword.lower()
     if keyword_lc.startswith('title:'):
         keyword = util.replace(keyword, 'title:', '', flags=re.IGNORECASE)
-        score = is_matches_title(data['TITLE'], keyword)
+        score = is_matches_title(content['TITLE'], keyword)
 
     elif keyword_lc.startswith('label:'):
         keyword = util.replace(keyword, 'label:', '', flags=re.IGNORECASE)
-        if is_matches_labels(data['LABELS'], keyword):
+        if is_matches_labels(content['LABELS'], keyword):
             score = 10
 
     elif keyword_lc.startswith('status:'):
         keyword_lc = util.replace(keyword_lc, 'status:', '', flags=re.IGNORECASE)
-        if 'STATUS' in data and data['STATUS']:
-            status_lc = data['STATUS'].lower()
+        if 'STATUS' in content and content['STATUS']:
+            status_lc = content['STATUS'].lower()
             if status_lc == keyword_lc:
                 score = 10
 
     elif keyword_lc.startswith('body:'):
         keyword = util.replace(keyword, 'body:', '', flags=re.IGNORECASE)
-        score = count_matched_key(data['BODY'], keyword)
+        score = count_matched_key(content['BODY'], keyword)
 
     elif keyword_lc.startswith('createdat:'):
         keyword = util.replace(keyword, 'createdat:', '', flags=re.IGNORECASE)
-        if is_date_matches(data['C_DATE'], keyword):
+        if is_date_matches(content['C_DATE'], keyword):
             score = 10
 
     elif keyword_lc.startswith('updatedat:'):
         keyword = util.replace(keyword, 'updatedat:', '', flags=re.IGNORECASE)
-        if is_date_matches(data['U_DATE'], keyword):
+        if is_date_matches(content['U_DATE'], keyword):
             score = 10
 
     elif keyword_lc.startswith('createdby:'):
         keyword = util.replace(keyword, 'createdby:', '', flags=re.IGNORECASE)
-        score = is_target_matches(data['C_USER'], keyword)
+        score = is_target_matches(content['C_USER'], keyword)
 
     elif keyword_lc.startswith('updatedby:'):
         keyword = util.replace(keyword, 'updatedby:', '', flags=re.IGNORECASE)
-        score = is_target_matches(data['U_USER'], keyword)
+        score = is_target_matches(content['U_USER'], keyword)
 
     else:
-        score += is_matches_title(data['TITLE'], keyword) * 2
-        score += count_matched_key(data['TITLE'], keyword) * 300
-        score += count_matched_key(data['LABELS'], keyword) * 100
+        score += is_matches_title(content['TITLE'], keyword) * 2
+        score += count_matched_key(content['TITLE'], keyword) * 300
+        score += count_matched_key(content['LABELS'], keyword) * 100
 
-        if not 'DATA_TYPE' in data or data['DATA_TYPE'] != 'dataurl':
-            score += count_matched_key(data['BODY'], keyword)
+        if not 'DATA_TYPE' in content or content['DATA_TYPE'] != 'dataurl':
+            score += count_matched_key(content['BODY'], keyword)
 
     return score
 
@@ -436,19 +455,21 @@ def get_data(id, need_encode_b64=False):
     except Exception as e:
         data = {
             'id': id,
-            'data_status': str(e)
+            'status': str(e)
         }
         return data
 
     if need_encode_b64:
-        if 'TITLE' in data:
-            data['TITLE'] = util.encode_base64(data['TITLE'])
+        content = data['content']
+        if 'TITLE' in content:
+            content['TITLE'] = util.encode_base64(content['TITLE'])
 
-        if 'LABELS' in data:
-            data['LABELS'] = util.encode_base64(data['LABELS'])
+        if 'LABELS' in content:
+            content['LABELS'] = util.encode_base64(content['LABELS'])
 
-        if 'BODY' in data:
-            data['BODY'] = util.encode_base64(data['BODY'])
+        if 'BODY' in content:
+            content['BODY'] = util.encode_base64(content['BODY'])
+        data['content'] = content
 
     return data
 
@@ -469,20 +490,13 @@ def load_data(id, head_only=False):
     fileinfo = get_datafile_info(id)
     text = load_data_as_text(id)
 
+    content = DEFAULT_CONTENT.copy()
     data = {
         'id': id,
-        'data_status': 'OK',
+        'status': 'OK',
         'size': 0,
         'encrypted': False,
-        'TITLE': '',
-        'C_DATE': '',
-        'C_USER': '',
-        'U_DATE': '',
-        'U_USER': '',
-        'LABELS': '',
-        'STATUS': '',
-        'FLAGS': '',
-        'DATA_TYPE': ''
+        'content': content
     }
 
     if fileinfo is not None:
@@ -507,16 +521,16 @@ def load_data(id, head_only=False):
 
         field_name = line[0:p]
         fielf_value = str.strip(line[p + 1:])
-        data[field_name] = fielf_value
+        content[field_name] = fielf_value
 
-    if head_only:
-      return data
+    data['content'] = content
 
-    body = ''
-    for i in range(idx, len(lines)):
-        body += lines[i] + '\n'
+    if not head_only:
+        body = ''
+        for i in range(idx, len(lines)):
+            body += lines[i] + '\n'
+        data['content']['BODY'] = body
 
-    data['BODY'] = body
     return data
 
 #------------------------------------------------------------------------------
@@ -528,45 +542,52 @@ def save_data(id, new_data, user=''):
     now = util.get_unixtime_millis()
 
     silent = True if new_data['silent'] == '1' else False
+    new_content = new_data['content']
+
     try:
         data = load_data(id)
     except:
         data = {
-            'C_DATE': now,
-            'C_USER': user
+            'content': {
+                'C_DATE': now,
+                'C_USER': user
+            }
         }
         silent = False
 
-    if not 'C_DATE' in data:
-        data['C_DATE'] = ''
-    if not 'C_USER' in data:
-        data['C_USER'] = ''
-    if not 'FLAGS' in data:
-        data['FLAGS'] = ''
+    content = data['content']
 
-    labels = util.decode_base64(new_data['LABELS'])
+    if not 'C_DATE' in content:
+        content['C_DATE'] = ''
+    if not 'C_USER' in content:
+        content['C_USER'] = ''
+    if not 'FLAGS' in content:
+        content['FLAGS'] = ''
+
+    labels = util.decode_base64(new_content['LABELS'])
     labels = to_set(labels)
 
     if new_data['only_labels']:
-        data['LABELS'] = labels
+        content['LABELS'] = labels
         secure = data['encrypted']
     else:
-        body = util.decode_base64(new_data['BODY'])
+        body = util.decode_base64(new_content['BODY'])
         isdataurl = is_dataurl(body)
         secure = True if new_data['encryption'] == '1' else False
 
-        data['TITLE'] = util.decode_base64(new_data['TITLE'])
-        data['LABELS'] = labels
-        data['STATUS'] = new_data['STATUS']
-        data['FLAGS'] = data['FLAGS']
-        data['DATA_TYPE'] = 'dataurl' if isdataurl else ''
-        data['BODY'] = body
+        content['TITLE'] = util.decode_base64(new_content['TITLE'])
+        content['LABELS'] = labels
+        content['STATUS'] = new_content['STATUS']
+        content['DATA_TYPE'] = 'dataurl' if isdataurl else ''
+        content['BODY'] = body
 
     if not silent:
-        data['U_DATE'] = now
-        data['U_USER'] = user
+        content['U_DATE'] = now
+        content['U_USER'] = user
 
-    write_data(id, data, secure)
+    data['content'] = content
+
+    write_data(id, content, secure)
 
     saved_data = {
         'id': id,
@@ -595,19 +616,19 @@ def is_dataurl(s):
   return util.match(s, '^data:.+;base64,[A-Za-z0-9+/=\n]+$')
 
 #------------------------------------------------------------------------------
-def write_data(id, data, secure=False, path=None):
+def write_data(id, content, secure=False, path=None):
     text = ''
-    text += 'TITLE: ' + data['TITLE'] + '\n'
-    text += 'C_DATE: ' + str(data['C_DATE']) + '\n'
-    text += 'C_USER: ' + data['C_USER'] + '\n'
-    text += 'U_DATE: ' + str(data['U_DATE']) + '\n'
-    text += 'U_USER: ' + data['U_USER'] + '\n'
-    text += 'LABELS: ' + data['LABELS'] + '\n'
-    text += 'STATUS: ' + data['STATUS'] + '\n'
-    text += 'FLAGS: ' + data['FLAGS'] + '\n'
-    text += 'DATA_TYPE: ' + data['DATA_TYPE'] + '\n'
+    text += 'TITLE: ' + content['TITLE'] + '\n'
+    text += 'C_DATE: ' + str(content['C_DATE']) + '\n'
+    text += 'C_USER: ' + content['C_USER'] + '\n'
+    text += 'U_DATE: ' + str(content['U_DATE']) + '\n'
+    text += 'U_USER: ' + content['U_USER'] + '\n'
+    text += 'LABELS: ' + content['LABELS'] + '\n'
+    text += 'STATUS: ' + content['STATUS'] + '\n'
+    text += 'FLAGS: ' + content['FLAGS'] + '\n'
+    text += 'DATA_TYPE: ' + content['DATA_TYPE'] + '\n'
     text += '\n'
-    text += data['BODY']
+    text += content['BODY']
 
     if secure:
         text = ENCRYPTED_HEAD + bsb64.encode_string(text, BSB64_N)
@@ -677,9 +698,10 @@ def encdec_data(dst_base_dir, secure):
         dst_path = dst_base_dir + id + '.txt'
         try:
             data = load_data(id)
-            write_data(id, data, secure=secure, path=dst_path)
+            content = data['content']
+            write_data(id, content, secure=secure, path=dst_path)
         except Exception as e:
-            text = 'Error: ' + str(e) + '\n'
+            text = '!ERROR! ' + str(e) + '\n'
             text += load_data_as_text(id)
             util.write_text_file(dst_path, text)
 
@@ -689,7 +711,8 @@ def download_b64content(id, idx=None):
         idx = 0
 
     data = get_data(id)
-    s = get_dataurl_content(data['BODY'], idx)
+    content = data['content']
+    s = get_dataurl_content(content['BODY'], idx)
     if s is None:
         send_error_file('NO_BASE64_CONTENT')
         return

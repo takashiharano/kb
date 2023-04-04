@@ -44,8 +44,8 @@ kb.configInfo = null;
 kb.itemList = [];
 kb.totalCount = 0;
 kb.pendingId = null;
-kb.content;
-kb.contentUrl = '';
+kb.data;
+kb.urlOfData = '';
 kb.dndHandler = null;
 kb.areaSize = {
   orgY: 0,
@@ -236,17 +236,19 @@ kb.drawList = function(items, sortIdx, sortType, totalCount) {
   for (var i = 0; i < items.length; i++) {
     var data = items[i];
     var id = data.id;
-    var data_status = data.data_status;
-    var status = data.STATUS;
-    var b64Title = ((data.TITLE == undefined) ? '' : data.TITLE);
-    var b64Labels = data.LABELS;
-    var cDate = data.C_DATE;
-    var uDate = data.U_DATE;
+    var data_status = data.status;
+    var content = data.content || {};
+
+    var status = content.STATUS;
+    var b64Title = ((content.TITLE == undefined) ? '' : content.TITLE);
+    var b64Labels = content.LABELS;
+    var cDate = content.C_DATE;
+    var uDate = content.U_DATE;
     var score = (data.score == undefined ? '' : data.score);
     var cDateStr = '';
-    var cUser = (data.C_USER ? data.C_USER : '');
+    var cUser = (content.C_USER ? content.C_USER : '');
     var uDateStr = '';
-    var uUser = (data.C_USER ? data.U_USER : '');
+    var uUser = (content.C_USER ? content.U_USER : '');
     if ((cDate == undefined) || (cDate == '')) {
       cDateStr = '---------- --:--:--';
     } else {
@@ -274,7 +276,7 @@ kb.drawList = function(items, sortIdx, sortType, totalCount) {
       encrypted = '<span data-tooltip="Encrypted">&#x1F512;</span>';
     }
     var dlLink = '';
-    if (data.DATA_TYPE == 'dataurl') {
+    if (content.DATA_TYPE == 'dataurl') {
       dlLink = '<span class="dl-link" onclick="kb.dlContent(\'' + id + '\');" data-tooltip="Download">&#x1F517;</span>';
     }
     var labelsHTML = kb.buildLabelsHTML(labels);
@@ -325,8 +327,8 @@ kb.drawList = function(items, sortIdx, sortType, totalCount) {
 
   kb.drawInfo(infoHtml);
 
-  if (kb.content && kb.content.id != '') {
-    kb.highlightSelectedRow(kb.content.id);
+  if (kb.data && kb.data.id != '') {
+    kb.highlightSelectedRow(kb.data.id);
   }
 };
 
@@ -574,23 +576,25 @@ kb.onGetData = function(xhr, res, req) {
     return;
   }
 
-  var data_status = data.data_status;
-  var b64Title = ((data.TITLE == undefined) ? '' : data.TITLE);
-  var b64Labels = data.LABELS;
-  var b64Body = data.BODY;
+  var data_status = data.status;
+  var content = data.content;
+  var b64Title = ((content.TITLE == undefined) ? '' : content.TITLE);
+  var b64Labels = content.LABELS;
+  var b64Body = content.BODY;
 
   var title = util.decodeBase64(b64Title);
   var labels = util.decodeBase64(b64Labels);
   var body = util.decodeBase64(b64Body);
 
-  kb.content = {};
-  kb.content = util.copyObject(data, kb.content);
-  kb.content.TITLE = title;
-  kb.content.LABELS = labels;
-  kb.content.BODY = body;
+  kb.data = {};
+  kb.data = util.copyObject(data, kb.data);
+  if (!kb.data.content) kb.data.content = {};
+  kb.data.content.TITLE = title;
+  kb.data.content.LABELS = labels;
+  kb.data.content.BODY = body;
 
   if (data_status == 'OK') {
-    kb.drawData(kb.content);
+    kb.drawData(kb.data);
     $el('.for-view').show();
   } else {
     kb._clear();
@@ -696,11 +700,14 @@ kb.edit = function() {
   $el('#select-status').disabled = false;
   $el('#chk-encryption').disabled = false;
 
-  $el('#content-id-edt').value = kb.content.id;
-  $el('#content-title-edt').value = kb.content.TITLE;
-  $el('#content-body-edt').value = kb.content.BODY;
-  $el('#content-labels-edt').value = kb.content.LABELS;
-  $el('#chk-encryption').checked = kb.content.encrypted;
+  var data = kb.data;
+  var content = data.content;
+
+  $el('#content-id-edt').value = data.id;
+  $el('#content-title-edt').value = content.TITLE;
+  $el('#content-body-edt').value = content.BODY;
+  $el('#content-labels-edt').value = content.LABELS;
+  $el('#chk-encryption').checked = content.encrypted;
   $el('#chk-silent').checked = false;
 };
 
@@ -733,9 +740,9 @@ kb.onEditEnd = function() {
   $el('#clear-button').disabled = false;
   kb.enableTouchButton();
 
-  if (kb.content) kb.drawData(kb.content);
+  if (kb.data) kb.drawData(kb.data);
 
-  if (kb.content.id) {
+  if (kb.data.id) {
     $el('.for-view').show();
   } else {
     $el('.for-view').hide();
@@ -771,7 +778,7 @@ kb.save = function() {
     }
   }
 
-  var orgUdate = kb.content.U_DATE;
+  var orgUdate = kb.data.content.U_DATE;
   var encryption = ($el('#chk-encryption').checked ? '1' : '0');
   var silent = ($el('#chk-silent').checked ? '1' : '0');
   var title = $el('#content-title-edt').value;
@@ -786,32 +793,37 @@ kb.save = function() {
     return;
   }
 
-  kb.content.id = id;
-  kb.content.TITLE = title;
-  kb.content.BODY = body;
-  kb.content.LABELS = labels;
-  kb.content.STATUS = status;
+  kb.data.id = id;
+  kb.data.content.TITLE = title;
+  kb.data.content.BODY = body;
+  kb.data.content.LABELS = labels;
+  kb.data.content.STATUS = status;
 
   var b64Title = util.encodeBase64(title);
   var b64Labels = util.encodeBase64(labels);
   var b64Body = util.encodeBase64(body);
 
+  var only_labels;
+  var content = {};
+  if (kb.status & kb.ST_EDIT_ONLY_LABELS) {
+    only_labels = true;
+    content.LABELS = b64Labels;
+  } else {
+    only_labels = false;
+    content.TITLE = b64Title;
+    content.LABELS = b64Labels;
+    content.STATUS = status;
+    content.BODY = b64Body;
+  }
+
   var data = {
     org_u_date: orgUdate,
     encryption: encryption,
-    silent: silent
+    only_labels: only_labels,
+    silent: silent,
+    content: content
   };
 
-  if (kb.status & kb.ST_EDIT_ONLY_LABELS) {
-    data.only_labels = true;
-    data.LABELS = b64Labels;
-  } else {
-    data.only_labels = false;
-    data.TITLE = b64Title;
-    data.LABELS = b64Labels;
-    data.STATUS = status;
-    data.BODY = b64Body;
-  }
 
   kb.drawContentBodyArea4Progress('Saving');
 
@@ -838,7 +850,7 @@ kb.onSaveData = function(xhr, res, req) {
       kb.reloadListAndData(id);
       kb.status &= ~kb.ST_EXIT;
     }
-    kb.content.U_DATE = savedData.U_DATE;
+    kb.data.content.U_DATE = savedData.U_DATE;
     kb.showInfotip('OK');
   } else if (res.status == 'CONFLICT') {
     kb.status |= kb.ST_CONFLICTING;
@@ -877,8 +889,8 @@ kb.onTouchDone = function(xhr, res, req) {
   }
   if (res.status == 'OK') {
     kb.checkedIds = [];
-    if (kb.content && kb.content.id != '') {
-      kb.reloadListAndData(kb.content.id);
+    if (kb.data && kb.data.id != '') {
+      kb.reloadListAndData(kb.data.id);
     } else {
       $el('#content-body').innerHTML = '';
       kb.search();
@@ -929,18 +941,19 @@ kb.cancel = function() {
 kb._cancel = function() {
   kb.onEditEnd();
   if (kb.status & kb.ST_CONFLICTING) {
-    kb.reloadListAndData(kb.content.id);
+    kb.reloadListAndData(kb.data.id);
   }
 };
 
-kb.drawData = function(content) {
-  var id = content.id;
+kb.drawData = function(data) {
+  var content = data.content;
+  var id = data.id;
   var cDate = content.C_DATE;
   var uDate = content.U_DATE;
   var title = content.TITLE;
   var labels = content.LABELS;
   var status = content.STATUS;
-  var data_status = content.data_status;
+  var data_status = data.status;
 
   var cDateStr = '';
   var uDateStr = '';
@@ -1004,7 +1017,7 @@ kb.drawData = function(content) {
     $el('.for-view').hide();
   }
 
-  if (kb.hasFlag(content, 'NODELETE')) {
+  if (kb.hasFlag(content.FLAGS, 'NODELETE')) {
     $el('#delete-button').hide();
     $el('#clear-button').show();
   } else {
@@ -1029,7 +1042,7 @@ kb.linkDataUrl = function(s, f, index) {
     if (!w.match(/^data:image/)) {
       var t = w.match(/data:(.+);/)[1];
       if (index == -1) idx = i;
-      var a = '<span class="pseudo-link link" onclick="kb.dlContent(\'' + kb.content.id + '\', \'' + idx + '\');" data-tooltip="Download">[DATA] ' + t + '</span>' + '\n\n'
+      var a = '<span class="pseudo-link link" onclick="kb.dlContent(\'' + kb.data.id + '\', \'' + idx + '\');" data-tooltip="Download">[DATA] ' + t + '</span>' + '\n\n'
       s = s.replace(w, a);
     }
   }
@@ -1063,7 +1076,7 @@ kb.decodeB64Image = function(s) {
 };
 
 kb.onEnrichChange = function() {
-  kb.drawData(kb.content);
+  kb.drawData(kb.data);
 };
 
 kb.clear = function() {
@@ -1071,22 +1084,24 @@ kb.clear = function() {
 };
 kb._clear = function() {
   kb.clearContent();
-  kb.drawData(kb.content);
+  kb.drawData(kb.data);
 };
 kb.clearContent = function() {
-  kb.content = {
+  kb.data = {
     id: '',
-    data_status: 'EMPTY',
-    C_DATE: '',
-    C_USER: '',
-    U_DATE: '',
-    U_USER: '',
-    TITLE: '',
-    LABELS: '',
-    STATUS: '',
-    FLAGS: '',
-    DATATYPE: '',
-    BODY: ''
+    status: 'EMPTY',
+    content: {
+      C_DATE: '',
+      C_USER: '',
+      U_DATE: '',
+      U_USER: '',
+      TITLE: '',
+      LABELS: '',
+      STATUS: '',
+      FLAGS: '',
+      DATATYPE: '',
+      BODY: ''
+    }
   };
 };
 
@@ -1095,7 +1110,7 @@ kb.delete = function(id) {
 };
 kb._delete = function(id) {
   if (id == undefined) {
-    id = kb.content.id;
+    id = kb.data.id;
   }
   var param = {id: id};
   kb.callApi('delete', param, kb.onDelete);
@@ -1124,7 +1139,7 @@ kb.clearData = function(id) {
 };
 kb._clearData = function(id) {
   if (id == undefined) {
-    id = kb.content.id;
+    id = kb.data.id;
   }
   kb.edit();
   $el('#content-body-edt').value = '';
@@ -1253,8 +1268,8 @@ kb.onAreaResizeEnd = function(e) {
 };
 
 kb.copyContent = function() {
-  if (kb.content) {
-    kb.copy(kb.content.BODY);
+  if (kb.data && kb.data.content) {
+    kb.copy(kb.data.content.BODY);
   }
 };
 
@@ -1265,9 +1280,9 @@ kb.getUrl4Id = function(id) {
 };
 
 kb.showUrl = function() {
-  var id = kb.content.id;
+  var id = kb.data.id;
   var url = kb.getUrl4Id(id);
-  kb.contentUrl = url;
+  kb.urlOfData = url;
   var m = '<span id="content-url" class="pseudo-link" onclick="kb.copyUrl();" data-tooltip="Click to copy">' + url + '</span>\n\n';
   var listTokens = '<div style="width:100%;text-align:left;line-height:1.8em;">';
   listTokens += 'Token: ';
@@ -1294,7 +1309,7 @@ kb.copyUrl = function() {
 
 kb.applyToken = function(id, tokenKey) {
   if (tokenKey == null) {
-    $el('#content-url').innerText = kb.contentUrl;
+    $el('#content-url').innerText = kb.urlOfData;
     $el('#valid-until').innerText = '';
     return;
   }
@@ -1304,7 +1319,7 @@ kb.applyToken = function(id, tokenKey) {
   var srcToken = id + ':' + tokenKey + ':' + now;
   var token = util.encodeBSB64(srcToken, 0);
   token = encodeURIComponent(token);
-  url = kb.contentUrl + '&token=' + token;
+  url = kb.urlOfData + '&token=' + token;
   $el('#content-url').innerText = url;
   $el('#valid-until').innerText = 'Valid until ' + validUntil;
 };
@@ -1377,7 +1392,7 @@ kb.drawContentBodyArea4Progress = function(msg) {
 };
 
 kb.dlContent = function(id, idx) {
-  if (id == undefined) id = kb.content.id;
+  if (id == undefined) id = kb.data.id;
   var opt = {
     data: {
       id: id,
@@ -1588,8 +1603,7 @@ kb.extractSelectedText = function() {
   return s.toString();
 };
 
-kb.hasFlag = function(content, flag) {
-  var flgs = content.FLAGS;
+kb.hasFlag = function(flgs, flag) {
   if (!flgs) return false;
   flgs = flgs.split('|');
   for (var i = 0; i < flgs.length; i++) {
