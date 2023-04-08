@@ -117,6 +117,9 @@ def build_main_screen(context):
           <button id="copy-text-button" style="margin-left:8px;" onclick="kb.copyContent();">COPY</button>
           <button id="copy-url-button" style="margin-left:2px;" onclick="kb.showUrl();">URL</button>
 '''
+    if web.is_admin(context):
+        html += '          <button id="props-button" style="min-width:32px;margin-left:8px;" onclick="kb.editProps();">PROPS</button>'
+
     if kb.has_privilege(context, 'kb.delete'):
         html += '          <button id="delete-button" class="red-button" style="min-width:32px;margin-left:8px;" onclick="kb.delete();">DELETE</button>'
 

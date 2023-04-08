@@ -14,6 +14,7 @@ kb.ST_CONFLICTING = 1 << 7;
 kb.ST_SAVE_CONFIRMING = 1 << 8;
 kb.ST_CANCEL_CONFIRMING = 1 << 9;
 kb.ST_TOUCH_CONFIRMING = 1 << 10;
+kb.ST_PROP_EDITING = 1 << 11;
 
 kb.UI_ST_NONE = 0;
 kb.UI_ST_AREA_RESIZING = 1;
@@ -1181,6 +1182,60 @@ kb._export = function() {
   util.postSubmit('api.cgi', param);
 };
 
+kb.editProps = function() {
+  kb.status |= kb.ST_PROP_EDITING;
+  var content = kb.data.content;
+  var props = '';
+  for (var k in content) {
+    if (k != 'BODY') {
+      props += k + ': ' + content[k] + '\n';
+    }
+  }
+  var html = '';
+  html += '<div style="width:50vw;height:50vh;">';
+  html += '<textarea id="props" spellcheck="false" style="width:100%;height:calc(100% - 30px);">' + props + '</textarea><br>';
+  html += '<button onclick="kb.savePropsAndClose();">SAVE</button>';
+  html += '<button style="margin-left:10px;" onclick="kb.cancelEditProps();">Cancel</button>';
+  html += '</div>';
+  util.dialog.open(html);
+};
+
+kb.savePropsAndClose = function() {
+  var props = $el('#props').value;
+  props = props.replace(/\n{2,}/g, '\n');
+  props = props.replace(/^\n/, '');
+  util.dialog.close();
+  var p = util.encodeBase64(props);
+  var param = {
+    id: kb.data.id,
+    props: p
+  };
+  kb.callApi('mod_props', param, kb.onSaveProps);
+  kb.onEditPropsEnd();
+};
+
+kb.onSaveProps = function(xhr, res, req) {
+  if (xhr.status != 200) {
+    kb.onHttpError(xhr.status);
+    return;
+  }
+  if (res.status == 'OK') {
+    kb.reloadListAndData(kb.data.id);
+    kb.showInfotip('OK');
+  } else {
+    log.e(res.status + ':' + res.body);
+  }
+};
+
+kb.cancelEditProps = function() {
+  util.dialog.close();
+  kb.onEditPropsEnd();
+};
+
+kb.onEditPropsEnd = function() {
+  kb.status &= ~kb.ST_PROP_EDITING;
+};
+
 kb.onHttpError = function(status) {
   var m = 'HTTP_ERROR: ' + status;
   log.e(m);
@@ -1465,6 +1520,8 @@ $onCtrlS = function(e) {
     } else {
       kb.confirmSaveAndExit();
     }
+  } else if (kb.status & kb.ST_PROP_EDITING) {
+    kb.savePropsAndClose();
   }
 };
 kb.onKeyDownY = function(e) {
@@ -1536,6 +1593,9 @@ $onEnterKey = function(e) {
 };
 $onEscKey = function(e) {
   kb.closeDialog();
+  if (kb.status & kb.ST_PROP_EDITING) {
+    kb.onEditPropsEnd();
+  }
 };
 
 kb.onMouseMove = function(e) {

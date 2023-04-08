@@ -149,6 +149,27 @@ def proc_touch(context):
         kb.write_data(id, content, secure)
 
 #------------------------------------------------------------------------------
+def proc_mod_props(context):
+    if not web.is_admin(context):
+        return 'FORBIDDEN'
+
+    id = get_request_param('id')
+    p_props = get_request_param('props')
+    p_props = util.decode_base64(p_props)
+
+    data = kb.load_data(id)
+    if data['status'] != 'OK':
+        return 'ERROR:' + data['status']
+
+    new_content = kb.parse_content(p_props, True)
+    content = data['content']
+    new_content['BODY'] = content['BODY']
+
+    secure = data['encrypted']
+    kb.write_data(id, new_content, secure)
+    return 'OK'
+
+#------------------------------------------------------------------------------
 def get_user_name(context):
     if 'user_info' in context:
         user_info = context['user_info']
@@ -188,6 +209,9 @@ def proc_api(context, act):
     elif act == 'touch':
         status = 'OK'
         proc_touch(context)
+        result_data = None
+    elif act == 'mod_props':
+        status = proc_mod_props(context)
         result_data = None
     elif act == 'delete':
         id = get_request_param('id')

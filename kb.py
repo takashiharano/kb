@@ -501,13 +501,12 @@ def load_data(id, head_only=False):
     fileinfo = get_datafile_info(id)
     text = load_data_as_text(id)
 
-    content = DEFAULT_CONTENT.copy()
     data = {
         'id': id,
         'status': 'OK',
         'size': 0,
         'encrypted': False,
-        'content': content
+        'content': None
     }
 
     if fileinfo is not None:
@@ -517,6 +516,11 @@ def load_data(id, head_only=False):
         text = bsb64.decode_string(text[len(ENCRYPTED_HEAD):], BSB64_N)
         data['encrypted'] = True
 
+    data['content'] = parse_content(text, head_only)
+    return data
+
+def parse_content(text, head_only=False):
+    content = DEFAULT_CONTENT.copy()
     lines = util.text2list(text)
     idx = 0
     for i in range(len(lines)):
@@ -534,15 +538,13 @@ def load_data(id, head_only=False):
         fielf_value = str.strip(line[p + 1:])
         content[field_name] = fielf_value
 
-    data['content'] = content
-
     if not head_only:
         body = ''
         for i in range(idx, len(lines)):
             body += lines[i] + '\n'
-        data['content']['BODY'] = body
+        content['BODY'] = body
 
-    return data
+    return content
 
 #------------------------------------------------------------------------------
 def save_data(id, new_data, user=''):
