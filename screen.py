@@ -57,6 +57,7 @@ def build_main_screen(context):
         html += '        <button id="touch-button" style="margin-left:16px;" onclick="kb.touch();" disabled>TOUCH</button>'
 
     html += '      <span style="position:absolute;right:5px;">'
+    html += '        <span class="text-dim" style="margin-right:8px;">' + web.get_user_name(context) + '</span>'
     html += '        <span id="clock"></span>'
 
     if kb.has_privilege(context, 'kb.export'):
@@ -381,6 +382,9 @@ table {
     css += '.red-button:hover {'
     css += '  background: ' + appconfig.button_red_hover_background + ';'
     css += '  color: ' + appconfig.button_red_hover_fgcolor + ';'
+    css += '}'
+    css += '.text-dim {'
+    css += '  color: ' + appconfig.fg_dim_color + ';'
     css += '}'
     css += '.text-red {'
     css += '  color: ' + appconfig.text_red + ';'

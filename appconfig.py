@@ -14,6 +14,7 @@ encryption_key = 3
 border_color = '#08e'
 
 fg_color = '#fff'
+fg_dim_color = '#c0c6c8'
 background1 = '#000'
 background2 = '#13181d'
 background3 = '#192027'
