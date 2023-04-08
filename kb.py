@@ -46,7 +46,7 @@ def get_datafile_path(id):
     return DATA_DIR_PATH + id + '.txt'
 
 #------------------------------------------------------------------------------
-def get_data_id_list():
+def get_all_data_id_list():
     files = util.list_files(DATA_DIR_PATH, '.txt')
     data_id_list = []
     for i in range(len(files)):
@@ -57,7 +57,7 @@ def get_data_id_list():
 
 #------------------------------------------------------------------------------
 def get_list(context, target_id=None, need_encode_b64=False):
-    data_id_list = get_data_id_list()
+    data_id_list = get_all_data_id_list()
     data_list = []
     for i in range(len(data_id_list)):
         id = data_id_list[i]
@@ -66,7 +66,7 @@ def get_list(context, target_id=None, need_encode_b64=False):
         try:
             data = load_data(id, True)
             content = data['content']
-            if should_omit_listing(context, id, content):
+            if not has_data_privilege(context, content):
                 continue
 
             if need_encode_b64:
@@ -185,7 +185,7 @@ def search_data(context, q, need_encode_b64=False):
     q = util.replace(q, '\u3000', ' ')
     keywords = q.split(' ')
 
-    id_list = get_data_id_list()
+    id_list = get_all_data_id_list()
     filtered = filter_by_id(id_list, keywords)
     id_filtering = False
     if len(filtered['id_list']) > 0:
@@ -669,7 +669,7 @@ def check_exists(id):
 
 def get_max_id():
     max_id = 0
-    data_id_list = get_data_id_list()
+    data_id_list = get_all_data_id_list()
     for i in range(len(data_id_list)):
         id = data_id_list[i]
         try:
@@ -701,7 +701,7 @@ def encrypt_data(dst_base_dir):
     encdec_data(dst_base_dir, True)
 
 def encdec_data(dst_base_dir, secure):
-    data_id_list = get_data_id_list()
+    data_id_list = get_all_data_id_list()
     for i in range(len(data_id_list)):
         id = data_id_list[i]
         dst_path = dst_base_dir + id + '.txt'
