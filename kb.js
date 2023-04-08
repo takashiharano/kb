@@ -19,7 +19,7 @@ kb.UI_ST_NONE = 0;
 kb.UI_ST_AREA_RESIZING = 1;
 
 kb.LIST_COLUMNS = [
-  {key: 'id', label: 'ID'},
+  {key: 'id', label: 'ID', meta: true},
   {key: 'TITLE', label: 'TITLE'},
   {key: 'DATA_TYPE', label: 'DL'},
   {key: 'C_DATE', label: 'CREATED'},
@@ -28,9 +28,9 @@ kb.LIST_COLUMNS = [
   {key: 'U_USER', label: 'BY'},
   {key: 'STATUS', label: 'STATUS'},
   {key: 'LABELS', label: 'LABELS'},
-  {key: 'score', label: 'SCORE'},
-  {key: 'size', label: 'SIZE'},
-  {key: 'encrypted', label: ''}
+  {key: 'score', label: 'SCORE', meta: true},
+  {key: 'size', label: 'SIZE', meta: true},
+  {key: 'encrypted', label: '', meta: true}
 ];
 kb.onselectstart = document.onselectstart;
 
@@ -216,19 +216,42 @@ kb.drawListContent = function(html) {
   $el('#list-wrp').scrollTop = 0;
 };
 
-kb.sortList = function(items, sortKey, desc) {
-  items = util.copyObject(items);
+kb.sortList = function(itemList, sortKey, desc, byMetaCol) {
+  var items = util.copyObject(itemList);
+  var srcList = items;
+  if (!byMetaCol) {
+    srcList = [];
+    for (var i = 0; i < items.length; i++) {
+      var item = items[i];
+      item.content.id = item.id;
+      srcList.push(item.content);
+    }
+  }
   var asNum = true;
-  items = util.sortObject(items, sortKey, desc, asNum);
+  var sortedList = util.sortObject(srcList, sortKey, desc, asNum);
+  if (!byMetaCol) {
+    var tmpList = [];
+    for (i = 0; i < sortedList.length; i++) {
+      var content = sortedList[i];
+      for (var j = 0; j < items.length; j++) {
+        var item = items[j];
+        if (content.id == item.id) {
+          item.content = content;
+          tmpList.push(item);
+        }
+      }
+    }
+    items = tmpList;
+  }
   return items;
 };
 
 kb.drawList = function(items, sortIdx, sortType, totalCount) {
   if (sortIdx >= 0) {
     if (sortType > 0) {
-      var sortKey = kb.LIST_COLUMNS[sortIdx].key;
+      var srtDef = kb.LIST_COLUMNS[sortIdx];
       var desc = (sortType == 2);
-      items = kb.sortList(items, sortKey, desc);
+      items = kb.sortList(items, srtDef.key, desc, srtDef.meta);
     }
   }
 
@@ -462,7 +485,7 @@ kb.onSearchCb = function(xhr, res, req) {
   kb.onGetList(xhr, res, req);
   var index = parseInt(util.getQuery('index'));
   if (!isNaN(index)) {
-    var items = kb.sortList(kb.itemList, 'score', true);
+    var items = kb.sortList(kb.itemList, 'score', true, true);
     var item = items[index];
     if (item) {
       var id = item.id;
