@@ -34,8 +34,8 @@ DEFAULT_CONTENT = {
     'LABELS': '',
     'STATUS': '',
     'FLAGS': '',
-    'DATA_PRIVS': '',
-    'DATA_TYPE': ''
+    'DATA_TYPE': '',
+    'DATA_PRIVS': ''
 }
 
 #------------------------------------------------------------------------------
