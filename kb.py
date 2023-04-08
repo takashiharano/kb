@@ -34,6 +34,7 @@ DEFAULT_CONTENT = {
     'LABELS': '',
     'STATUS': '',
     'FLAGS': '',
+    'DATA_PRIVS': '',
     'DATA_TYPE': ''
 }
 
@@ -55,16 +56,19 @@ def get_data_id_list():
     return data_id_list
 
 #------------------------------------------------------------------------------
-def get_list(target_id=None, need_encode_b64=False):
+def get_list(context, target_id=None, need_encode_b64=False):
     data_id_list = get_data_id_list()
     data_list = []
     for i in range(len(data_id_list)):
         id = data_id_list[i]
-        if target_id is not None and target_id != id or target_id is None and should_omit_listing(id):
+        if target_id is not None and target_id != id or target_id is None and should_omit_listing(context, id):
             continue
         try:
             data = load_data(id, True)
             content = data['content']
+            if should_omit_listing(context, id, content):
+                continue
+
             if need_encode_b64:
                 if 'TITLE' in content:
                     content['TITLE'] = util.encode_base64(content['TITLE'])
@@ -78,7 +82,7 @@ def get_list(target_id=None, need_encode_b64=False):
                 'content': DEFAULT_CONTENT.copy()
             }
 
-        if target_id is None and should_omit_listing(id, content):
+        if target_id is None and should_omit_listing(context, id, content):
             continue
 
         data_list.append(data)
@@ -103,11 +107,14 @@ def get_list(target_id=None, need_encode_b64=False):
 
     return data_list_obj
 
-def should_omit_listing(id, content=None):
+def should_omit_listing(context, id, content=None):
     if is_special_id(id):
         return True
-    if content is not None and 'FLAGS' in content and has_flag(content['FLAGS'], 'HIDDEN'):
-        return True
+    if content is not None:
+        if not has_data_privilege(context, content):
+            return True
+        if 'FLAGS' in content and has_flag(content['FLAGS'], 'HIDDEN'):
+            return True
     return False
 
 def is_special_id(id):
@@ -116,12 +123,7 @@ def is_special_id(id):
     return False
 
 def has_flag(flags_text, target_flag):
-    flags = flags_text.split('|')
-    for i in range(len(flags)):
-        flag = flags[i]
-        if flag == target_flag:
-            return True
-    return False
+    return util.has_item_value(flags_text, target_flag)
 
 def filter_by_id(all_id_list, keywords):
     filtered_id_list = []
@@ -175,7 +177,7 @@ def filter_by_id_range(all_id_list, keyword, filtered_id_list):
     return filtered_id_list
 
 #------------------------------------------------------------------------------
-def search_data(q, need_encode_b64=False):
+def search_data(context, q, need_encode_b64=False):
     q = util.to_half_width(q)
     q = util.replace(q, '\\s{2,}', ' ')
     q = util.replace(q, '\u3000', ' ')
@@ -192,12 +194,12 @@ def search_data(q, need_encode_b64=False):
     all_data = []
     for i in range(len(id_list)):
         id = id_list[i]
-        if should_omit_listing(id):
+        if should_omit_listing(context, id):
             continue
         try:
             data = load_data(id)
             content = data['content']
-            if should_omit_listing(id, content):
+            if should_omit_listing(context, id, content):
                 dontinue
             data['content'] = convert_data_to_half_width(content)
             data['score'] = 0
@@ -449,7 +451,7 @@ def count_matched_key(target, keyword):
     return count
 
 #------------------------------------------------------------------------------
-def get_data(id, need_encode_b64=False):
+def get_data(context, id, need_encode_b64=False):
     try:
         data = load_data(id)
     except Exception as e:
@@ -459,8 +461,15 @@ def get_data(id, need_encode_b64=False):
         }
         return data
 
+    content = data['content']
+    if not has_data_privilege(context, content):
+        data = {
+            'id': id,
+            'status': 'DATA_NOT_FOUND'
+        }
+        return data
+
     if need_encode_b64:
-        content = data['content']
         if 'TITLE' in content:
             content['TITLE'] = util.encode_base64(content['TITLE'])
 
@@ -571,11 +580,12 @@ def save_data(id, new_data, user=''):
         content['LABELS'] = labels
         secure = data['encrypted']
     else:
+        title = util.decode_base64(new_content['TITLE'])
         body = util.decode_base64(new_content['BODY'])
         isdataurl = is_dataurl(body)
         secure = True if new_data['encryption'] == '1' else False
 
-        content['TITLE'] = util.decode_base64(new_content['TITLE'])
+        content['TITLE'] = title
         content['LABELS'] = labels
         content['STATUS'] = new_content['STATUS']
         content['DATA_TYPE'] = 'dataurl' if isdataurl else ''
@@ -618,15 +628,12 @@ def is_dataurl(s):
 #------------------------------------------------------------------------------
 def write_data(id, content, secure=False, path=None):
     text = ''
-    text += 'TITLE: ' + content['TITLE'] + '\n'
-    text += 'C_DATE: ' + str(content['C_DATE']) + '\n'
-    text += 'C_USER: ' + content['C_USER'] + '\n'
-    text += 'U_DATE: ' + str(content['U_DATE']) + '\n'
-    text += 'U_USER: ' + content['U_USER'] + '\n'
-    text += 'LABELS: ' + content['LABELS'] + '\n'
-    text += 'STATUS: ' + content['STATUS'] + '\n'
-    text += 'FLAGS: ' + content['FLAGS'] + '\n'
-    text += 'DATA_TYPE: ' + content['DATA_TYPE'] + '\n'
+
+    for key in content:
+        if key != 'BODY':
+            value = str(content[key])
+            text += key + ': ' + value + '\n'
+
     text += '\n'
     text += content['BODY']
 
@@ -706,11 +713,11 @@ def encdec_data(dst_base_dir, secure):
             util.write_text_file(dst_path, text)
 
 #------------------------------------------------------------------------------
-def download_b64content(id, idx=None):
+def download_b64content(context, id, idx=None):
     if idx is None:
         idx = 0
 
-    data = get_data(id)
+    data = get_data(context, id)
     content = data['content']
     s = get_dataurl_content(content['BODY'], idx)
     if s is None:
@@ -837,26 +844,40 @@ def is_access_allowed(context):
         return True
     return False
 
-def has_permission(context, permission):
+def has_privilege(context, privilege):
     access_control = appconfig.access_control
     if access_control == 'auth':
-        # permission = kb.xxx
-        return web.has_permission(context, permission)
+        # privilege = kb.xxx
+        return web.has_privilege(context, privilege)
     elif access_control == 'full':
         return True
     else:
-        permission = util.replace(permission, 'kb', '')
-        permission = util.replace(permission, '\.', '')
-        if permission == '':
+        privilege = util.replace(privilege, 'kb', '')
+        privilege = util.replace(v, '\.', '')
+        if privilege == '':
             return True
         privs = access_control.split('|')
         for i in range(len(privs)):
             priv = privs[i]
-            if permission == priv:
+            if privilege == priv:
                 return True
-            elif priv == 'auth' and web.has_permission(context, permission):
+            elif priv == 'auth' and web.has_privilege(context, privilege):
                 return True
     return False
+
+def has_data_privilege(context, content):
+    if web.is_admin(context):
+        return True
+    dataprivs = content['DATA_PRIVS'] if 'DATA_PRIVS' in content else ''
+    dataprivs = dataprivs.lower()
+    if dataprivs == '':
+        return True
+    privs = dataprivs.split(' ')
+    for i in range(len(privs)):
+        priv = privs[i]
+        if not web.has_privilege(context, priv):
+            return False
+    return True
 
 #------------------------------------------------------------------------------
 def main():

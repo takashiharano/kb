@@ -577,29 +577,30 @@ kb.onGetData = function(xhr, res, req) {
   }
 
   var data_status = data.status;
-  var content = data.content;
-  var b64Title = ((content.TITLE == undefined) ? '' : content.TITLE);
-  var b64Labels = content.LABELS;
-  var b64Body = content.BODY;
-
-  var title = util.decodeBase64(b64Title);
-  var labels = util.decodeBase64(b64Labels);
-  var body = util.decodeBase64(b64Body);
+  if (data_status != 'OK') {
+    kb._clear();
+    kb.showInfotip(data_status);
+    return;
+  }
 
   kb.data = {};
   kb.data = util.copyObject(data, kb.data);
-  if (!kb.data.content) kb.data.content = {};
-  kb.data.content.TITLE = title;
-  kb.data.content.LABELS = labels;
-  kb.data.content.BODY = body;
 
-  if (data_status == 'OK') {
-    kb.drawData(kb.data);
-    $el('.for-view').show();
-  } else {
-    kb._clear();
-    kb.showInfotip(data_status);
+  var content = data.content;
+  if (content) {
+    var b64Title = ((content.TITLE == undefined) ? '' : content.TITLE);
+    var b64Labels = content.LABELS;
+    var b64Body = content.BODY;
+    var title = util.decodeBase64(b64Title);
+    var labels = util.decodeBase64(b64Labels);
+    var body = util.decodeBase64(b64Body);
+    kb.data.content.TITLE = title;
+    kb.data.content.LABELS = labels;
+    kb.data.content.BODY = body;
   }
+
+  kb.drawData(kb.data);
+  $el('.for-view').show();
 };
 
 kb.buildStatusHTML = function(status) {
@@ -699,6 +700,7 @@ kb.edit = function() {
   $el('#content-body-edt').disabled = false;
   $el('#select-status').disabled = false;
   $el('#chk-encryption').disabled = false;
+  $el('#chk-silent').disabled = false;
 
   var data = kb.data;
   var content = data.content;
@@ -707,7 +709,7 @@ kb.edit = function() {
   $el('#content-title-edt').value = content.TITLE;
   $el('#content-body-edt').value = content.BODY;
   $el('#content-labels-edt').value = content.LABELS;
-  $el('#chk-encryption').checked = content.encrypted;
+  $el('#chk-encryption').checked = data.encrypted;
   $el('#chk-silent').checked = false;
 };
 
@@ -1284,20 +1286,22 @@ kb.showUrl = function() {
   var url = kb.getUrl4Id(id);
   kb.urlOfData = url;
   var m = '<span id="content-url" class="pseudo-link" onclick="kb.copyUrl();" data-tooltip="Click to copy">' + url + '</span>\n\n';
-  var listTokens = '<div style="width:100%;text-align:left;line-height:1.8em;">';
-  listTokens += 'Token: ';
-  listTokens +=  '<span id="valid-until"></span>\n';
-    var tokenKeys = [];
-  if (kb.configInfo && kb.configInfo.token_keys) {
-    tokenKeys = kb.configInfo.token_keys;
+  if (!kb.data.content.DATA_PRIVS) {
+    var listTokens = '<div style="width:100%;text-align:left;line-height:1.8em;">';
+    listTokens += 'Token: ';
+    listTokens +=  '<span id="valid-until"></span>\n';
+      var tokenKeys = [];
+    if (kb.configInfo && kb.configInfo.token_keys) {
+      tokenKeys = kb.configInfo.token_keys;
+    }
+    for (var i = 0; i < tokenKeys.length; i++) {
+      var tokenKey = tokenKeys[i];
+      listTokens += '<button style="margin-right:8px;" onclick="kb.applyToken(\'' + id + '\', \'' + tokenKey + '\')"> SELECT </button>' + tokenKey + '\n';
+    }
+    listTokens += '<button style="margin-right:8px;" onclick="kb.applyToken(\'' + id + '\', null)">DESELECT</button>\n';
+    listTokens += '</div>';
+    m += listTokens;
   }
-  for (var i = 0; i < tokenKeys.length; i++) {
-    var tokenKey = tokenKeys[i];
-    listTokens += '<button style="margin-right:8px;" onclick="kb.applyToken(\'' + id + '\', \'' + tokenKey + '\')"> SELECT </button>' + tokenKey + '\n';
-  }
-  listTokens += '<button style="margin-right:8px;" onclick="kb.applyToken(\'' + id + '\', null)">DESELECT</button>\n';
-  listTokens += '</div>';
-  m += listTokens;
   util.alert(m)
 };
 
@@ -1605,7 +1609,8 @@ kb.extractSelectedText = function() {
 
 kb.hasFlag = function(flgs, flag) {
   if (!flgs) return false;
-  flgs = flgs.split('|');
+  flag = flag.toLowerCase();
+  flgs = flgs.toLowerCase().split('|');
   for (var i = 0; i < flgs.length; i++) {
     if (flgs[i] == flag) return true;
   }

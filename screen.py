@@ -45,7 +45,7 @@ def build_main_screen(context):
   <div id="list-area" class="area">
     <div style="position:relative;">
 '''
-    if kb.has_permission(context, 'kb.write'):
+    if kb.has_privilege(context, 'kb.write'):
         html += '      <button id="new-button" style="margin-right:32px;" onclick="kb.createNew();">NEW</button>'
 
     html += '''
@@ -53,13 +53,13 @@ def build_main_screen(context):
       <span id="keyqord-label" style="margin-left:8px;">KEYWORD:</span> <input type="text" id="q" class="q-txt" spellcheck="false" style="margin-left:4px;"><button id="search-button" style="margin-left:4px;min-width:32px;" onclick="kb.search();">SEARCH</button>
       <button id="all-button" style="margin-left:8px;min-width:32px;" onclick="kb.getListAll();">LIST ALL</button>
 '''
-    if kb.has_permission(context, 'kb.write'):
+    if kb.has_privilege(context, 'kb.write'):
         html += '        <button id="touch-button" style="margin-left:16px;" onclick="kb.touch();" disabled>TOUCH</button>'
 
     html += '      <span style="position:absolute;right:5px;">'
     html += '        <span id="clock"></span>'
 
-    if kb.has_permission(context, 'kb.export'):
+    if kb.has_privilege(context, 'kb.export'):
         html += '        <button id="export-button" style="margin-left:8px;min-width:32px;" onclick="kb.export();">EXPORT</button>'
 
     html += '''
@@ -77,7 +77,7 @@ def build_main_screen(context):
     <div>
       <div id="info-area">
 '''
-    if kb.has_permission(context, 'kb.write'):
+    if kb.has_privilege(context, 'kb.write'):
         html += '        <button id="edit-button" class="for-view" style="min-width:32px;" onclick="kb.edit();">EDIT</button>'
 
     html += '''
@@ -106,7 +106,7 @@ def build_main_screen(context):
         <span id="buttons-r" class="for-view">
           <span id="content-labels-area">
             <span id="content-labels"></span>'''
-    if kb.has_permission(context, 'kb.write'):
+    if kb.has_privilege(context, 'kb.write'):
         html += '<span id="edit-labels-button" class="for-view pseudo-link subfunc" style="margin-left:4px;" onclick="kb.editLabels();">[EDIT]</span>'
 
     html += '''
@@ -116,10 +116,10 @@ def build_main_screen(context):
           <button id="copy-text-button" style="margin-left:8px;" onclick="kb.copyContent();">COPY</button>
           <button id="copy-url-button" style="margin-left:2px;" onclick="kb.showUrl();">URL</button>
 '''
-    if kb.has_permission(context, 'kb.delete'):
+    if kb.has_privilege(context, 'kb.delete'):
         html += '          <button id="delete-button" class="red-button" style="min-width:32px;margin-left:8px;" onclick="kb.delete();">DELETE</button>'
 
-    if kb.has_permission(context, 'kb.write'):
+    if kb.has_privilege(context, 'kb.write'):
         html += '          <button id="clear-button" class="red-button" style="min-width:32px;margin-left:8px;display:hidden;" onclick="kb.clearData();">CLEAR</button>'
 
     html += '''
@@ -252,7 +252,7 @@ def build_forbidden_screen(context):
 </head>
 <body>
 KB SYSTEM<br>
-ACCESS PERMISSION IS REQUIRED.
+ACCESS PRIVILEGE IS REQUIRED.
 </body></html>'''
     return html
 
@@ -627,7 +627,7 @@ def main():
     id = util.get_request_param('id')
 
     if kb.is_access_allowed(context):
-       if kb.has_permission(context, 'kb'):
+       if kb.has_privilege(context, 'kb'):
             html = build_main_screen(context)
        else:
             html = build_forbidden_screen(context)

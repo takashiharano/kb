@@ -28,7 +28,7 @@ def send_result_json(status, body):
     web.send_result_json(status, body)
 
 #------------------------------------------------------------------------------
-def has_privilege(context, id):
+def has_access_privilege(context, id):
     if not kb.is_access_allowed(context):
         token = get_request_param('token')
         try:
@@ -73,9 +73,9 @@ def is_token_expired(issued_time):
 #------------------------------------------------------------------------------
 def get_data(context):
     id = get_request_param('id')
-    if has_privilege(context, id):
+    if has_access_privilege(context, id):
         status = 'OK'
-        result_data = kb.get_data(id, True)
+        result_data = kb.get_data(context, id, True)
     else:
         status = 'NO_ACCESS_RIGHTS'
         result_data = None
@@ -85,14 +85,14 @@ def get_data(context):
 #------------------------------------------------------------------------------
 def download_b64content(context):
     id = get_request_param('id')
-    if has_privilege(context, id):
+    if has_access_privilege(context, id):
         status = 'OK'
         p_idx = get_request_param('idx')
         try:
             idx = int(p_idx)
         except:
             idx = 0
-        kb.download_b64content(id, idx)
+        kb.download_b64content(context, id, idx)
     else:
         kb.send_error_file('NO_ACCESS_RIGHTS')
 
@@ -104,7 +104,7 @@ def proc_save(context):
 
     content = None
     if id != '':
-        data = kb.get_data(id)
+        data = kb.get_data(context, id)
         content = data['content']
 
     if id == '' or content is not None and content['U_DATE'] == new_data['org_u_date']:
@@ -138,7 +138,7 @@ def proc_touch(context):
     user = get_user_name(context)
     for i in range(len(ids)):
         id = ids[i]
-        data = kb.get_data(id)
+        data = kb.get_data(context, id)
         if data['status'] != 'OK':
             continue
         now = util.get_unixtime_millis()
@@ -168,15 +168,15 @@ def proc_api(context, act):
     status = 'OK'
     if act == 'list':
         id = get_request_param('id')
-        result_data = kb.get_list(id, True)
+        result_data = kb.get_list(context, id, True)
     elif act == 'search':
         id = get_request_param('id')
         if id is None:
             q = get_request_param('q')
             q = util.decode_base64(q)
-            result_data = kb.search_data(q, True)
+            result_data = kb.search_data(context, q, True)
         else:
-            result_data = kb.get_data(id, True)
+            result_data = kb.get_data(context, id, True)
     elif act == 'save':
         result = proc_save(context)
         status = result['status']
