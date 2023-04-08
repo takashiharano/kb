@@ -1125,7 +1125,8 @@ kb.clearContent = function() {
       LABELS: '',
       STATUS: '',
       FLAGS: '',
-      DATATYPE: '',
+      DATA_TYPE: '',
+      DATA_PRIVS: '',
       BODY: ''
     }
   };
