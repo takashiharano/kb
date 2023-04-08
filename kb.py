@@ -123,6 +123,8 @@ def is_special_id(id):
     return False
 
 def has_flag(flags_text, target_flag):
+    flags_text = flags_text.lower()
+    target_flag = target_flag.lower()
     return util.has_item_value(flags_text, target_flag)
 
 def filter_by_id(all_id_list, keywords):
@@ -853,7 +855,7 @@ def has_privilege(context, privilege):
         return True
     else:
         privilege = util.replace(privilege, 'kb', '')
-        privilege = util.replace(v, '\.', '')
+        privilege = util.replace(privilege, '\.', '')
         if privilege == '':
             return True
         privs = access_control.split('|')
