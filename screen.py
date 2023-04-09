@@ -357,6 +357,7 @@ input[type="checkbox"] {
     css += '  background: transparent;'
     css += '  color: ' + appconfig.fg_color + ';'
     css += '  font-family: Consolas, Monaco, Menlo, monospace, sans-serif;'
+    css += '  resize: none;'
     css += '}'
 
     css += '''
