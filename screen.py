@@ -57,7 +57,7 @@ def build_main_screen(context):
         html += '        <button id="touch-button" style="margin-left:16px;" onclick="kb.touch();" disabled>TOUCH</button>'
 
     html += '      <span style="position:absolute;right:5px;">'
-    html += '        <span class="text-dim" style="margin-right:8px;">' + web.get_user_name(context) + '</span>'
+    html += '        <span class="text-dim" style="margin-right:10px;">' + web.get_user_name(context) + '</span>'
     html += '        <span id="clock"></span>'
 
     if kb.has_privilege(context, 'kb.export'):

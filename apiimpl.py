@@ -170,6 +170,26 @@ def proc_mod_props(context):
     return 'OK'
 
 #------------------------------------------------------------------------------
+def proc_change_data_id(context):
+    if not web.is_admin(context):
+        result = {
+            'status': 'FORBIDDEN',
+            'result': None
+        }
+        return result
+    id_fm = get_request_param('id_fm')
+    id_to = get_request_param('id_to')
+    status = kb.change_data_id(id_fm, id_to)
+    result = {
+        'status': status,
+        'detail': {
+            'id_fm': id_fm,
+            'id_to': id_to
+        }
+    }
+    return result
+
+#------------------------------------------------------------------------------
 def get_user_name(context):
     if 'user_info' in context:
         user_info = context['user_info']
@@ -187,6 +207,7 @@ def proc_on_forbidden(act):
 #------------------------------------------------------------------------------
 def proc_api(context, act):
     status = 'OK'
+    result_data = None
     if act == 'list':
         id = get_request_param('id')
         result_data = kb.get_list(context, id, True)
@@ -209,17 +230,19 @@ def proc_api(context, act):
     elif act == 'touch':
         status = 'OK'
         proc_touch(context)
-        result_data = None
     elif act == 'mod_props':
         status = proc_mod_props(context)
         result_data = None
     elif act == 'delete':
         id = get_request_param('id')
         status = kb.delete_data(id)
-        result_data = None
     elif act == 'check_exists':
         id = get_request_param('id')
         result_data = kb.check_exists(id)
+    elif act == 'change_data_id':
+        result = proc_change_data_id(context)
+        status = result['status']
+        result_data = result['detail']
     else:
         act = web.get_raw_request_param('act')
         if act == 'export':
@@ -232,7 +255,6 @@ def proc_api(context, act):
             return
         else:
             status = 'NO_SUCH_ACTION'
-            result_data = None
 
     send_result_json(status, result_data)
 

@@ -683,6 +683,18 @@ def get_max_id():
             max_id = n
     return max_id
 
+def change_data_id(id_fm, id_to):
+    if not check_exists(id_fm):
+        return 'SRC_NOT_FOUND'
+    if check_exists(id_to):
+        return 'DEST_ALREADY_EXISTS'
+    path_fm = get_datafile_path(id_fm)
+    path_to = get_datafile_path(id_to)
+    ret = util.move(path_fm, path_to)
+    if ret:
+        return 'OK'
+    return 'FAILED:NEED_TO_FILE_CHECK_ON_THE_SERVER'
+
 def export_data(asis=False):
     wk_data_path = WK_PATH + 'data/'
     if asis:

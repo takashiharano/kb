@@ -1194,40 +1194,47 @@ kb.editProps = function() {
   }
   var html = '';
   html += '<div style="width:50vw;height:50vh;">';
-  html += '<textarea id="props" spellcheck="false" style="width:100%;height:calc(100% - 30px);">' + props + '</textarea><br>';
-  html += '<button onclick="kb.savePropsAndClose();">SAVE</button>';
+  html += '<div style="text-align:left;margin-bottom:4px;width:150px;">';
+  html += '<span>ID: </span><input type="text" id="prop-data-id" value="' + kb.data.id + '" onfocus="kb.onPropIdFocus();">';
+  html += '<button id="change-id-button" style="margin-left:4px;" onclick="kb.confirmChangeDataId();" disabled>CHANGE</button>';
+  html += '</div>';
+  html += '<textarea id="props" spellcheck="false" style="width:100%;height:calc(100% - 50px);" onfocus="kb.onPropsFocus();">' + props + '</textarea><br>';
+  html += '<button id="save-props-button" onclick="kb.confirmSaveProps();" disabled>SAVE</button>';
   html += '<button style="margin-left:10px;" onclick="kb.cancelEditProps();">Cancel</button>';
   html += '</div>';
   util.dialog.open(html);
 };
 
-kb.savePropsAndClose = function() {
+kb.confirmSaveProps = function() {
+  util.confirm('Save properties?', kb.saveProps);
+};
+kb.saveProps = function() {
   var props = $el('#props').value;
   props = props.replace(/\n{2,}/g, '\n');
   props = props.replace(/^\n/, '');
-  util.dialog.close();
   var p = util.encodeBase64(props);
   var param = {
     id: kb.data.id,
     props: p
   };
   kb.callApi('mod_props', param, kb.onSaveProps);
-  kb.onEditPropsEnd();
 };
-
 kb.onSaveProps = function(xhr, res, req) {
   if (xhr.status != 200) {
     kb.onHttpError(xhr.status);
     return;
   }
   if (res.status == 'OK') {
+    util.dialog.close();
+    kb.onEditPropsEnd();
     kb.reloadListAndData(kb.data.id);
     kb.showInfotip('OK');
   } else {
-    log.e(res.status + ':' + res.body);
+    var m = res.status + ':' + res.body;
+    log.e(m);
+    kb.showInfotip(m);
   }
 };
-
 kb.cancelEditProps = function() {
   util.dialog.close();
   kb.onEditPropsEnd();
@@ -1235,6 +1242,62 @@ kb.cancelEditProps = function() {
 
 kb.onEditPropsEnd = function() {
   kb.status &= ~kb.ST_PROP_EDITING;
+};
+
+kb.confirmChangeDataId = function() {
+  var idFm = kb.data.id;
+  var idTo = $el('#prop-data-id').value.trim();
+  if (idFm == idTo) {
+    kb.showInfotip('Same as current ID.');
+    return;
+  }
+  if (kb.validateId(idTo)) {
+    kb.showInfotip('Invalid ID');
+    return;
+  }
+  util.confirm('Change ID?', kb.changeDataId);
+};
+kb.changeDataId = function() {
+  var idFm = kb.data.id;
+  var idTo = $el('#prop-data-id').value.trim();
+  var param = {
+    id_fm: idFm,
+    id_to: idTo
+  };
+  kb.callApi('change_data_id', param, kb.onChangeDataId);
+};
+kb.onChangeDataId = function(xhr, res, req) {
+  if (xhr.status != 200) {
+    kb.onHttpError(xhr.status);
+    return;
+  }
+  if (res.status == 'OK') {
+    util.dialog.close();
+    kb.onEditPropsEnd();
+    var newId = res.body.id_to;
+    kb.reloadListAndData(newId);
+    kb.showInfotip('OK');
+  } else {
+    var m = res.status;
+    log.e(m);
+    kb.showInfotip(m, 3000);
+  }
+};
+
+kb.onPropIdFocus = function() {
+  $el('#change-id-button').disabled = false;
+  $el('#save-props-button').disabled = true;
+};
+kb.onPropsFocus = function() {
+  $el('#change-id-button').disabled = true;
+  $el('#save-props-button').disabled = false;
+};
+
+kb.validateId = function(id) {
+  if (!id.match(/^[A-Za-z0-9_\-]+$/)) {
+    return true;
+  }
+  return false;
 };
 
 kb.onHttpError = function(status) {
@@ -1522,7 +1585,7 @@ $onCtrlS = function(e) {
       kb.confirmSaveAndExit();
     }
   } else if (kb.status & kb.ST_PROP_EDITING) {
-    kb.savePropsAndClose();
+    kb.confirmSaveProps();
   }
 };
 kb.onKeyDownY = function(e) {
