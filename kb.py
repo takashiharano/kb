@@ -923,7 +923,11 @@ def has_data_privilege(context, content):
     privs = dataprivs.split(' ')
     for i in range(len(privs)):
         priv = privs[i]
-        if not web.has_privilege(context, priv):
+        if priv.startswith('-'):
+            priv = priv[1:]
+            if web.has_privilege(context, priv):
+                return False
+        elif not web.has_privilege(context, priv):
             return False
     return True
 
