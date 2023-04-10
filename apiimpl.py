@@ -190,6 +190,19 @@ def proc_change_data_id(context):
     return result
 
 #------------------------------------------------------------------------------
+def proc_check_id(context):
+    next_id = kb.get_next_id()
+    empty_ids = kb.get_empty_ids()
+    result = {
+        'status': 'OK',
+        'detail': {
+            'next_id': next_id,
+            'empty_ids': empty_ids
+        }
+    }
+    return result
+
+#------------------------------------------------------------------------------
 def get_user_name(context):
     if 'user_info' in context:
         user_info = context['user_info']
@@ -241,6 +254,10 @@ def proc_api(context, act):
         result_data = kb.check_exists(id)
     elif act == 'change_data_id':
         result = proc_change_data_id(context)
+        status = result['status']
+        result_data = result['detail']
+    elif act == 'check_id':
+        result = proc_check_id(context)
         status = result['status']
         result_data = result['detail']
     else:

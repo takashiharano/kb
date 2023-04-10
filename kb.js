@@ -1197,8 +1197,11 @@ kb.editProps = function() {
   html += '<div style="text-align:left;margin-bottom:4px;width:150px;">';
   html += '<span>ID: </span><input type="text" id="prop-data-id" value="' + kb.data.id + '" onfocus="kb.onPropIdFocus();">';
   html += '<button id="change-id-button" style="margin-left:4px;" onclick="kb.confirmChangeDataId();" disabled>CHANGE</button>';
+  html += '<span style="position:absolute;right:8px;">';
+  html += '<button id="next-id-button" style="margin-left:4px;" onclick="kb.checkId();">CHECK ID</button>';
+  html += '</span>';
   html += '</div>';
-  html += '<textarea id="props" spellcheck="false" style="width:100%;height:calc(100% - 50px);" onfocus="kb.onPropsFocus();">' + props + '</textarea><br>';
+  html += '<textarea id="props" spellcheck="false" style="width:100%;height:calc(100% - 54px);margin-bottom:8px;" onfocus="kb.onPropsFocus();">' + props + '</textarea><br>';
   html += '<button id="save-props-button" onclick="kb.confirmSaveProps();" disabled>SAVE</button>';
   html += '<button style="margin-left:10px;" onclick="kb.cancelEditProps();">Cancel</button>';
   html += '</div>';
@@ -1244,6 +1247,36 @@ kb.onEditPropsEnd = function() {
   kb.status &= ~kb.ST_PROP_EDITING;
 };
 
+kb.checkId = function() {
+  kb.callApi('check_id', null, kb.onCheckId);
+};
+kb.onCheckId = function(xhr, res, req) {
+  if (xhr.status != 200) {
+    kb.onHttpError(xhr.status);
+    return;
+  }
+  if (res.status == 'OK') {
+    var info = res.body;
+    var nextId = info.next_id;
+    var emptyIds = info.empty_ids;
+    var m = 'NEXT ID: ' + nextId;
+    if (emptyIds.length > 0) {
+      m += '\n';
+      m += 'EMPTY: ';
+      for (var i = 0; i < emptyIds.length; i++) {
+        var id = emptyIds[i];
+        if (i > 0) m += ', ';
+        m += id;
+      }
+    }
+    util.alert(m);
+  } else {
+    var m = res.status;
+    log.e(m);
+    kb.showInfotip(m);
+  }
+};
+
 kb.confirmChangeDataId = function() {
   var idFm = kb.data.id;
   var idTo = $el('#prop-data-id').value.trim();
@@ -1255,7 +1288,8 @@ kb.confirmChangeDataId = function() {
     kb.showInfotip('Invalid ID');
     return;
   }
-  util.confirm('Change ID?', kb.changeDataId);
+  var m = 'Change ID from ' + idFm + ' to ' + idTo + ' ?'
+  util.confirm(m, kb.changeDataId);
 };
 kb.changeDataId = function() {
   var idFm = kb.data.id;

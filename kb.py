@@ -549,8 +549,7 @@ def parse_content(text, head_only=False):
 #------------------------------------------------------------------------------
 def save_data(id, new_data, user=''):
     if id == '':
-        next_id = get_max_id() + 1
-        id = str(next_id)
+        id = get_next_id()
 
     now = util.get_unixtime_millis()
 
@@ -682,6 +681,39 @@ def get_max_id():
         if n > max_id:
             max_id = n
     return max_id
+
+def get_next_id():
+    id = get_max_id() + 1
+    return str(id)
+
+def get_empty_ids():
+    all_ids = get_all_data_id_list()
+    n_list = []
+    for i in range(len(all_ids)):
+        id = all_ids[i]
+        try:
+            n = int(id)
+        except:
+            continue
+        n_list.append(n)
+    n_list.sort()
+
+    empty_ids = []
+    empty_cnt = 0
+    prev_n = -1
+    for i in range(len(n_list)):
+        n = n_list[i]
+        df = n - prev_n
+        if prev_n >= 0 and df >= 2:
+            st = prev_n + 1
+            ed = st + df - 1
+            for j in range(st, ed):
+                if empty_cnt < 10:
+                    empty_ids.append(str(j))
+                    empty_cnt += 1
+        prev_n = n
+
+    return empty_ids
 
 def change_data_id(id_fm, id_to):
     if not check_exists(id_fm):
