@@ -156,6 +156,7 @@ def proc_mod_props(context):
     id = get_request_param('id')
     p_props = get_request_param('props')
     p_props = util.decode_base64(p_props)
+    p_props = util.replace(p_props, ' {2,}', ' ')
 
     data = kb.load_data(id)
     if data['status'] != 'OK':
