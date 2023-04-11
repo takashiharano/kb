@@ -1470,11 +1470,12 @@ kb.showUrl = function() {
     if (kb.configInfo && kb.configInfo.token_keys) {
       tokenKeys = kb.configInfo.token_keys;
     }
+    listTokens += '<div style="margin-left:16px;">';
     for (var i = 0; i < tokenKeys.length; i++) {
       var tokenKey = tokenKeys[i];
-      listTokens += '<button style="margin-right:8px;" onclick="kb.applyToken(\'' + id + '\', \'' + tokenKey + '\')"> SELECT </button>' + tokenKey + '\n';
+      listTokens += '<span class="pseudo-link" onclick="kb.applyToken(\'' + id + '\', \'' + tokenKey + '\')">' + tokenKey  + '</span>\n';
     }
-    listTokens += '<button style="margin-right:8px;" onclick="kb.applyToken(\'' + id + '\', null)">DESELECT</button>\n';
+    listTokens += '</div>';
     listTokens += '</div>';
     m += listTokens;
   }
@@ -1499,9 +1500,11 @@ kb.applyToken = function(id, tokenKey) {
   var srcToken = id + ':' + tokenKey + ':' + now;
   var token = util.encodeBSB64(srcToken, 0);
   token = encodeURIComponent(token);
-  url = kb.urlOfData + '&token=' + token;
+  var url = kb.urlOfData + '&token=' + token;
+  var until = 'Valid until ' + validUntil;
+  until += '<span class="pseudo-link" style="margin-left:16px;" onclick="kb.applyToken(\'' + id + '\', null)">&lt;X&gt;</span>';
   $el('#content-url').innerText = url;
-  $el('#valid-until').innerText = 'Valid until ' + validUntil;
+  $el('#valid-until').innerHTML = until;
 };
 
 kb.copy = function(s) {
