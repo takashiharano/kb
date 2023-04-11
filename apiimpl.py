@@ -81,7 +81,7 @@ def proc_save(context):
         saved_data = saved_obj['data']
         saved_content = saved_data['content']
         saved_id = saved_obj['id']
-        saved_date = saved_content['U_DATE']
+        saved_date = str(saved_content['U_DATE'])
         saved_user = saved_content['U_USER']
     else:
         status = 'CONFLICT'
