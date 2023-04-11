@@ -1462,7 +1462,7 @@ kb.showUrl = function() {
   var url = kb.getUrl4Id(id);
   kb.urlOfData = url;
   var m = '<span id="content-url" class="pseudo-link" onclick="kb.copyUrl();" data-tooltip="Click to copy">' + url + '</span>\n\n';
-  if (!kb.data.content.DATA_PRIVS) {
+  if (kb.isadmin && !kb.data.content.DATA_PRIVS) {
     var listTokens = '<div style="width:100%;text-align:left;line-height:1.8em;">';
     listTokens += 'Token: ';
     listTokens +=  '<span id="valid-until"></span>\n';
