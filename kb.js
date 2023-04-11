@@ -882,17 +882,22 @@ kb.onSaveData = function(xhr, res, req) {
     kb.status |= kb.ST_CONFLICTING;
     $el('#content-body').innerHTML = 'ERROR!';
     var data = res.body;
-    var dt = util.getDateTimeString(+data.U_DATE);
-    var msg = 'The data is already updated.\n\n'
-    msg += '<div style="text-align:left;">';
-    msg += 'DATE: ' + dt + '\n';
-    msg += 'BY  : ' + data.U_USER;
-    msg += '</div>';
-    util.alert('Conflict!', msg, kb.onConflictOK);
+    var m = kb.buildConflictMsg(data);
+    util.alert('Conflict!', m, kb.onConflictOK);
   } else {
     log.e(res.status + ':' + res.body);
   }
 };
+
+kb.buildConflictMsg = function(data) {
+    var dt = util.getDateTimeString(+data.U_DATE);
+    var m = 'The data is already updated.\n\n'
+    m += '<div style="text-align:left;">';
+    m += 'DATE: ' + dt + '\n';
+    m += 'BY  : ' + data.U_USER;
+    m += '</div>';
+    return m;
+}
 
 kb.touch = function() {
   kb.status |= kb.ST_TOUCH_CONFIRMING;
@@ -1216,8 +1221,10 @@ kb.saveProps = function() {
   props = props.replace(/\n{2,}/g, '\n');
   props = props.replace(/^\n/, '');
   var p = util.encodeBase64(props);
+  var orgUdate = kb.data.content.U_DATE;
   var param = {
     id: kb.data.id,
+    org_u_date: orgUdate,
     props: p
   };
   kb.callApi('mod_props', param, kb.onSaveProps);
@@ -1232,6 +1239,11 @@ kb.onSaveProps = function(xhr, res, req) {
     kb.onEditPropsEnd();
     kb.reloadListAndData(kb.data.id);
     kb.showInfotip('OK');
+  } else if (res.status == 'CONFLICT') {
+    kb.status |= kb.ST_CONFLICTING;
+    var data = res.body;
+    var m = kb.buildConflictMsg(data);
+    util.alert('Conflict!', m, null);
   } else {
     var m = res.status + ':' + res.body;
     log.e(m);
