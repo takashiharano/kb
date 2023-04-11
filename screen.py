@@ -635,10 +635,18 @@ def main():
     id = util.get_request_param('id')
 
     if kb.is_access_allowed(context):
-       if kb.has_privilege(context, 'kb'):
+        if kb.has_privilege(context, 'kb'):
             html = build_main_screen(context)
-       else:
-            html = build_forbidden_screen(context)
+        else:
+            token = util.get_request_param('token', '')
+            if token != '':
+                if kb.is_valid_token(token, id):
+                    html = build_view_screen(context)
+                else:
+                    html = build_forbidden_screen(context)
+            else:
+                # public-mode
+                html = build_main_screen(context)
     elif id is not None:
         token = util.get_request_param('token')
         if token is None:

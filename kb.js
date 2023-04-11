@@ -272,7 +272,7 @@ kb.drawList = function(items, sortIdx, sortType, totalCount) {
     var cDateStr = '';
     var cUser = (content.C_USER ? content.C_USER : '');
     var uDateStr = '';
-    var uUser = (content.C_USER ? content.U_USER : '');
+    var uUser = (content.U_USER ? content.U_USER : '');
     if ((cDate == undefined) || (cDate == '')) {
       cDateStr = '---------- --:--:--';
     } else {

@@ -892,26 +892,26 @@ def is_access_allowed(context):
         return True
     return False
 
-def has_privilege(context, privilege):
+def has_privilege(context, target_priv):
     access_control = appconfig.access_control
+
     if access_control == 'auth':
-        # privilege = kb.xxx
-        return web.has_privilege(context, privilege)
-    elif access_control == 'full':
-        return True
-    else:
-        privilege = util.replace(privilege, 'kb', '')
-        privilege = util.replace(privilege, '\.', '')
-        if privilege == '':
+        # target_priv = kb.xxx
+        return web.has_privilege(context, target_priv)
+
+    if util.has_item_value(access_control, 'auth', separator='|'):
+        if web.has_privilege(context, target_priv):
             return True
-        privs = access_control.split('|')
-        for i in range(len(privs)):
-            priv = privs[i]
-            if privilege == priv:
-                return True
-            elif priv == 'auth' and web.has_privilege(context, privilege):
-                return True
-    return False
+
+    if access_control == 'full':
+        return True
+
+    if target_priv == 'kb':
+        # public-mode
+        return True
+
+    target_priv = util.replace(target_priv, 'kb\.', '')
+    return util.has_item_value(access_control, target_priv, separator='|')
 
 def has_data_privilege(context, content):
     if web.is_admin(context):
@@ -930,6 +930,44 @@ def has_data_privilege(context, content):
         elif not web.has_privilege(context, priv):
             return False
     return True
+
+def is_valid_token(token_enc, target_id):
+    try:
+        return _is_valid_token(token_enc, target_id)
+    except:
+        return False
+
+def _is_valid_token(token_enc, target_id):
+    token = bsb64.decode_string(token_enc, 0)
+    fields = token.split(':')
+    id = fields[0]
+    key = fields[1]
+    issued_time = int(fields[2])
+
+    if id != target_id:
+        return False
+
+    if not is_token_key_exists_in_list(key):
+        return False
+
+    if is_token_expired(issued_time):
+        return False
+
+    return True
+
+def is_token_key_exists_in_list(key):
+    for v in appconfig.token_keys:
+        if v == key:
+            return True
+    return False
+
+def is_token_expired(issued_time):
+    valid_millis = appconfig.token_valid_sec * 1000
+    now = util.get_unixtime_millis()
+    valid_until = issued_time + valid_millis
+    if valid_until < now:
+        return True
+    return False
 
 #------------------------------------------------------------------------------
 def main():

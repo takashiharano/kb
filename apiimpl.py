@@ -11,7 +11,6 @@ ROOT_PATH = appconfig.root_path
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ROOT_PATH + 'libs'))
 import util
-import bsb64
 
 util.append_system_path(__file__, ROOT_PATH)
 util.append_system_path(__file__, ROOT_PATH + 'websys/bin')
@@ -32,43 +31,11 @@ def has_access_privilege(context, id):
     if not kb.is_access_allowed(context):
         token = get_request_param('token')
         try:
-            if not is_valid_token(token, id):
+            if not kb.is_valid_token(token, id):
                 return False
         except:
             return False
     return True
-
-def is_valid_token(token_enc, target_id):
-    token = bsb64.decode_string(token_enc, 0)
-    fields = token.split(':')
-    id = fields[0]
-    key = fields[1]
-    issued_time = int(fields[2])
-
-    if id != target_id:
-        return False
-
-    if not is_token_key_exists_in_list(key):
-        return False
-
-    if is_token_expired(issued_time):
-        return False
-
-    return True
-
-def is_token_key_exists_in_list(key):
-    for v in appconfig.token_keys:
-        if v == key:
-            return True
-    return False
-
-def is_token_expired(issued_time):
-    valid_millis = appconfig.token_valid_sec * 1000
-    now = util.get_unixtime_millis()
-    valid_until = issued_time + valid_millis
-    if valid_until < now:
-        return True
-    return False
 
 #------------------------------------------------------------------------------
 def get_data(context):
