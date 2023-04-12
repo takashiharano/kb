@@ -756,7 +756,7 @@ def encdec_data(dst_base_dir, secure):
             content = data['content']
             write_data(id, content, secure=secure, path=dst_path)
         except Exception as e:
-            text = '!ERROR! ' + str(e) + '\n'
+            text = '!ERROR! ' + str(e) + '\n---\n'
             text += load_data_as_text(id)
             util.write_text_file(dst_path, text)
 
