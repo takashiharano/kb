@@ -38,6 +38,23 @@ def has_access_privilege(context, id):
     return True
 
 #------------------------------------------------------------------------------
+def has_valid_apitoken():
+    apitoken = get_request_param('apitoken')
+    for i in range(len(appconfig.api_tokens)):
+        token = appconfig.api_tokens[i]
+        if apitoken == token:
+            return True
+    return False
+
+#------------------------------------------------------------------------------
+def get_user_name(context):
+    if 'user_info' in context:
+        user_info = context['user_info']
+        if user_info is not None and 'name' in user_info:
+            return user_info['name']
+    return ''
+
+#------------------------------------------------------------------------------
 def get_data(context):
     id = get_request_param('id')
     if has_access_privilege(context, id):
@@ -62,6 +79,25 @@ def download_b64content(context):
         kb.download_b64content(context, id, idx)
     else:
         kb.send_error_file('NO_ACCESS_RIGHTS')
+
+#------------------------------------------------------------------------------
+def proc_list(context):
+    id = get_request_param('id')
+    detail = kb.get_list(context, id, True)
+    result = create_result_object('OK', detail)
+    return result
+
+#------------------------------------------------------------------------------
+def proc_search(context):
+    id = get_request_param('id')
+    if id is None:
+        q = get_request_param('q')
+        q = util.decode_base64(q)
+        detail = kb.search_data(context, q, True)
+    else:
+        detail = kb.get_data(context, id, True)
+    result = create_result_object('OK', detail)
+    return result
 
 #------------------------------------------------------------------------------
 def proc_save(context):
@@ -89,13 +125,13 @@ def proc_save(context):
         saved_date = content['U_DATE']
         saved_user = content['U_USER']
 
-    result = {
-        'status': status,
+    detail = {
         'saved_id': saved_id,
         'U_DATE': saved_date,
         'U_USER': saved_user
     }
 
+    result = create_result_object(status, detail)
     return result
 
 #------------------------------------------------------------------------------
@@ -115,15 +151,13 @@ def proc_touch(context):
         secure = data['encrypted']
         kb.write_data(id, content, secure)
 
+    result = create_result_object('OK')
+    return result
+
 #------------------------------------------------------------------------------
 def proc_mod_props(context):
-    result = {
-        'status': 'OK',
-        'detail': None
-    }
-
     if not web.is_admin(context):
-        result['status'] = 'FORBIDDEN'
+        result = create_result_object('CONFLICT')
         return result
 
     id = get_request_param('id')
@@ -134,18 +168,16 @@ def proc_mod_props(context):
 
     data = kb.load_data(id)
     if data['status'] != 'OK':
-        result['status'] = 'ERROR:' + data['status']
+        result = create_result_object('ERROR:' + data['status'])
         return result
 
     content = data['content']
     if content['U_DATE'] != org_u_date:
-        result = {
-            'status': 'CONFLICT',
-            'detail': {
-                'U_DATE': content['U_DATE'],
-                'U_USER': content['U_USER']
-            }
+        detail = {
+            'U_DATE': content['U_DATE'],
+            'U_USER': content['U_USER']
         }
+        result = create_result_object('CONFLICT', detail)
         return result
 
     new_content = kb.parse_content(p_props, True)
@@ -153,48 +185,53 @@ def proc_mod_props(context):
 
     secure = data['encrypted']
     kb.write_data(id, new_content, secure)
+
+    result = create_result_object('OK')
+    return result
+
+#------------------------------------------------------------------------------
+def proc_delete(context):
+    id = get_request_param('id')
+    status = kb.delete_data(id)
+    result = create_result_object(status)
+    return result
+
+#------------------------------------------------------------------------------
+def proc_check_exists(context):
+    id = get_request_param('id')
+    detail = kb.check_exists(id)
+    result = create_result_object('OK', detail)
     return result
 
 #------------------------------------------------------------------------------
 def proc_change_data_id(context):
     if not web.is_admin(context):
-        result = {
-            'status': 'FORBIDDEN',
-            'result': None
-        }
+        result = create_result_object('FORBIDDEN')
         return result
+
     id_fm = get_request_param('id_fm')
     id_to = get_request_param('id_to')
     status = kb.change_data_id(id_fm, id_to)
-    result = {
-        'status': status,
-        'detail': {
-            'id_fm': id_fm,
-            'id_to': id_to
-        }
+    detail = {
+        'id_fm': id_fm,
+        'id_to': id_to
     }
+
+    result = create_result_object(status, detail)
     return result
 
 #------------------------------------------------------------------------------
 def proc_check_id(context):
     next_id = kb.get_next_id()
     empty_ids = kb.get_empty_ids()
-    result = {
-        'status': 'OK',
-        'detail': {
-            'next_id': next_id,
-            'empty_ids': empty_ids
-        }
-    }
-    return result
 
-#------------------------------------------------------------------------------
-def get_user_name(context):
-    if 'user_info' in context:
-        user_info = context['user_info']
-        if user_info is not None and 'name' in user_info:
-            return user_info['name']
-    return ''
+    detail = {
+        'next_id': next_id,
+        'empty_ids': empty_ids
+    }
+
+    result = create_result_object('OK', detail)
+    return result
 
 #------------------------------------------------------------------------------
 def proc_on_forbidden(act):
@@ -204,72 +241,38 @@ def proc_on_forbidden(act):
         send_result_json('FORBIDDEN', None)
 
 #------------------------------------------------------------------------------
+def create_result_object(status, detail=None):
+    obj = {
+        'status': status,
+        'detail': detail
+    }
+    return obj
+
+#------------------------------------------------------------------------------
 def proc_api(context, act):
-    status = 'OK'
-    result_data = None
-    if act == 'list':
-        id = get_request_param('id')
-        result_data = kb.get_list(context, id, True)
-    elif act == 'search':
-        id = get_request_param('id')
-        if id is None:
-            q = get_request_param('q')
-            q = util.decode_base64(q)
-            result_data = kb.search_data(context, q, True)
-        else:
-            result_data = kb.get_data(context, id, True)
-    elif act == 'save':
-        result = proc_save(context)
-        status = result['status']
-        result_data = {
-            'saved_id': result['saved_id'],
-            'U_DATE': result['U_DATE'],
-            'U_USER': result['U_USER']
-        }
-    elif act == 'touch':
-        status = 'OK'
-        proc_touch(context)
-    elif act == 'mod_props':
-        result = proc_mod_props(context)
-        status = result['status']
-        result_data = result['detail']
-    elif act == 'delete':
-        id = get_request_param('id')
-        status = kb.delete_data(id)
-    elif act == 'check_exists':
-        id = get_request_param('id')
-        result_data = kb.check_exists(id)
-    elif act == 'change_data_id':
-        result = proc_change_data_id(context)
-        status = result['status']
-        result_data = result['detail']
-    elif act == 'check_id':
-        result = proc_check_id(context)
-        status = result['status']
-        result_data = result['detail']
+    status = 'NO_SUCH_ACTION'
+    result = None
+    funcname_list = ['list', 'search', 'save', 'touch', 'mod_props', 'delete', 'check_exists', 'change_data_id', 'check_id']
+
+    if act in funcname_list:
+        func_name = 'proc_' + act
+        g = globals()
+        result = g[func_name](context)
     else:
+        # from url query string w/o encryption
         act = web.get_raw_request_param('act')
         if act == 'export':
             p_asis = web.get_raw_request_param('asis')
-            asis = False
-            if p_asis == 'true':
-                asis = True
+            asis = p_asis == 'true'
             b = kb.export_data(asis)
             util.send_binary(b, filename='kbdata.zip')
             return
-        else:
-            status = 'NO_SUCH_ACTION'
+
+    if result is not None:
+        status = result['status']
+        result_data = result['detail']
 
     send_result_json(status, result_data)
-
-#------------------------------------------------------------------------------
-def has_valid_apitoken():
-    apitoken = get_request_param('apitoken')
-    for i in range(len(appconfig.api_tokens)):
-        token = appconfig.api_tokens[i]
-        if apitoken == token:
-            return True
-    return False
 
 #------------------------------------------------------------------------------
 def main():
