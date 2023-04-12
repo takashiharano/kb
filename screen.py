@@ -417,23 +417,21 @@ table {
   background: #2f3a42;
 }
 '''
-    list_height = 240
-    content_height_adj = list_height + 40
-
+    content_height_adj = appconfig.list_height + 40
     css += '.item {'
     css += '  width: 100%;'
     css += '  background: ' + appconfig.background4 + ';'
     css += '}'
     css += '#list-area {'
     css += '  width: 100%;'
-    css += '  height: ' + str(list_height) + 'px;'
+    css += '  height: ' + str(appconfig.list_height) + 'px;'
     css += '  margin: 4px 2px 2px 2px;'
     css += '  background: ' + appconfig.background2 + ';'
     css += '}'
 
     css += '''
 #list-wrp {
-  height: calc(100% - 32px);
+  height: calc(100% - 50px);
   overflow: auto;
 }
 #list {

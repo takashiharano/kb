@@ -9,6 +9,7 @@ system_name = 'Knowledge Base System'
 system_name_color = '#ddd'
 
 list_max = 100
+list_height = 240
 
 default_data_encryption = True
 encryption_key = 3
