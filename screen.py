@@ -43,8 +43,20 @@ def build_main_screen(context):
 <body>
 <div id="body1">
   <div id="list-area" class="area">
-    <div style="position:relative;">
+    <div style="position:relative;height:20px;">
+
 '''
+    html += '      <span id="system-name" style="color:' + appconfig.system_name_color + ';">' + appconfig.system_name + '</span>'
+    html += '      <span style="position:absolute;right:5px;">'
+    html += '        <span class="text-dim" style="margin-right:10px;">' + web.get_user_name(context) + '</span>'
+    html += '        <span id="clock"></span>'
+    html += '''
+      </span>
+    </div>'''
+
+    html += '''
+    <div style="position:relative;height:20px;">'''
+
     if kb.has_privilege(context, 'kb.write'):
         html += '      <button id="new-button" style="margin-right:32px;" onclick="kb.createNew();">NEW</button>'
 
@@ -57,14 +69,11 @@ def build_main_screen(context):
         html += '        <button id="touch-button" style="margin-left:16px;" onclick="kb.touch();" disabled>TOUCH</button>'
 
     html += '      <span style="position:absolute;right:5px;">'
-    html += '        <span class="text-dim" style="margin-right:10px;">' + web.get_user_name(context) + '</span>'
-    html += '        <span id="clock"></span>'
-
     if kb.has_privilege(context, 'kb.export'):
         html += '        <button id="export-button" style="margin-left:8px;min-width:32px;" onclick="kb.export();">EXPORT</button>'
+    html += '      </span>'
 
     html += '''
-      </span>
     </div>
     <div style="height:1em;">
       <pre id="info"></pre>
@@ -146,7 +155,7 @@ def build_main_screen(context):
           </div>
         </div>
         <div style="height:25px;">
-          <input type="range" value="0" min="0" max="128" step="1" id="font-range" style="position:relative;top:6px;" oninput="kb.onFontRangeChanged(this);" onchange="kb.onFontRangeChanged(this);"><span id="fontsize"></span>
+          <input type="range" value="0" min="0" max="80" step="1" id="font-range" style="position:relative;top:6px;" oninput="kb.onFontRangeChanged(this);" onchange="kb.onFontRangeChanged(this);"><span id="fontsize"></span>
           <button onclick="kb.resetFontSize();">RESET</button>
           <span style="margin-left:16px;">Font: </sapn><input type="text" id="font" oninput="kb.onFontChanged(this);" onchange="kb.onFontChanged(this);">
           <span class="pseudo-link subfunc" onclick="kb.setMonospaceFont(true);">[monospace]</span>
@@ -227,7 +236,7 @@ kb.mode = 'view'
           </div>
         </div>
         <div style="height:25px;">
-          <input type="range" value="0" min="0" max="128" step="1" id="font-range" style="position:relative;top:6px;" oninput="kb.onFontRangeChanged(this);" onchange="kb.onFontRangeChanged(this);"><span id="fontsize"></span>
+          <input type="range" value="0" min="0" max="80" step="1" id="font-range" style="position:relative;top:6px;" oninput="kb.onFontRangeChanged(this);" onchange="kb.onFontRangeChanged(this);"><span id="fontsize"></span>
           <button onclick="kb.resetFontSize();">RESET</button>
           <span style="margin-left:16px;">Font: </sapn><input type="text" id="font" oninput="kb.onFontChanged(this);" onchange="kb.onFontChanged(this);">
         </div>
@@ -408,13 +417,16 @@ table {
   background: #2f3a42;
 }
 '''
+    list_height = 240
+    content_height_adj = list_height + 40
+
     css += '.item {'
     css += '  width: 100%;'
     css += '  background: ' + appconfig.background4 + ';'
     css += '}'
     css += '#list-area {'
     css += '  width: 100%;'
-    css += '  height: 230px;'
+    css += '  height: ' + str(list_height) + 'px;'
     css += '  margin: 4px 2px 2px 2px;'
     css += '  background: ' + appconfig.background2 + ';'
     css += '}'
@@ -440,7 +452,7 @@ table {
     css += '}'
     css += '#content-area {'
     css += '  width: 100%;'
-    css += '  height: calc(100vh - 270px);'
+    css += '  height: calc(100vh - ' + str(content_height_adj) + 'px);'
     css += '  margin: 2px;'
     css += '  background: ' + appconfig.background3 + ';'
     css += 'font-family: Consolas, Monaco, Menlo, monospace, sans-serif;'

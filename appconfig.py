@@ -5,6 +5,8 @@ workspace_path = root_path + '../private/kb/'
 access_control = 'auth'
 
 title = 'KB'
+system_name = 'Knowledge Base System'
+system_name_color = '#ddd'
 
 list_max = 100
 
