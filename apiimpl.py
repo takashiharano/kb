@@ -157,7 +157,7 @@ def proc_touch(context):
 #------------------------------------------------------------------------------
 def proc_mod_props(context):
     if not web.is_admin(context):
-        result = create_result_object('CONFLICT')
+        result = create_result_object('FORBIDDEN')
         return result
 
     id = get_request_param('id')
