@@ -1463,6 +1463,24 @@ kb.copyContent = function() {
   }
 };
 
+kb.confirmExportHtml = function() {
+  util.confirm('Save as HTML?', kb.exportHtml);
+}
+kb.exportHtml = function() {
+  var html = $el('#content-body').innerHTML;
+  var body = util.encodeBase64(html);
+  var fontSize = $el('#font-range').value;
+  var fontFamily = $el('#font').value;
+  param = {
+    act: 'export_html',
+    id: kb.data.id,
+    fontsize: fontSize,
+    fontfamily: fontFamily,
+    body: body
+  };
+  util.postSubmit('api.cgi', param);
+};
+
 kb.getUrl4Id = function(id) {
   var url = location.href;
   url = url.replace(/\?.*/, '') + '?id=' + id;

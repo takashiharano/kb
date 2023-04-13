@@ -81,6 +81,22 @@ def download_b64content(context):
         kb.send_error_file('NO_ACCESS_RIGHTS')
 
 #------------------------------------------------------------------------------
+def create_result_object(status, detail=None, type='json'):
+    obj = {
+        'type': type,
+        'status': status,
+        'detail': detail
+    }
+    return obj
+
+#------------------------------------------------------------------------------
+def proc_on_forbidden(act):
+    if act == 'export':
+        util.send_result_json('FORBIDDEN', None)
+    else:
+        send_result_json('FORBIDDEN', None)
+
+#------------------------------------------------------------------------------
 def proc_list(context):
     id = get_request_param('id')
     detail = kb.get_list(context, id, True)
@@ -234,25 +250,81 @@ def proc_check_id(context):
     return result
 
 #------------------------------------------------------------------------------
-def proc_on_forbidden(act):
-    if act == 'export':
-        util.send_result_json('FORBIDDEN', None)
-    else:
-        send_result_json('FORBIDDEN', None)
+def proc_check_id(context):
+    next_id = kb.get_next_id()
+    empty_ids = kb.get_empty_ids()
 
-#------------------------------------------------------------------------------
-def create_result_object(status, detail=None):
-    obj = {
-        'status': status,
-        'detail': detail
+    detail = {
+        'next_id': next_id,
+        'empty_ids': empty_ids
     }
-    return obj
+
+    result = create_result_object('OK', detail)
+    return result
+
+def proc_export_html(context):
+    id = get_request_param('id')
+    body = get_request_param('body')
+    body = util.decode_base64(body)
+    fontsize = get_request_param('fontsize')
+    fontfamily = get_request_param('fontfamily')
+
+    html = '''<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="none">
+<meta name="referrer" content="no-referrer">
+<meta name="referrer" content="never">
+'''
+    html += '<title>' + appconfig.title + '</title>\n'
+    html += '<style>\n'
+    html += _build_css(fontsize, fontfamily)
+    html += '</style>'
+    html += '''
+</head>
+<body>
+<pre id="content-body">
+'''
+    html += body
+    html += '''</pre>
+</body>
+</html>
+'''
+    b = html.encode()
+    filename = 'kb-' + id + '.html'
+    util.send_binary(b, filename=filename)
+    result = create_result_object('OK', None, 'octet-stream')
+    return result
+
+def _build_css(fontsize='12', fontfamily=''):
+    if fontfamily == '':
+        fontfamily = 'Consolas, Monaco, Menlo, monospace, sans-serif'
+    css = ''
+    css += 'body{\n'
+    css += '  calc(width: 100% - 20px);\n'
+    css += '  height: calc(100vh - 30px);\n'
+    css += '  margin: 0;\n'
+    css += '  padding: 10px;\n'
+    css += '  background: ' + appconfig.background3 + ';\n'
+    css += '  color: ' + appconfig.fg_color + ';\n'
+    css += '  font-size: ' + fontsize + 'px;\n'
+    css += '  font-family: ' + fontfamily + ';\n'
+    css += '}\n'
+    css += 'pre {\n'
+    css += '  margin: 0;\n'
+    css += '  font-family: ' + fontfamily + ';\n'
+    css += '}\n'
+    css += 'a {\n'
+    css += '  color: ' + appconfig.link_color + ';\n'
+    css += '}\n'
+    return css
 
 #------------------------------------------------------------------------------
 def proc_api(context, act):
     status = 'NO_SUCH_ACTION'
     result = None
-    funcname_list = ['list', 'search', 'save', 'touch', 'mod_props', 'delete', 'check_exists', 'change_data_id', 'check_id']
+    funcname_list = ['list', 'search', 'save', 'touch', 'mod_props', 'delete', 'check_exists', 'change_data_id', 'check_id', 'export_html']
 
     if act in funcname_list:
         func_name = 'proc_' + act
@@ -269,6 +341,8 @@ def proc_api(context, act):
             return
 
     if result is not None:
+        if result['type'] == 'octet-stream':
+            return
         status = result['status']
         result_data = result['detail']
 

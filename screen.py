@@ -70,7 +70,7 @@ def build_main_screen(context):
 
     html += '      <span style="position:absolute;right:5px;">'
     if kb.has_privilege(context, 'kb.export'):
-        html += '        <button id="export-button" style="margin-left:8px;min-width:32px;" onclick="kb.export();">EXPORT</button>'
+        html += '        <button id="export-button" style="margin-left:8px;min-width:32px;" onclick="kb.export();">EXPORT DATA</button>'
     html += '      </span>'
 
     html += '''
@@ -122,18 +122,19 @@ def build_main_screen(context):
     html += '''
           </span>
           <span id="status" style="margin-right:8px;"></span>
-          <input type="checkbox" id="enrich" checked><label for="enrich">Enrich</label>
-          <button id="copy-text-button" style="margin-left:8px;" onclick="kb.copyContent();">COPY</button>
-          <button id="copy-url-button" style="margin-left:2px;" onclick="kb.showUrl();">URL</button>
-'''
+          <input type="checkbox" id="enrich" checked><label for="enrich">Enrich</label>'''
+    html += '<button id="copy-text-button" style="margin-left:16px;" onclick="kb.copyContent();">COPY</button>'
+    html += '<button id="copy-url-button" style="margin-left:8px;" onclick="kb.showUrl();">URL</button>'
+    html += '<button id="save-html-button" style="margin-left:8px;" onclick="kb.confirmExportHtml();">EXPORT</button>'
+
     if web.is_admin(context):
-        html += '          <button id="props-button" style="min-width:32px;margin-left:8px;" onclick="kb.editProps();">PROPS</button>'
+        html += '<button id="props-button" style="min-width:32px;margin-left:12px;" onclick="kb.editProps();">PROPS</button>'
 
     if kb.has_privilege(context, 'kb.delete'):
-        html += '          <button id="delete-button" class="red-button" style="min-width:32px;margin-left:8px;" onclick="kb.delete();">DELETE</button>'
+        html += '<button id="delete-button" class="red-button" style="min-width:32px;margin-left:12px;" onclick="kb.delete();">DELETE</button>'
 
     if kb.has_privilege(context, 'kb.write'):
-        html += '          <button id="clear-button" class="red-button" style="min-width:32px;margin-left:8px;display:hidden;" onclick="kb.clearData();">CLEAR</button>'
+        html += '<button id="clear-button" class="red-button" style="min-width:32px;margin-left:12px;display:hidden;" onclick="kb.clearData();">CLEAR</button>'
 
     html += '''
         </span>
@@ -453,7 +454,7 @@ table {
     css += '  height: calc(100vh - ' + str(content_height_adj) + 'px);'
     css += '  margin: 2px;'
     css += '  background: ' + appconfig.background3 + ';'
-    css += 'font-family: Consolas, Monaco, Menlo, monospace, sans-serif;'
+    css += '  font-family: Consolas, Monaco, Menlo, monospace, sans-serif;'
     css += '}'
     css += '.title {'
     css += '  color: ' + appconfig.title_color + ';'
