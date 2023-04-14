@@ -156,7 +156,7 @@ def build_main_screen(context):
           </div>
         </div>
         <div style="height:25px;">
-          <input type="range" value="0" min="0" max="80" step="1" id="font-range" style="position:relative;top:6px;" oninput="kb.onFontRangeChanged(this);" onchange="kb.onFontRangeChanged(this);"><span id="fontsize"></span>
+          <input type="range" value="0" min="6" max="64" step="1" id="font-range" style="position:relative;top:6px;" oninput="kb.onFontRangeChanged(this);" onchange="kb.onFontRangeChanged(this);"><span id="fontsize"></span>
           <button onclick="kb.resetFontSize();">RESET</button>
           <span style="margin-left:16px;">Font: </sapn><input type="text" id="font" oninput="kb.onFontChanged(this);" onchange="kb.onFontChanged(this);">
           <span class="pseudo-link subfunc" onclick="kb.changeFont('monospace');">[monospace]</span>
@@ -237,7 +237,7 @@ kb.mode = 'view'
           </div>
         </div>
         <div style="height:25px;">
-          <input type="range" value="0" min="0" max="80" step="1" id="font-range" style="position:relative;top:6px;" oninput="kb.onFontRangeChanged(this);" onchange="kb.onFontRangeChanged(this);"><span id="fontsize"></span>
+          <input type="range" value="0" min="6" max="64" step="1" id="font-range" style="position:relative;top:6px;" oninput="kb.onFontRangeChanged(this);" onchange="kb.onFontRangeChanged(this);"><span id="fontsize"></span>
           <button onclick="kb.resetFontSize();">RESET</button>
           <span style="margin-left:16px;">Font: </sapn><input type="text" id="font" oninput="kb.onFontChanged(this);" onchange="kb.onFontChanged(this);">
         </div>
