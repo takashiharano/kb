@@ -280,7 +280,7 @@ def calc_data_macthed_score(content, keyword):
 
     elif keyword_lc.startswith('label:'):
         keyword = util.replace(keyword, 'label:', '', flags=re.IGNORECASE)
-        if is_matches_labels(content['LABELS'], keyword):
+        if is_matches_items(content, 'LABELS', keyword):
             score = 10
 
     elif keyword_lc.startswith('status:'):
@@ -289,10 +289,6 @@ def calc_data_macthed_score(content, keyword):
             status_lc = content['STATUS'].lower()
             if status_lc == keyword_lc:
                 score = 10
-
-    elif keyword_lc.startswith('body:'):
-        keyword = util.replace(keyword, 'body:', '', flags=re.IGNORECASE)
-        score = count_matched_key(content['BODY'], keyword)
 
     elif keyword_lc.startswith('createdat:'):
         keyword = util.replace(keyword, 'createdat:', '', flags=re.IGNORECASE)
@@ -311,6 +307,15 @@ def calc_data_macthed_score(content, keyword):
     elif keyword_lc.startswith('updatedby:'):
         keyword = util.replace(keyword, 'updatedby:', '', flags=re.IGNORECASE)
         score = is_target_matches(content['U_USER'], keyword)
+
+    elif keyword_lc.startswith('privs:'):
+        keyword = util.replace(keyword, 'privs:', '', flags=re.IGNORECASE)
+        if is_matches_items(content, 'DATA_PRIVS', keyword):
+            score = 10
+
+    elif keyword_lc.startswith('body:'):
+        keyword = util.replace(keyword, 'body:', '', flags=re.IGNORECASE)
+        score = count_matched_key(content['BODY'], keyword)
 
     else:
         score += is_matches_title(content['TITLE'], keyword) * 2
@@ -432,15 +437,18 @@ def is_matches_title(title, keyword):
     score += title.count(keyword) * 10
     return score
 
-def is_matches_labels(labels, keyword):
-    if labels == '':
+def is_matches_items(content, item_key, keyword):
+    if not item_key in content:
         return False
-    labels = labels.lower()
+    items = content[item_key]
+    if items == '':
+        return False
+    items = items.lower()
     keyword = keyword.lower()
-    label_list = labels.split(' ')
-    for i in range(len(label_list)):
-        label = label_list[i]
-        if label == keyword:
+    item_list = items.split(' ')
+    for i in range(len(item_list)):
+        item = item_list[i]
+        if item == keyword:
             return True
     return False
 

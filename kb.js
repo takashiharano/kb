@@ -31,6 +31,7 @@ kb.LIST_COLUMNS = [
   {key: 'LABELS', label: 'LABELS'},
   {key: 'score', label: 'SCORE', meta: true},
   {key: 'size', label: 'SIZE', meta: true},
+  {key: 'DATA_PRIVS', label: 'DATA_PRIVS'},
   {key: 'encrypted', label: '', meta: true}
 ];
 kb.onselectstart = document.onselectstart;
@@ -273,6 +274,7 @@ kb.drawList = function(items, sortIdx, sortType, totalCount) {
     var cUser = (content.C_USER ? content.C_USER : '');
     var uDateStr = '';
     var uUser = (content.U_USER ? content.U_USER : '');
+    var dataPrivs = content.DATA_PRIVS || '';
     if ((cDate == undefined) || (cDate == '')) {
       cDateStr = '---------- --:--:--';
     } else {
@@ -303,7 +305,8 @@ kb.drawList = function(items, sortIdx, sortType, totalCount) {
     if (content.DATA_TYPE == 'dataurl') {
       dlLink = '<span class="dl-link" onclick="kb.dlContent(\'' + id + '\');" data-tooltip="Download">&#x1F517;</span>';
     }
-    var labelsHTML = kb.buildLabelsHTML(labels);
+    var labelsHTML = kb.buildItemsHTML('label', labels);
+    var privsHTML = kb.buildItemsHTML('privs', dataPrivs);
     htmlList += '<tr id="row-' + id + '" class="data-list-row">';
     htmlList += '<td><input type="checkbox" onchange="kb.checkItem(\'' + id + '\', this)"';
     if (kb.checkedIds.includes(id)) htmlList += ' checked';
@@ -331,6 +334,7 @@ kb.drawList = function(items, sortIdx, sortType, totalCount) {
     htmlList += '<td style="padding-left:20px;">' + labelsHTML + '</td>';
     htmlList += '<td>' + score + '</td>';
     htmlList += '<td style="text-align:right;padding-left:0.5em;">' + size + '</td>';
+    htmlList += '<td style="padding-left:20px;">' + privsHTML + '</td>';
     htmlList += '<td style="text-align:center;cursor:default;">' + encrypted + '</td>';
 
     if (data_status != 'OK') {
@@ -662,19 +666,19 @@ kb.buildStatusHTML = function(status) {
   return html;
 };
 
-kb.buildLabelsHTML = function(labels) {
-  var labelList = [];
-  if (labels) {
-    labelList = labels.replace(/\s{2,}/g, ' ').split(' ');
+kb.buildItemsHTML = function(keyname, items) {
+  var itemList = [];
+  if (items) {
+    itemList = items.replace(/\s{2,}/g, ' ').split(' ');
   }
   var html = '';
-  for (var i = 0; i < labelList.length; i++) {
-    var label = util.escHtml(labelList[i]);
+  for (var i = 0; i < itemList.length; i++) {
+    var item = util.escHtml(itemList[i]);
     html += '<span class="label"';
     if (kb.mode != 'view') {
-      html += ' onclick="kb.categorySearch(\'label\', \'' + label + '\');"';
+      html += ' onclick="kb.categorySearch(\'' + keyname + '\', \'' + item + '\');"';
     }
-    html += '>' + label + '</span>';
+    html += '>' + item + '</span>';
   }
   return html;
 };
@@ -991,7 +995,7 @@ kb.drawData = function(data) {
   var uDateStr = '';
   if (cDate != undefined) cDateStr = kb.getDateTimeString(+cDate);
   if (uDate != undefined) uDateStr = kb.getDateTimeString(+uDate);
-  var labelsHTML = kb.buildLabelsHTML(labels);
+  var labelsHTML = kb.buildItemsHTML('label', labels);
 
   var contentBody = content.BODY;
   contentBody = util.escHtml(contentBody);
