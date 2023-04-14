@@ -153,6 +153,8 @@ def proc_save(context):
 #------------------------------------------------------------------------------
 def proc_touch(context):
     p_ids = get_request_param('ids')
+    p_keep_updated_by = get_request_param('keep_updated_by', '0')
+    keep_updated_by = True if p_keep_updated_by == '1' else False
     ids = p_ids.split(',')
     user = get_user_name(context)
     for i in range(len(ids)):
@@ -163,7 +165,8 @@ def proc_touch(context):
         now = util.get_unixtime_millis()
         content = data['content']
         content['U_DATE'] = now
-        content['U_USER'] = user
+        if not keep_updated_by:
+            content['U_USER'] = user
         secure = data['encrypted']
         kb.write_data(id, content, secure)
 

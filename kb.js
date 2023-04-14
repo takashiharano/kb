@@ -905,7 +905,8 @@ kb.buildConflictMsg = function(data) {
 
 kb.touch = function() {
   kb.status |= kb.ST_TOUCH_CONFIRMING;
-  util.confirm('Update the last update date to now?', kb._touch);
+  var m = 'Update the last update date to now?\n<input type="checkbox" id="chk-keep-updated-by"><label for="chk-keep-updated-by">Keep updated by</label>';
+  util.confirm(m, kb._touch);
 };
 kb._touch = function() {
   var ids = '';
@@ -913,7 +914,8 @@ kb._touch = function() {
     if (i > 0) ids += ',';
     ids += kb.checkedIds[i];
   }
-  var param = {ids: ids};
+  var keepUpdatedBy = ($el('#chk-keep-updated-by').checked ? '1' : '0');
+  var param = {ids: ids, keep_updated_by: keepUpdatedBy};
   kb.callApi('touch', param, kb.onTouchDone);
   kb.drawContentBodyArea4Progress('Updating');
 };
