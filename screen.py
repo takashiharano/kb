@@ -422,7 +422,7 @@ table {
   background: #2f3a42;
 }
 '''
-    content_height_adj = appconfig.list_height + 40
+    content_height_adj = appconfig.list_height + 32
     css += '.item {'
     css += '  width: 100%;'
     css += '  background: ' + appconfig.background4 + ';'
