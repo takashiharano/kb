@@ -1464,18 +1464,21 @@ kb.copyContent = function() {
 };
 
 kb.confirmExportHtml = function() {
-  util.confirm('Save as HTML?', kb.exportHtml);
+  var m = 'Save as HTML?\n<input type="checkbox" id="chk-export-color"><label for="chk-export-color">w/ color style</label>';
+  util.confirm(m, kb.exportHtml);
 }
 kb.exportHtml = function() {
   var html = $el('#content-body').innerHTML;
   var body = util.encodeBase64(html);
   var fontSize = $el('#font-range').value;
   var fontFamily = $el('#font').value;
+  var wColor = ($el('#chk-export-color').checked ? '1' : '0');
   param = {
     act: 'export_html',
     id: kb.data.id,
     fontsize: fontSize,
     fontfamily: fontFamily,
+    with_color: wColor,
     body: body
   };
   util.postSubmit('api.cgi', param);

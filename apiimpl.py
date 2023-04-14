@@ -20,8 +20,8 @@ import kb
 
 #------------------------------------------------------------------------------
 # Returns None if the value not found
-def get_request_param(key):
-    return web.get_request_param(key)
+def get_request_param(key, default=None):
+    return web.get_request_param(key, default=default)
 
 def send_result_json(status, body):
     web.send_result_json(status, body)
@@ -268,6 +268,8 @@ def proc_export_html(context):
     body = util.decode_base64(body)
     fontsize = get_request_param('fontsize')
     fontfamily = get_request_param('fontfamily')
+    p_with_color = get_request_param('with_color', '0')
+    with_color = True if p_with_color == '1' else False
 
     html = '''<!DOCTYPE html>
 <html>
@@ -279,7 +281,7 @@ def proc_export_html(context):
 '''
     html += '<title>' + appconfig.title + '</title>\n'
     html += '<style>\n'
-    html += _build_css(fontsize, fontfamily)
+    html += _build_css(fontsize, fontfamily, with_color)
     html += '</style>'
     html += '''
 </head>
@@ -297,7 +299,7 @@ def proc_export_html(context):
     result = create_result_object('OK', None, 'octet-stream')
     return result
 
-def _build_css(fontsize='12', fontfamily=''):
+def _build_css(fontsize='12', fontfamily='', with_color=False):
     if fontfamily == '':
         fontfamily = 'Consolas, Monaco, Menlo, monospace, sans-serif'
     css = ''
@@ -306,8 +308,11 @@ def _build_css(fontsize='12', fontfamily=''):
     css += '  height: calc(100vh - 30px);\n'
     css += '  margin: 0;\n'
     css += '  padding: 10px;\n'
-    css += '  background: ' + appconfig.background3 + ';\n'
-    css += '  color: ' + appconfig.fg_color + ';\n'
+
+    if with_color:
+        css += '  background: ' + appconfig.background3 + ';\n'
+        css += '  color: ' + appconfig.fg_color + ';\n'
+
     css += '  font-size: ' + fontsize + 'px;\n'
     css += '  font-family: ' + fontfamily + ';\n'
     css += '}\n'
