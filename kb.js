@@ -984,6 +984,7 @@ kb.drawData = function(data) {
   var title = content.TITLE;
   var labels = content.LABELS;
   var status = content.STATUS;
+  var fontFamily = content.FONT;
   var data_status = data.status;
 
   var cDateStr = '';
@@ -1054,6 +1055,14 @@ kb.drawData = function(data) {
   } else {
     $el('#delete-button').show();
     $el('#clear-button').hide();
+  }
+
+  if (fontFamily) {
+    kb.forceFontChanged = true;
+    kb.setFont(fontFamily);
+  } else {
+    kb.restoreFont();
+    kb.forceFontChanged = false;
   }
 };
 
@@ -1373,19 +1382,29 @@ kb.resetFontSize = function() {
   kb.setFontSize(12);
 };
 
+kb.fontFamily = '';
+kb.forceFontChanged = false;
 kb.onFontChanged = function(el) {
   var v = el.value;
-  kb.setFont(v);
+  kb.fontFamily = v;
+  kb._setFont(v);
 };
-kb.setFont = function(v) {
+kb._setFont = function(v) {
   $el('#content-body').style.fontFamily = v;
   $el('#content-body-edt').style.fontFamily = v;
 };
-
-kb.setMonospaceFont = function(f) {
-  var n = (f ? 'monospace' : '');
+kb.restoreFont = function() {
+  if (kb.forceFontChanged) {
+    kb.setFont(kb.fontFamily);
+  }
+};
+kb.setFont = function(n) {
   $el('#font').value = n;
+  kb._setFont(n);
+};
+kb.changeFont = function(n) {
   kb.setFont(n);
+  kb.fontFamily = n;
 };
 
 kb.getSelfSizePos = function(el) {
