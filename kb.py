@@ -716,12 +716,27 @@ def get_empty_ids():
             st = prev_n + 1
             ed = st + df - 1
             for j in range(st, ed):
-                if empty_cnt < 10:
-                    empty_ids.append(str(j))
-                    empty_cnt += 1
+                empty_ids.append(str(j))
+                empty_cnt += 1
         prev_n = n
 
-    return empty_ids
+    omit_count = 0
+    MAX = 10
+    empty_ids_len = len(empty_ids)
+    if empty_ids_len > MAX:
+        omit_count = empty_ids_len - MAX
+        wk_list = []
+        mx = MAX - 1
+        for i in range(mx):
+            wk_list.append(empty_ids[i])
+        wk_list.append(empty_ids[-1])
+        empty_ids = wk_list
+
+    result = {
+        'empty_ids': empty_ids,
+        'omit_count': omit_count
+    }
+    return result
 
 def change_data_id(id_fm, id_to):
     if not check_exists(id_fm):

@@ -1285,7 +1285,9 @@ kb.onCheckId = function(xhr, res, req) {
   if (res.status == 'OK') {
     var info = res.body;
     var nextId = info.next_id;
-    var emptyIds = info.empty_ids;
+    var emptyIdInfo = info.empty_id_info;
+    var emptyIds = emptyIdInfo.empty_ids;
+    var omitCount = emptyIdInfo.omit_count;
     var m = 'NEXT ID: ' + nextId;
     if (emptyIds.length > 0) {
       m += '\n';
@@ -1293,6 +1295,7 @@ kb.onCheckId = function(xhr, res, req) {
       for (var i = 0; i < emptyIds.length; i++) {
         var id = emptyIds[i];
         if (i > 0) m += ', ';
+        if ((omitCount > 0) && (i == emptyIds.length - 1)) m += '..(' + omitCount + ').. ';
         m += id;
       }
     }

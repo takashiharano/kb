@@ -242,29 +242,17 @@ def proc_change_data_id(context):
 #------------------------------------------------------------------------------
 def proc_check_id(context):
     next_id = kb.get_next_id()
-    empty_ids = kb.get_empty_ids()
+    empty_ids_res = kb.get_empty_ids()
 
     detail = {
         'next_id': next_id,
-        'empty_ids': empty_ids
+        'empty_id_info': empty_ids_res
     }
 
     result = create_result_object('OK', detail)
     return result
 
 #------------------------------------------------------------------------------
-def proc_check_id(context):
-    next_id = kb.get_next_id()
-    empty_ids = kb.get_empty_ids()
-
-    detail = {
-        'next_id': next_id,
-        'empty_ids': empty_ids
-    }
-
-    result = create_result_object('OK', detail)
-    return result
-
 def proc_export_html(context):
     id = get_request_param('id')
     body = get_request_param('body')
