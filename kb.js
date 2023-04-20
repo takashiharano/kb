@@ -31,7 +31,7 @@ kb.LIST_COLUMNS = [
   {key: 'LABELS', label: 'LABELS'},
   {key: 'score', label: 'SCORE', meta: true},
   {key: 'size', label: 'SIZE', meta: true},
-  {key: 'DATA_PRIVS', label: 'DATA_PRIVS'},
+  {key: 'DATA_PRIVS', label: 'DATA_PRIVS', forAdmin: true},
   {key: 'encrypted', label: '', meta: true}
 ];
 kb.onselectstart = document.onselectstart;
@@ -334,7 +334,9 @@ kb.drawList = function(items, sortIdx, sortType, totalCount) {
     htmlList += '<td style="padding-left:20px;">' + labelsHTML + '</td>';
     htmlList += '<td>' + score + '</td>';
     htmlList += '<td style="text-align:right;padding-left:0.5em;">' + size + '</td>';
-    htmlList += '<td style="padding-left:20px;">' + privsHTML + '</td>';
+    if (kb.LIST_COLUMNS[11].forAdmin && kb.isAdmin) {
+      htmlList += '<td style="padding-left:20px;">' + privsHTML + '</td>';
+    }
     htmlList += '<td style="text-align:center;cursor:default;">' + encrypted + '</td>';
 
     if (data_status != 'OK') {
@@ -393,6 +395,9 @@ kb.buildListHeader = function(columns, sortIdx, sortType) {
   html += '<th class="item-list">&nbsp;</th>';
   for (var i = 0; i < columns.length; i++) {
     var column = columns[i];
+    if (column.forAdmin && !kb.isAdmin) {
+      continue;
+    }
     var label = column['label'];
 
     var sortAscClz = '';
@@ -1523,7 +1528,7 @@ kb.showUrl = function() {
   var url = kb.getUrl4Id(id);
   kb.urlOfData = url;
   var m = '<span id="content-url" class="pseudo-link" onclick="kb.copyUrl();" data-tooltip="Click to copy">' + url + '</span>\n\n';
-  if (kb.isadmin && !kb.data.content.DATA_PRIVS) {
+  if (kb.isAdmin && !kb.data.content.DATA_PRIVS) {
     var listTokens = '<div style="width:100%;text-align:left;line-height:1.8em;">';
     listTokens += 'Token: ';
     listTokens +=  '<span id="valid-until"></span>\n';

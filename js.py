@@ -54,7 +54,7 @@ def build_js(context):
 
     js += '};\n'
 
-    js += 'kb.isadmin = ' + ('true' if web.is_admin(context) else 'false') + ';\n'
+    js += 'kb.isAdmin = ' + ('true' if web.is_admin(context) else 'false') + ';\n'
 
     js += 'websys.init(\'' + ROOT_PATH + '\');'
     return js
