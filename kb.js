@@ -1019,6 +1019,8 @@ kb.drawData = function(data) {
     w = kb.linkDataUrl(contentBody, true, w.i);
     contentBody = w.s;
     contentBody = kb.decodeB64Image(contentBody);
+
+    contentBody = kb.linkBsb64Data(contentBody);
   }
 
   var idLabel = '';
@@ -1125,6 +1127,14 @@ kb.decodeB64Image = function(s) {
     s = s.replace(/(?<!")data:image\/.+;base64,\n?[A-za-z0-9+/=][A-za-z0-9+/=\n]+\n\n/, '\n<img src="' + imgs[i] + '">\n\n');
   }
   s = s.replace(/(data:image\/.+;base64,\n?[A-za-z0-9+/=][A-za-z0-9+/=\n]+)$/, '<img src="$1">');
+  return s;
+};
+
+kb.linkBsb64Data = function(s) {
+  var t = '<span class="pseudo-link link" onclick="kb.decodeBSB64(\'$1\');" data-tooltip="Click to decode">$1</span>';
+  s = s.replace(/(bsb64:[A-Za-z0-9+/=$]+)/g, t);
+  s = s.replace(/decodeBSB64\('bsb64:/g, 'decodeBSB64(\'');
+  s = s.replace(/>bsb64:([A-Za-z0-9+/=$]+)<\/span>/g, '>$1</span>');
   return s;
 };
 
@@ -1864,14 +1874,7 @@ kb.selectText = function(el, st, ed) {
   el.selectionEnd = ed;
 };
 
-kb.keyHandlerD = function(e) {
-  if (kb.status & kb.ST_EDITING) {
-    var el = $el('#content-body-edt');
-    var st = el.selectionStart;
-    var ed = el.selectionEnd;
-  }
-  var t = kb.extractSelectedText();
-  if (!t) return;
+kb.decodeBSB64 = function(t) {
   var m;
   try {
     var s = util.decodeBSB64(t, kb.bsb64.n);
@@ -1880,10 +1883,21 @@ kb.keyHandlerD = function(e) {
   } catch(e) {
     m = '<span style="color:#f77;">DECODE ERROR</span>';
   }
+  util.infotip.show(m, {pos: 'pointer'});
+};
+
+kb.keyHandlerD = function(e) {
+  if (kb.status & kb.ST_EDITING) {
+    var el = $el('#content-body-edt');
+    var st = el.selectionStart;
+    var ed = el.selectionEnd;
+  }
+  var t = kb.extractSelectedText();
+  if (!t) return;
+  kb.decodeBSB64(t);
   if (kb.status & kb.ST_EDITING) {
     kb.selectText(el, st, ed);
   }
-  util.infotip.show(m);
 };
 kb.keyHandlerE = function(e) {
   if (kb.status & kb.ST_EDITING) {
