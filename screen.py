@@ -69,8 +69,9 @@ def build_main_screen(context):
         html += '        <button id="touch-button" style="margin-left:16px;" onclick="kb.touch();" disabled>TOUCH</button>'
 
     html += '      <span style="position:absolute;right:5px;">'
+    html += '        <button id="export-button" style="min-width:32px;" onclick="kb.openTools();">TOOLS</button>'
     if kb.has_privilege(context, 'kb.export'):
-        html += '        <button id="export-button" style="margin-left:8px;min-width:32px;" onclick="kb.export();">EXPORT DATA</button>'
+        html += '        <button id="export-button" style="margin-left:4px;min-width:32px;" onclick="kb.export();">EXPORT DATA</button>'
     html += '      </span>'
 
     html += '''
@@ -117,7 +118,7 @@ def build_main_screen(context):
           <span id="content-labels-area">
             <span id="content-labels"></span>'''
     if kb.has_privilege(context, 'kb.write'):
-        html += '<span id="edit-labels-button" class="for-view pseudo-link subfunc" style="margin-left:4px;" onclick="kb.editLabels();">[EDIT]</span>'
+        html += '<button id="edit-labels-button" class="for-view small-button" style="margin-left:4px;" onclick="kb.editLabels();">EDIT</button>'
 
     html += '''
           </span>
@@ -160,7 +161,7 @@ def build_main_screen(context):
           <button onclick="kb.resetFontSize();">RESET</button>
           <span style="margin-left:16px;">Font: </sapn><input type="text" id="font" oninput="kb.onFontChanged(this);" onchange="kb.onFontChanged(this);">
           <span class="pseudo-link subfunc" onclick="kb.changeFont('monospace');">[monospace]</span>
-          <span class="pseudo-link subfunc" onclick="kb.changeFont('');">[RESET]</span>
+          <button onclick="kb.changeFont('');">RESET</button>
           <span class="for-view">
             <span class="meta-info" style="position:absolute;right:8px;margin-top:10px;">
               <span>CREATED: <span id="content-created-date"></span> <span id="content-created-by"></span></span><span style="margin-left:24px;">UPDATED: <span id="content-updated-date"></span> <span id="content-updated-by"></span></span>
@@ -407,6 +408,15 @@ table {
     css += '.text-red {'
     css += '  color: ' + appconfig.text_red + ';'
     css += '}'
+    css += '.text-error {'
+    css += '  color: ' + appconfig.text_error + ';'
+    css += '}'
+
+    css += '.small-button {'
+    css += '  min-width: 30px;'
+    css += '  height: 16px;'
+    css += '  font-size: 8px;'
+    css += '}'
 
     css += '''
 #q {
@@ -638,6 +648,12 @@ td.center {
     css += '  background: ' + appconfig.list_row_selected_bg + ';'
     css += '}'
 
+    css += '''
+.tools-output {
+  border: none;
+  border-bottom: 1px solid #333;
+}
+'''
     return css
 
 #------------------------------------------------------------------------------

@@ -61,6 +61,8 @@ kb.clipboardEnabled = false;
 
 kb.bsb64 = {n: 1};
 
+kb.toolsWindow = null;
+
 $onReady = function(e) {
   $el('#enrich').addEventListener('change', kb.onEnrichChange);
   var fontSize = util.getQuery('fontsize') | 0;
@@ -1369,6 +1371,57 @@ kb.validateId = function(id) {
   return false;
 };
 
+kb.openTools = function() {
+  if (kb.toolsWindow) {
+    return;
+  }
+  var html = '';
+  html += '<div style="width:100%;height:100%;">';
+  html += '<div style="padding:4px;">';
+  html += kb.tools.buildBsb64Html();
+  html += kb.tools.buildPwGenHtml();
+  html += '</div>';
+  html += '</div>';
+
+  var opt = {
+    draggable: true,
+    resizable: true,
+    pos: 'c',
+    closeButton: true,
+    width: 720,
+    height: 280,
+    minWidth: 720,
+    minHeight: 280,
+    scale: 1,
+    hidden: false,
+    modal: false,
+    title: {
+      text: 'Tools'
+    },
+    body: {
+      style: {
+        background: 'rgba(0,0,0,0.8)'
+      }
+    },
+    onclose: kb.onToolsWindowClose,
+    content: html
+  };
+
+  kb.toolsWindow = util.newWindow(opt);
+
+  $el('#bsb64-text-in').focus();
+};
+
+kb.closeToolsWindow = function() {
+  if (kb.toolsWindow) {
+    kb.toolsWindow.close();
+  }
+};
+
+kb.onToolsWindowClose = function() {
+  kb.toolsWindow = null;
+};
+
 kb.onHttpError = function(status) {
   var m = 'HTTP_ERROR: ' + status;
   log.e(m);
@@ -1763,6 +1816,7 @@ $onEscKey = function(e) {
   if (kb.status & kb.ST_PROP_EDITING) {
     kb.onEditPropsEnd();
   }
+  kb.closeToolsWindow();
 };
 
 kb.onMouseMove = function(e) {
@@ -1865,6 +1919,130 @@ kb.hasFlag = function(flgs, flag) {
     if (flgs[i] == flag) return true;
   }
   return false;
+};
+
+//-------------------------------------------------------------------------
+kb.tools = {};
+
+kb.tools.buildBsb64Html = function() {
+  var html = '';
+  html += '<div style="margin-bottom:8px;">';
+  html += '<b>BSB64 Encoder/Decoder</b>';
+  html += '<button style="margin-left:260px;" onclick="kb.tools.resetBsb64Input();">Reset</button>';
+  html += '</div>';
+  html += '<table>';
+  html += '<tr>';
+  html += '<td>Input: </td>';
+  html += '<td>';
+  html += '<input type="text" id="bsb64-text-in" style="width:400px;">';
+  html += '</td>';
+  html += '<td>';
+  html += '<span style="margin-left:4px;">n=</span><select id="bsb64-n">';
+  html += '<option value="0">0</option>';
+  html += '<option value="1" selected>1</option>';
+  html += '<option value="2">2</option>';
+  html += '<option value="3">3</option>';
+  html += '<option value="4">4</option>';
+  html += '<option value="5">5</option>';
+  html += '<option value="6">6</option>';
+  html += '<option value="7">7</option>';
+  html += '</select>';
+  html += '</td>';
+  html += '</tr>';
+  html += '<tr>';
+  html += '<td>&nbsp;</td>';
+  html += '<td style="padding-top:8px;">';
+  html += '<button onclick="kb.tools.encBsb64();">Encode</button>';
+  html += '<button style="margin-left:8px;" onclick="kb.tools.decBsb64();">Decode</button>';
+  html += '</td>';
+  html += '</tr>';
+  html += '<tr>';
+  html += '<td>Output: </td>';
+  html += '<td>';
+  html += '<input type="text" id="bsb64-text-out" class="tools-output" style="width:400px;" readonly>';
+  html += '</td>';
+  html += '<td>';
+  html += '<button class="small-button" style="margin-left:4px;" onclick="kb.tools.copy(\'bsb64-text-out\');">Copy</button>';
+  html += '</td>';
+  html += '</tr>';
+  html += '</table>';
+  return html;
+};
+
+kb.tools.encBsb64 = function() {
+  kb.tools.encdecBsb64(true);
+};
+
+kb.tools.decBsb64 = function() {
+  kb.tools.encdecBsb64(false);
+};
+
+kb.tools.encdecBsb64 = function(enc) {
+  var s = $el('#bsb64-text-in').value;
+  var n = $el('#bsb64-n').value;
+  var f = (enc ? util.encodeBSB64 : util.decodeBSB64);
+  try {
+    var v = f(s, n);
+    var clz = '';
+  } catch (e) {
+    v = 'ERROR';
+  }
+  $el('#bsb64-text-out').value = v;
+  if (v == 'ERROR') {
+    util.addClass('#bsb64-text-out', 'text-error');
+  } else {
+    util.removeClass('#bsb64-text-out', 'text-error');
+  }
+};
+
+kb.tools.resetBsb64Input = function() {
+  $el('#bsb64-text-in').value = '';
+  $el('#bsb64-text-out').value = '';
+};
+
+kb.tools.buildPwGenHtml = function() {
+  var html = '';
+  html += '<div style="margin-top:32px;">';
+  html += '<div style="margin-bottom:8px;"><b>Password Generator</b></div>';
+  html += '<table>';
+  html += '<tr>';
+  html += '<td>';
+  html += 'Chars:';
+  html += '</td>';
+  html += '<td>';
+  html += '<input type="text" id="pwgen-chars" style="width:480px;" value="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789">';
+  html += '<span style="margin-left:4px;">Length:</span><input type="text" id="pwgen-len" style="width:28px;" value="8">';
+  html += '<button style="margin-left:4px;" onclick="kb.tools.genPw();">Generate</button>';
+  html += '</td>';
+  html += '</tr>';
+  html += '<tr>';
+  html += '<td>';
+  html += 'Output:';
+  html += '</td>';
+  html += '<td>';
+  html += '<input type="text" id="pwgen-out" class="tools-output" style="width:400px;" readonly>';
+  html += '<button class="small-button" style="margin-left:4px;" onclick="kb.tools.copy(\'pwgen-out\');">Copy</button>';
+  html += '</td>';
+  html += '</tr>';
+  html += '</table>';
+  html += '</div>';
+  return html;
+};
+
+kb.tools.genPw = function() {
+  var chars = $el('#pwgen-chars').value;
+  var len = $el('#pwgen-len').value | 0;
+  var s = '';
+  if (len > 0) s = util.randomString(chars, len);
+  $el('#pwgen-out').value = s;
+};
+
+kb.tools.copy = function(id) {
+  var v = $el('#' + id).value;
+  if (v) {
+    util.copy(v);
+    kb.showInfotip('Copied.');
+  }
 };
 
 //-------------------------------------------------------------------------

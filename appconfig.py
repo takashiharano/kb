@@ -30,6 +30,7 @@ title_disabled_color = '#aaa'
 
 text_red = '#faa'
 text_disabled = '#888'
+text_error = '#f66'
 
 button_border = '#0275d8'
 button_fgcolor = '#0275d8'
