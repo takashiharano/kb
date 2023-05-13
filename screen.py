@@ -47,6 +47,7 @@ def build_main_screen(context):
 
 '''
     html += '      <span id="system-name" style="color:' + appconfig.system_name_color + ';">' + appconfig.system_name + '</span>'
+    html += '      <span id="scm-name" style="color:' + appconfig.system_name_color + ';"></span>'
     html += '      <span style="position:absolute;right:5px;">'
     html += '        <span class="text-dim" style="margin-right:10px;">' + web.get_user_name(context) + '</span>'
     html += '        <span id="clock"></span>'
@@ -69,6 +70,7 @@ def build_main_screen(context):
         html += '        <button id="touch-button" style="margin-left:16px;" onclick="kb.touch();" disabled>TOUCH</button>'
 
     html += '      <span style="position:absolute;right:5px;">'
+    html += '        <button id="export-button" style="min-width:32px;" onclick="kb.selectSchema();">SCHEMA</button>'
     html += '        <button id="export-button" style="min-width:32px;" onclick="kb.openTools();">TOOLS</button>'
     if kb.has_privilege(context, 'kb.export'):
         html += '        <button id="export-button" style="margin-left:4px;min-width:32px;" onclick="kb.export();">EXPORT DATA</button>'
@@ -664,6 +666,10 @@ def main():
         js.main()
         return
 
+    scm = util.get_request_param('scm', '')
+    if scm == '':
+        scm = kb.get_default_scm()
+
     id = util.get_request_param('id')
 
     if kb.is_access_allowed(context):
@@ -672,7 +678,7 @@ def main():
         else:
             token = util.get_request_param('token', '')
             if token != '':
-                if kb.is_valid_token(token, id):
+                if kb.is_valid_token(token, scm, id):
                     html = build_view_screen(context)
                 else:
                     html = build_forbidden_screen(context)

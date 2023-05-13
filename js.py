@@ -15,11 +15,13 @@ import util
 util.append_system_path(__file__, ROOT_PATH)
 util.append_system_path(__file__, ROOT_PATH + 'websys/bin')
 import web
+import kb
 
 #------------------------------------------------------------------------------
 def build_js(context):
     js = ''
     js += 'var kb = kb || {};\n'
+    js += 'kb.defaultScm = \'' + kb.get_default_scm() + '\';\n'
     js += 'kb.config = {\n'
     js += '  default_data_encryption: '
     js += 'true' if appconfig.default_data_encryption else 'false'

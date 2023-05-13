@@ -19,7 +19,7 @@ util.append_system_path(__file__, ROOT_PATH + 'websys/bin')
 import web
 
 WORKSPACE_PATH = appconfig.workspace_path
-DATA_DIR_PATH = WORKSPACE_PATH + 'data/'
+DATA_BASE_DIR_PATH = WORKSPACE_PATH + 'scm/'
 WK_PATH = WORKSPACE_PATH + 'wk/'
 
 ENCRYPTED_HEAD = '#DATA'
@@ -42,12 +42,96 @@ DEFAULT_CONTENT = {
 def get_workspace_path():
     return WORKSPACE_PATH
 
-def get_datafile_path(id):
-    return DATA_DIR_PATH + id + '.txt'
+def get_scm_dir_path(scm):
+    return DATA_BASE_DIR_PATH + scm + '/'
+
+def get_data_dir_path(scm):
+    return DATA_BASE_DIR_PATH + scm + '/data/'
+
+def get_datafile_path(scm, id):
+    datadir = get_data_dir_path(scm)
+    return datadir + id + '.txt'
+
+def get_default_scm():
+    return '0'
 
 #------------------------------------------------------------------------------
-def get_all_data_id_list():
-    files = util.list_files(DATA_DIR_PATH, '.txt')
+def get_schema_list(context):
+    dirs = util.list_dirs(DATA_BASE_DIR_PATH)
+    scm_map = {}
+    for i in range(len(dirs)):
+        scm = dirs[i]
+        if has_privilege_for_scm(context, scm):
+            props = load_scm_props(scm)
+            scm_map[scm] = props
+    return scm_map
+
+#------------------------------------------------------------------------------
+def has_privilege_for_scm(context, scm):
+    props = load_scm_props(scm)
+    if not 'privs' in props:
+        return True
+    return satisfy_privs(context, props['privs'])
+
+#------------------------------------------------------------------------------
+def read_scm_props_as_text(scm):
+    dir_path = DATA_BASE_DIR_PATH + scm
+    path = dir_path + '/props.txt'
+    text = util.read_text_file(path)
+    return text
+
+#------------------------------------------------------------------------------
+def load_scm_props(scm):
+    text = read_scm_props_as_text(scm)
+    try:
+        props = util.from_json(text)
+    except:
+        props = {}
+
+    if props is None:
+        props = {}
+
+    if scm == get_default_scm():
+        if not 'name' in props:
+            props['name'] = 'Main'
+
+    return props
+
+#------------------------------------------------------------------------------
+def schema_exists(scm):
+    path = DATA_BASE_DIR_PATH + scm
+    return util.path_exists(path)
+
+#------------------------------------------------------------------------------
+def create_schema(scm, props):
+    if schema_exists(scm):
+        return 'SCM_ALREADY_EXISTS'
+    path = DATA_BASE_DIR_PATH + scm
+    util.mkdir(path)
+    save_scm_props(scm, props)
+    return 'OK'
+
+def delete_schema(scm):
+    if not schema_exists(scm):
+        return 'SCM_NOT_FOUND'
+    path = DATA_BASE_DIR_PATH + scm
+    try:
+        util.rmdir(path, True)
+        status = 'OK'
+    except Exception as e:
+        status = 'DELETE_SCHEMA_ERR:' + str(e)
+    return status
+
+#------------------------------------------------------------------------------
+def save_scm_props(scm, json_text):
+    dir_path = DATA_BASE_DIR_PATH + scm
+    path = dir_path + '/props.txt'
+    util.write_text_file(path, json_text)
+
+#------------------------------------------------------------------------------
+def get_all_data_id_list(scm):
+    datadir = get_data_dir_path(scm)
+    files = util.list_files(datadir, '.txt')
     data_id_list = []
     for i in range(len(files)):
         filename = files[i]
@@ -56,15 +140,15 @@ def get_all_data_id_list():
     return data_id_list
 
 #------------------------------------------------------------------------------
-def get_list(context, target_id=None, need_encode_b64=False):
-    data_id_list = get_all_data_id_list()
+def get_list(context, scm, target_id=None, need_encode_b64=False):
+    data_id_list = get_all_data_id_list(scm)
     data_list = []
     for i in range(len(data_id_list)):
         id = data_id_list[i]
         if target_id is not None and target_id != id or target_id is None and should_omit_listing(context, id):
             continue
         try:
-            data = load_data(id, True)
+            data = load_data(scm, id, True)
             content = data['content']
             if not has_data_privilege(context, content):
                 continue
@@ -179,13 +263,13 @@ def filter_by_id_range(all_id_list, keyword, filtered_id_list):
     return filtered_id_list
 
 #------------------------------------------------------------------------------
-def search_data(context, q, need_encode_b64=False):
+def search_data(context, scm, q, need_encode_b64=False):
     q = util.to_half_width(q)
     q = util.replace(q, '\\s{2,}', ' ')
     q = util.replace(q, '\u3000', ' ')
     keywords = q.split(' ')
 
-    id_list = get_all_data_id_list()
+    id_list = get_all_data_id_list(scm)
     filtered = filter_by_id(id_list, keywords)
     id_filtering = False
     if len(filtered['id_list']) > 0:
@@ -199,7 +283,7 @@ def search_data(context, q, need_encode_b64=False):
         if should_omit_listing(context, id):
             continue
         try:
-            data = load_data(id)
+            data = load_data(scm, id)
             content = data['content']
             if should_omit_listing(context, id, content):
                 dontinue
@@ -461,9 +545,9 @@ def count_matched_key(target, keyword):
     return count
 
 #------------------------------------------------------------------------------
-def get_data(context, id, need_encode_b64=False):
+def get_data(context, scm, id, need_encode_b64=False):
     try:
-        data = load_data(id)
+        data = load_data(scm, id)
     except Exception as e:
         data = {
             'id': id,
@@ -492,22 +576,22 @@ def get_data(context, id, need_encode_b64=False):
 
     return data
 
-def load_data_as_text(id):
-    text_path = get_datafile_path(id)
+def load_data_as_text(scm, id):
+    text_path = get_datafile_path(scm, id)
     if not util.path_exists(text_path):
         raise Exception('DATA_NOT_FOUND')
     text = util.read_text_file(text_path)
     return text
 
-def get_datafile_info(id):
-    path = get_datafile_path(id)
+def get_datafile_info(scm, id):
+    path = get_datafile_path(scm, id)
     if not util.path_exists(path):
         return None
     return util.get_file_info(path)
 
-def load_data(id, head_only=False):
-    fileinfo = get_datafile_info(id)
-    text = load_data_as_text(id)
+def load_data(scm, id, head_only=False):
+    fileinfo = get_datafile_info(scm, id)
+    text = load_data_as_text(scm, id)
 
     data = {
         'id': id,
@@ -555,9 +639,9 @@ def parse_content(text, head_only=False):
     return content
 
 #------------------------------------------------------------------------------
-def save_data(id, new_data, user=''):
+def save_data(scm, id, new_data, user=''):
     if id == '':
-        id = get_next_id()
+        id = get_next_id(scm)
 
     now = util.get_unixtime_millis()
 
@@ -565,7 +649,7 @@ def save_data(id, new_data, user=''):
     new_content = new_data['content']
 
     try:
-        data = load_data(id)
+        data = load_data(scm, id)
     except:
         data = {
             'content': {
@@ -608,7 +692,7 @@ def save_data(id, new_data, user=''):
 
     data['content'] = content
 
-    write_data(id, content, secure)
+    write_data(scm, id, content, secure)
 
     saved_data = {
         'id': id,
@@ -637,7 +721,7 @@ def is_dataurl(s):
   return util.match(s, '^data:.+;base64,[A-Za-z0-9+/=\n]+$')
 
 #------------------------------------------------------------------------------
-def write_data(id, content, secure=False, path=None):
+def write_data(scm, id, content, secure=False, path=None):
     text = ''
 
     for key in content:
@@ -652,33 +736,33 @@ def write_data(id, content, secure=False, path=None):
         text = ENCRYPTED_HEAD + bsb64.encode_string(text, BSB64_N)
 
     if path is None:
-        path = get_datafile_path(id)
+        path = get_datafile_path(scm, id)
 
     util.write_text_file(path, text)
 
-def delete_data(id):
+def delete_data(scm, id):
     if id == '':
         return 'ERR_ROOT_PATH'
     if util.match(id, '\.\.'):
         return 'ERR_PARENT_PATH'
-    path = get_datafile_path(id)
+    path = get_datafile_path(scm, id)
     if not util.path_exists(path):
         return 'NOT_FOUND'
     util.delete(path)
     return 'OK'
 
-def check_exists(id):
+def check_exists(scm, id):
     if id == '':
         raise Exception('EMPTY_ID')
-    path = get_datafile_path(id)
+    path = get_datafile_path(scm, id)
     if util.path_exists(path):
         return True
     else:
         return False
 
-def get_max_id():
+def get_max_id(scm):
     max_id = 0
-    data_id_list = get_all_data_id_list()
+    data_id_list = get_all_data_id_list(scm)
     for i in range(len(data_id_list)):
         id = data_id_list[i]
         try:
@@ -690,12 +774,12 @@ def get_max_id():
             max_id = n
     return max_id
 
-def get_next_id():
-    id = get_max_id() + 1
+def get_next_id(scm):
+    id = get_max_id(scm) + 1
     return str(id)
 
-def get_empty_ids():
-    all_ids = get_all_data_id_list()
+def get_empty_ids(scm):
+    all_ids = get_all_data_id_list(scm)
     n_list = []
     for i in range(len(all_ids)):
         id = all_ids[i]
@@ -738,57 +822,78 @@ def get_empty_ids():
     }
     return result
 
-def change_data_id(id_fm, id_to):
-    if not check_exists(id_fm):
+def change_data_id(scm, id_fm, id_to):
+    if not check_exists(scm, id_fm):
         return 'SRC_NOT_FOUND'
-    if check_exists(id_to):
+    if check_exists(scm, id_to):
         return 'DEST_ALREADY_EXISTS'
-    path_fm = get_datafile_path(id_fm)
-    path_to = get_datafile_path(id_to)
+    path_fm = get_datafile_path(scm, id_fm)
+    path_to = get_datafile_path(scm, id_to)
     ret = util.move(path_fm, path_to)
     if ret:
         return 'OK'
     return 'FAILED:NEED_TO_FILE_CHECK_ON_THE_SERVER'
 
-def export_data(asis=False):
-    wk_data_path = WK_PATH + 'data/'
-    if asis:
-        target_path = DATA_DIR_PATH
-    else:
+def export_data(scm, decrypt=False):
+    if decrypt:
+        wk_data_path = WK_PATH + scm + '/data/'
         util.mkdir(wk_data_path)
-        decrypt_data(wk_data_path)
+        decrypt_data(scm, wk_data_path)
         target_path = wk_data_path
+    else:
+        target_path = get_data_dir_path(scm)
 
     b = util.zip(None, target_path)
     util.delete(WK_PATH, True)
     return b
 
-def decrypt_data(dst_base_dir):
-    encdec_data(dst_base_dir, False)
+def export_all_data(context, decrypt=False):
+    util.delete(WK_PATH, True)
+    if decrypt:
+        target_path = WK_PATH + 'kbdata/'
+        scm_map = get_schema_list(context)
+        for scm in scm_map:
+            src_scm_path = get_scm_dir_path(scm)
+            src_scm_props_path = src_scm_path + 'props.txt'
+            wk_scm_path = target_path + scm + '/'
+            wk_data_path = wk_scm_path + 'data/'
+            util.mkdir(wk_data_path)
+            decrypt_data(scm, wk_data_path)
+            if util.path_exists(src_scm_props_path):
+                util.copy(src_scm_props_path, wk_scm_path)
+    else:
+        target_path = DATA_BASE_DIR_PATH
 
-def encrypt_data(dst_base_dir):
-    encdec_data(dst_base_dir, True)
+    b = util.zip(None, target_path)
+    util.delete(WK_PATH, True)
+    return b
 
-def encdec_data(dst_base_dir, secure):
-    data_id_list = get_all_data_id_list()
+def decrypt_data(scm, dst_base_dir):
+    encdec_data(scm, dst_base_dir, False)
+
+def encrypt_data(scm, dst_base_dir):
+    encdec_data(scm, dst_base_dir, True)
+
+def encdec_data(scm, dst_base_dir, secure):
+    data_id_list = get_all_data_id_list(scm)
     for i in range(len(data_id_list)):
         id = data_id_list[i]
         dst_path = dst_base_dir + id + '.txt'
         try:
-            data = load_data(id)
+            data = load_data(scm, id)
             content = data['content']
-            write_data(id, content, secure=secure, path=dst_path)
+            write_data(scm, id, content, secure=secure, path=dst_path)
         except Exception as e:
             text = '!ERROR! ' + str(e) + '\n---\n'
-            text += load_data_as_text(id)
+            text += load_data_as_text(scm, id)
             util.write_text_file(dst_path, text)
 
 #------------------------------------------------------------------------------
-def download_b64content(context, id, idx=None):
+def download_b64content(context, scm, id, idx=None):
     if idx is None:
         idx = 0
 
-    data = get_data(context, id)
+    data = get_data(context, scm, id)
     content = data['content']
     s = get_dataurl_content(content['BODY'], idx)
     if s is None:
@@ -940,10 +1045,15 @@ def has_data_privilege(context, content):
     if web.is_admin(context):
         return True
     dataprivs = content['DATA_PRIVS'] if 'DATA_PRIVS' in content else ''
-    dataprivs = dataprivs.lower()
-    if dataprivs == '':
+    return satisfy_privs(context, dataprivs)
+
+def satisfy_privs(context, required_privs):
+    if web.is_admin(context):
         return True
-    privs = dataprivs.split(' ')
+    if required_privs == '':
+        return True
+    required_privs = required_privs.lower()
+    privs = required_privs.split(' ')
     for i in range(len(privs)):
         priv = privs[i]
         if priv.startswith('-'):
@@ -954,18 +1064,24 @@ def has_data_privilege(context, content):
             return False
     return True
 
-def is_valid_token(token_enc, target_id):
+def is_valid_token(token_enc, scm, target_id):
     try:
-        return _is_valid_token(token_enc, target_id)
+        return _is_valid_token(token_enc, scm, target_id)
     except:
         return False
 
-def _is_valid_token(token_enc, target_id):
+def _is_valid_token(token_enc, target_scm, target_id):
     token = bsb64.decode_string(token_enc, 0)
     fields = token.split(':')
-    id = fields[0]
-    key = fields[1]
-    issued_time = int(fields[2])
+    scm = fields[0]
+    id = fields[1]
+    key = fields[2]
+    issued_time = int(fields[3])
+    dflt_scm = get_default_scm()
+
+    if scm != target_scm:
+        if not scm == '' and target_scm == dflt_scm:
+            return False
 
     if id != target_id:
         return False

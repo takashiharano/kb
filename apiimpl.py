@@ -23,15 +23,23 @@ import kb
 def get_request_param(key, default=None):
     return web.get_request_param(key, default=default)
 
+#------------------------------------------------------------------------------
+def get_req_param_scm():
+    scm = get_request_param('scm', '')
+    if scm == '':
+        scm = kb.get_default_scm()
+    return scm
+
+#------------------------------------------------------------------------------
 def send_result_json(status, body):
     web.send_result_json(status, body)
 
 #------------------------------------------------------------------------------
-def has_access_privilege(context, id):
+def has_access_privilege(context, scm, id):
     if not kb.is_access_allowed(context):
         token = get_request_param('token')
         try:
-            if not kb.is_valid_token(token, id):
+            if not kb.is_valid_token(token, scm, id):
                 return False
         except:
             return False
@@ -55,11 +63,73 @@ def get_user_name(context):
     return ''
 
 #------------------------------------------------------------------------------
-def get_data(context):
+def proc_get_schema_list(context):
+    scm_list = kb.get_schema_list(context)
+    send_result_json('OK', scm_list)
+
+#------------------------------------------------------------------------------
+def proc_get_schema_props(context):
+    if not web.is_admin(context):
+        send_result_json('FORBIDDEN')
+
+    scm = get_req_param_scm()
+    props = kb.read_scm_props_as_text(scm)
+    if props is None:
+        props = ''
+    b64props = util.encode_base64(props)
+    result_data = {
+        'scm': scm,
+        'props': b64props
+    }
+    send_result_json('OK', result_data)
+
+#------------------------------------------------------------------------------
+def proc_save_schema_props(context):
+    if not web.is_admin(context):
+        send_result_json('FORBIDDEN')
+
+    scm = get_req_param_scm()
+    b64props = get_request_param('props')
+    props = util.decode_base64(b64props)
+    kb.save_scm_props(scm, props)
+    result_data = {
+        'scm': scm
+    }
+    send_result_json('OK', result_data)
+
+#------------------------------------------------------------------------------
+def proc_create_schema(context):
+    if not web.is_admin(context):
+        send_result_json('FORBIDDEN')
+
+    scm = get_req_param_scm()
+    b64props = get_request_param('props')
+    props = util.decode_base64(b64props)
+    status = kb.create_schema(scm, props)
+    result_data = {
+        'scm': scm
+    }
+    send_result_json(status, result_data)
+
+#------------------------------------------------------------------------------
+def proc_delete_schema(context):
+    if not web.is_admin(context):
+        send_result_json('FORBIDDEN')
+
+    scm = get_req_param_scm()
+    status = kb.delete_schema(scm)
+    result_data = {
+        'scm': scm
+    }
+    send_result_json(status, result_data)
+
+#------------------------------------------------------------------------------
+def proc_get_data(context):
     id = get_request_param('id')
-    if has_access_privilege(context, id):
+    scm = get_req_param_scm()
+    if has_access_privilege(context, scm, id):
         status = 'OK'
-        result_data = kb.get_data(context, id, True)
+        result_data = kb.get_data(context, scm, id, True)
     else:
         status = 'NO_ACCESS_RIGHTS'
         result_data = None
@@ -67,16 +137,17 @@ def get_data(context):
     send_result_json(status, result_data)
 
 #------------------------------------------------------------------------------
-def download_b64content(context):
+def proc_download_b64content(context):
+    scm = get_req_param_scm()
     id = get_request_param('id')
-    if has_access_privilege(context, id):
+    if has_access_privilege(context, scm, id):
         status = 'OK'
         p_idx = get_request_param('idx')
         try:
             idx = int(p_idx)
         except:
             idx = 0
-        kb.download_b64content(context, id, idx)
+        kb.download_b64content(context, scm, id, idx)
     else:
         kb.send_error_file('NO_ACCESS_RIGHTS')
 
@@ -99,37 +170,62 @@ def proc_on_forbidden(act):
 #------------------------------------------------------------------------------
 def proc_list(context):
     id = get_request_param('id')
-    detail = kb.get_list(context, id, True)
-    result = create_result_object('OK', detail)
+    scm = get_req_param_scm()
+
+    if not kb.schema_exists(scm):
+        return create_result_object('SCHEMA_NOT_FOUND')
+
+    if kb.has_privilege_for_scm(context, scm):
+        detail = kb.get_list(context, scm, id, True)
+        result = create_result_object('OK', detail)
+    else:
+        result = create_result_object('NO_ACCESS_RIGHTS')
+
     return result
 
 #------------------------------------------------------------------------------
 def proc_search(context):
+    scm = get_req_param_scm()
     id = get_request_param('id')
+
+    if not kb.schema_exists(scm):
+        return create_result_object('SCHEMA_NOT_FOUND')
+
+    if not kb.has_privilege_for_scm(context, scm):
+        return create_result_object('NO_ACCESS_RIGHTS')
+
     if id is None:
         q = get_request_param('q')
         q = util.decode_base64(q)
-        detail = kb.search_data(context, q, True)
+        detail = kb.search_data(context, scm, q, True)
     else:
-        detail = kb.get_data(context, id, True)
+        detail = kb.get_data(context, scm, id, True)
     result = create_result_object('OK', detail)
     return result
 
 #------------------------------------------------------------------------------
 def proc_save(context):
+    scm = get_req_param_scm()
+
+    if not kb.schema_exists(scm):
+        return create_result_object('SCHEMA_NOT_FOUND')
+
+    if not kb.has_privilege_for_scm(context, scm):
+        return create_result_object('NO_ACCESS_RIGHTS')
+
     id = get_request_param('id')
     data_json = get_request_param('data')
     new_data = util.from_json(data_json)
 
     content = None
     if id != '':
-        data = kb.get_data(context, id)
+        data = kb.get_data(context, scm, id)
         content = data['content']
 
     if id == '' or content is not None and content['U_DATE'] == new_data['org_u_date']:
         status = 'OK'
         user = get_user_name(context)
-        saved_obj = kb.save_data(id, new_data, user)
+        saved_obj = kb.save_data(scm, id, new_data, user)
         saved_data = saved_obj['data']
         saved_content = saved_data['content']
         saved_id = saved_obj['id']
@@ -152,6 +248,11 @@ def proc_save(context):
 
 #------------------------------------------------------------------------------
 def proc_touch(context):
+    scm = get_req_param_scm()
+
+    if not kb.has_privilege_for_scm(context, scm):
+        return create_result_object('NO_ACCESS_RIGHTS')
+
     p_ids = get_request_param('ids')
     p_keep_updated_by = get_request_param('keep_updated_by', '0')
     keep_updated_by = True if p_keep_updated_by == '1' else False
@@ -159,7 +260,7 @@ def proc_touch(context):
     user = get_user_name(context)
     for i in range(len(ids)):
         id = ids[i]
-        data = kb.get_data(context, id)
+        data = kb.get_data(context, scm, id)
         if data['status'] != 'OK':
             continue
         now = util.get_unixtime_millis()
@@ -168,7 +269,7 @@ def proc_touch(context):
         if not keep_updated_by:
             content['U_USER'] = user
         secure = data['encrypted']
-        kb.write_data(id, content, secure)
+        kb.write_data(scm, id, content, secure)
 
     result = create_result_object('OK')
     return result
@@ -179,13 +280,14 @@ def proc_mod_props(context):
         result = create_result_object('FORBIDDEN')
         return result
 
+    scm = get_req_param_scm()
     id = get_request_param('id')
     org_u_date = get_request_param('org_u_date')
     p_props = get_request_param('props')
     p_props = util.decode_base64(p_props)
     p_props = util.replace(p_props, ' {2,}', ' ')
 
-    data = kb.load_data(id)
+    data = kb.load_data(scm, id)
     if data['status'] != 'OK':
         result = create_result_object('ERROR:' + data['status'])
         return result
@@ -203,22 +305,30 @@ def proc_mod_props(context):
     new_content['BODY'] = content['BODY']
 
     secure = data['encrypted']
-    kb.write_data(id, new_content, secure)
+    kb.write_data(scm, id, new_content, secure)
 
     result = create_result_object('OK')
     return result
 
 #------------------------------------------------------------------------------
 def proc_delete(context):
+    scm = get_req_param_scm()
+    if not kb.has_privilege_for_scm(context, scm):
+        return create_result_object('NO_ACCESS_RIGHTS')
+
     id = get_request_param('id')
-    status = kb.delete_data(id)
+    status = kb.delete_data(scm, id)
     result = create_result_object(status)
     return result
 
 #------------------------------------------------------------------------------
 def proc_check_exists(context):
+    scm = get_req_param_scm()
+    if not kb.has_privilege_for_scm(context, scm):
+        return create_result_object('NO_ACCESS_RIGHTS')
+
     id = get_request_param('id')
-    detail = kb.check_exists(id)
+    detail = kb.check_exists(scm, id)
     result = create_result_object('OK', detail)
     return result
 
@@ -228,9 +338,10 @@ def proc_change_data_id(context):
         result = create_result_object('FORBIDDEN')
         return result
 
+    scm = get_req_param_scm()
     id_fm = get_request_param('id_fm')
     id_to = get_request_param('id_to')
-    status = kb.change_data_id(id_fm, id_to)
+    status = kb.change_data_id(scm, id_fm, id_to)
     detail = {
         'id_fm': id_fm,
         'id_to': id_to
@@ -241,8 +352,13 @@ def proc_change_data_id(context):
 
 #------------------------------------------------------------------------------
 def proc_check_id(context):
-    next_id = kb.get_next_id()
-    empty_ids_res = kb.get_empty_ids()
+    if not web.is_admin(context):
+        result = create_result_object('FORBIDDEN')
+        return result
+
+    scm = get_req_param_scm()
+    next_id = kb.get_next_id(scm)
+    empty_ids_res = kb.get_empty_ids(scm)
 
     detail = {
         'next_id': next_id,
@@ -254,6 +370,12 @@ def proc_check_id(context):
 
 #------------------------------------------------------------------------------
 def proc_export_html(context):
+    scm = get_req_param_scm()
+    if not kb.has_privilege_for_scm(context, scm):
+        send_error_text('NO_ACCESS_RIGHTS:scm=' + scm)
+        result = create_result_object('OK', None, 'octet-stream')
+        return result
+
     id = get_request_param('id')
     body = get_request_param('body')
     body = util.decode_base64(body)
@@ -290,6 +412,34 @@ def proc_export_html(context):
     result = create_result_object('OK', None, 'octet-stream')
     return result
 
+#------------------------------------------------------------------------------
+def proc_export_data(context):
+    scm = get_req_param_scm()
+    if not kb.has_privilege_for_scm(context, scm):
+        send_error_text('NO_ACCESS_RIGHTS:scm=' + scm)
+        return
+
+    p_decrypt = web.get_raw_request_param('decrypt')
+    decrypt = p_decrypt == '1'
+    b = kb.export_data(scm, decrypt)
+
+    filename = 'kbdata'
+    if scm != kb.get_default_scm():
+        filename += '_' + scm
+    filename += '.zip'
+
+    util.send_binary(b, filename=filename)
+
+def proc_export_data_all(context):
+    if not web.is_admin(context):
+        send_error_text('NO_ACCESS_RIGHTS:scm=' + scm)
+        return
+    p_decrypt = web.get_raw_request_param('decrypt')
+    decrypt = p_decrypt == '1'
+    b = kb.export_all_data(context, decrypt)
+    util.send_binary(b, filename='kbdata_all.zip')
+
+#------------------------------------------------------------------------------
 def _build_css(fontsize='12', fontfamily='', with_color=False):
     if fontfamily == '':
         fontfamily = 'Consolas, Monaco, Menlo, monospace, sans-serif'
@@ -317,10 +467,31 @@ def _build_css(fontsize='12', fontfamily='', with_color=False):
     return css
 
 #------------------------------------------------------------------------------
+def send_error_text(msg):
+    b = msg.encode()
+    util.send_binary(b, filename='error.txt')
+
+#------------------------------------------------------------------------------
 def proc_api(context, act):
     status = 'NO_SUCH_ACTION'
     result = None
-    funcname_list = ['list', 'search', 'save', 'touch', 'mod_props', 'delete', 'check_exists', 'change_data_id', 'check_id', 'export_html']
+    funcname_list = [
+        'list',
+        'search',
+        'save',
+        'touch',
+        'mod_props',
+        'delete',
+        'check_exists',
+        'change_data_id',
+        'check_id',
+        'export_html',
+        'get_schema_list',
+        'get_schema_props',
+        'save_schema_props',
+        'create_schema',
+        'delete_schema'
+    ]
 
     if act in funcname_list:
         func_name = 'proc_' + act
@@ -330,10 +501,13 @@ def proc_api(context, act):
         # from url query string w/o encryption
         act = web.get_raw_request_param('act')
         if act == 'export':
-            p_asis = web.get_raw_request_param('asis')
-            asis = p_asis == 'true'
-            b = kb.export_data(asis)
-            util.send_binary(b, filename='kbdata.zip')
+            all = web.get_raw_request_param('all', '')
+            if all == '1':
+                # api.cgi?act=export&all=1&decrypt=1
+                proc_export_data_all(context)
+            else:
+                # api.cgi?act=export&scm=xyz&decrypt=1
+                proc_export_data(context)
             return
 
     if result is not None:
@@ -350,9 +524,9 @@ def main():
 
     act = get_request_param('act')
     if act == 'get':
-        get_data(context)
+        proc_get_data(context)
     elif act == 'dlb64content':
-        download_b64content(context)
+        proc_download_b64content(context)
     else:
         if kb.is_access_allowed(context) or has_valid_apitoken():
             proc_api(context, act)

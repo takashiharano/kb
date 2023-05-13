@@ -46,6 +46,7 @@ kb.configInfo = null;
 kb.itemList = [];
 kb.totalCount = 0;
 kb.pendingId = null;
+kb.scm = '';
 kb.data;
 kb.urlOfData = '';
 kb.dndHandler = null;
@@ -88,8 +89,15 @@ kb.onAppReady = function() {
 };
 
 kb.onAppReady1 = function() {
+  var scm = util.getQuery('scm');
   var q = util.getQuery('q');
   var id = util.getQuery('id');
+  if (scm) {
+    kb.scm = scm;
+  }
+  if (kb.scm && (kb.scm != kb.defaultScm)) {
+    $el('#scm-name').innerHTML = ' - ' + scm;
+  }
   if (id) {
     kb.listAndShowDataById(id);
   } else if (q) {
@@ -185,9 +193,11 @@ kb.callApi = function(act, params, cb) {
 };
 
 kb.getList = function(id) {
-  var param = null;
+  var param = {
+    scm: kb.scm
+  };
   if (id != undefined) {
-    param = {id: id};
+    param.id = id;
   }
   kb.onStartListLoading('Loading');
   kb.callApi('list', param, kb.onGetList);
@@ -439,7 +449,15 @@ kb.buildListHeader = function(columns, sortIdx, sortType) {
 };
 
 kb.getListAll = function() {
-  location.href = './';
+  var url = './';
+  if (kb.scm) url += '?scm=' + kb.scm;
+  history.replaceState(null, '', url);
+  $el('#q').value = '';
+  $el('#id-txt').value = '';
+  kb.resetAreaSize();
+  kb.checkedIds = [];
+  kb.listAll();
+  $el('#q').focus();
 };
 kb.listAll = function() {
   if (!kb.isListLoading()) {
@@ -489,7 +507,10 @@ kb.searchByKeyword = function(q) {
     kb.listStatus.sortIdx = 9;
   }
   kb.listStatus.sortType = 2;
-  var param = {q: util.encodeBase64(q)};
+  var param = {
+    scm: kb.scm,
+    q: util.encodeBase64(q)
+  };
   kb.onStartListLoading('Searching');
   kb.callApi('search', param, kb.onSearchCb);
 };
@@ -581,7 +602,10 @@ kb._getData = function() {
   if (id == null) return;
   kb.pendingId = null;
   kb.requestedId = id;
-  var param = {id: id};
+  var param = {
+    scm: kb.scm,
+    id: id
+  };
   if (kb.token) {
     param.token = kb.token;
   }
@@ -866,6 +890,7 @@ kb.save = function() {
 
   var j = util.toJSON(data);
   var param = {
+    scm: kb.scm,
     id: id,
     data: j
   };
@@ -896,7 +921,7 @@ kb.onSaveData = function(xhr, res, req) {
     var m = kb.buildConflictMsg(data);
     util.alert('Conflict!', m, kb.onConflictOK);
   } else {
-    log.e(res.status + ':' + res.body);
+    kb.onApiError(res);
   }
 };
 
@@ -922,7 +947,7 @@ kb._touch = function() {
     ids += kb.checkedIds[i];
   }
   var keepUpdatedBy = ($el('#chk-keep-updated-by').checked ? '1' : '0');
-  var param = {ids: ids, keep_updated_by: keepUpdatedBy};
+  var param = {scm: kb.scm, ids: ids, keep_updated_by: keepUpdatedBy};
   kb.callApi('touch', param, kb.onTouchDone);
   kb.drawContentBodyArea4Progress('Updating');
 };
@@ -957,7 +982,7 @@ kb.onConflictOK = function() {
 };
 
 kb.checkExists = function(id) {
-  var param = {id: id};
+  var param = {scm: kb.scm, id: id};
   kb.callApi('check_exists', param, kb.onCheckExists);
 };
 kb.onCheckExists = function(xhr, res, req) {
@@ -1176,7 +1201,7 @@ kb._delete = function(id) {
   if (id == undefined) {
     id = kb.data.id;
   }
-  var param = {id: id};
+  var param = {scm: kb.scm, id: id};
   kb.callApi('delete', param, kb.onDelete);
   kb._clear();
 };
@@ -1191,7 +1216,7 @@ kb.onDelete = function(xhr, res, req) {
   }
   if (res.status == 'OK') {
     kb.showInfotip('OK');
-    kb.getList ();
+    kb.getList();
   } else {
     kb.showInfotip(res.status);
     log.e(res.status + ':' + res.body);
@@ -1211,11 +1236,22 @@ kb._clearData = function(id) {
 };
 
 kb.export = function() {
-  util.confirm('Export?', kb._export);
+  var s = 'Export?\n\n';
+  s += '<div style="display:inline-block;text-align:left;">'
+  s += '<input type="checkbox" id="chk-export-all"><label for="chk-export-all">All data</label>\n'
+  s += '<input type="checkbox" id="chk-decrypt"><label for="chk-decrypt">Decrypt</label>'
+  s += '</div>';
+  util.confirm(s, kb._export);
 };
 kb._export = function() {
-  param = {
-    'act': 'export'
+  param = {act: 'export'};
+  if ($el('#chk-export-all').checked) {
+    param.all = '1'
+  } else {
+    param.scm = kb.scm;
+  }
+  if ($el('#chk-decrypt').checked) {
+    param.decrypt = '1';
   }
   util.postSubmit('api.cgi', param);
 };
@@ -1255,6 +1291,7 @@ kb.saveProps = function() {
   var p = util.encodeBase64(props);
   var orgUdate = kb.data.content.U_DATE;
   var param = {
+    scm: kb.scm,
     id: kb.data.id,
     org_u_date: orgUdate,
     props: p
@@ -1292,7 +1329,8 @@ kb.onEditPropsEnd = function() {
 };
 
 kb.checkId = function() {
-  kb.callApi('check_id', null, kb.onCheckId);
+  var param = {scm: kb.scm};
+  kb.callApi('check_id', param, kb.onCheckId);
 };
 kb.onCheckId = function(xhr, res, req) {
   if (xhr.status != 200) {
@@ -1342,6 +1380,7 @@ kb.changeDataId = function() {
   var idFm = kb.data.id;
   var idTo = $el('#prop-data-id').value.trim();
   var param = {
+    scm: kb.scm,
     id_fm: idFm,
     id_to: idTo
   };
@@ -1379,6 +1418,220 @@ kb.validateId = function(id) {
     return true;
   }
   return false;
+};
+
+kb.selectSchema = function() {
+  var html = '';
+  html += '<div style="width:400px;height:180px;">';
+  html += 'SELECT SCHEMA';
+  if (kb.isAdmin) {
+    html += '<button style="position:absolute;right:16px;" onclick="kb.newSchema();">New</button>';
+  }
+  html += '<div style="margin-top:16px;height:calc(100% - 60px);">';
+  html += '<div style="display:inline-block;width:70%;height:100%;overflow:auto;">';
+  html += '<pre id="schema-list" style="text-align:left;"><span class="progdot">Loading</span></pre>';
+  html += '</div>';
+  html += '</div>';
+  html += '<div style="margin:16px 0;">';
+  html += '<button onclick="kb.closeDialog();">Close</button>';
+  html += '</div>';
+  html += '</div>';
+  util.dialog.open(html);
+  kb.updateSchemaList();
+};
+kb.updateSchemaList = function() {
+  kb.callApi('get_schema_list', null, kb.onGetSchemaList);
+};
+kb.onGetSchemaList = function(xhr, res, req) {
+  if (xhr.status != 200) {
+    kb.onHttpError(xhr.status);
+    return;
+  }
+  if (res.status != 'OK') {
+    return;
+  }
+  var scmMap = res.body;
+  var html = '<table style="width:100%;">';
+  for (var scm in scmMap) {
+    var prop = scmMap[scm];
+    var name = scm;
+    if (('name' in prop) && prop['name'] != '') {
+      name = prop['name'];
+    }
+    html += '<tr class="data-list-row">';
+    html += '<td style="width:10px;">';
+    if ((scm == kb.scm) || (!kb.scm && (scm == kb.defaultScm))) {
+      html += '*';
+    }
+    html += '</td>';
+    html += '<td style="padding-right:20px;white-space:nowrap;">';
+    html += '<span style="display:inline-block;width:100%;overflow:hidden;text-overflow:ellipsis;" class="title pseudo-link" onclick="kb.switchSchema(\'' + scm + '\');">';
+    html += '<span class="pseudo-link link">' + name + '</span>\n';
+    html += '</span>';
+    html += '</td>';
+    if (kb.isAdmin) {
+      html += '<td style="width:24px;">';
+      html += '<span class="pseudo-link" onclick="kb.editSchemaProps(\'' + scm + '\');" data-tooltip="Edit properties">P</span>\n';
+      html += '</td>';
+      html += '<td style="width:16px;">';
+      if ((scm != kb.defaultScm) && (scm != kb.scm)) {
+        html += '<span class="pseudo-link text-red" onclick="kb.confirmDeleteSchema(\'' + scm + '\');" data-tooltip="Delete">X</span>\n';
+      } else {
+        html += '&nbsp;';
+      }
+      html += '</td>';
+    }
+    html += '</tr>';
+  }
+  html += '</table>';
+  $el('#schema-list').innerHTML = html;
+};
+kb.switchSchema = function(scm) {
+  var url = './';
+  if (scm && scm != kb.defaultScm) {
+    url += '?scm=' + scm;
+  }
+  location.href = url;
+};
+
+kb.newSchema = function() {
+  var html = kb.buildSchemaEditor(null, 'kb.createSchema');
+  util.dialog.open(html);
+  $el('#scm-props').value = '{\n  "name": "",\n  "privs": ""\n}\n';
+  $el('#scm-id').focus();
+};
+kb.buildSchemaEditor = function(scm, cbFncName) {
+  var title = (scm ? 'EDIT SCHEMA' : 'NEW SCHEMA');
+  var html = '';
+  html += '<div style="width:360px;height:180px;">';
+  html += title;
+  html += '<div style="overflow:auto;height:calc(100% - 30px);">';
+  html += '<div style="display:inline-block;width:80%;">';
+  html += '<pre id="schema-list" style="text-align:left;">';
+  html += 'ID: <input type="text" id="scm-id" style="width:260px;">\n';
+  html += '<div style="margin-top:8px;">Properties:</div>';
+  html += '<textarea id="scm-props" style="width:100%;height:85px;"></textarea>';
+  html += '</pre>';
+  html += '</div>';
+  html += '</div>';
+  html += '<button style="width:60px;" onclick="' + cbFncName + '();">OK</button>';
+  html += '<button style="margin-left:4px;width:60px;" onclick="kb.closeDialog();">Cancel</button>';
+  html += '</div>';
+  return html;
+};
+
+kb.createSchema = function() {
+  var scmId = $el('#scm-id').value.trim();
+  var props = $el('#scm-props').value.trim();
+  var b64props = util.encodeBase64(props);
+  var params = {
+    scm: scmId,
+    props: b64props
+  };
+  kb.callApi('create_schema', params, kb.onCreateSchema);
+};
+kb.onCreateSchema = function(xhr, res, req) {
+  if (xhr.status != 200) {
+    kb.onHttpError(xhr.status);
+    return;
+  }
+  if (res.status != 'OK') {
+    kb.showInfotip(res.status);
+    return;
+  }
+  util.dialog.close();
+  kb.updateSchemaList();
+  kb.showInfotip('OK');
+};
+kb.switchNewSchema = function(data) {
+  kb.switchSchema(data.scm);
+};
+
+kb.editSchemaProps = function(scm) {
+  var html = kb.buildSchemaEditor(scm, 'kb.saveSchemaProps');
+  util.dialog.open(html);
+  $el('#scm-id').value = scm;
+  $el('#scm-id').disabled = true;
+  kb.getSchemaProps(scm);
+};
+kb.getSchemaProps = function(scm) {
+  var params = {scm: scm};
+  kb.callApi('get_schema_props', params, kb.onGetSchemaProps);
+};
+kb.onGetSchemaProps = function(xhr, res, req) {
+  if (xhr.status != 200) {
+    kb.onHttpError(xhr.status);
+    return;
+  }
+  if (res.status != 'OK') {
+    kb.showInfotip(res.status);
+    return;
+  }
+  var b64props = res.body.props;
+  var props = util.decodeBase64(b64props);
+  $el('#scm-props').value = props;
+};
+
+kb.saveSchemaProps = function() {
+  var scmId = $el('#scm-id').value.trim();
+  var props = $el('#scm-props').value.trim() + '\n';
+  var b64props = util.encodeBase64(props);
+  var params = {
+    scm: scmId,
+    props: b64props
+  };
+  kb.callApi('save_schema_props', params, kb.onSaveSchemaProps);
+};
+kb.onSaveSchemaProps = function(xhr, res, req) {
+  if (xhr.status != 200) {
+    kb.onHttpError(xhr.status);
+    return;
+  }
+  if (res.status != 'OK') {
+    kb.showInfotip(res.status);
+    return;
+  }
+  util.dialog.close();
+  kb.updateSchemaList();
+  kb.showInfotip('OK');
+};
+
+kb.confirmDeleteSchema = function(scm) {
+  var code = util.randomString('0123456789', 6);
+  var opt = {
+    focus: 'no',
+    data: {
+      scm: scm,
+      code: code
+    }
+  };
+  var title = '<span class="text-red">!!! DELETE SCHEMA !!!</span>';
+  var msg = '\nDelete the schema <b>' + scm + '</b> ?\n';
+  msg += 'Once you get started, you cannot rollback.\n';
+  msg += '\n';
+  msg += 'Enter the code ' + code + ' to proceed.';
+  util.dialog.text(title, msg, kb.deleteSchema, opt);
+};
+kb.deleteSchema = function(text, data) {
+  if (text != data.code) {
+    util.alert('Incorrect passcode. Aborted.');
+    return;
+  }
+  var params = {scm: data.scm};
+  kb.callApi('delete_schema', params, kb.onDeleteSchema);
+};
+kb.onDeleteSchema = function(xhr, res, req) {
+  if (xhr.status != 200) {
+    kb.onHttpError(xhr.status);
+    return;
+  }
+  if (res.status != 'OK') {
+    util.alert(res.status);
+    return;
+  }
+  var scm = res.body.scm;
+  kb.showInfotip('OK');
+  kb.updateSchemaList();
 };
 
 kb.openTools = function() {
@@ -1438,10 +1691,22 @@ kb.onHttpError = function(status) {
   kb.showInfotip(m);
 };
 kb.onApiError = function(res) {
-  var m = res.status;
-  if (res.body) m += ': ' + res.body;
-  log.e(m);
-  kb.showInfotip(m);
+  var s = res.status;
+  if (s == 'SCHEMA_NOT_FOUND') {
+    kb.onSchemaNotFound(s);
+  } else {
+    if (res.body) s += ': ' + res.body;
+    log.e(s);
+    kb.showInfotip(s);
+  }
+};
+kb.onSchemaNotFound = function(s) {
+  kb.showInfotip(s);
+  kb.drawInfo('<span class="text-red">' + s + '</span>');
+  kb.drawListContent('');
+  $el('#new-button').disabled = true;
+  $el('#search-button').disabled = true;
+  $el('#all-button').disabled = true;
 };
 
 kb.onFontRangeChanged = function(el) {
@@ -1571,6 +1836,7 @@ kb.exportHtml = function() {
   var wColor = ($el('#chk-export-color').checked ? '1' : '0');
   param = {
     act: 'export_html',
+    scm: kb.scm,
     id: kb.data.id,
     fontsize: fontSize,
     fontfamily: fontFamily,
@@ -1582,7 +1848,7 @@ kb.exportHtml = function() {
 
 kb.getUrl4Id = function(id) {
   var url = location.href;
-  url = url.replace(/\?.*/, '') + '?id=' + id;
+  url = url.replace(/\?.*/, '') + '?scm=' + kb.scm + '&id=' + id;
   return url;
 };
 
@@ -1626,7 +1892,7 @@ kb.applyToken = function(id, tokenKey) {
   var now = Date.now();
   var validUntilTime = now + kb.configInfo.token_valid_sec * 1000;
   var validUntil = util.getDateTimeString(validUntilTime, '%YYYY-%MM-%DD %HH:%mm:%SS %Z');
-  var srcToken = id + ':' + tokenKey + ':' + now;
+  var srcToken = kb.scm + ':' + id + ':' + tokenKey + ':' + now;
   var token = util.encodeBSB64(srcToken, 0);
   token = encodeURIComponent(token);
   var url = kb.urlOfData + '&token=' + token;
