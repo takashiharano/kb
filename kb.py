@@ -21,6 +21,7 @@ import web
 WORKSPACE_PATH = appconfig.workspace_path
 DATA_BASE_DIR_PATH = WORKSPACE_PATH + 'scm/'
 WK_PATH = WORKSPACE_PATH + 'wk/'
+PROPS_FILENAME = 'properties.txt'
 
 ENCRYPTED_HEAD = '#DATA'
 BSB64_N = appconfig.encryption_key
@@ -52,6 +53,11 @@ def get_datafile_path(scm, id):
     datadir = get_data_dir_path(scm)
     return datadir + id + '.txt'
 
+def get_props_file_path(scm):
+    dir_path = get_scm_dir_path(scm)
+    path = dir_path + PROPS_FILENAME
+    return path
+
 def get_default_scm():
     return '0'
 
@@ -75,8 +81,7 @@ def has_privilege_for_scm(context, scm):
 
 #------------------------------------------------------------------------------
 def read_scm_props_as_text(scm):
-    dir_path = DATA_BASE_DIR_PATH + scm
-    path = dir_path + '/props.txt'
+    path = get_props_file_path(scm)
     text = util.read_text_file(path)
     return text
 
@@ -106,6 +111,9 @@ def schema_exists(scm):
 def create_schema(scm, props):
     if schema_exists(scm):
         return 'SCM_ALREADY_EXISTS'
+    if not util.match(scm, '^[A-Za-z0-9_\-]+$'):
+        return 'ILLEGAL_SCM_ID'
+
     path = DATA_BASE_DIR_PATH + scm
     util.mkdir(path)
     save_scm_props(scm, props)
@@ -124,8 +132,7 @@ def delete_schema(scm):
 
 #------------------------------------------------------------------------------
 def save_scm_props(scm, json_text):
-    dir_path = DATA_BASE_DIR_PATH + scm
-    path = dir_path + '/props.txt'
+    path = get_props_file_path(scm)
     util.write_text_file(path, json_text)
 
 #------------------------------------------------------------------------------
@@ -853,8 +860,7 @@ def export_all_data(context, decrypt=False):
         target_path = WK_PATH + 'kbdata/'
         scm_map = get_schema_list(context)
         for scm in scm_map:
-            src_scm_path = get_scm_dir_path(scm)
-            src_scm_props_path = src_scm_path + 'props.txt'
+            src_scm_props_path = get_props_file_path(scm)
             wk_scm_path = target_path + scm + '/'
             wk_data_path = wk_scm_path + 'data/'
             util.mkdir(wk_data_path)

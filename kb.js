@@ -1522,6 +1522,10 @@ kb.buildSchemaEditor = function(scm, cbFncName) {
 
 kb.createSchema = function() {
   var scmId = $el('#scm-id').value.trim();
+  if (!scmId.match(/^[A-Za-z0-9_\-]+$/)) {
+    kb.showInfotip('Available chars are A-Za-z0-9_-', 2500);
+    return;
+  }
   var props = $el('#scm-props').value.trim();
   var b64props = util.encodeBase64(props);
   var params = {
