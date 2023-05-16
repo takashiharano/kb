@@ -1696,21 +1696,24 @@ kb.onHttpError = function(status) {
 };
 kb.onApiError = function(res) {
   var s = res.status;
-  if (s == 'SCHEMA_NOT_FOUND') {
-    kb.onSchemaNotFound(s);
+  if ((s == 'SCHEMA_NOT_FOUND') || (s == 'NO_ACCESS_RIGHTS')) {
+    kb.onNotAvailable('Not Available');
   } else {
     if (res.body) s += ': ' + res.body;
     log.e(s);
-    kb.showInfotip(s);
   }
+  kb.showInfotip(s, 2500);
 };
-kb.onSchemaNotFound = function(s) {
-  kb.showInfotip(s);
+kb.onNotAvailable = function(s) {
   kb.drawInfo('<span class="text-red">' + s + '</span>');
   kb.drawListContent('');
   $el('#new-button').disabled = true;
   $el('#search-button').disabled = true;
   $el('#all-button').disabled = true;
+  $el('#id-txt').disabled = true;
+  $el('#id-label').addClass('input-label-disable');
+  $el('#q').disabled = true;
+  $el('#keyqord-label').addClass('input-label-disable');
 };
 
 kb.onFontRangeChanged = function(el) {
