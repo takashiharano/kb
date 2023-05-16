@@ -31,7 +31,7 @@ def get_req_param_scm():
     return scm
 
 #------------------------------------------------------------------------------
-def send_result_json(status, body):
+def send_result_json(status, body=None):
     web.send_result_json(status, body)
 
 #------------------------------------------------------------------------------
@@ -69,9 +69,6 @@ def proc_get_schema_list(context):
 
 #------------------------------------------------------------------------------
 def proc_get_schema_props(context):
-    if not web.is_admin(context):
-        send_result_json('FORBIDDEN')
-
     scm = get_req_param_scm()
     props = kb.read_scm_props_as_text(scm)
     if props is None:
@@ -87,6 +84,7 @@ def proc_get_schema_props(context):
 def proc_save_schema_props(context):
     if not web.is_admin(context):
         send_result_json('FORBIDDEN')
+        return
 
     scm = get_req_param_scm()
     b64props = get_request_param('props')
@@ -101,6 +99,7 @@ def proc_save_schema_props(context):
 def proc_create_schema(context):
     if not web.is_admin(context):
         send_result_json('FORBIDDEN')
+        return
 
     scm = get_req_param_scm()
     b64props = get_request_param('props')
@@ -115,6 +114,7 @@ def proc_create_schema(context):
 def proc_delete_schema(context):
     if not web.is_admin(context):
         send_result_json('FORBIDDEN')
+        return
 
     scm = get_req_param_scm()
     status = kb.delete_schema(scm)
