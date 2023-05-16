@@ -47,6 +47,7 @@ kb.itemList = [];
 kb.totalCount = 0;
 kb.pendingId = null;
 kb.scm = '';
+kb.scmProps = null;
 kb.data;
 kb.urlOfData = '';
 kb.dndHandler = null;
@@ -107,6 +108,7 @@ kb.onAppReady1 = function() {
   } else {
     kb.getList();
   }
+  kb.getSchemaProps(scm, kb.onGetSchemaProps);
   kb.storeAreaSize();
   if (!id) $el('#q').focus();
 };
@@ -718,7 +720,11 @@ kb.createNew = function() {
   kb.status |= kb.ST_NEW;
   kb._clear();
   kb.edit();
-  $el('#chk-encryption').checked = kb.config.default_data_encryption;
+  var encrypt = kb.config.default_data_encryption;
+  if ('encrypt' in kb.scmProps) {
+    encrypt = kb.scmProps.encrypt;
+  }
+  $el('#chk-encryption').checked = encrypt;
   $el('#content-title-edt').focus();
   $el('#chk-silent').disabled = true;
 };
@@ -1314,7 +1320,7 @@ kb.onSaveProps = function(xhr, res, req) {
     var m = kb.buildConflictMsg(data);
     util.alert('Conflict!', m, null);
   } else {
-    var m = res.status + ':' + res.body;
+    m = res.status + ':' + res.body;
     log.e(m);
     kb.showInfotip(m);
   }
@@ -1356,7 +1362,7 @@ kb.onCheckId = function(xhr, res, req) {
     }
     util.alert(m);
   } else {
-    var m = res.status;
+    m = res.status;
     log.e(m);
     kb.showInfotip(m);
   }
@@ -1497,7 +1503,7 @@ kb.switchSchema = function(scm) {
 kb.newSchema = function() {
   var html = kb.buildSchemaEditor(null, 'kb.createSchema');
   util.dialog.open(html);
-  $el('#scm-props').value = '{\n  "name": "",\n  "privs": ""\n}\n';
+  $el('#scm-props').value = '{\n  "name": "",\n  "privs": "",\n  "encrypt": ' + kb.config.default_data_encryption + '\n}\n';
   $el('#scm-id').focus();
 };
 kb.buildSchemaEditor = function(scm, cbFncName) {
@@ -1556,13 +1562,28 @@ kb.editSchemaProps = function(scm) {
   util.dialog.open(html);
   $el('#scm-id').value = scm;
   $el('#scm-id').disabled = true;
-  kb.getSchemaProps(scm);
+  kb.getSchemaProps(scm, kb.onGetSchemaPropsForEdit);
 };
-kb.getSchemaProps = function(scm) {
+kb.getSchemaProps = function(scm, cb) {
   var params = {scm: scm};
-  kb.callApi('get_schema_props', params, kb.onGetSchemaProps);
+  kb.callApi('get_schema_props', params, cb);
 };
 kb.onGetSchemaProps = function(xhr, res, req) {
+  if (xhr.status != 200) {
+    kb.onHttpError(xhr.status);
+    return;
+  }
+  if (res.status != 'OK') {
+    kb.showInfotip(res.status);
+    return;
+  }
+  var b64props = res.body.props;
+  var props = util.decodeBase64(b64props);
+  if (!props) props = '{}';
+  kb.scmProps = util.fromJSON(props);
+};
+
+kb.onGetSchemaPropsForEdit = function(xhr, res, req) {
   if (xhr.status != 200) {
     kb.onHttpError(xhr.status);
     return;
@@ -1633,7 +1654,6 @@ kb.onDeleteSchema = function(xhr, res, req) {
     util.alert(res.status);
     return;
   }
-  var scm = res.body.scm;
   kb.showInfotip('OK');
   kb.updateSchemaList();
 };
