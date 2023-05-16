@@ -1006,18 +1006,24 @@ def get_ext_from_base64(s):
 def cmd_export():
     arg1 = util.get_arg(2)
     arg2 = util.get_arg(3)
+    arg3 = util.get_arg(4)
 
-    dest_path = arg1
-    asis = False
-    if arg2 == '-asis':
-        asis = True
+    scm = arg1
+    dest_path = arg2
+    decrypt = False
+    if arg3 == '-decrypt':
+        decrypt = True
 
     if dest_path == '' or dest_path.startswith('-'):
         print('Dest file path is required. (e.g., /tmp/data.zip)')
-        print('Usage: python kb.py export <DEST_FILE_PATH> [-asis]')
+        print('Usage: python kb.py export <SCM> <DEST_FILE_PATH> [-decrypt]')
         return
 
-    data_bytes = export_data(asis)
+    if scm == '-all':
+        data_bytes = export_all_data(scm, decrypt)
+    else:
+        data_bytes = export_data(scm, decrypt)
+
     util.write_binary_file(dest_path, data_bytes)
 
 #------------------------------------------------------------------------------
