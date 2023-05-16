@@ -1616,8 +1616,12 @@ kb.onSaveSchemaProps = function(xhr, res, req) {
     kb.showInfotip(res.status);
     return;
   }
+  var scm = res.body.scm;
   util.dialog.close();
   kb.updateSchemaList();
+  if (scm == kb.scm) {
+    kb.getSchemaProps(scm, kb.onGetSchemaProps);
+  }
   kb.showInfotip('OK');
 };
 
