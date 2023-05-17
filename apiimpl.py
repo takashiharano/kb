@@ -66,6 +66,7 @@ def get_user_name(context):
 def proc_get_schema_list(context):
     scm_list = kb.get_schema_list(context)
     send_result_json('OK', scm_list)
+    return None
 
 #------------------------------------------------------------------------------
 def proc_get_schema_props(context):
@@ -79,12 +80,13 @@ def proc_get_schema_props(context):
         'props': b64props
     }
     send_result_json('OK', result_data)
+    return None
 
 #------------------------------------------------------------------------------
 def proc_save_schema_props(context):
     if not web.is_admin(context):
         send_result_json('FORBIDDEN')
-        return
+        return None
 
     scm = get_req_param_scm()
     b64props = get_request_param('props')
@@ -94,12 +96,13 @@ def proc_save_schema_props(context):
         'scm': scm
     }
     send_result_json('OK', result_data)
+    return None
 
 #------------------------------------------------------------------------------
 def proc_create_schema(context):
     if not web.is_admin(context):
         send_result_json('FORBIDDEN')
-        return
+        return None
 
     scm = get_req_param_scm()
     b64props = get_request_param('props')
@@ -109,12 +112,13 @@ def proc_create_schema(context):
         'scm': scm
     }
     send_result_json(status, result_data)
+    return None
 
 #------------------------------------------------------------------------------
 def proc_delete_schema(context):
     if not web.is_admin(context):
         send_result_json('FORBIDDEN')
-        return
+        return None
 
     scm = get_req_param_scm()
     status = kb.delete_schema(scm)
@@ -122,6 +126,7 @@ def proc_delete_schema(context):
         'scm': scm
     }
     send_result_json(status, result_data)
+    return None
 
 #------------------------------------------------------------------------------
 def proc_get_data(context):
@@ -135,6 +140,7 @@ def proc_get_data(context):
         result_data = None
 
     send_result_json(status, result_data)
+    return None
 
 #------------------------------------------------------------------------------
 def proc_download_b64content(context):
@@ -150,6 +156,7 @@ def proc_download_b64content(context):
         kb.download_b64content(context, scm, id, idx)
     else:
         kb.send_error_file('NO_ACCESS_RIGHTS')
+    return None
 
 #------------------------------------------------------------------------------
 def create_result_object(status, detail=None, type='json'):
@@ -166,6 +173,7 @@ def proc_on_forbidden(act):
         util.send_result_json('FORBIDDEN', None)
     else:
         send_result_json('FORBIDDEN', None)
+    return None
 
 #------------------------------------------------------------------------------
 def proc_list(context):
@@ -417,7 +425,7 @@ def proc_export_data(context):
     scm = get_req_param_scm()
     if not kb.has_privilege_for_scm(context, scm):
         send_error_text('NO_ACCESS_RIGHTS:scm=' + scm)
-        return
+        return None
 
     p_decrypt = web.get_raw_request_param('decrypt')
     decrypt = p_decrypt == '1'
@@ -429,15 +437,17 @@ def proc_export_data(context):
     filename += '.zip'
 
     util.send_binary(b, filename=filename)
+    return None
 
 def proc_export_data_all(context):
     if not web.is_admin(context):
         send_error_text('NO_ACCESS_RIGHTS:scm=' + scm)
-        return
+        return None
     p_decrypt = web.get_raw_request_param('decrypt')
     decrypt = p_decrypt == '1'
     b = kb.export_all_data(context, decrypt)
     util.send_binary(b, filename='kbdata_all.zip')
+    return None
 
 #------------------------------------------------------------------------------
 def _build_css(fontsize='12', fontfamily='', with_color=False):
@@ -473,7 +483,7 @@ def send_error_text(msg):
 
 #------------------------------------------------------------------------------
 def proc_api(context, act):
-    status = 'NO_SUCH_ACTION'
+    status = 'OK'
     result = None
     funcname_list = [
         'list',
@@ -509,14 +519,15 @@ def proc_api(context, act):
                 # api.cgi?act=export&scm=xyz&decrypt=1
                 proc_export_data(context)
             return
+        else:
+            status = 'NO_SUCH_ACTION'
 
     if result is not None:
         if result['type'] == 'octet-stream':
             return
         status = result['status']
         result_data = result['detail']
-
-    send_result_json(status, result_data)
+        send_result_json(status, result_data)
 
 #------------------------------------------------------------------------------
 def main():
