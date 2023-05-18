@@ -452,7 +452,7 @@ kb.buildListHeader = function(columns, sortIdx, sortType) {
 
 kb.getListAll = function() {
   var url = './';
-  if (kb.scm) url += '?scm=' + kb.scm;
+  if (kb.scm != '') url += '?scm=' + kb.scm;
   history.replaceState(null, '', url);
   $el('#q').value = '';
   $el('#id-txt').value = '';
@@ -1879,7 +1879,9 @@ kb.exportHtml = function() {
 
 kb.getUrl4Id = function(id) {
   var url = location.href;
-  url = url.replace(/\?.*/, '') + '?scm=' + kb.scm + '&id=' + id;
+  url = url.replace(/\?.*/, '') + '?';
+  if (kb.scm != '') url += 'scm=' + kb.scm + '&';
+  url += 'id=' + id;
   return url;
 };
 
