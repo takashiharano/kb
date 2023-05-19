@@ -825,7 +825,7 @@ kb.enableTouchButton = function() {
 kb.confirmSaveAndExit = function() {
   if (!(kb.status & kb.ST_SAVE_CONFIRMING)) {
     kb.status |= kb.ST_SAVE_CONFIRMING;
-    util.confirm('Save and Exit?', kb.saveAndExit);
+    util.confirm('Save and Exit?', kb.saveAndExit, kb.cancelSave);
   }
 };
 kb.saveAndExit = function() {
@@ -930,6 +930,9 @@ kb.onSaveData = function(xhr, res, req) {
     kb.onApiError(res);
   }
 };
+kb.cancelSave = function() {
+  kb.status &= ~kb.ST_SAVE_CONFIRMING;
+};
 
 kb.buildConflictMsg = function(data) {
     var dt = util.getDateTimeString(+data.U_DATE);
@@ -944,9 +947,10 @@ kb.buildConflictMsg = function(data) {
 kb.touch = function() {
   kb.status |= kb.ST_TOUCH_CONFIRMING;
   var m = 'Update the last update date to now?\n<input type="checkbox" id="chk-keep-updated-by"><label for="chk-keep-updated-by">Keep updated by</label>';
-  util.confirm(m, kb._touch);
+  util.confirm(m, kb._touch, kb.cancelTouch);
 };
 kb._touch = function() {
+  kb.status &= ~kb.ST_TOUCH_CONFIRMING;
   var ids = '';
   for (var i = 0; i < kb.checkedIds.length; i++) {
     if (i > 0) ids += ',';
@@ -974,6 +978,9 @@ kb.onTouchDone = function(xhr, res, req) {
   } else {
     log.e(res.status + ':' + res.body);
   }
+};
+kb.cancelTouch = function() {
+  kb.status &= ~kb.ST_TOUCH_CONFIRMING;
 };
 
 kb.reloadListAndData = function(id) {
@@ -1011,13 +1018,16 @@ kb.onCheckExists = function(xhr, res, req) {
 
 kb.cancel = function() {
   kb.status |= kb.ST_CANCEL_CONFIRMING;
-  util.confirm('Cancel?', kb._cancel, {focus: 'no'});
+  util.confirm('Cancel?', kb._cancel, kb.cancelCancel, {focus: 'no'});
 };
 kb._cancel = function() {
   kb.onEditEnd();
   if (kb.status & kb.ST_CONFLICTING) {
     kb.reloadListAndData(kb.data.id);
   }
+};
+kb.cancelCancel = function() {
+  kb.status &= ~kb.ST_CANCEL_CONFIRMING;
 };
 
 kb.drawData = function(data) {
