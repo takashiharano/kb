@@ -48,7 +48,8 @@ kb.totalCount = 0;
 kb.pendingId = null;
 kb.scm = '';
 kb.scmProps = null;
-kb.data;
+kb.data = null;
+kb.data_bak = null;
 kb.urlOfData = '';
 kb.dndHandler = null;
 kb.areaSize = {
@@ -729,6 +730,21 @@ kb.createNew = function() {
   $el('#chk-silent').disabled = true;
 };
 
+kb.duplicate = function() {
+  kb.status |= kb.ST_NEW;
+  kb.data_bak = util.copyObject(kb.data);
+  kb.data.id = '';
+  kb.drawData(kb.data);
+  kb.edit();
+  var encrypt = kb.config.default_data_encryption;
+  if ('encrypt' in kb.scmProps) {
+    encrypt = kb.scmProps.encrypt;
+  }
+  $el('#chk-encryption').checked = encrypt;
+  $el('#content-title-edt').focus();
+  $el('#chk-silent').disabled = true;
+};
+
 kb.editLabels = function() {
   kb.status |= kb.ST_EDIT_ONLY_LABELS;
   kb.edit();
@@ -782,6 +798,7 @@ kb.onEditEnd = function() {
   kb.status &= ~kb.ST_EDITING;
   kb.status &= ~kb.ST_EDIT_ONLY_LABELS;
   kb.status &= ~kb.ST_NEW;
+  kb.data_bak = null;
 
   $el('#content-body').show();
 
@@ -1021,6 +1038,10 @@ kb.cancel = function() {
   util.confirm('Cancel?', kb._cancel, kb.cancelCancel, {focus: 'no'});
 };
 kb._cancel = function() {
+  if (kb.data_bak) {
+    kb.data = kb.data_bak;
+    kb.data_bak = null;
+  }
   kb.onEditEnd();
   if (kb.status & kb.ST_CONFLICTING) {
     kb.reloadListAndData(kb.data.id);
