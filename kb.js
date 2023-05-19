@@ -1538,8 +1538,8 @@ kb.buildSchemaEditor = function(scm, cbFncName) {
 
 kb.createSchema = function() {
   var scmId = $el('#scm-id').value.trim();
-  if (!scmId.match(/^[A-Za-z0-9_\-]+$/)) {
-    kb.showInfotip('Available chars are A-Za-z0-9_-', 2500);
+  if (!scmId.match(/^[a-z0-9_\-]+$/)) {
+    kb.showInfotip('Available chars are:\n- Lowercase letters\n- Numerical character\n- Hyphen\n- Underscore', 3000);
     return;
   }
   var props = $el('#scm-props').value.trim();

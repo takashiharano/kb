@@ -111,7 +111,7 @@ def schema_exists(scm):
 def create_schema(scm, props):
     if schema_exists(scm):
         return 'SCM_ALREADY_EXISTS'
-    if not util.match(scm, '^[A-Za-z0-9_\-]+$'):
+    if not util.match(scm, '^[a-z0-9_\-]+$'):
         return 'ILLEGAL_SCM_ID'
 
     path = DATA_BASE_DIR_PATH + scm
