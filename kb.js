@@ -457,6 +457,8 @@ kb.getListAll = function() {
   history.replaceState(null, '', url);
   $el('#q').value = '';
   $el('#id-txt').value = '';
+  kb.onInputId();
+  kb.onInputQ();
   kb.resetAreaSize();
   kb.checkedIds = [];
   kb.listAll();
