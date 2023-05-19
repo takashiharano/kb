@@ -399,8 +399,8 @@ def calc_data_macthed_score(content, keyword):
         keyword = util.replace(keyword, 'updatedby:', '', flags=re.IGNORECASE)
         score = is_target_matches(content['U_USER'], keyword)
 
-    elif keyword_lc.startswith('privs:'):
-        keyword = util.replace(keyword, 'privs:', '', flags=re.IGNORECASE)
+    elif keyword_lc.startswith('priv:'):
+        keyword = util.replace(keyword, 'priv:', '', flags=re.IGNORECASE)
         if is_matches_items(content, 'DATA_PRIVS', keyword):
             score = 10
 
