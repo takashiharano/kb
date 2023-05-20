@@ -511,7 +511,7 @@ table {
   max-width: 800px;
 }
 #content-title-edt {
-  width: 550px;
+  width: 480px;
 }
 #content-labels-area {
   display: inline-block;
@@ -519,13 +519,13 @@ table {
   margin-right: 32px;
 }
 #content-labels-edt {
-  width: 250px;
+  width: 200px;
 }
 #content-assignee-edt {
   width: 100px;
 }
 #chk-encryption {
-  margin-left: 16px;
+  margin-left: 12px;
 }
 #content-wrp1 {
   width: calc(100% - 6px);

@@ -346,7 +346,7 @@ kb.drawList = function(items, sortIdx, sortType, totalCount) {
     htmlList += '<td style="padding-right:8px;">' + cDateStr + '</td>';
     htmlList += '<td style="padding-right:16px;">' + cUser + '</td>';
     htmlList += '<td style="padding-right:8px;">' + uDateStr + '</td>';
-    htmlList += '<td style="padding-right:16px;">' + uUser + '</td>';
+    htmlList += '<td style="padding-right:8px;">' + uUser + '</td>';
     htmlList += '<td style="padding-right:16px;">' + assignee + '</td>';
     htmlList += '<td>' + statusLabel + '</td>';
     htmlList += '<td style="padding-left:20px;">' + labelsHTML + '</td>';
