@@ -382,27 +382,27 @@ def calc_data_macthed_score(content, keyword):
             if status_lc == keyword_lc:
                 score = 10
 
-    elif keyword_lc.startswith('createdat:'):
-        keyword = util.replace(keyword, 'createdat:', '', flags=re.IGNORECASE)
+    elif keyword_lc.startswith('created_at:'):
+        keyword = util.replace(keyword, 'created_at:', '', flags=re.IGNORECASE)
         if is_date_matches(content['C_DATE'], keyword):
             score = 10
 
-    elif keyword_lc.startswith('updatedat:'):
-        keyword = util.replace(keyword, 'updatedat:', '', flags=re.IGNORECASE)
+    elif keyword_lc.startswith('updated_at:'):
+        keyword = util.replace(keyword, 'updated_at:', '', flags=re.IGNORECASE)
         if is_date_matches(content['U_DATE'], keyword):
             score = 10
 
-    elif keyword_lc.startswith('createdby:'):
-        keyword = util.replace(keyword, 'createdby:', '', flags=re.IGNORECASE)
-        score = is_target_matches(content['C_USER'], keyword)
+    elif keyword_lc.startswith('created_by:'):
+        keyword = util.replace(keyword, 'created_by:', '', flags=re.IGNORECASE)
+        score = is_target_matches(content['C_USER'], keyword, True)
 
-    elif keyword_lc.startswith('updatedby:'):
-        keyword = util.replace(keyword, 'updatedby:', '', flags=re.IGNORECASE)
-        score = is_target_matches(content['U_USER'], keyword)
+    elif keyword_lc.startswith('updated_by:'):
+        keyword = util.replace(keyword, 'updated_by:', '', flags=re.IGNORECASE)
+        score = is_target_matches(content['U_USER'], keyword, True)
 
     elif keyword_lc.startswith('assignee:'):
         keyword = util.replace(keyword, 'assignee:', '', flags=re.IGNORECASE)
-        score = is_target_matches(content['ASSIGNEE'], keyword)
+        score = is_target_matches(content['ASSIGNEE'], keyword, True)
 
     elif keyword_lc.startswith('priv:'):
         keyword = util.replace(keyword, 'priv:', '', flags=re.IGNORECASE)
@@ -423,12 +423,14 @@ def calc_data_macthed_score(content, keyword):
 
     return score
 
-def is_target_matches(target, keyword):
+def is_target_matches(target, keyword, partial_match):
     if target == '':
         return 0
     score = 0
     target = target.lower()
     keyword = keyword.lower()
+    if partial_match and util.match(target, keyword):
+        score += 100
     if target == keyword:
         score += 100
     return score
