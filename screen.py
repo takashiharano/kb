@@ -103,10 +103,12 @@ def build_main_screen(context):
           <input type="text" id="content-id-edt" spellcheck="false" style="display:none;">
           <span style="margin-left:4px;">TITLE:</span>
           <input type="text" id="content-title-edt" spellcheck="false">
-          <span style="margin-left:16px;">LABELS:</span>
+          <span style="margin-left:12px;">LABELS:</span>
           <input type="text" id="content-labels-edt" spellcheck="false">
-          <span style="margin-left:16px;">STATUS:</span>
+          <span style="margin-left:12px;">STATUS:</span>
           <select id="select-status"></select>
+          <span style="margin-left:12px;">ASSIGNEE:</span>
+          <input type="text" id="content-assignee-edt" spellcheck="false">
           <input type="checkbox" id="chk-encryption"><label for="chk-encryption">Encrypt</label>
 '''
     if web.is_admin(context):
@@ -169,7 +171,7 @@ def build_main_screen(context):
           <button onclick="kb.changeFont('');">RESET</button>
           <span class="for-view">
             <span class="meta-info" style="position:absolute;right:8px;margin-top:10px;">
-              <span>CREATED: <span id="content-created-date"></span> <span id="content-created-by"></span></span><span style="margin-left:24px;">UPDATED: <span id="content-updated-date"></span> <span id="content-updated-by"></span></span>
+              <span>CREATED: <span id="content-created-date"></span> <span id="content-created-by"></span></span><span>&nbsp;&nbsp;UPDATED: <span id="content-updated-date"></span> <span id="content-updated-by"></span><span id="content-assignee"></span></span>
             </span>
           </span>
         </div>
@@ -215,7 +217,7 @@ kb.mode = 'view'
   <div id="content-area" class="area">
     <div>
       <div id="meta-info" class="meta-info">
-        <span>CREATED: <span id="content-created-date"></span> <span id="content-created-by"></span></span><span style="margin-left:32px;">UPDATED: <span id="content-updated-date"></span> <span id="content-updated-by"></span></span>
+        <span>CREATED: <span id="content-created-date"></span> <span id="content-created-by"></span></span><span>&nbsp;&nbsp;UPDATED: <span id="content-updated-date"></span> <span id="content-updated-by"></span></span>
         <span id="status" style="margin-left:32px;"></span>
         <span style="position:absolute;right:5px;">
           <span id="clock"></span>
@@ -430,7 +432,7 @@ table {
 #body1 {
   display: none;
   width: calc(100% - 17px);
-  min-width: 1200px;
+  min-width: 1500px;
   min-height: calc(100vh - 4px);
 }
 .selected {
@@ -518,6 +520,9 @@ table {
 }
 #content-labels-edt {
   width: 250px;
+}
+#content-assignee-edt {
+  width: 100px;
 }
 #chk-encryption {
   margin-left: 16px;

@@ -27,6 +27,7 @@ kb.LIST_COLUMNS = [
   {key: 'C_USER', label: 'BY'},
   {key: 'U_DATE', label: 'UPDATED'},
   {key: 'U_USER', label: 'BY'},
+  {key: 'ASSIGNEE', label: 'ASSIGNEE'},
   {key: 'STATUS', label: 'STATUS'},
   {key: 'LABELS', label: 'LABELS'},
   {key: 'score', label: 'SCORE', meta: true},
@@ -289,6 +290,7 @@ kb.drawList = function(items, sortIdx, sortType, totalCount) {
     var cUser = (content.C_USER ? content.C_USER : '');
     var uDateStr = '';
     var uUser = (content.U_USER ? content.U_USER : '');
+    var assignee = (content.ASSIGNEE ? content.ASSIGNEE : '');
     var dataPrivs = content.DATA_PRIVS || '';
     if ((cDate == undefined) || (cDate == '')) {
       cDateStr = '---------- --:--:--';
@@ -345,11 +347,12 @@ kb.drawList = function(items, sortIdx, sortType, totalCount) {
     htmlList += '<td style="padding-right:16px;">' + cUser + '</td>';
     htmlList += '<td style="padding-right:8px;">' + uDateStr + '</td>';
     htmlList += '<td style="padding-right:16px;">' + uUser + '</td>';
+    htmlList += '<td style="padding-right:16px;">' + assignee + '</td>';
     htmlList += '<td>' + statusLabel + '</td>';
     htmlList += '<td style="padding-left:20px;">' + labelsHTML + '</td>';
     htmlList += '<td>' + score + '</td>';
     htmlList += '<td style="text-align:right;padding-left:0.5em;">' + size + '</td>';
-    if (kb.LIST_COLUMNS[11].forAdmin && kb.isAdmin) {
+    if (kb.LIST_COLUMNS[12].forAdmin && kb.isAdmin) {
       htmlList += '<td style="padding-left:20px;">' + privsHTML + '</td>';
     }
     htmlList += '<td style="text-align:center;cursor:default;">' + encrypted + '</td>';
@@ -509,7 +512,7 @@ kb.searchByKeyword = function(q) {
   } else if (q.match(/^created..:[^\s]+?$/)) {
     kb.listStatus.sortIdx = 3;
   } else {
-    kb.listStatus.sortIdx = 9;
+    kb.listStatus.sortIdx = 10;
   }
   kb.listStatus.sortType = 2;
   var param = {
@@ -869,9 +872,10 @@ kb.save = function() {
   var silent = ($el('#chk-silent').checked ? '1' : '0');
   var title = $el('#content-title-edt').value;
   var body = $el('#content-body-edt').value;
-  var labels = $el('#content-labels-edt').value;
+  var labels = $el('#content-labels-edt').value.trim();
   labels = labels.replace(/\s{2,}/g, ' ');
   var status = $el('#select-status').value;
+  var assignee = $el('#content-assignee-edt').value.trim();
 
   if (!title) {
     kb.showInfotip('Title is required', 3000);
@@ -899,6 +903,7 @@ kb.save = function() {
     content.TITLE = b64Title;
     content.LABELS = b64Labels;
     content.STATUS = status;
+    content.ASSIGNEE = assignee;
     content.BODY = b64Body;
   }
 
@@ -1061,6 +1066,7 @@ kb.drawData = function(data) {
   var title = content.TITLE;
   var labels = content.LABELS;
   var status = content.STATUS;
+  var assignee = content.ASSIGNEE;
   var fontFamily = content.FONT;
   var data_status = data.status;
 
@@ -1097,6 +1103,7 @@ kb.drawData = function(data) {
   $el('#content-title').innerHTML = titleLabel;
   $el('#content-labels').innerHTML = labelsHTML;
   $el('#select-status').value = status;
+  $el('#content-assignee-edt').value = assignee;
   if (kb.status & kb.ST_APP_READY) {
     $el('#content-body').innerHTML = contentBody;
   }
@@ -1106,11 +1113,13 @@ kb.drawData = function(data) {
     $el('#content-created-by').innerHTML = '';
     $el('#content-updated-date').innerHTML = '';
     $el('#content-updated-by').innerHTML = '';
+    $el('#content-assignee').innerHTML = '';
   } else {
     $el('#content-created-date').innerHTML = cDateStr;
     $el('#content-created-by').innerHTML = 'by ' + content.C_USER;
     $el('#content-updated-date').innerHTML = uDateStr;
     $el('#content-updated-by').innerHTML = 'by ' + content.U_USER;
+    if (content.ASSIGNEE) $el('#content-assignee').innerHTML = '&nbsp;&nbsp;ASSIGNEE: ' + content.ASSIGNEE;
   }
 
   var statusLabel = '';
@@ -1222,6 +1231,7 @@ kb.clearContent = function() {
       C_USER: '',
       U_DATE: '',
       U_USER: '',
+      ASSIGNEE: '',
       TITLE: '',
       LABELS: '',
       STATUS: '',
