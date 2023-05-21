@@ -65,5 +65,5 @@ def build_js(context):
 def main():
     context = web.on_access()
     js = build_js(context)
-    util.send_response('text/javascript', js)
+    util.send_response(js, 'text/javascript')
 
