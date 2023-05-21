@@ -440,8 +440,8 @@ def proc_export_data(context):
     return None
 
 def proc_export_data_all(context):
-    if not web.is_admin(context):
-        send_error_text('NO_ACCESS_RIGHTS:scm=' + scm)
+    if not web.is_admin(context) and not has_valid_apitoken():
+        send_error_text('NO_ACCESS_RIGHTS')
         return None
     p_decrypt = web.get_raw_request_param('decrypt')
     decrypt = p_decrypt == '1'
