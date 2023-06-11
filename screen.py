@@ -127,7 +127,11 @@ def build_main_screen(context):
     html += '''
           </span>
           <span id="status" style="margin-right:8px;"></span>
-          <input type="checkbox" id="enrich" checked><label for="enrich">Enrich</label>'''
+          <select id="draw-mode">
+            <option value="0">Plain</option>
+            <option value="1" selected>Advanced</option>
+            <option value="2">HTML</option>
+          </select>'''
     html += '<button id="copy-text-button" style="margin-left:16px;" onclick="kb.copyContent();">COPY</button>'
     html += '<button id="copy-url-button" style="margin-left:4px;" onclick="kb.showUrl();">URL</button>'
     html += '<button id="save-html-button" style="margin-left:4px;" onclick="kb.confirmExportHtml();">EXPORT</button>'
@@ -233,7 +237,11 @@ kb.mode = 'view'
           <span id="content-labels"></span>
         </span>
         <span id="buttons-r">
-          <input type="checkbox" id="enrich" checked><label for="enrich">Enrich</label>
+          <select id="draw-mode">
+            <option value="0">Plain</option>
+            <option value="1" selected>Advanced</option>
+            <option value="2">HTML</option>
+          </select>
           <button id="copy-text-button" style="margin-left:8px;" onclick="kb.copyContent();">COPY</button>
         </span>
       </div>
@@ -662,6 +670,19 @@ td.center {
 .tools-output {
   border: none;
   border-bottom: 1px solid #333;
+}
+
+.code-s {
+  border-radius: 3px;
+  padding: 1px 2px;
+  background: #555;
+}
+.code {
+  display: inline-block;
+  border: 1px solid #888;
+  border-radius: 3px;
+  padding: 8px;
+  margin: 1px 0;
 }
 '''
     return css

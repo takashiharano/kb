@@ -68,7 +68,7 @@ kb.bsb64 = {n: 1};
 kb.toolsWindow = null;
 
 $onReady = function(e) {
-  $el('#enrich').addEventListener('change', kb.onEnrichChange);
+  $el('#draw-mode').addEventListener('change', kb.onDrawModeChange);
   var fontSize = util.getQuery('fontsize') | 0;
   if (!fontSize) fontSize = 12;
   kb.setFontSize(fontSize);
@@ -1069,6 +1069,7 @@ kb.drawData = function(data) {
   var assignee = content.ASSIGNEE;
   var fontFamily = content.FONT;
   var data_status = data.status;
+  var contentBody = content.BODY;
 
   var cDateStr = '';
   var uDateStr = '';
@@ -1076,10 +1077,11 @@ kb.drawData = function(data) {
   if (uDate != undefined) uDateStr = kb.getDateTimeString(+uDate);
   var labelsHTML = kb.buildItemsHTML('label', labels);
 
-  var contentBody = content.BODY;
-  contentBody = util.escHtml(contentBody);
-
-  if ($el('#enrich').checked) {
+  var drawMode = $el('#draw-mode').value;
+  if (drawMode != '2') {
+    contentBody = util.escHtml(contentBody);
+  }
+  if (drawMode == '1') {
     contentBody = contentBody.replace(/&quot;/g, '"');
     contentBody = util.linkUrls(contentBody);
 
@@ -1091,6 +1093,9 @@ kb.drawData = function(data) {
     contentBody = kb.decodeB64Image(contentBody);
 
     contentBody = kb.linkBsb64Data(contentBody);
+
+    contentBody = contentBody.replace(/```([\s\S]+?)```/g, '<pre class="code">$1</pre>');
+    contentBody = contentBody.replace(/`(.+?)`/g, '<span class="code-s">$1</span>');
   }
 
   var idLabel = '';
@@ -1211,7 +1216,7 @@ kb.linkBsb64Data = function(s) {
   return s;
 };
 
-kb.onEnrichChange = function() {
+kb.onDrawModeChange = function() {
   kb.drawData(kb.data);
 };
 
