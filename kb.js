@@ -2156,6 +2156,16 @@ kb.updateSearchLabels = function() {
   if ($el('#q').disabled) $el('#keyqord-label').addClass('input-label-disable');
 };
 
+kb.confirmLogout = function() {
+  util.confirm('Logout?', kb.logout);
+};
+kb.logout = function() {
+  websys.logout(null, kb.cbLogout);
+};
+kb.cbLogout = function() {
+  kb.getListAll();
+};
+
 $onEnterKey = function(e) {
   if ($el('.q-txt').hasFocus()) {
     if (!kb.isListLoading()) {

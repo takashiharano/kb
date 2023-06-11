@@ -49,7 +49,7 @@ def build_main_screen(context):
     html += '      <span id="system-name" style="color:' + appconfig.system_name_color + ';">' + appconfig.system_name + '</span>'
     html += '      <span id="scm-name" style="color:' + appconfig.system_name_color + ';"></span>'
     html += '      <span style="position:absolute;right:5px;">'
-    html += '        <span class="text-dim" style="margin-right:10px;">' + web.get_user_name(context) + '</span>'
+    html += '        <span class="pseudo-link text-dim" style="margin-right:10px;" onclick="kb.confirmLogout();">' + web.get_user_name(context) + '</span>'
     html += '        <span id="clock"></span>'
     html += '''
       </span>
