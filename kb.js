@@ -1094,8 +1094,9 @@ kb.drawData = function(data) {
 
     contentBody = kb.linkBsb64Data(contentBody);
 
-    contentBody = contentBody.replace(/```([\s\S]+?)```/g, '<pre class="code">$1</pre>');
-    contentBody = contentBody.replace(/`(.+?)`/g, '<span class="code-s">$1</span>');
+    contentBody = contentBody.replace(/(?<!\\)```([\s\S]+?)(?<!\\)```/g, '<pre class="code">$1</pre>');
+    contentBody = contentBody.replace(/(?<!\\)`(.+?)(?<!\\)`/g, '<span class="code-s">$1</span>');
+    contentBody = contentBody.replace(/\\`/g, '`');
   }
 
   var idLabel = '';
