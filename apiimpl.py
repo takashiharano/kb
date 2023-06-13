@@ -520,7 +520,7 @@ def proc_api(context, act):
                 proc_export_data(context)
             return
         else:
-            status = 'NO_SUCH_ACTION'
+            result = create_result_object('NO_SUCH_ACTION')
 
     if result is not None:
         if result['type'] == 'octet-stream':
@@ -534,7 +534,9 @@ def main():
     context = web.on_access()
 
     act = get_request_param('act')
-    if act == 'get':
+    if act is None:
+        util.send_response(appconfig.system_name)
+    elif act == 'get':
         proc_get_data(context)
     elif act == 'dlb64content':
         proc_download_b64content(context)
