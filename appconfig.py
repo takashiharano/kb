@@ -1,5 +1,6 @@
 root_path = '../../'
 workspace_path = root_path + '../private/kb/'
+home_path = root_path
 
 # auth / auth|read|write|delete|export / full
 access_control = 'auth'

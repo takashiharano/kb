@@ -46,6 +46,7 @@ def build_main_screen(context):
     <div style="position:relative;height:20px;">
 
 '''
+    html += '      <a href="' + appconfig.home_path + '" style="margin-right:4px;">HOME</a>'
     html += '      <span id="system-name" style="color:' + appconfig.system_name_color + ';">' + appconfig.system_name + '</span>'
     html += '      <span id="scm-name" style="color:' + appconfig.system_name_color + ';"></span>'
     html += '      <span style="position:absolute;right:5px;">'
@@ -376,6 +377,11 @@ input[type="checkbox"] {
 
     css += 'a {'
     css += '  color: ' + appconfig.link_color + ';'
+    css += '  text-decoration: none;'
+    css += '}'
+
+    css += 'a:hover {'
+    css += '  text-decoration: underline;'
     css += '}'
 
     css += '.link {'
