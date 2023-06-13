@@ -223,6 +223,10 @@ kb.onGetList = function(xhr, res, req) {
   kb.itemList = data.data_list;
   kb.totalCount = data.total_count;
   kb.drawList(kb.itemList, kb.listStatus.sortIdx, kb.listStatus.sortType, kb.totalCount);
+  if (kb.itemList.length == 1) {
+    $el('#id-txt').value = '';
+    kb.onInputSearch()
+  }
 };
 
 kb.drawInfo = function(html) {
@@ -460,8 +464,7 @@ kb.getListAll = function() {
   history.replaceState(null, '', url);
   $el('#q').value = '';
   $el('#id-txt').value = '';
-  kb.onInputId();
-  kb.onInputQ();
+  kb.onInputSearch()
   kb.resetAreaSize();
   kb.checkedIds = [];
   kb.listAll();
@@ -820,8 +823,7 @@ kb.onEditEnd = function() {
 
   $el('#id-txt').disabled = false;
   $el('#q').disabled = false;
-  kb.onInputId();
-  kb.onInputQ();
+  kb.onInputSearch()
 
   $el('#new-button').disabled = false;
   $el('#search-button').disabled = false;
@@ -2153,6 +2155,11 @@ kb.disableQ = function() {
 };
 kb.enableQ = function() {
   $el('#q').disabled = false;
+};
+
+kb.onInputSearch = function() {
+  kb.onInputId();
+  kb.onInputQ();
 };
 
 kb.updateSearchLabels = function() {
