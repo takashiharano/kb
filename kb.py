@@ -272,9 +272,9 @@ def filter_by_id_range(all_id_list, keyword, filtered_id_list):
 
 #------------------------------------------------------------------------------
 def search_data(context, scm, q, need_encode_b64=False):
+    q = q.strip()
     q = util.to_half_width(q)
     q = util.replace(q, '\\s{2,}', ' ')
-    q = util.replace(q, '\u3000', ' ')
     keywords = q.split(' ')
 
     id_list = get_all_data_id_list(scm)
@@ -555,7 +555,14 @@ def count_matched_key(target, keyword):
         return 0
     target = target.lower()
     keyword = keyword.lower()
-    count = target.count(keyword)
+
+    r = re.findall(keyword, target)
+    count = len(r)
+
+    pattern = re.compile(r'data:[0-9A-Za-z+\-/=.,;]+?[0-9A-Za-z+\-/=\s]*' + keyword, re.MULTILINE | re.DOTALL)
+    r = pattern.findall(target)
+    count = count - len(r)
+
     return count
 
 #------------------------------------------------------------------------------
