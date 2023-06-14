@@ -420,6 +420,7 @@ def calc_data_macthed_score(content, keyword):
 
         if not 'DATA_TYPE' in content or content['DATA_TYPE'] != 'dataurl':
             score += count_matched_key(content['BODY'], keyword)
+            score -= count_matched_key_in_dataurl(content['BODY'], keyword)
 
     return score
 
@@ -555,14 +556,19 @@ def count_matched_key(target, keyword):
         return 0
     target = target.lower()
     keyword = keyword.lower()
+    count = target.count(keyword)
+    return count
 
-    r = re.findall(keyword, target)
-    count = len(r)
-
-    pattern = re.compile(r'data:[0-9A-Za-z+\-/=.,;]+?[0-9A-Za-z+\-/=\s]*' + keyword, re.MULTILINE | re.DOTALL)
-    r = pattern.findall(target)
-    count = count - len(r)
-
+def count_matched_key_in_dataurl(target, keyword):
+    count = 0
+    idx = 0
+    while True:
+        s = get_dataurl_content(target, idx)
+        if s is None:
+            break
+        s = s.lower()
+        count += s.count(keyword)
+        idx += 1
     return count
 
 #------------------------------------------------------------------------------
