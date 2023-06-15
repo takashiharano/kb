@@ -560,13 +560,13 @@ def count_matched_key(target, keyword):
     return count
 
 def count_matched_key_in_dataurl(target, keyword):
+    target = target.lower()
     count = 0
     idx = 0
     while True:
         s = get_dataurl_content(target, idx)
         if s is None:
             break
-        s = s.lower()
         count += s.count(keyword)
         idx += 1
     return count
