@@ -367,50 +367,50 @@ def calc_data_macthed_score(content, keyword):
 
     keyword_lc = keyword.lower()
     if keyword_lc.startswith('title:'):
-        keyword = util.replace(keyword, 'title:', '', flags=re.IGNORECASE)
+        keyword = extract_sraech_keyword(keyword, 'title')
         score = is_matches_title(content['TITLE'], keyword)
 
     elif keyword_lc.startswith('label:'):
-        keyword = util.replace(keyword, 'label:', '', flags=re.IGNORECASE)
+        keyword = extract_sraech_keyword(keyword, 'label')
         if is_matches_items(content, 'LABELS', keyword):
             score = 10
 
     elif keyword_lc.startswith('status:'):
-        keyword_lc = util.replace(keyword_lc, 'status:', '', flags=re.IGNORECASE)
+        keyword = extract_sraech_keyword(keyword, 'status')
         if 'STATUS' in content and content['STATUS']:
             status_lc = content['STATUS'].lower()
             if status_lc == keyword_lc:
                 score = 10
 
     elif keyword_lc.startswith('created_at:'):
-        keyword = util.replace(keyword, 'created_at:', '', flags=re.IGNORECASE)
+        keyword = extract_sraech_keyword(keyword, 'created_at')
         if is_date_matches(content['C_DATE'], keyword):
             score = 10
 
     elif keyword_lc.startswith('updated_at:'):
-        keyword = util.replace(keyword, 'updated_at:', '', flags=re.IGNORECASE)
+        keyword = extract_sraech_keyword(keyword, 'updated_at')
         if is_date_matches(content['U_DATE'], keyword):
             score = 10
 
     elif keyword_lc.startswith('created_by:'):
-        keyword = util.replace(keyword, 'created_by:', '', flags=re.IGNORECASE)
+        keyword = extract_sraech_keyword(keyword, 'created_by')
         score = is_target_matches(content['C_USER'], keyword, True)
 
     elif keyword_lc.startswith('updated_by:'):
-        keyword = util.replace(keyword, 'updated_by:', '', flags=re.IGNORECASE)
+        keyword = extract_sraech_keyword(keyword, 'updated_by')
         score = is_target_matches(content['U_USER'], keyword, True)
 
     elif keyword_lc.startswith('assignee:'):
-        keyword = util.replace(keyword, 'assignee:', '', flags=re.IGNORECASE)
+        keyword = extract_sraech_keyword(keyword, 'assignee')
         score = is_target_matches(content['ASSIGNEE'], keyword, True)
 
     elif keyword_lc.startswith('priv:'):
-        keyword = util.replace(keyword, 'priv:', '', flags=re.IGNORECASE)
+        keyword = extract_sraech_keyword(keyword, 'priv')
         if is_matches_items(content, 'DATA_PRIVS', keyword):
             score = 10
 
     elif keyword_lc.startswith('body:'):
-        keyword = util.replace(keyword, 'body:', '', flags=re.IGNORECASE)
+        keyword = extract_sraech_keyword(keyword, 'body')
         score = count_matched_key(content['BODY'], keyword)
 
     else:
@@ -423,6 +423,11 @@ def calc_data_macthed_score(content, keyword):
             score -= count_matched_key_in_dataurl(content['BODY'], keyword)
 
     return score
+
+def extract_sraech_keyword(s, name):
+    keyword = util.replace(s, name + ':', '', flags=re.IGNORECASE)
+    keyword = util.extract_quoted_string(keyword)
+    return keyword
 
 def is_target_matches(target, keyword, partial_match):
     if target == '':
