@@ -275,7 +275,7 @@ def search_data(context, scm, q, need_encode_b64=False):
     q = q.strip()
     q = util.to_half_width(q)
     q = util.replace(q, '\\s{2,}', ' ')
-    keywords = q.split(' ')
+    keywords = util.split_keywords(q)
 
     id_list = get_all_data_id_list(scm)
     filtered = filter_by_id(id_list, keywords)
