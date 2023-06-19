@@ -1295,7 +1295,7 @@ kb._clearData = function(id) {
 kb.export = function() {
   var s = '<div style="width:280px;">Export data?</div>\n';
   s += '<div style="display:inline-block;text-align:left;">'
-  s += '<input type="checkbox" id="chk-export-all"><label for="chk-export-all">All schema</label>\n'
+  s += '<input type="checkbox" id="chk-export-all"' + (kb.isAdmin ? ' checked' : '') + '><label for="chk-export-all">All schema</label>\n'
   s += '<input type="checkbox" id="chk-decrypt"><label for="chk-decrypt">Decrypt</label>'
   s += '</div>';
   util.confirm(s, kb._export);
