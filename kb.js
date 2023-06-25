@@ -41,7 +41,7 @@ kb.status = 0;
 kb.uiStatus = kb.UI_ST_NONE;
 kb.listStatus = {
   sortIdx: 5,
-  sortType: 2
+  sortOrder: 2
 };
 kb.configInfo = null;
 kb.itemList = [];
@@ -222,7 +222,7 @@ kb.onGetList = function(xhr, res, req) {
   var data = res.body;
   kb.itemList = data.data_list;
   kb.totalCount = data.total_count;
-  kb.drawList(kb.itemList, kb.listStatus.sortIdx, kb.listStatus.sortType, kb.totalCount);
+  kb.drawList(kb.itemList, kb.listStatus.sortIdx, kb.listStatus.sortOrder, kb.totalCount);
   if (kb.itemList.length == 1) {
     $el('#id-txt').value = '';
     kb.onInputSearch()
@@ -268,11 +268,11 @@ kb.sortList = function(itemList, sortKey, desc, byMetaCol) {
   return items;
 };
 
-kb.drawList = function(items, sortIdx, sortType, totalCount) {
+kb.drawList = function(items, sortIdx, sortOrder, totalCount) {
   if (sortIdx >= 0) {
-    if (sortType > 0) {
+    if (sortOrder > 0) {
       var srtDef = kb.LIST_COLUMNS[sortIdx];
-      var desc = (sortType == 2);
+      var desc = (sortOrder == 2);
       items = kb.sortList(items, srtDef.key, desc, srtDef.meta);
     }
   }
@@ -368,7 +368,7 @@ kb.drawList = function(items, sortIdx, sortType, totalCount) {
   }
   htmlList += '</table>';
 
-  var htmlHead = kb.buildListHeader(kb.LIST_COLUMNS, sortIdx, sortType);
+  var htmlHead = kb.buildListHeader(kb.LIST_COLUMNS, sortIdx, sortOrder);
   var html = htmlHead + htmlList; 
   kb.drawListContent(html);
 
@@ -384,13 +384,13 @@ kb.drawList = function(items, sortIdx, sortType, totalCount) {
   }
 };
 
-kb.sortItemList = function(sortIdx, sortType) {
-  if (sortType > 2) {
-    sortType = 0;
+kb.sortItemList = function(sortIdx, sortOrder) {
+  if (sortOrder > 2) {
+    sortOrder = 0;
   }
   kb.listStatus.sortIdx = sortIdx;
-  kb.listStatus.sortType = sortType;
-  kb.drawList(kb.itemList, sortIdx, sortType, kb.totalCount);
+  kb.listStatus.sortOrder = sortOrder;
+  kb.drawList(kb.itemList, sortIdx, sortOrder, kb.totalCount);
 };
 
 kb.checkedIds = [];
@@ -410,7 +410,7 @@ kb.checkItem = function(id, el) {
 };
 
 //---------------------------------------------------------
-kb.buildListHeader = function(columns, sortIdx, sortType) {
+kb.buildListHeader = function(columns, sortIdx, sortOrder) {
   var html = '<table id="list-table" class="item list-table item-list">';
   html += '<tr class="item-list">';
 
@@ -426,12 +426,12 @@ kb.buildListHeader = function(columns, sortIdx, sortType) {
     var sortDescClz = '';
     var nextSortType = 1;
     if (i == sortIdx) {
-      if (sortType == 1) {
+      if (sortOrder == 1) {
         sortAscClz = 'sort-active';
-      } else if (sortType == 2) {
+      } else if (sortOrder == 2) {
         sortDescClz = 'sort-active';
       }
-      nextSortType = sortType + 1;
+      nextSortType = sortOrder + 1;
     }
 
     var sortButton = '<span class="sort-button" ';
@@ -473,7 +473,7 @@ kb.getListAll = function() {
 kb.listAll = function() {
   if (!kb.isListLoading()) {
     kb.listStatus.sortIdx = 5;
-    kb.listStatus.sortType = 2;
+    kb.listStatus.sortOrder = 2;
     kb.getList();
   }
 };
@@ -517,7 +517,7 @@ kb.searchByKeyword = function(q) {
   } else {
     kb.listStatus.sortIdx = 10;
   }
-  kb.listStatus.sortType = 2;
+  kb.listStatus.sortOrder = 2;
   var param = {
     scm: kb.scm,
     q: util.encodeBase64(q)
@@ -1011,7 +1011,7 @@ kb.cancelTouch = function() {
 
 kb.reloadListAndData = function(id) {
   kb.listStatus.sortIdx = 5;
-  kb.listStatus.sortType = 2;
+  kb.listStatus.sortOrder = 2;
   kb.search();
   kb.getData(id);
 };
