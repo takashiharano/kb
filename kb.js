@@ -327,7 +327,7 @@ kb.drawList = function(items, sortIdx, sortOrder, totalCount) {
       dlLink = '<span class="dl-link" onclick="kb.dlContent(\'' + id + '\');" data-tooltip="Download">&#x1F517;</span>';
     }
     var labelsHTML = kb.buildItemsHTML('label', labels);
-    var privsHTML = kb.buildItemsHTML('privs', dataPrivs);
+    var privsHTML = kb.buildItemsHTML('priv', dataPrivs);
     htmlList += '<tr id="row-' + id + '" class="data-list-row">';
     htmlList += '<td><input type="checkbox" onchange="kb.checkItem(\'' + id + '\', this)"';
     if (kb.checkedIds.includes(id)) htmlList += ' checked';
