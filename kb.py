@@ -376,7 +376,7 @@ def calc_data_macthed_score(content, keyword):
             score = 10
 
     elif keyword_lc.startswith('status:'):
-        keyword = extract_sraech_keyword(keyword, 'status')
+        keyword_lc = extract_sraech_keyword(keyword_lc, 'status')
         if 'STATUS' in content and content['STATUS']:
             status_lc = content['STATUS'].lower()
             if status_lc == keyword_lc:
