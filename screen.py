@@ -34,6 +34,7 @@ def build_main_screen(context):
     html += '<style>'
     html += build_css(mode='main')
     html += '</style>'
+    html += '<script src="' + ROOT_PATH + 'libs/sha.js"></script>'
     html += '<script src="' + ROOT_PATH + 'libs/debug.js"></script>'
     html += '<script src="' + ROOT_PATH + 'libs/util.js"></script>'
     html += '<script src="' + ROOT_PATH + 'websys/websys.js"></script>'
