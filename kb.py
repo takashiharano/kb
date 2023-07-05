@@ -1063,10 +1063,10 @@ def has_privilege(context, target_priv):
 
     if access_control == 'auth':
         # target_priv = kb.xxx
-        return web.has_privilege(context, target_priv)
+        return web.has_permission(context, target_priv)
 
     if util.has_item_value(access_control, 'auth', separator='|'):
-        if web.has_privilege(context, target_priv):
+        if web.has_permission(context, target_priv):
             return True
 
     if access_control == 'full':
@@ -1096,9 +1096,9 @@ def satisfy_privs(context, required_privs):
         priv = privs[i]
         if priv.startswith('-'):
             priv = priv[1:]
-            if web.has_privilege(context, priv):
+            if web.has_permission(context, priv):
                 return False
-        elif not web.has_privilege(context, priv):
+        elif not web.has_permission(context, priv):
             return False
     return True
 
