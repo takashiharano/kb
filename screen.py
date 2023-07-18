@@ -24,7 +24,7 @@ def build_main_screen(context):
     msg_path = workspace_path + 'info.txt'
     message = util.read_text_file(msg_path, default='')
 
-    html = '''<!DOCTYPE html><html><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    html = '''<!DOCTYPE html><html><head><meta charset="utf-8">
 <meta name="robots" content="none">
 <meta name="referrer" content="no-referrer">
 <meta name="referrer" content="never">
@@ -267,7 +267,7 @@ kb.mode = 'view'
 
 #------------------------------------------------------------------------------
 def build_forbidden_screen(context):
-    html = '''<!DOCTYPE html><html><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    html = '''<!DOCTYPE html><html><head><meta charset="utf-8">
 <meta name="robots" content="none">
 <meta name="referrer" content="no-referrer">
 <meta name="referrer" content="never">
@@ -671,6 +671,10 @@ td.center {
 
     css += '.row-selected {'
     css += '  background: ' + appconfig.list_row_selected_bg + ';'
+    css += '}'
+
+    css += '.comment {'
+    css += '  color: ' + appconfig.comment_color + ';'
     css += '}'
 
     css += '''

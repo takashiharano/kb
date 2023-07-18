@@ -69,6 +69,7 @@ dialog_background = '#000'
 
 clock_color = '#8f0'
 link_color = '#cef'
+comment_color = '#00bfff'
 
 subfunc_color = '#cde'
 
