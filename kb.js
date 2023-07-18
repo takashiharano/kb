@@ -1095,8 +1095,8 @@ kb.drawData = function(data) {
     contentBody = kb.decodeB64Image(contentBody);
 
     contentBody = kb.linkBsb64Data(contentBody);
-    contentBody = contentBody.replace(/^( *)(#.*)/g, '$1<span class="comment">$2</span>');
-    contentBody = contentBody.replace(/([ \n]+)(#.*)/g, '$1<span class="comment">$2</span>');
+    contentBody = contentBody.replace(/^(\s*)(#.*)/g, '$1<span class="comment">$2</span>');
+    contentBody = contentBody.replace(/(\n)(\s*)(#.*)/g, '$1$2<span class="comment">$3</span>');
     contentBody = contentBody.replace(/(?<!\\)```([\s\S]+?)(?<!\\)```/g, '<pre class="code">$1</pre>');
     contentBody = contentBody.replace(/(?<!\\)`(.+?)(?<!\\)`/g, '<span class="code-s">$1</span>');
     contentBody = contentBody.replace(/\\`/g, '`');
