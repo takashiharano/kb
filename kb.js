@@ -2174,10 +2174,12 @@ kb.confirmLogout = function() {
   util.confirm('Logout?', kb.logout);
 };
 kb.logout = function() {
-  websys.logout(null, kb.cbLogout);
+  websys.logout(kb.cbLogout);
 };
 kb.cbLogout = function() {
-  kb.getListAll();
+  var url = './';
+  if (kb.scm != '') url += '?scm=' + kb.scm;
+  location.href = url;
 };
 
 $onEnterKey = function(e) {
