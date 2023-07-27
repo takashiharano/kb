@@ -1893,6 +1893,8 @@ kb.storeAreaSize = function() {
 };
 kb.resetAreaSize = function() {
   kb.setAreaSize(kb.orgH.h1, 0);
+  kb.areaSize.orgDH = 0;
+  kb.areaSize.dH = 0;
 };
 kb.setAreaSize = function(h1, dH) {
   $el('#list-area').style.height = h1 + 'px';
