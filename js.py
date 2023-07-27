@@ -19,6 +19,8 @@ import kb
 
 #------------------------------------------------------------------------------
 def build_js(context):
+    content_height_adj = appconfig.list_height + 32
+
     js = ''
     js += 'var kb = kb || {};\n'
     js += 'kb.defaultScm = \'' + kb.get_default_scm() + '\';\n'
@@ -57,7 +59,7 @@ def build_js(context):
     js += '};\n'
 
     js += 'kb.isAdmin = ' + ('true' if web.is_admin(context) else 'false') + ';\n'
-
+    js += 'kb.contentHeightAdj = ' + str(content_height_adj) + ';\n';
     js += 'websys.init(\'' + ROOT_PATH + '\');'
     return js
 

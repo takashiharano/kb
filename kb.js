@@ -56,7 +56,9 @@ kb.dndHandler = null;
 kb.areaSize = {
   orgY: 0,
   orgSP1: 0,
-  orgSP2: 0
+  orgSP2: 0,
+  orgDH: 0,
+  dH: 0
 };
 kb.requestedId = null;
 kb.loadPendingTmrId = 0;
@@ -1864,6 +1866,7 @@ kb.onAreaResizeStart = function(e) {
   kb.areaSize.orgY = y;
   kb.areaSize.orgSP1 = sp1;
   kb.areaSize.orgSP2 = sp2;
+  kb.areaSize.orgDH = kb.areaSize.dH;
   kb.disableTextSelect();
   document.body.style.cursor = 'ns-resize';
 
@@ -1872,28 +1875,29 @@ kb.onAreaResize = function(e) {
   var x = e.clientX;
   var y = e.clientY;
   var adj = 8;
-  var dH = kb.areaSize.orgY - y;
-  var h1 = kb.areaSize.orgSP1.h - dH - adj;
-  var h2 = kb.areaSize.orgSP2.h + dH - adj;
-  if ((h1 < 70) || (h2 < 100)) {
+  var dY = kb.areaSize.orgY - y;
+  var h1 = kb.areaSize.orgSP1.h - dY - adj;
+  var h2 = kb.areaSize.orgSP2.h + dY - adj;
+  var dH = kb.areaSize.orgDH - dY;
+  kb.areaSize.dH = dH;
+  if ((h1 < 100) || (h2 < 100)) {
     return;
   }
-  kb.setAreaSize(h1, h2);
+  kb.setAreaSize(h1, dH);
 };
 kb.storeAreaSize = function() {
   var sp1 = kb.getSelfSizePos($el('#list-area'));
-  var sp2 = kb.getSelfSizePos($el('#content-area'));
   var adj = 8;
   var h1 = sp1.h - adj;
-  var h2 = sp2.h - adj;
-  kb.orgH = {h1: h1, h2: h2};
+  kb.orgH = {h1: h1};
 };
 kb.resetAreaSize = function() {
-  kb.setAreaSize(kb.orgH.h1, kb.orgH.h2);
+  kb.setAreaSize(kb.orgH.h1, 0);
 };
-kb.setAreaSize = function(h1, h2) {
+kb.setAreaSize = function(h1, dH) {
   $el('#list-area').style.height = h1 + 'px';
-  $el('#content-area').style.height = h2 + 'px';
+  var h2 = kb.contentHeightAdj + dH;
+  $el('#content-area').style.height = 'calc(100vh - ' + h2 + 'px)';
 };
 kb.onAreaResizeEnd = function(e) {
   kb.enableTextSelect();
