@@ -1054,7 +1054,7 @@ def cmd_export():
 
 #------------------------------------------------------------------------------
 def is_access_allowed(context):
-    if appconfig.access_control != 'auth' or context['authorized']:
+    if appconfig.access_control != 'auth' or context.is_authorized():
         return True
     return False
 
@@ -1063,10 +1063,10 @@ def has_privilege(context, target_priv):
 
     if access_control == 'auth':
         # target_priv = kb.xxx
-        return web.has_permission(context, target_priv)
+        return context.has_permission(target_priv)
 
     if util.has_item_value(access_control, 'auth', separator='|'):
-        if web.has_permission(context, target_priv):
+        if context.has_permission(target_priv):
             return True
 
     if access_control == 'full':
@@ -1080,13 +1080,13 @@ def has_privilege(context, target_priv):
     return util.has_item_value(access_control, target_priv, separator='|')
 
 def has_data_privilege(context, content):
-    if web.is_admin(context):
+    if context.is_admin():
         return True
     dataprivs = content['DATA_PRIVS'] if 'DATA_PRIVS' in content else ''
     return satisfy_privs(context, dataprivs)
 
 def satisfy_privs(context, required_privs):
-    if web.is_admin(context):
+    if context.is_admin():
         return True
     if required_privs == '':
         return True
@@ -1096,9 +1096,9 @@ def satisfy_privs(context, required_privs):
         priv = privs[i]
         if priv.startswith('-'):
             priv = priv[1:]
-            if web.has_permission(context, priv):
+            if context.has_permission(priv):
                 return False
-        elif not web.has_permission(context, priv):
+        elif not context.has_permission(priv):
             return False
     return True
 

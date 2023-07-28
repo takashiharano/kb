@@ -51,7 +51,7 @@ def build_main_screen(context):
     html += '      <span id="system-name" style="color:' + appconfig.system_name_color + ';">' + appconfig.system_name + '</span>'
     html += '      <span id="scm-name" style="color:' + appconfig.system_name_color + ';"></span>'
     html += '      <span style="position:absolute;right:5px;">'
-    html += '        <span class="pseudo-link text-dim" style="margin-right:10px;" onclick="kb.confirmLogout();">' + web.get_user_name(context) + '</span>'
+    html += '        <span class="pseudo-link text-dim" style="margin-right:10px;" onclick="kb.confirmLogout();">' + context.get_user_name() + '</span>'
     html += '        <span id="clock"></span>'
     html += '''
       </span>
@@ -113,7 +113,7 @@ def build_main_screen(context):
           <input type="text" id="content-assignee-edt" spellcheck="false">
           <input type="checkbox" id="chk-encryption"><label for="chk-encryption">Encrypt</label>
 '''
-    if web.is_admin(context):
+    if context.is_admin():
         html += '          <input type="checkbox" id="chk-silent"><label for="chk-silent">Silent</label>'
 
     html += '''
@@ -138,7 +138,7 @@ def build_main_screen(context):
     html += '<button id="copy-url-button" style="margin-left:4px;" onclick="kb.showUrl();">URL</button>'
     html += '<button id="save-html-button" style="margin-left:4px;" onclick="kb.confirmExportHtml();">EXPORT</button>'
 
-    if web.is_admin(context):
+    if context.is_admin():
         html += '<button id="props-button" style="min-width:32px;margin-left:8px;" onclick="kb.editProps();">PROPS</button>'
 
     if kb.has_privilege(context, 'kb.write'):

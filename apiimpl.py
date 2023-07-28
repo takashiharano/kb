@@ -56,10 +56,9 @@ def has_valid_apitoken():
 
 #------------------------------------------------------------------------------
 def get_user_name(context):
-    if 'user_info' in context:
-        user_info = context['user_info']
-        if user_info is not None and 'name' in user_info:
-            return user_info['name']
+    user_info = context.get_user_info()
+    if user_info is not None and 'name' in user_info:
+        return user_info['name']
     return ''
 
 #------------------------------------------------------------------------------
@@ -84,7 +83,7 @@ def proc_get_schema_props(context):
 
 #------------------------------------------------------------------------------
 def proc_save_schema_props(context):
-    if not web.is_admin(context):
+    if not context.is_admin():
         send_result_json('FORBIDDEN')
         return None
 
@@ -100,7 +99,7 @@ def proc_save_schema_props(context):
 
 #------------------------------------------------------------------------------
 def proc_create_schema(context):
-    if not web.is_admin(context):
+    if not context.is_admin():
         send_result_json('FORBIDDEN')
         return None
 
@@ -116,7 +115,7 @@ def proc_create_schema(context):
 
 #------------------------------------------------------------------------------
 def proc_delete_schema(context):
-    if not web.is_admin(context):
+    if not context.is_admin():
         send_result_json('FORBIDDEN')
         return None
 
@@ -284,7 +283,7 @@ def proc_touch(context):
 
 #------------------------------------------------------------------------------
 def proc_mod_props(context):
-    if not web.is_admin(context):
+    if not context.is_admin():
         result = create_result_object('FORBIDDEN')
         return result
 
@@ -342,7 +341,7 @@ def proc_check_exists(context):
 
 #------------------------------------------------------------------------------
 def proc_change_data_id(context):
-    if not web.is_admin(context):
+    if not context.is_admin():
         result = create_result_object('FORBIDDEN')
         return result
 
@@ -360,7 +359,7 @@ def proc_change_data_id(context):
 
 #------------------------------------------------------------------------------
 def proc_check_id(context):
-    if not web.is_admin(context):
+    if not context.is_admin():
         result = create_result_object('FORBIDDEN')
         return result
 
@@ -440,7 +439,7 @@ def proc_export_data(context):
     return None
 
 def proc_export_data_all(context):
-    if not web.is_admin(context) and not has_valid_apitoken():
+    if not context.is_admin() and not has_valid_apitoken():
         send_error_text('NO_ACCESS_RIGHTS')
         return None
     p_decrypt = web.get_raw_request_param('decrypt')
