@@ -2168,6 +2168,12 @@ kb.onInputSearch = function() {
   kb.onInputId();
   kb.onInputQ();
 };
+kb.clearKeywords = function() {
+  $el('#id-txt').value = '';
+  $el('#q').value = '';
+  kb.onInputSearch();
+  $el('#q').focus();
+};
 
 kb.updateSearchLabels = function() {
   $el('#id-label').removeClass('input-label-disable');
