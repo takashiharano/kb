@@ -55,13 +55,6 @@ def has_valid_apitoken():
     return False
 
 #------------------------------------------------------------------------------
-def get_user_name(context):
-    user_info = context.get_user_info()
-    if user_info is not None and 'name' in user_info:
-        return user_info['name']
-    return ''
-
-#------------------------------------------------------------------------------
 def proc_get_schema_list(context):
     scm_list = kb.get_schema_list(context)
     send_result_json('OK', scm_list)
@@ -231,7 +224,7 @@ def proc_save(context):
 
     if id == '' or content is not None and content['U_DATE'] == new_data['org_u_date']:
         status = 'OK'
-        user = get_user_name(context)
+        user = context.get_user_name()
         saved_obj = kb.save_data(scm, id, new_data, user)
         saved_data = saved_obj['data']
         saved_content = saved_data['content']
@@ -264,7 +257,7 @@ def proc_touch(context):
     p_keep_updated_by = get_request_param('keep_updated_by', '0')
     keep_updated_by = True if p_keep_updated_by == '1' else False
     ids = p_ids.split(',')
-    user = get_user_name(context)
+    user = context.get_user_name()
     for i in range(len(ids)):
         id = ids[i]
         data = kb.get_data(context, scm, id)
