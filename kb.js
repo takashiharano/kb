@@ -1330,9 +1330,7 @@ kb.editProps = function() {
   html += '<div style="text-align:left;margin-bottom:4px;width:150px;">';
   html += '<span>ID: </span><input type="text" id="prop-data-id" value="' + kb.data.id + '" onfocus="kb.onPropIdFocus();">';
   html += '<button id="change-id-button" style="margin-left:4px;" onclick="kb.confirmChangeDataId();" disabled>CHANGE</button>';
-  html += '<span style="position:absolute;right:8px;">';
-  html += '<button id="next-id-button" style="margin-left:4px;" onclick="kb.checkId();">CHECK ID</button>';
-  html += '</span>';
+  html += '<button id="next-id-button" class="small-button" style="margin-left:4px;" onclick="kb.checkId();">CHECK ID</button>';
   html += '</div>';
   html += '<textarea id="props" spellcheck="false" style="width:100%;height:calc(100% - 54px);margin-bottom:8px;" onfocus="kb.onPropsFocus();">' + props + '</textarea><br>';
   html += '<button id="save-props-button" onclick="kb.confirmSaveProps();" disabled>SAVE</button>';
