@@ -358,7 +358,7 @@ kb.drawList = function(items, sortIdx, sortOrder, totalCount) {
     htmlList += '<td style="padding-left:20px;">' + labelsHTML + '</td>';
     htmlList += '<td>' + score + '</td>';
     htmlList += '<td style="text-align:right;padding-left:0.5em;">' + size + '</td>';
-    if (kb.LIST_COLUMNS[12].forAdmin && kb.isAdmin) {
+    if (kb.LIST_COLUMNS[12].forAdmin && kb.isSysAdmin) {
       htmlList += '<td style="padding-left:20px;">' + privsHTML + '</td>';
     }
     htmlList += '<td style="text-align:center;cursor:default;">' + encrypted + '</td>';
@@ -419,7 +419,7 @@ kb.buildListHeader = function(columns, sortIdx, sortOrder) {
   html += '<th class="item-list">&nbsp;</th>';
   for (var i = 0; i < columns.length; i++) {
     var column = columns[i];
-    if (column.forAdmin && !kb.isAdmin) {
+    if (column.forAdmin && !kb.isSysAdmin) {
       continue;
     }
     var label = column['label'];
@@ -1298,7 +1298,9 @@ kb._clearData = function(id) {
 kb.export = function() {
   var s = '<div style="width:280px;">Export data?</div>\n';
   s += '<div style="display:inline-block;text-align:left;">'
-  s += '<input type="checkbox" id="chk-export-all"' + (kb.isAdmin ? ' checked' : '') + '><label for="chk-export-all">All schema</label>\n'
+  if (kb.isAdmin) {
+    s += '<input type="checkbox" id="chk-export-all" checked><label for="chk-export-all">All schema</label>\n'
+  }
   s += '<input type="checkbox" id="chk-decrypt"><label for="chk-decrypt">Decrypt</label>'
   s += '</div>';
   util.confirm(s, kb._export);
@@ -1482,7 +1484,7 @@ kb.selectSchema = function() {
   var html = '';
   html += '<div style="width:400px;height:180px;">';
   html += 'SELECT SCHEMA';
-  if (kb.isAdmin) {
+  if (kb.isSysAdmin) {
     html += '<button style="position:absolute;right:16px;" onclick="kb.newSchema();">New</button>';
   }
   html += '<div style="margin-top:16px;height:calc(100% - 60px);">';
@@ -1527,7 +1529,7 @@ kb.onGetSchemaList = function(xhr, res, req) {
     html += '<span class="pseudo-link link">' + name + '</span>\n';
     html += '</span>';
     html += '</td>';
-    if (kb.isAdmin) {
+    if (kb.isSysAdmin) {
       html += '<td style="width:24px;">';
       html += '<span class="pseudo-link" onclick="kb.editSchemaProps(\'' + scm + '\');" data-tooltip="Edit properties">P</span>\n';
       html += '</td>';
@@ -1946,7 +1948,7 @@ kb.showUrl = function() {
   var url = kb.getUrl4Id(id);
   kb.urlOfData = url;
   var m = '<span id="content-url" class="pseudo-link" onclick="kb.copyUrl();" data-tooltip="Click to copy">' + url + '</span>\n\n';
-  if (kb.isAdmin && !kb.data.content.DATA_PRIVS) {
+  if (kb.isSysAdmin && !kb.data.content.DATA_PRIVS) {
     var listTokens = '<div style="width:100%;text-align:left;line-height:1.8em;">';
     listTokens += 'Token: ';
     listTokens +=  '<span id="valid-until"></span>\n';

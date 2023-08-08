@@ -60,7 +60,7 @@ def build_main_screen(context):
     html += '''
     <div style="position:relative;height:20px;">'''
 
-    if kb.has_privilege(context, 'kb.write'):
+    if kb.has_privilege(context, 'sysadmin') or kb.has_privilege(context, 'kb.write'):
         html += '      <button id="new-button" style="margin-right:32px;" onclick="kb.createNew();">NEW</button>'
 
     html += '''
@@ -68,13 +68,13 @@ def build_main_screen(context):
       <span id="keyqord-label" style="margin-left:8px;">KEYWORD:</span> <input type="text" id="q" class="q-txt" spellcheck="false" style="margin-left:4px;"><button id="search-button" style="margin-left:4px;min-width:32px;" onclick="kb.search();">SEARCH</button><button class="small-button" style="margin-left:4px;" onclick="kb.clearKeywords();">CLEAR</button>
       <button id="all-button" style="margin-left:8px;min-width:32px;" onclick="kb.getListAll();">LIST ALL</button>
 '''
-    if kb.has_privilege(context, 'kb.write'):
+    if kb.has_privilege(context, 'sysadmin') or kb.has_privilege(context, 'kb.write'):
         html += '        <button id="touch-button" style="margin-left:16px;" onclick="kb.touch();" disabled>TOUCH</button>'
 
     html += '      <span style="position:absolute;right:5px;">'
     html += '        <button id="export-button" style="min-width:32px;" onclick="kb.selectSchema();">SCHEMA</button>'
     html += '        <button id="export-button" style="min-width:32px;" onclick="kb.openTools();">TOOLS</button>'
-    if kb.has_privilege(context, 'kb.export'):
+    if kb.has_privilege(context, 'sysadmin') or kb.has_privilege(context, 'kb.export'):
         html += '        <button id="export-button" style="margin-left:4px;min-width:32px;" onclick="kb.export();">EXPORT DATA</button>'
     html += '      </span>'
 
@@ -92,7 +92,7 @@ def build_main_screen(context):
     <div>
       <div id="info-area">
 '''
-    if kb.has_privilege(context, 'kb.write'):
+    if kb.has_privilege(context, 'sysadmin') or kb.has_privilege(context, 'kb.write'):
         html += '        <button id="edit-button" class="for-view" style="min-width:32px;" onclick="kb.edit();">EDIT</button>'
 
     html += '''
@@ -113,7 +113,7 @@ def build_main_screen(context):
           <input type="text" id="content-assignee-edt" spellcheck="false">
           <input type="checkbox" id="chk-encryption"><label for="chk-encryption">Encrypt</label>
 '''
-    if context.is_admin():
+    if context.has_permission('sysadmin'):
         html += '          <input type="checkbox" id="chk-silent"><label for="chk-silent">Silent</label>'
 
     html += '''
@@ -123,7 +123,7 @@ def build_main_screen(context):
         <span id="buttons-r" class="for-view">
           <span id="content-labels-area">
             <span id="content-labels"></span>'''
-    if kb.has_privilege(context, 'kb.write'):
+    if kb.has_privilege(context, 'sysadmin') or kb.has_privilege(context, 'kb.write'):
         html += '<button id="edit-labels-button" class="for-view small-button" style="margin-left:4px;" onclick="kb.editLabels();">EDIT</button>'
 
     html += '''
@@ -138,16 +138,16 @@ def build_main_screen(context):
     html += '<button id="copy-url-button" style="margin-left:4px;" onclick="kb.showUrl();">URL</button>'
     html += '<button id="save-html-button" style="margin-left:4px;" onclick="kb.confirmExportHtml();">EXPORT</button>'
 
-    if context.is_admin():
+    if context.has_permission('sysadmin'):
         html += '<button id="props-button" style="min-width:32px;margin-left:8px;" onclick="kb.editProps();">PROPS</button>'
 
-    if kb.has_privilege(context, 'kb.write'):
+    if kb.has_privilege(context, 'sysadmin') or kb.has_privilege(context, 'kb.write'):
         html += '<button id="dup-button" style="min-width:16px;margin-left:8px;" onclick="kb.duplicate();">DUP</button>'
 
-    if kb.has_privilege(context, 'kb.delete'):
+    if kb.has_privilege(context, 'sysadmin') or kb.has_privilege(context, 'kb.delete'):
         html += '<button id="delete-button" class="red-button" style="min-width:32px;margin-left:8px;" onclick="kb.delete();">DELETE</button>'
 
-    if kb.has_privilege(context, 'kb.write'):
+    if kb.has_privilege(context, 'sysadmin') or kb.has_privilege(context, 'kb.write'):
         html += '<button id="clear-button" class="red-button" style="min-width:32px;margin-left:8px;display:hidden;" onclick="kb.clearData();">CLEAR</button>'
 
     html += '''
@@ -713,7 +713,7 @@ def main():
     id = util.get_request_param('id')
 
     if kb.is_access_allowed(context):
-        if kb.has_privilege(context, 'kb'):
+        if kb.has_privilege(context, 'sysadmin') or kb.has_privilege(context, 'kb'):
             html = build_main_screen(context)
         else:
             token = util.get_request_param('token', '')

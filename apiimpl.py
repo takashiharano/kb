@@ -76,7 +76,7 @@ def proc_get_schema_props(context):
 
 #------------------------------------------------------------------------------
 def proc_save_schema_props(context):
-    if not context.is_admin():
+    if not context.is_admin() and not context.has_permission('sysadmin'):
         send_result_json('FORBIDDEN')
         return None
 
@@ -92,7 +92,7 @@ def proc_save_schema_props(context):
 
 #------------------------------------------------------------------------------
 def proc_create_schema(context):
-    if not context.is_admin():
+    if not context.is_admin() and not context.has_permission('sysadmin'):
         send_result_json('FORBIDDEN')
         return None
 
@@ -108,7 +108,7 @@ def proc_create_schema(context):
 
 #------------------------------------------------------------------------------
 def proc_delete_schema(context):
-    if not context.is_admin():
+    if not context.is_admin() and not context.has_permission('sysadmin'):
         send_result_json('FORBIDDEN')
         return None
 
@@ -276,7 +276,7 @@ def proc_touch(context):
 
 #------------------------------------------------------------------------------
 def proc_mod_props(context):
-    if not context.is_admin():
+    if not context.is_admin() and not context.has_permission('sysadmin'):
         result = create_result_object('FORBIDDEN')
         return result
 
@@ -334,7 +334,7 @@ def proc_check_exists(context):
 
 #------------------------------------------------------------------------------
 def proc_change_data_id(context):
-    if not context.is_admin():
+    if not context.is_admin() and not context.has_permission('sysadmin'):
         result = create_result_object('FORBIDDEN')
         return result
 
@@ -352,7 +352,7 @@ def proc_change_data_id(context):
 
 #------------------------------------------------------------------------------
 def proc_check_id(context):
-    if not context.is_admin():
+    if not context.is_admin() and not context.has_permission('sysadmin'):
         result = create_result_object('FORBIDDEN')
         return result
 
