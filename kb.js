@@ -2439,6 +2439,10 @@ kb.tools.copy = function(id) {
   }
 };
 
+kb.openNewWindow = function() {
+  window.open(location.href);
+};
+
 //-------------------------------------------------------------------------
 $onBeforeUnload = function(e) {
   if (kb.status & kb.ST_EDITING) e.returnValue = '';

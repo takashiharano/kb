@@ -65,14 +65,13 @@ def build_main_screen(context):
 
     html += '''
       <span id="id-label">ID:</span> <input type="text" id="id-txt" class="q-txt" spellcheck="false" style="width:46px;">
-      <span id="keyqord-label" style="margin-left:8px;">KEYWORD:</span> <input type="text" id="q" class="q-txt" spellcheck="false" style="margin-left:4px;"><button id="search-button" style="margin-left:4px;min-width:32px;" onclick="kb.search();">SEARCH</button><button class="small-button" style="margin-left:4px;" onclick="kb.clearKeywords();">CLEAR</button>
-      <button id="all-button" style="margin-left:8px;min-width:32px;" onclick="kb.getListAll();">LIST ALL</button>
+      <span id="keyqord-label" style="margin-left:8px;">KEYWORD:</span> <input type="text" id="q" class="q-txt" spellcheck="false" style="margin-left:4px;"><button id="search-button" style="margin-left:4px;min-width:32px;" onclick="kb.search();">SEARCH</button><button class="small-button" style="margin-left:4px;" onclick="kb.clearKeywords();">CLEAR</button><button id="all-button" style="margin-left:16px;min-width:32px;" onclick="kb.getListAll();">LIST ALL</button><button style="margin-left:24px;" onclick="kb.openNewWindow();">NEW WIN</button>
 '''
-    if kb.has_privilege(context, 'sysadmin') or kb.has_privilege(context, 'kb.write'):
-        html += '        <button id="touch-button" style="margin-left:16px;" onclick="kb.touch();" disabled>TOUCH</button>'
 
     html += '      <span style="position:absolute;right:5px;">'
-    html += '        <button id="export-button" style="min-width:32px;" onclick="kb.selectSchema();">SCHEMA</button>'
+    if kb.has_privilege(context, 'sysadmin') or kb.has_privilege(context, 'kb.write'):
+        html += '        <button id="touch-button" style="margin-right:8px;" onclick="kb.touch();" disabled>TOUCH</button>'
+    html += '        <button style="min-width:32px;" onclick="kb.selectSchema();">SCHEMA</button>'
     html += '        <button id="export-button" style="min-width:32px;" onclick="kb.openTools();">TOOLS</button>'
     if kb.has_privilege(context, 'sysadmin') or kb.has_privilege(context, 'kb.export'):
         html += '        <button id="export-button" style="margin-left:4px;min-width:32px;" onclick="kb.export();">EXPORT DATA</button>'
