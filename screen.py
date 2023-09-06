@@ -153,7 +153,7 @@ def build_main_screen(context):
         </span>
         <span id="buttons-w" class="for-edit">
           <button id="save-button" style="min-width:32px;" onclick="kb.confirmSaveAndExit();">SAVE</button>
-          <button id="cancel-button" onclick="kb.cancel();">CANCEL</button>
+          <button id="cancel-button" onclick="kb.confirmCancel();">CANCEL</button>
         </span>
       </div>
     </div>

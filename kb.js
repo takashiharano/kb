@@ -1044,9 +1044,13 @@ kb.onCheckExists = function(xhr, res, req) {
   }
 };
 
-kb.cancel = function() {
+kb.confirmCancel = function() {
   kb.status |= kb.ST_CANCEL_CONFIRMING;
-  util.confirm('Cancel?', kb._cancel, kb.cancelCancel, {focus: 'no'});
+  util.confirm('Cancel?', kb.cancel, kb.cancelCancel, {focus: 'no'});
+};
+kb.cancel = function() {
+  kb.status &= ~kb.ST_CANCEL_CONFIRMING;
+  kb._cancel();
 };
 kb._cancel = function() {
   if (kb.data_bak) {
@@ -2113,13 +2117,13 @@ $onCtrlS = function(e) {
 };
 kb.onKeyDownY = function(e) {
   if (kb.status & kb.ST_SAVE_CONFIRMING) {
-    util.dialog.close();
+    kb.closeDialog();
     kb.saveAndExit();
   } else if (kb.status & kb.ST_CANCEL_CONFIRMING) {
-    util.dialog.close();
-    kb._cancel();
+    kb.closeDialog();
+    kb.cancel();
   } else if (kb.status & kb.ST_TOUCH_CONFIRMING) {
-    util.dialog.close();
+    kb.closeDialog();
     kb._touch();
   }
 };
