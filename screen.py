@@ -135,7 +135,7 @@ def build_main_screen(context):
           </select>'''
     html += '<button id="copy-text-button" style="margin-left:16px;" onclick="kb.copyContent();">COPY</button>'
     html += '<button id="copy-url-button" style="margin-left:4px;" onclick="kb.showUrl();">URL</button>'
-    html += '<button id="save-html-button" style="margin-left:4px;" onclick="kb.confirmExportHtml();">EXPORT</button>'
+    html += '<button id="save-html-button" style="margin-left:4px;" onclick="kb.confirmSaveAsHtml();">SAVE<span style="font-size:10px;"> AS</span></button>'
 
     if context.has_permission('sysadmin'):
         html += '<button id="props-button" style="min-width:32px;margin-left:8px;" onclick="kb.editProps();">PROPS</button>'

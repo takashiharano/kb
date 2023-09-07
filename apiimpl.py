@@ -445,6 +445,11 @@ def proc_export_data_all(context):
 def _build_css(fontsize='12', fontfamily='', with_color=False):
     if fontfamily == '':
         fontfamily = 'Consolas, Monaco, Menlo, monospace, sans-serif'
+    if with_color:
+        link_color = appconfig.link_color
+    else:
+        link_color = '#00f'
+
     css = ''
     css += 'body{\n'
     css += '  calc(width: 100% - 20px);\n'
@@ -464,7 +469,11 @@ def _build_css(fontsize='12', fontfamily='', with_color=False):
     css += '  font-family: ' + fontfamily + ';\n'
     css += '}\n'
     css += 'a {\n'
-    css += '  color: ' + appconfig.link_color + ';\n'
+    css += '  color: ' + link_color + ';\n'
+    css += '  text-decoration: none;\n'
+    css += '}\n'
+    css += 'a:hover {'
+    css += '  text-decoration: underline;'
     css += '}\n'
     return css
 

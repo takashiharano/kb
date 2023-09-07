@@ -1917,11 +1917,11 @@ kb.copyContent = function() {
   }
 };
 
-kb.confirmExportHtml = function() {
+kb.confirmSaveAsHtml = function() {
   var m = 'Save as HTML?\n<input type="checkbox" id="chk-export-color"><label for="chk-export-color">w/ color style</label>';
-  util.confirm(m, kb.exportHtml);
+  util.confirm(m, kb.saveAsHtml);
 }
-kb.exportHtml = function() {
+kb.saveAsHtml = function() {
   var html = $el('#content-body').innerHTML;
   var body = util.encodeBase64(html);
   var fontSize = $el('#font-range').value;
