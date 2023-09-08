@@ -40,6 +40,8 @@ DEFAULT_CONTENT = {
     'DATA_PRIVS': ''
 }
 
+SP_KEYWORD_NANID = '*nanid'
+
 #------------------------------------------------------------------------------
 def get_workspace_path():
     return WORKSPACE_PATH
@@ -154,7 +156,7 @@ def get_list(context, scm, target_id=None, need_encode_b64=False):
     fixed_data_list = []
     for i in range(len(data_id_list)):
         id = data_id_list[i]
-        if target_id is not None and target_id != id or target_id is None and should_omit_listing(context, id):
+        if target_id is not None and target_id != id or target_id is None and is_nan_id(id):
             continue
         try:
             data = load_data(scm, id, True)
@@ -205,8 +207,11 @@ def get_list(context, scm, target_id=None, need_encode_b64=False):
     return data_list_obj
 
 def should_omit_listing(context, id, content=None):
-    if is_special_id(id):
+    if is_nan_id(id):
         return True
+    return should_omit_content(context, content)
+
+def should_omit_content(context, content=None):
     if content is not None:
         if not has_data_privilege(context, content):
             return True
@@ -217,8 +222,8 @@ def should_omit_listing(context, id, content=None):
 def is_fixed_data(content):
     return has_flag(content, 'FIXED')
 
-def is_special_id(id):
-    if util.match(id, '^[^0-9]'):
+def is_nan_id(id):
+    if util.match(id, '[^0-9]'):
         return True
     return False
 
@@ -291,22 +296,30 @@ def search_data(context, scm, q, need_encode_b64=False):
     keywords = util.split_keywords(q)
 
     id_list = get_all_data_id_list(scm)
+
     filtered = filter_by_id(id_list, keywords)
+
     id_filtering = False
     if len(filtered['id_list']) > 0:
         id_filtering = True
         id_list = filtered['id_list']
         keywords = filtered['keywords']
 
+    incl_nan_id = False
+    for i in range(len(keywords)):
+        keyword = keywords[i]
+        if keyword == SP_KEYWORD_NANID:
+            incl_nan_id = True
+
     all_data = []
     for i in range(len(id_list)):
         id = id_list[i]
-        if should_omit_listing(context, id):
+        if not incl_nan_id and is_nan_id(id):
             continue
         try:
             data = load_data(scm, id)
             content = data['content']
-            if should_omit_listing(context, id, content):
+            if should_omit_content(context, content):
                 dontinue
             data['content'] = convert_data_to_half_width(content)
             data['score'] = 0
@@ -321,8 +334,7 @@ def search_data(context, scm, q, need_encode_b64=False):
         macthed_data_list = []
         for j in range(len(wk_data_list)):
             data = wk_data_list[j]
-            content = data['content']
-            score = calc_data_macthed_score(content, keyword)
+            score = calc_data_macthed_score(data, keyword)
             if score > 0:
                 data['score'] += score
                 macthed_data_list.append(data)
@@ -375,11 +387,16 @@ def convert_data_to_half_width(content):
         content['BODY'] = util.to_half_width(content['BODY'])
     return content
 
-def calc_data_macthed_score(content, keyword):
+def calc_data_macthed_score(data, keyword):
+    id = data['id']
+    content = data['content']
     score = 0
 
     keyword_lc = keyword.lower()
-    if keyword_lc.startswith('title:'):
+    if keyword_lc == SP_KEYWORD_NANID and is_nan_id(id):
+        score = 1
+
+    elif keyword_lc.startswith('title:'):
         keyword = extract_sraech_keyword(keyword, 'title')
         score = is_matches_title(content['TITLE'], keyword)
 
