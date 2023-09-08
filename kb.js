@@ -222,9 +222,10 @@ kb.onGetList = function(xhr, res, req) {
     return;
   }
   var data = res.body;
+  kb.fixedItemList = (data.fixed_data_list ? data.fixed_data_list : []);
   kb.itemList = data.data_list;
   kb.totalCount = data.total_count;
-  kb.drawList(kb.itemList, kb.listStatus.sortIdx, kb.listStatus.sortOrder, kb.totalCount);
+  kb.drawList(kb.fixedItemList, kb.itemList, kb.listStatus.sortIdx, kb.listStatus.sortOrder, kb.totalCount);
   if (kb.itemList.length == 1) {
     $el('#id-txt').value = '';
     kb.onInputSearch()
@@ -270,7 +271,7 @@ kb.sortList = function(itemList, sortKey, desc, byMetaCol) {
   return items;
 };
 
-kb.drawList = function(items, sortIdx, sortOrder, totalCount) {
+kb.drawList = function(fixedItems, items, sortIdx, sortOrder, totalCount) {
   if (sortIdx >= 0) {
     if (sortOrder > 0) {
       var srtDef = kb.LIST_COLUMNS[sortIdx];
@@ -280,93 +281,13 @@ kb.drawList = function(items, sortIdx, sortOrder, totalCount) {
   }
 
   var htmlList = '';
+  for (var i = 0; i < fixedItems.length; i++) {
+    var data = fixedItems[i];
+    htmlList += kb.buildListRow(data, true);
+  }
   for (var i = 0; i < items.length; i++) {
-    var data = items[i];
-    var id = data.id;
-    var data_status = data.status;
-    var content = data.content || {};
-
-    var status = content.STATUS;
-    var b64Title = ((content.TITLE == undefined) ? '' : content.TITLE);
-    var b64Labels = content.LABELS;
-    var cDate = content.C_DATE;
-    var uDate = content.U_DATE;
-    var score = (data.score == undefined ? '' : data.score);
-    var cDateStr = '';
-    var cUser = (content.C_USER ? content.C_USER : '');
-    var uDateStr = '';
-    var uUser = (content.U_USER ? content.U_USER : '');
-    var assignee = (content.ASSIGNEE ? content.ASSIGNEE : '');
-    var dataPrivs = content.DATA_PRIVS || '';
-    if ((cDate == undefined) || (cDate == '')) {
-      cDateStr = '---------- --:--:--';
-    } else {
-      cDateStr = kb.getDateTimeString(+cDate);
-    }
-    if ((uDate == undefined) || (uDate == '')) {
-      uDateStr = '---------- --:--:--';
-    } else {
-      uDateStr = kb.getDateTimeString(+uDate);
-    }
-    var title = util.decodeBase64(b64Title);
-    if (!title) {
-      title = '&lt;NO TITLE&gt;';
-    }
-    var labels = util.decodeBase64(b64Labels);
-    var statusLabel = '';
-    if (data_status == 'OK') {
-      statusLabel = kb.buildStatusHTML(status);
-    } else {
-      statusLabel = '<span class="status-label-err">' + data_status + '</span>';
-    }
-    var size = util.formatNumber(data.size);
-    var encrypted = '';
-    if (data.encrypted) {
-      encrypted = '<span data-tooltip="Encrypted">&#x1F512;</span>';
-    }
-    var dlLink = '';
-    if (content.DATA_TYPE == 'dataurl') {
-      dlLink = '<span class="dl-link" onclick="kb.dlContent(\'' + id + '\');" data-tooltip="Download">&#x1F517;</span>';
-    }
-    var labelsHTML = kb.buildItemsHTML('label', labels);
-    var privsHTML = kb.buildItemsHTML('priv', dataPrivs);
-    htmlList += '<tr id="row-' + id + '" class="data-list-row">';
-    htmlList += '<td><input type="checkbox" onchange="kb.checkItem(\'' + id + '\', this)"';
-    if (kb.checkedIds.includes(id)) htmlList += ' checked';
-    htmlList += '></td>'
-    htmlList += '<td style="padding-right:16px;">' + id + '</td>'
-    htmlList += '<td style="min-width:300px;max-width:600px;">';
-    if (data_status == 'OK') {
-      htmlList += '<span style="display:inline-block;width:100%;overflow:hidden;text-overflow:ellipsis;" class="title pseudo-link" onclick="kb.onClickTitle(\'' + id + '\');">';
-    } else {
-      htmlList += '<span class="title-disabled">';
-    }
-    htmlList += '<span';
-    if (util.lenW(title) > 76) {
-      var escTitle = util.escHtml(title);
-      htmlList += ' data-tooltip="' + escTitle + '"';
-    }
-    htmlList += '>' + title + '</span>';
-    htmlList += '</span></td>';
-    htmlList += '<td style="padding-right:16px;text-align:center;">' + dlLink + '</td>';
-    htmlList += '<td style="padding-right:8px;">' + cDateStr + '</td>';
-    htmlList += '<td style="padding-right:16px;">' + cUser + '</td>';
-    htmlList += '<td style="padding-right:8px;">' + uDateStr + '</td>';
-    htmlList += '<td style="padding-right:8px;">' + uUser + '</td>';
-    htmlList += '<td style="padding-right:16px;">' + assignee + '</td>';
-    htmlList += '<td>' + statusLabel + '</td>';
-    htmlList += '<td style="padding-left:20px;">' + labelsHTML + '</td>';
-    htmlList += '<td>' + score + '</td>';
-    htmlList += '<td style="text-align:right;padding-left:0.5em;">' + size + '</td>';
-    if (kb.LIST_COLUMNS[12].forAdmin && kb.isSysAdmin) {
-      htmlList += '<td style="padding-left:20px;">' + privsHTML + '</td>';
-    }
-    htmlList += '<td style="text-align:center;cursor:default;">' + encrypted + '</td>';
-
-    if (data_status != 'OK') {
-      htmlList += '<td class="center"><span class="pseudo-link text-red" data-tooltip="Delete" onclick="kb.delete(\'' + id + '\');">X</span></td>';
-    }
-    htmlList += '</tr>';
+    data = items[i];
+    htmlList += kb.buildListRow(data);
   }
   htmlList += '</table>';
 
@@ -386,13 +307,104 @@ kb.drawList = function(items, sortIdx, sortOrder, totalCount) {
   }
 };
 
+kb.buildListRow = function(data, fixed) {
+  var id = data.id;
+  var data_status = data.status;
+  var content = data.content || {};
+
+  var status = content.STATUS;
+  var b64Title = ((content.TITLE == undefined) ? '' : content.TITLE);
+  var b64Labels = content.LABELS;
+  var cDate = content.C_DATE;
+  var uDate = content.U_DATE;
+  var score = (data.score == undefined ? '' : data.score);
+  var cDateStr = '';
+  var cUser = (content.C_USER ? content.C_USER : '');
+  var uDateStr = '';
+  var uUser = (content.U_USER ? content.U_USER : '');
+  var assignee = (content.ASSIGNEE ? content.ASSIGNEE : '');
+  var dataPrivs = content.DATA_PRIVS || '';
+  if ((cDate == undefined) || (cDate == '')) {
+    cDateStr = '---------- --:--:--';
+  } else {
+    cDateStr = kb.getDateTimeString(+cDate);
+  }
+  if ((uDate == undefined) || (uDate == '')) {
+    uDateStr = '---------- --:--:--';
+  } else {
+    uDateStr = kb.getDateTimeString(+uDate);
+  }
+  var title = util.decodeBase64(b64Title);
+  if (!title) {
+    title = '&lt;NO TITLE&gt;';
+  }
+  var labels = util.decodeBase64(b64Labels);
+  var statusLabel = '';
+  if (data_status == 'OK') {
+    statusLabel = kb.buildStatusHTML(status);
+  } else {
+    statusLabel = '<span class="status-label-err">' + data_status + '</span>';
+  }
+  var size = util.formatNumber(data.size);
+  var encrypted = '';
+  if (data.encrypted) {
+    encrypted = '<span data-tooltip="Encrypted">&#x1F512;</span>';
+  }
+  var dlLink = '';
+  if (content.DATA_TYPE == 'dataurl') {
+    dlLink = '<span class="dl-link" onclick="kb.dlContent(\'' + id + '\');" data-tooltip="Download">&#x1F517;</span>';
+  }
+  var labelsHTML = kb.buildItemsHTML('label', labels);
+  var privsHTML = kb.buildItemsHTML('priv', dataPrivs);
+  var html = '<tr id="row-' + id + '" class="data-list-row">';
+  html += '<td><input type="checkbox" onchange="kb.checkItem(\'' + id + '\', this)"';
+  if (kb.checkedIds.includes(id)) html += ' checked';
+  html += '></td>'
+  html += '<td style="padding-right:16px;">' + id + (fixed ? '<span style="color:#888;">*</span>' : '') + '</td>'
+
+  html += '<td style="min-width:300px;max-width:600px;">';
+  if (data_status == 'OK') {
+    html += '<span style="display:inline-block;width:100%;overflow:hidden;text-overflow:ellipsis;" class="title pseudo-link" onclick="kb.onClickTitle(\'' + id + '\');">';
+  } else {
+    html += '<span class="title-disabled">';
+  }
+  html += '<span';
+  if (util.lenW(title) > 76) {
+    var escTitle = util.escHtml(title);
+    html += ' data-tooltip="' + escTitle + '"';
+  }
+  html += '>' + title + '</span>';
+  html += '</span></td>';
+
+  html += '<td style="padding-right:16px;text-align:center;">' + dlLink + '</td>';
+  html += '<td style="padding-right:8px;">' + cDateStr + '</td>';
+  html += '<td style="padding-right:16px;">' + cUser + '</td>';
+  html += '<td style="padding-right:8px;">' + uDateStr + '</td>';
+  html += '<td style="padding-right:8px;">' + uUser + '</td>';
+  html += '<td style="padding-right:16px;">' + assignee + '</td>';
+  html += '<td>' + statusLabel + '</td>';
+  html += '<td style="padding-left:20px;">' + labelsHTML + '</td>';
+  html += '<td>' + score + '</td>';
+  html += '<td style="text-align:right;padding-left:0.5em;">' + size + '</td>';
+  if (kb.LIST_COLUMNS[12].forAdmin && kb.isSysAdmin) {
+    html += '<td style="padding-left:20px;">' + privsHTML + '</td>';
+  }
+  html += '<td style="text-align:center;cursor:default;">' + encrypted + '</td>';
+
+  if (data_status != 'OK') {
+    html += '<td class="center"><span class="pseudo-link text-red" data-tooltip="Delete" onclick="kb.delete(\'' + id + '\');">X</span></td>';
+  }
+  html += '</tr>';
+  return html;
+};
+
 kb.sortItemList = function(sortIdx, sortOrder) {
   if (sortOrder > 2) {
     sortOrder = 0;
   }
   kb.listStatus.sortIdx = sortIdx;
   kb.listStatus.sortOrder = sortOrder;
-  kb.drawList(kb.itemList, sortIdx, sortOrder, kb.totalCount);
+  kb.drawList(kb.fixedItemList, kb.itemList, sortIdx, sortOrder, kb.totalCount);
 };
 
 kb.checkedIds = [];
@@ -573,8 +585,15 @@ kb.onLoadPendingExpr = function(id) {
 };
 
 kb.getMetaData = function(id) {
-  for (var i = 0; i < kb.itemList.length; i++) {
-    var item = kb.itemList[i];
+  var d = kb._getMetaData(id, kb.itemList);
+  if (d) return d;
+  d = kb._getMetaData(id, kb.fixedItemList);
+  if (d) return d;
+  return null;
+};
+kb._getMetaData = function(id, itemList) {
+  for (var i = 0; i < itemList.length; i++) {
+    var item = itemList[i];
     if (item.id == id) return item;
   }
   return null;

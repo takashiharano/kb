@@ -151,6 +151,7 @@ def get_all_data_id_list(scm):
 def get_list(context, scm, target_id=None, need_encode_b64=False):
     data_id_list = get_all_data_id_list(scm)
     data_list = []
+    fixed_data_list = []
     for i in range(len(data_id_list)):
         id = data_id_list[i]
         if target_id is not None and target_id != id or target_id is None and should_omit_listing(context, id):
@@ -177,16 +178,19 @@ def get_list(context, scm, target_id=None, need_encode_b64=False):
         if target_id is None and should_omit_listing(context, id, content):
             continue
 
-        data_list.append(data)
+        if is_fixed_data(content):
+            fixed_data_list.append(data)
+        else:
+            data_list.append(data)
 
-    total_count = len(data_list)
+    total_count = len(fixed_data_list) + len(data_list)
     if appconfig.list_max > 0 and total_count > appconfig.list_max:
-        data_list2 = sorted(data_list, key=lambda x: x['content']['U_DATE'], reverse=True)
+        sorted_data_list = sorted(data_list, key=lambda x: x['content']['U_DATE'], reverse=True)
         data_list = []
         cnt = 0
-        for i in range(len(data_list2)):
+        for i in range(len(sorted_data_list)):
             if appconfig.list_max == 0 or cnt < appconfig.list_max:
-                data = data_list2[i]
+                data = sorted_data_list[i]
                 data_list.append(data)
                 cnt += 1
             else:
@@ -194,6 +198,7 @@ def get_list(context, scm, target_id=None, need_encode_b64=False):
 
     data_list_obj = {
         'total_count': total_count,
+        'fixed_data_list': fixed_data_list,
         'data_list': data_list
     }
 
@@ -205,16 +210,24 @@ def should_omit_listing(context, id, content=None):
     if content is not None:
         if not has_data_privilege(context, content):
             return True
-        if 'FLAGS' in content and has_flag(content['FLAGS'], 'HIDDEN'):
+        if has_flag(content, 'HIDDEN'):
             return True
     return False
+
+def is_fixed_data(content):
+    return has_flag(content, 'FIXED')
 
 def is_special_id(id):
     if util.match(id, '^[^0-9]'):
         return True
     return False
 
-def has_flag(flags_text, target_flag):
+def has_flag(content, flag_name):
+    if 'FLAGS' in content and _has_flag(content['FLAGS'], flag_name):
+        return True
+    return False
+
+def _has_flag(flags_text, target_flag):
     flags_text = flags_text.lower()
     target_flag = target_flag.lower()
     return util.has_item_value(flags_text, target_flag)
