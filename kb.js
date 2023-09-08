@@ -1434,7 +1434,8 @@ kb.onCheckId = function(xhr, res, req) {
         var id = emptyIds[i];
         if (i > 0) m += ', ';
         if ((omitCount > 0) && (i == emptyIds.length - 1)) m += '..(' + omitCount + ').. ';
-        m += id;
+        var idLink = '<span class="pseudo-link" onclick="kb.selectAndChangeDataId(\'' + id + '\');">' + id + '</span>';
+        m += idLink;
       }
     }
     util.alert(m);
@@ -1445,6 +1446,11 @@ kb.onCheckId = function(xhr, res, req) {
   }
 };
 
+kb.selectAndChangeDataId = function(idTo) {
+  $el('#prop-data-id').value = idTo;
+  util.dialog.close();
+  kb.confirmChangeDataId();
+};
 kb.confirmChangeDataId = function() {
   var idFm = kb.data.id;
   var idTo = $el('#prop-data-id').value.trim();
