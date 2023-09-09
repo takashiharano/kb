@@ -318,11 +318,27 @@ kb.buildListRow = function(data, fixed) {
   var cDate = content.C_DATE;
   var uDate = content.U_DATE;
   var score = (data.score == undefined ? '' : data.score);
+
   var cDateStr = '';
   var cUser = (content.C_USER ? content.C_USER : '');
+  var cUserLink = '';
+  if (cUser) {
+    cUserLink = '<span class="pseudo-link" onclick="kb.fieldSearch(\'created_by\', \'' + cUser + '\');">' + cUser + '</span>';
+  }
+
   var uDateStr = '';
   var uUser = (content.U_USER ? content.U_USER : '');
+  var uUserLink = '';
+  if (uUser) {
+    uUserLink = '<span class="pseudo-link" onclick="kb.fieldSearch(\'updated_by\', \'' + uUser + '\');">' + uUser + '</span>';
+  }
+
   var assignee = (content.ASSIGNEE ? content.ASSIGNEE : '');
+  var assigneeLink = '';
+  if (assignee) {
+    assigneeLink = '<span class="pseudo-link" onclick="kb.fieldSearch(\'assignee\', \'' + assignee + '\');">' + assignee + '</span>';
+  }
+
   var dataPrivs = content.DATA_PRIVS || '';
   if ((cDate == undefined) || (cDate == '')) {
     cDateStr = '---------- --:--:--';
@@ -378,10 +394,10 @@ kb.buildListRow = function(data, fixed) {
 
   html += '<td style="padding-right:16px;text-align:center;">' + dlLink + '</td>';
   html += '<td style="padding-right:8px;">' + cDateStr + '</td>';
-  html += '<td style="padding-right:16px;">' + cUser + '</td>';
+  html += '<td style="padding-right:16px;">' + cUserLink + '</td>';
   html += '<td style="padding-right:8px;">' + uDateStr + '</td>';
-  html += '<td style="padding-right:8px;">' + uUser + '</td>';
-  html += '<td style="padding-right:16px;">' + assignee + '</td>';
+  html += '<td style="padding-right:8px;">' + uUserLink + '</td>';
+  html += '<td style="padding-right:16px;">' + assigneeLink + '</td>';
   html += '<td>' + statusLabel + '</td>';
   html += '<td style="padding-left:20px;">' + labelsHTML + '</td>';
   html += '<td>' + score + '</td>';
@@ -557,10 +573,11 @@ kb.listAndShowDataById = function(id) {
   kb.getData(id);
 };
 
-kb.categorySearch = function(category, label) {
+kb.fieldSearch = function(field, keyword) {
   $el('#id-txt').value = '';
   kb.onInputId();
-  $el('#q').value = category + ':' + label;
+  if (keyword.match(/ /)) keyword = '"' + keyword + '"';
+  $el('#q').value = field + ':' + keyword;
   kb.onInputQ();
   kb.search();
 };
@@ -721,7 +738,7 @@ kb.buildStatusHTML = function(status) {
    html += '"';
   }
   if (kb.mode != 'view') {
-    html += ' onclick="kb.categorySearch(\'status\', \'' + status + '\');"';
+    html += ' onclick="kb.fieldSearch(\'status\', \'' + status + '\');"';
   }
    html += '>';
   html += status;
@@ -739,7 +756,7 @@ kb.buildItemsHTML = function(keyname, items) {
     var item = util.escHtml(itemList[i]);
     html += '<span class="label"';
     if (kb.mode != 'view') {
-      html += ' onclick="kb.categorySearch(\'' + keyname + '\', \'' + item + '\');"';
+      html += ' onclick="kb.fieldSearch(\'' + keyname + '\', \'' + item + '\');"';
     }
     html += '>' + item + '</span>';
   }
@@ -1128,10 +1145,8 @@ kb.drawData = function(data) {
   }
 
   var idLabel = '';
-  if (id != '') idLabel = id + ':';
-
+  if (id != '') idLabel = '<span class="pseudo-link" onclick="kb.showData(\'' + id + '\');">' + id + '</span>:';
   var titleLabel = util.escHtml(title);
-  titleLabel = '<span class="pseudo-link" onclick="kb.showData(\'' + id + '\');">' + titleLabel + '</span>';
 
   $el('#content-id').innerHTML = idLabel;
   $el('#content-title').innerHTML = titleLabel;
