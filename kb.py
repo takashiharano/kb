@@ -40,7 +40,7 @@ DEFAULT_CONTENT = {
     'DATA_PRIVS': ''
 }
 
-SP_KEYWORD_NANID = '*nanid'
+SP_KEYWORD_NANIDS = '*nanids'
 
 #------------------------------------------------------------------------------
 def get_workspace_path():
@@ -308,7 +308,7 @@ def search_data(context, scm, q, need_encode_b64=False):
     incl_nan_id = False
     for i in range(len(keywords)):
         keyword = keywords[i]
-        if keyword == SP_KEYWORD_NANID:
+        if keyword == SP_KEYWORD_NANIDS:
             incl_nan_id = True
 
     all_data = []
@@ -393,7 +393,7 @@ def calc_data_macthed_score(data, keyword):
     score = 0
 
     keyword_lc = keyword.lower()
-    if keyword_lc == SP_KEYWORD_NANID and is_nan_id(id):
+    if keyword_lc == SP_KEYWORD_NANIDS and is_nan_id(id):
         score = 1
 
     elif keyword_lc.startswith('title:'):
@@ -621,7 +621,7 @@ def get_data(context, scm, id, need_encode_b64=False):
     if not has_data_privilege(context, content):
         data = {
             'id': id,
-            'status': 'DATA_NOT_FOUND'
+            'status': 'FORBIDDEN'
         }
         return data
 
