@@ -397,6 +397,10 @@ input[type="checkbox"] {
     css += '}'
 
     css += '''
+select {
+  outline: none;
+}
+
 h1, h2, h3 {
   color: #a5afb7;
 }
