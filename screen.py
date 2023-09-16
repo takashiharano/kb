@@ -71,8 +71,8 @@ def build_main_screen(context):
     html += '      <span style="position:absolute;right:5px;">'
     if kb.has_privilege(context, 'sysadmin') or kb.has_privilege(context, 'kb.write'):
         html += '        <button id="touch-button" style="margin-right:8px;" onclick="kb.touch();" disabled>TOUCH</button>'
-    html += '        <button style="min-width:32px;" onclick="kb.selectSchema();">SCHEMA</button>'
     html += '        <button id="export-button" style="min-width:32px;" onclick="kb.openTools();">TOOLS</button>'
+    html += '        <button style="min-width:32px;" onclick="kb.selectSchema();">SCHEMA</button>'
     if kb.has_privilege(context, 'sysadmin') or kb.has_privilege(context, 'kb.export'):
         html += '        <button id="export-button" style="margin-left:4px;min-width:32px;" onclick="kb.export();">EXPORT DATA</button>'
     html += '      </span>'
@@ -108,8 +108,6 @@ def build_main_screen(context):
           <input type="text" id="content-labels-edt" spellcheck="false">
           <span style="margin-left:12px;">STATUS:</span>
           <select id="select-status"></select>
-          <span style="margin-left:12px;">ASSIGNEE:</span>
-          <input type="text" id="content-assignee-edt" spellcheck="false">
           <input type="checkbox" id="chk-encryption"><label for="chk-encryption">Encrypt</label>
 '''
     if context.has_permission('sysadmin'):
@@ -174,9 +172,13 @@ def build_main_screen(context):
           <span style="margin-left:16px;">Font: </sapn><input type="text" id="font" oninput="kb.onFontChanged(this);" onchange="kb.onFontChanged(this);">
           <span class="pseudo-link subfunc" onclick="kb.changeFont('monospace');">[monospace]</span>
           <button onclick="kb.changeFont('');">RESET</button>
-          <span class="for-view">
-            <span class="meta-info" style="position:absolute;right:8px;margin-top:10px;">
+          <span style="position:absolute;right:8px;margin-top:10px;">
+            <span class="for-view meta-info">
               <span>CREATED: <span id="content-created-date"></span> <span id="content-created-by"></span></span><span>&nbsp;&nbsp;UPDATED: <span id="content-updated-date"></span> <span id="content-updated-by"></span><span id="content-assignee"></span></span>
+            </span>
+            <span class="for-edit">
+              <span style="margin-left:12px;">ASSIGNEE:</span>
+              <input type="text" id="content-assignee-edt" spellcheck="false">
             </span>
           </span>
         </div>
@@ -540,7 +542,7 @@ table {
   width: 200px;
 }
 #content-assignee-edt {
-  width: 100px;
+  width: 150px;
 }
 #chk-encryption {
   margin-left: 12px;

@@ -2397,8 +2397,8 @@ kb.tools.buildBsb64Html = function() {
   html += '<span class="area-b64s">';
   html += '<span style="margin-left:4px;">Key:</span>';
   html += '<input type="password" id="b64s-key" style="width:150px;">';
-  html += '<input type="checkbox" id="b64s-key-s" onchange="kb.tools.b64KeySecretChange();" checked>';
-  html += '<label for="b64s-key-s">Hide</label>';
+  html += '<input type="checkbox" id="b64s-key-s" onchange="kb.tools.b64KeySecretChange();">';
+  html += '<label for="b64s-key-s">Show</label>';
   html += '</span>';
 
   html += '</td>';
@@ -2435,7 +2435,7 @@ kb.tools.onEncDecModeChange = function() {
 };
 
 kb.tools.b64KeySecretChange = function() {
-  var type = ($el('#b64s-key-s').checked ? 'password' : 'text');
+  var type = ($el('#b64s-key-s').checked ? 'text' : 'password');
   $el('#b64s-key').type = type;
 };
 
