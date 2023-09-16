@@ -2366,11 +2366,11 @@ kb.tools = {};
 kb.tools.buildBsb64Html = function() {
   var html = '';
   html += '<div style="margin-bottom:8px;">';
-  html += '<select id="encdec-mode" style="margin-right:8px;" onchange="kb.tools.onEncDecModeChange();">';
+  html += '<b>Encoder/Decoder</b>';
+  html += '<select id="encdec-mode" style="margin-left:8px;" onchange="kb.tools.onEncDecModeChange();">';
   html += '<option value="bsb64">BSB64</option>';
   html += '<option value="b64s">Base64s</option>';
   html += '</select>';
-  html += '<b>Encoder/Decoder</b>';
   html += '<button style="margin-left:216px;" onclick="kb.tools.resetB64Input();">Reset</button>';
   html += '</div>';
   html += '<table>';
@@ -2408,6 +2408,7 @@ kb.tools.buildBsb64Html = function() {
   html += '<td style="padding-top:8px;">';
   html += '<button onclick="kb.tools.encB64();">Encode</button>';
   html += '<button style="margin-left:8px;" onclick="kb.tools.decB64();">Decode</button>';
+  html += '<button style="margin-left:24px;min-width:20px;" onclick="kb.tools.switchB64Value();">^v</button>';
   html += '</td>';
   html += '</tr>';
   html += '<tr>';
@@ -2417,6 +2418,7 @@ kb.tools.buildBsb64Html = function() {
   html += '</td>';
   html += '<td>';
   html += '<button class="small-button" style="margin-left:4px;" onclick="kb.tools.copy(\'b64-text-out\');">Copy</button>';
+  html += '<button class="small-button" style="margin-left:8px;" onclick="kb.tools.clearB64out();;">Clear</button>';
   html += '</td>';
   html += '</tr>';
   html += '</table>';
@@ -2473,6 +2475,17 @@ kb.tools.encdecB64 = function(enc) {
 
 kb.tools.resetB64Input = function() {
   $el('#b64-text-in').value = '';
+  $el('#b64-text-out').value = '';
+};
+
+kb.tools.switchB64Value = function() {
+  var v1 = $el('#b64-text-in').value;
+  var v2 = $el('#b64-text-out').value;
+  $el('#b64-text-in').value = v2;
+  $el('#b64-text-out').value = v1;
+};
+
+kb.tools.clearB64out = function() {
   $el('#b64-text-out').value = '';
 };
 
