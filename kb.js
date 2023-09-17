@@ -1137,6 +1137,7 @@ kb.drawData = function(data) {
     contentBody = kb.decodeB64Image(contentBody);
 
     contentBody = kb.linkBsb64Data(contentBody);
+    contentBody = kb.linkB64sData(contentBody);
     contentBody = contentBody.replace(/^(\s*)(#.*)/g, '$1<span class="comment">$2</span>');
     contentBody = contentBody.replace(/(\n)(\s*)(#.*)/g, '$1$2<span class="comment">$3</span>');
     contentBody = contentBody.replace(/(?<!\\)```([\s\S]+?)(?<!\\)```/g, '<pre class="code">$1</pre>');
@@ -1257,6 +1258,14 @@ kb.linkBsb64Data = function(s) {
   s = s.replace(/(bsb64:[A-Za-z0-9+/=$]+)/g, t);
   s = s.replace(/decodeBSB64\('bsb64:/g, 'decodeBSB64(\'');
   s = s.replace(/>bsb64:([A-Za-z0-9+/=$]+)<\/span>/g, '>$1</span>');
+  return s;
+};
+
+kb.linkB64sData = function(s) {
+  var t = '<span class="pseudo-link link" onclick="kb.openB64sKeyDialog(\'$1\');" data-tooltip="Click to decode">$1</span>';
+  s = s.replace(/(b64s:[A-Za-z0-9+/=$]+)/g, t);
+  s = s.replace(/openB64sKeyDialog\('b64s:/g, 'openB64sKeyDialog(\'');
+  s = s.replace(/>b64s:([A-Za-z0-9+/=$]+)<\/span>/g, '>$1</span>');
   return s;
 };
 
@@ -2306,7 +2315,26 @@ kb.decodeBSB64 = function(t) {
     util.copy(s);
     m = 'Decoded';
   } catch(e) {
-    m = '<span style="color:#f77;">DECODE ERROR</span>';
+    m = '<span style="color:#f77;">Decode Error</span>';
+  }
+  util.infotip.show(m, {pos: 'pointer'});
+};
+
+kb.openB64sKeyDialog = function(t) {
+  var opt = {
+    secure: true,
+    data: t
+  };
+  util.dialog.text('Base64s decryption key:', kb.decodeB64s, opt);
+};
+kb.decodeB64s = function(key, data) {
+  var m;
+  try {
+    var s = util.decodeBase64s(data, key);
+    util.copy(s);
+    m = 'Decoded';
+  } catch(e) {
+    m = '<span style="color:#f77;">Decode Error</span>';
   }
   util.infotip.show(m, {pos: 'pointer'});
 };
@@ -2338,7 +2366,7 @@ kb.keyHandlerE = function(e) {
     util.copy(s);
     m = 'Encoded';
   } catch(e) {
-    m = '<span style="color:#f77;">ENCODE ERROR</span>';
+    m = '<span style="color:#f77;">Encode Error</span>';
   }
   if (kb.status & kb.ST_EDITING) {
     kb.selectText(el, st, ed);
@@ -2418,7 +2446,7 @@ kb.tools.buildBsb64Html = function() {
   html += '</td>';
   html += '<td>';
   html += '<button class="small-button" style="margin-left:4px;" onclick="kb.tools.copy(\'b64-text-out\');">Copy</button>';
-  html += '<button class="small-button" style="margin-left:8px;" onclick="kb.tools.clearB64out();;">Clear</button>';
+  html += '<button class="small-button" style="margin-left:16px;" onclick="kb.tools.clearB64out();;">Clear</button>';
   html += '</td>';
   html += '</tr>';
   html += '</table>';
