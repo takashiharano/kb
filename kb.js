@@ -2395,10 +2395,14 @@ kb.tools.buildBsb64Html = function() {
   var html = '';
   html += '<div style="margin-bottom:8px;">';
   html += '<b>Encoder/Decoder</b>';
-  html += '<select id="encdec-mode" style="margin-left:8px;" onchange="kb.tools.onEncDecModeChange();">';
-  html += '<option value="bsb64">BSB64</option>';
-  html += '<option value="b64s">Base64s</option>';
-  html += '</select>';
+
+  html += '<span style="margin-left:4px;">';
+  html += '<input type="radio" name="encdec-mode" id="rdo-bsb64" onchange="kb.tools.onEncDecModeChange();" checked>'
+  html += '<label for="rdo-bsb64">BSB64</label>';
+  html += '<input type="radio" name="encdec-mode" id="rdo-b64s" onchange="kb.tools.onEncDecModeChange();">'
+  html += '<label for="rdo-b64s">Base64s</label>';
+  html += '</span>';
+
   html += '<button style="margin-left:216px;" onclick="kb.tools.resetB64Input();">Reset</button>';
   html += '</div>';
   html += '<table>';
@@ -2454,8 +2458,7 @@ kb.tools.buildBsb64Html = function() {
 };
 
 kb.tools.onEncDecModeChange = function() {
-  var mode = $el('#encdec-mode').value;
-  if (mode == 'b64s') {
+  if ($el('#rdo-b64s').checked) {
     $el('.area-bsb64').setStyle('display', 'none');
     $el('.area-b64s').setStyle('display', '');
   } else {
@@ -2479,8 +2482,7 @@ kb.tools.decB64 = function() {
 
 kb.tools.encdecB64 = function(enc) {
   var s = $el('#b64-text-in').value;
-  var mode = $el('#encdec-mode').value;
-  if (mode == 'b64s') {
+  if ($el('#rdo-b64s').checked) {
     var k = $el('#b64s-key').value;
     var f = (enc ? util.encodeBase64s : util.decodeBase64s);
   } else {
