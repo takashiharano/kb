@@ -2415,11 +2415,11 @@ kb.tools.buildBsb64Html = function() {
   html += '<label for="rdo-bsb64">BSB64</label>';
   html += '</span>';
 
-  html += '<span style="margin-left:216px;">';
+  html += '<span style="margin-left:168px;">';
   html += '<button onclick="kb.tools.resetB64Input();">Reset</button>';
 
   html += '<span class="area-b64s">';
-  html += '<button style="margin-left:56px;" onclick="kb.tools.applyDefaultKey();">DefaultKey</button>';
+  html += '<button style="margin-left:100px;" onclick="kb.tools.applyDefaultKey();">DefaultKey</button>';
   html += '</span>';
 
   html += '</span>';
