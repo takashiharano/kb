@@ -2409,10 +2409,10 @@ kb.tools.buildBsb64Html = function() {
   html += '<b>Encoder/Decoder</b>';
 
   html += '<span style="margin-left:4px;">';
-  html += '<input type="radio" name="encdec-mode" id="rdo-bsb64" onchange="kb.tools.onEncDecModeChange();" checked>'
-  html += '<label for="rdo-bsb64">BSB64</label>';
-  html += '<input type="radio" name="encdec-mode" id="rdo-b64s" onchange="kb.tools.onEncDecModeChange();">'
+  html += '<input type="radio" name="encdec-mode" id="rdo-b64s" onchange="kb.tools.onEncDecModeChange();" checked>'
   html += '<label for="rdo-b64s">Base64s</label>';
+  html += '<input type="radio" name="encdec-mode" id="rdo-bsb64" onchange="kb.tools.onEncDecModeChange();">'
+  html += '<label for="rdo-bsb64">BSB64</label>';
   html += '</span>';
 
   html += '<span style="margin-left:216px;">';
