@@ -1261,9 +1261,15 @@ kb.linkBsb64Data = function(s) {
 
 kb.linkB64sData = function(s) {
   var t = '<span class="pseudo-link link" onclick="kb.openB64sKeyDialog(\'$1\');" data-tooltip="Click to decode">$1</span>';
+
+  s = s.replace(/(base64s:[A-Za-z0-9+/=$]+)/g, t);
+  s = s.replace(/openB64sKeyDialog\('base64s:/g, 'openB64sKeyDialog(\'');
+  s = s.replace(/>base64s:([A-Za-z0-9+/=$]+)<\/span>/g, '>$1</span>');
+
   s = s.replace(/(b64s:[A-Za-z0-9+/=$]+)/g, t);
   s = s.replace(/openB64sKeyDialog\('b64s:/g, 'openB64sKeyDialog(\'');
   s = s.replace(/>b64s:([A-Za-z0-9+/=$]+)<\/span>/g, '>$1</span>');
+
   return s;
 };
 
@@ -2327,10 +2333,11 @@ kb.openB64sKeyDialog = function(t) {
   m += '<button onclick="kb.applyDefaultKey();">USE DEFAULT</button>';
   util.dialog.text(m, kb.decodeB64s, opt);
 };
+kb.getDefaultKey = function() {
+  return util.decodeBSB64(kb.config.default_encryption_key, 1);
+};
 kb.applyDefaultKey = function() {
-  var k = util.decodeBSB64(kb.config.default_encryption_key, 1);
-  $el('.dialog-textbox')[0].value = k;
-  $el('.dialog-button-0')[0].click();
+  $el('.dialog-textbox')[0].value = kb.getDefaultKey();
 };
 kb.decodeB64s = function(key, data) {
   var m;
@@ -2408,7 +2415,14 @@ kb.tools.buildBsb64Html = function() {
   html += '<label for="rdo-b64s">Base64s</label>';
   html += '</span>';
 
-  html += '<button style="margin-left:216px;" onclick="kb.tools.resetB64Input();">Reset</button>';
+  html += '<span style="margin-left:216px;">';
+  html += '<button onclick="kb.tools.resetB64Input();">Reset</button>';
+
+  html += '<span class="area-b64s">';
+  html += '<button style="margin-left:56px;" onclick="kb.tools.applyDefaultKey();">DefaultKey</button>';
+  html += '</span>';
+
+  html += '</span>';
   html += '</div>';
   html += '<table>';
   html += '<tr style="height:28px;">';
@@ -2475,6 +2489,10 @@ kb.tools.onEncDecModeChange = function() {
 kb.tools.b64KeySecretChange = function() {
   var type = ($el('#b64s-key-s').checked ? 'text' : 'password');
   $el('#b64s-key').type = type;
+};
+
+kb.tools.applyDefaultKey = function() {
+  $el('#b64s-key').value = kb.getDefaultKey();
 };
 
 kb.tools.encB64 = function() {
