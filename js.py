@@ -11,6 +11,7 @@ ROOT_PATH = appconfig.root_path
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ROOT_PATH + 'libs'))
 import util
+import bsb64
 
 util.append_system_path(__file__, ROOT_PATH)
 util.append_system_path(__file__, ROOT_PATH + 'websys/bin')
@@ -20,16 +21,18 @@ import kb
 #------------------------------------------------------------------------------
 def build_js(context):
     content_height_adj = appconfig.list_height + 32
+    bsb64_enc_key = bsb64.encode_string(kb.DEFAULT_ENCRYPTION_KEY, 1)
 
     js = ''
     js += 'var kb = kb || {};\n'
     js += 'kb.defaultScm = \'' + kb.get_default_scm() + '\';\n'
     js += 'kb.config = {\n'
-    js += '  default_data_encryption: '
-    js += 'true' if appconfig.default_data_encryption else 'false'
-    js += ',\n'
-    js += '  list_max: ' + str(appconfig.list_max) + '\n';
+    js += '  list_max: ' + str(appconfig.list_max) + ',\n';
+    js += '  default_data_encryption: ' + ('true' if appconfig.default_data_encryption else 'false') + ',\n'
+    js += '  default_encryption_key: \'' + bsb64_enc_key + '\'\n'
     js += '};\n'
+
+    js += 'kb.bsb64 = {n: 1};\n'
 
     js += 'kb.configInfo = {\n'
     js += '  state_list: [\n';

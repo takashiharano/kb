@@ -65,8 +65,6 @@ kb.loadPendingTmrId = 0;
 kb.dataLoadingTmrId = 0;
 kb.clipboardEnabled = false;
 
-kb.bsb64 = {n: 1};
-
 kb.toolsWindow = null;
 
 $onReady = function(e) {
@@ -2325,7 +2323,14 @@ kb.openB64sKeyDialog = function(t) {
     secure: true,
     data: t
   };
-  util.dialog.text('Base64s decryption key:', kb.decodeB64s, opt);
+  var m = 'Base64s decryption key: ';
+  m += '<button onclick="kb.applyDefaultKey();">USE DEFAULT</button>';
+  util.dialog.text(m, kb.decodeB64s, opt);
+};
+kb.applyDefaultKey = function() {
+  var k = util.decodeBSB64(kb.config.default_encryption_key, 1);
+  $el('.dialog-textbox')[0].value = k;
+  $el('.dialog-button-0')[0].click();
 };
 kb.decodeB64s = function(key, data) {
   var m;

@@ -12,11 +12,7 @@ system_name_color = '#ddd'
 list_max = 100
 list_height = 240
 
-default_data_encryption = True
-encryption_key = 3
-
 border_color = '#08e'
-
 fg_color = '#fff'
 fg_dim_color = '#c0c6c8'
 background1 = '#000'
@@ -85,6 +81,10 @@ state_list = [
     {'name': 'UNRESOLVED', 'fgcolor': '#fff', 'bgcolor': '#400'},
     {'name': 'OBSOLETE', 'fgcolor': '#a0a0a0', 'bgcolor': '#444'}
 ]
+
+default_data_encryption = True
+data_encryption_n = 3
+default_encryption_key = 'xyz'
 
 token_valid_sec = 259200
 token_keys = ['1']

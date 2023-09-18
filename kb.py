@@ -24,7 +24,8 @@ WK_PATH = WORKSPACE_PATH + 'wk/'
 PROPS_FILENAME = 'properties.txt'
 
 ENCRYPTED_HEAD = '#DATA'
-BSB64_N = appconfig.encryption_key
+DATA_ENCRYPTION_N = appconfig.data_encryption_n
+DEFAULT_ENCRYPTION_KEY = appconfig.default_encryption_key
 
 DEFAULT_CONTENT = {
     'TITLE': '',
@@ -667,7 +668,7 @@ def load_data(scm, id, head_only=False):
         data['size'] = fileinfo['size']
 
     if text.startswith(ENCRYPTED_HEAD):
-        text = bsb64.decode_string(text[len(ENCRYPTED_HEAD):], BSB64_N)
+        text = bsb64.decode_string(text[len(ENCRYPTED_HEAD):], DATA_ENCRYPTION_N)
         data['encrypted'] = True
 
     data['content'] = parse_content(text, head_only)
@@ -796,7 +797,7 @@ def write_data(scm, id, content, secure=False, path=None):
     text += content['BODY']
 
     if secure:
-        text = ENCRYPTED_HEAD + bsb64.encode_string(text, BSB64_N)
+        text = ENCRYPTED_HEAD + bsb64.encode_string(text, DATA_ENCRYPTION_N)
 
     if path is None:
         path = get_datafile_path(scm, id)
