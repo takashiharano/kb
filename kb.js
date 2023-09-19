@@ -1260,9 +1260,9 @@ kb.linkBsb64Data = function(s) {
 };
 
 kb.linkB64sData = function(s) {
-  var t = '<span class="pseudo-link link" onclick="kb.openB64sKeyDialog(\'$1\');" data-tooltip="Click to decode">$1</span>';
+  var t = '<span class="pseudo-link link" onclick="kb.openB64sDialog(\'$1\');" data-tooltip="Click to decode">$1</span>';
   s = s.replace(/(b64:[A-Za-z0-9+/=$]+)/g, t);
-  s = s.replace(/openB64sKeyDialog\('b64:/g, 'openB64sKeyDialog(\'');
+  s = s.replace(/openB64sDialog\('b64:/g, 'openB64sDialog(\'');
   s = s.replace(/>b64:([A-Za-z0-9+/=$]+)<\/span>/g, '>$1</span>');
   return s;
 };
@@ -2300,12 +2300,6 @@ kb.pasteImage = async function() {
   }
 };
 
-kb.selectText = function(el, st, ed) {
-  el.focus();
-  el.selectionStart = st;
-  el.selectionEnd = ed;
-};
-
 kb.decodeBSB64 = function(t) {
   var m;
   try {
@@ -2318,14 +2312,14 @@ kb.decodeBSB64 = function(t) {
   util.infotip.show(m, {pos: 'pointer'});
 };
 
-kb.openB64sKeyDialog = function(t) {
+kb.openB64sDialog = function(t, enc) {
   var opt = {
     secure: true,
-    data: t
+    data: {t: t, enc: enc}
   };
-  var m = 'Base64s decryption key: ';
+  var m = 'Base64s ' + (enc ? 'encryption' : 'decryption') + ' key: ';
   m += '<button onclick="kb.applyDefaultKey();">USE DEFAULT</button>';
-  util.dialog.text(m, kb.decodeB64s, opt);
+  util.dialog.text(m, kb.b64sDialogCb, opt);
 };
 kb.getDefaultKey = function() {
   return util.decodeBSB64(kb.config.default_encryption_key, 1);
@@ -2333,12 +2327,27 @@ kb.getDefaultKey = function() {
 kb.applyDefaultKey = function() {
   $el('.dialog-textbox')[0].value = kb.getDefaultKey();
 };
+kb.b64sDialogCb = function(key, data) {
+  var f = (data.enc ? kb.encodeB64s : kb.decodeB64s);
+  f(key, data.t);
+};
 kb.decodeB64s = function(key, data) {
   var m;
   try {
     var s = util.decodeBase64s(data, key);
     util.copy(s);
     m = 'Decoded';
+  } catch(e) {
+    m = '<span style="color:#f77;">Decode Error</span>';
+  }
+  util.infotip.show(m, {pos: 'pointer'});
+};
+kb.encodeB64s = function(key, data) {
+  var m;
+  try {
+    var s = util.encodeBase64s(data, key);
+    util.copy(s);
+    m = 'Encoded';
   } catch(e) {
     m = '<span style="color:#f77;">Decode Error</span>';
   }
@@ -2353,10 +2362,7 @@ kb.keyHandlerD = function(e) {
   }
   var t = kb.extractSelectedText();
   if (!t) return;
-  kb.decodeBSB64(t);
-  if (kb.status & kb.ST_EDITING) {
-    kb.selectText(el, st, ed);
-  }
+  kb.openB64sDialog(t);
 };
 kb.keyHandlerE = function(e) {
   if (kb.status & kb.ST_EDITING) {
@@ -2366,18 +2372,7 @@ kb.keyHandlerE = function(e) {
   }
   var t = kb.extractSelectedText();
   if (!t) return;
-  var m;
-  try {
-    var s = util.encodeBSB64(t, kb.bsb64.n);
-    util.copy(s);
-    m = 'Encoded';
-  } catch(e) {
-    m = '<span style="color:#f77;">Encode Error</span>';
-  }
-  if (kb.status & kb.ST_EDITING) {
-    kb.selectText(el, st, ed);
-  }
-  util.infotip.show(m);
+  kb.openB64sDialog(t, true);
 };
 kb.extractSelectedText = function() {
   var s = window.getSelection();
