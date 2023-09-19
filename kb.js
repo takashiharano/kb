@@ -1261,15 +1261,9 @@ kb.linkBsb64Data = function(s) {
 
 kb.linkB64sData = function(s) {
   var t = '<span class="pseudo-link link" onclick="kb.openB64sKeyDialog(\'$1\');" data-tooltip="Click to decode">$1</span>';
-
-  s = s.replace(/(base64s:[A-Za-z0-9+/=$]+)/g, t);
-  s = s.replace(/openB64sKeyDialog\('base64s:/g, 'openB64sKeyDialog(\'');
-  s = s.replace(/>base64s:([A-Za-z0-9+/=$]+)<\/span>/g, '>$1</span>');
-
-  s = s.replace(/(b64s:[A-Za-z0-9+/=$]+)/g, t);
-  s = s.replace(/openB64sKeyDialog\('b64s:/g, 'openB64sKeyDialog(\'');
-  s = s.replace(/>b64s:([A-Za-z0-9+/=$]+)<\/span>/g, '>$1</span>');
-
+  s = s.replace(/(b64:[A-Za-z0-9+/=$]+)/g, t);
+  s = s.replace(/openB64sKeyDialog\('b64:/g, 'openB64sKeyDialog(\'');
+  s = s.replace(/>b64:([A-Za-z0-9+/=$]+)<\/span>/g, '>$1</span>');
   return s;
 };
 
