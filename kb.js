@@ -64,7 +64,7 @@ kb.requestedId = null;
 kb.loadPendingTmrId = 0;
 kb.dataLoadingTmrId = 0;
 kb.clipboardEnabled = false;
-
+kb.mode = null;
 kb.toolsWindow = null;
 
 $onReady = function(e) {
@@ -81,6 +81,10 @@ $onReady = function(e) {
   }
   util.addKeyHandler('D', 'down', kb.keyHandlerD, {ctrl: true, alt: true});
   util.addKeyHandler('E', 'down', kb.keyHandlerE, {ctrl: true, alt: true});
+  util.addKeyHandler('L', 'down', kb.keyHandlerL, {ctrl: false, alt: true});
+  util.addKeyHandler('S', 'down', kb.keyHandlerS, {ctrl: false, alt: true});
+  util.addKeyHandler('T', 'down', kb.keyHandlerT, {ctrl: false, alt: true});
+  util.addKeyHandler('W', 'down', kb.keyHandlerW, {ctrl: false, alt: true});
   kb.status |= kb.ST_APP_READY;
 };
 
@@ -811,6 +815,7 @@ kb.edit = function() {
   $el('#search-button').disabled = true;
   $el('#all-button').disabled = true;
   $el('#touch-button').disabled = true;
+  $el('#schema-button').disabled = true;
   $el('#clear-button').disabled = true;
   $el('.for-view').hide();
   $el('.for-edit').show();
@@ -865,6 +870,7 @@ kb.onEditEnd = function() {
   $el('#search-button').disabled = false;
   $el('#all-button').disabled = false;
   $el('#clear-button').disabled = false;
+  $el('#schema-button').disabled = false;
   kb.enableTouchButton();
 
   if (kb.data) kb.drawData(kb.data);
@@ -2096,11 +2102,13 @@ kb.onStartLoading = function() {
   $el('#search-button').disabled = true;
   $el('#all-button').disabled = true;
   $el('#touch-button').disabled = true;
+  $el('#schema-button').disabled = true;
   kb.clear();
 };
 kb.onEndLoading = function() {
   $el('#search-button').disabled = false;
   $el('#all-button').disabled = false;
+  $el('#schema-button').disabled = false;
   kb.enableTouchButton();
 };
 
@@ -2374,6 +2382,23 @@ kb.keyHandlerE = function(e) {
   if (!t) return;
   kb.openB64sDialog(t, true);
 };
+kb.keyHandlerL = function(e) {
+  if ((kb.status & kb.ST_EDITING) || (kb.mode == 'view')) return;
+  kb.getListAll();
+};
+kb.keyHandlerS = function(e) {
+  if ((kb.status & kb.ST_EDITING) || (kb.mode == 'view')) return;
+  kb.selectSchema();
+};
+kb.keyHandlerT = function(e) {
+  if (kb.mode == 'view') return;
+  kb.openTools();
+};
+kb.keyHandlerW = function(e) {
+  if (kb.mode == 'view') return;
+  kb.openNewWindow();
+};
+
 kb.extractSelectedText = function() {
   var s = window.getSelection();
   return s.toString();

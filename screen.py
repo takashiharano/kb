@@ -72,7 +72,7 @@ def build_main_screen(context):
     if kb.has_privilege(context, 'sysadmin') or kb.has_privilege(context, 'kb.write'):
         html += '        <button id="touch-button" style="margin-right:8px;" onclick="kb.touch();" disabled>TOUCH</button>'
     html += '        <button id="export-button" style="min-width:32px;" onclick="kb.openTools();">TOOLS</button>'
-    html += '        <button style="min-width:32px;" onclick="kb.selectSchema();">SCHEMA</button>'
+    html += '        <button id="schema-button" style="min-width:32px;" onclick="kb.selectSchema();">SCHEMA</button>'
     if kb.has_privilege(context, 'sysadmin') or kb.has_privilege(context, 'kb.export'):
         html += '        <button id="export-button" style="margin-left:4px;min-width:32px;" onclick="kb.export();">EXPORT DATA</button>'
     html += '      </span>'
