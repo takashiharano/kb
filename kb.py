@@ -68,13 +68,17 @@ def get_default_scm():
 #------------------------------------------------------------------------------
 def get_schema_list(context):
     dirs = util.list_dirs(DATA_BASE_DIR_PATH)
-    scm_map = {}
+    scm_list = []
     for i in range(len(dirs)):
         scm = dirs[i]
         if has_privilege_for_scm(context, scm):
             props = load_scm_props(scm)
-            scm_map[scm] = props
-    return scm_map
+            scm_data = {
+                'id': scm,
+                'props': props
+            }
+            scm_list.append(scm_data)
+    return scm_list
 
 #------------------------------------------------------------------------------
 def has_privilege_for_scm(context, scm):
@@ -915,8 +919,11 @@ def export_all_data(context, decrypt=False):
     util.delete(WK_PATH, True)
     if decrypt:
         target_path = WK_PATH + 'kbdata/'
-        scm_map = get_schema_list(context)
-        for scm in scm_map:
+        scm_list = get_schema_list(context)
+
+        for i in range(len(scm_list)):
+            scm_data = scm_list[i]
+            scm = scm_data['id']
             src_scm_props_path = get_props_file_path(scm)
             wk_scm_path = target_path + scm + '/'
             wk_data_path = wk_scm_path + 'data/'

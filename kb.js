@@ -15,6 +15,7 @@ kb.ST_SAVE_CONFIRMING = 1 << 8;
 kb.ST_CANCEL_CONFIRMING = 1 << 9;
 kb.ST_TOUCH_CONFIRMING = 1 << 10;
 kb.ST_PROP_EDITING = 1 << 11;
+kb.ST_SCM_SELECTING = 1 << 12;
 
 kb.UI_ST_NONE = 0;
 kb.UI_ST_AREA_RESIZING = 1;
@@ -66,6 +67,9 @@ kb.dataLoadingTmrId = 0;
 kb.clipboardEnabled = false;
 kb.mode = null;
 kb.toolsWindow = null;
+kb.scmList = [];
+kb.activeScmIdx = 0;
+kb.activeScmId = null;
 
 $onReady = function(e) {
   $el('#draw-mode').addEventListener('change', kb.onDrawModeChange);
@@ -85,6 +89,8 @@ $onReady = function(e) {
   util.addKeyHandler('S', 'down', kb.keyHandlerS, {ctrl: false, alt: true});
   util.addKeyHandler('T', 'down', kb.keyHandlerT, {ctrl: false, alt: true});
   util.addKeyHandler('W', 'down', kb.keyHandlerW, {ctrl: false, alt: true});
+  util.addKeyHandler(38, 'down', kb.keyHandlerUp);
+  util.addKeyHandler(40, 'down', kb.keyHandlerDn);
   kb.status |= kb.ST_APP_READY;
 };
 
@@ -1555,6 +1561,7 @@ kb.selectSchema = function() {
   html += '</div>';
   util.dialog.open(html);
   kb.updateSchemaList();
+  kb.status |= kb.ST_SCM_SELECTING;
 };
 kb.updateSchemaList = function() {
   kb.callApi('get_schema_list', null, kb.onGetSchemaList);
@@ -1567,32 +1574,39 @@ kb.onGetSchemaList = function(xhr, res, req) {
   if (res.status != 'OK') {
     return;
   }
-  var scmMap = res.body;
+  var scmList = res.body;
+  kb.scmList = scmList;
+  var activeScmId = null;
+  kb.activeScmIdx = 0;
   var html = '<table style="width:100%;">';
-  for (var scm in scmMap) {
-    var prop = scmMap[scm];
-    var name = scm;
-    if (('name' in prop) && prop['name'] != '') {
+  for (var i = 0; i < scmList.length; i++) {
+    var scmData = scmList[i];
+    var scmId = scmData.id;
+    var prop = scmData.props;
+    var name = scmId;
+    if (('name' in prop) && prop.name != '') {
       name = prop['name'];
     }
-    html += '<tr class="data-list-row">';
+    html += '<tr id="scm-list-' + scmId + '" class="scm-list-row" onmouseover="kb.setActiveScm(\'' + scmId + '\');" >';
     html += '<td style="width:10px;">';
-    if ((scm == kb.scm) || (!kb.scm && (scm == kb.defaultScm))) {
+    if ((scmId == kb.scm) || (!kb.scm && (scmId == kb.defaultScm))) {
+      activeScmId = scmId;
+      kb.activeScmIdx = i;
       html += '*';
     }
     html += '</td>';
     html += '<td style="padding-right:20px;white-space:nowrap;">';
-    html += '<span style="display:inline-block;width:100%;overflow:hidden;text-overflow:ellipsis;" class="title pseudo-link" onclick="kb.switchSchema(\'' + scm + '\');">';
+    html += '<span style="display:inline-block;width:100%;overflow:hidden;text-overflow:ellipsis;" class="title pseudo-link" onclick="kb.switchSchema(\'' + scmId + '\');">';
     html += '<span class="pseudo-link link">' + name + '</span>\n';
     html += '</span>';
     html += '</td>';
     if (kb.isSysAdmin) {
       html += '<td style="width:24px;">';
-      html += '<span class="pseudo-link" onclick="kb.editSchemaProps(\'' + scm + '\');" data-tooltip="Edit properties">P</span>\n';
+      html += '<span class="pseudo-link" onclick="kb.editSchemaProps(\'' + scmId + '\');" data-tooltip="Edit properties">P</span>\n';
       html += '</td>';
       html += '<td style="width:16px;">';
-      if ((scm != kb.defaultScm) && (scm != kb.scm)) {
-        html += '<span class="pseudo-link text-red" onclick="kb.confirmDeleteSchema(\'' + scm + '\');" data-tooltip="Delete">X</span>\n';
+      if ((scmId != kb.defaultScm) && (scmId != kb.scm)) {
+        html += '<span class="pseudo-link text-red" onclick="kb.confirmDeleteSchema(\'' + scmId + '\');" data-tooltip="Delete">X</span>\n';
       } else {
         html += '&nbsp;';
       }
@@ -1602,6 +1616,7 @@ kb.onGetSchemaList = function(xhr, res, req) {
   }
   html += '</table>';
   $el('#schema-list').innerHTML = html;
+  if (activeScmId) kb.setActiveScm(activeScmId);
 };
 kb.switchSchema = function(scm) {
   var url = './';
@@ -1609,6 +1624,13 @@ kb.switchSchema = function(scm) {
     url += '?scm=' + scm;
   }
   location.href = url;
+};
+
+kb.setActiveScm = function(id) {
+  kb.activeScmId = id;
+  $el('.scm-list-row').removeClass('data-list-row-active');
+  $el('#scm-list-' + id).addClass('data-list-row-active');
+
 };
 
 kb.newSchema = function() {
@@ -2152,6 +2174,7 @@ kb.closeDialog = function() {
   kb.status &= ~kb.ST_SAVE_CONFIRMING;
   kb.status &= ~kb.ST_CANCEL_CONFIRMING;
   kb.status &= ~kb.ST_TOUCH_CONFIRMING;
+  kb.status &= ~kb.ST_SCM_SELECTING;
   util.dialog.close();
 };
 
@@ -2397,6 +2420,30 @@ kb.keyHandlerT = function(e) {
 kb.keyHandlerW = function(e) {
   if (kb.mode == 'view') return;
   kb.openNewWindow();
+};
+kb.keyHandlerUp = function(e) {
+  if (!(kb.status & kb.ST_SCM_SELECTING)) return;
+  kb.activeScmIdx--;
+  if (kb.activeScmIdx < 0) kb.activeScmIdx = 0;
+  var id = kb.getScmIdOnList(kb.activeScmIdx);
+  if (id) kb.setActiveScm(id);
+};
+kb.keyHandlerDn = function(e) {
+  if (!(kb.status & kb.ST_SCM_SELECTING)) return;
+  kb.activeScmIdx++;
+  if (kb.activeScmIdx >= kb.scmList.length) kb.activeScmIdx = kb.scmList.length - 1;
+  var id = kb.getScmIdOnList(kb.activeScmIdx);
+  if (id) kb.setActiveScm(id);
+};
+$onEnterKey = function(e) {
+  if (!(kb.status & kb.ST_SCM_SELECTING)) return;
+  kb.switchSchema(kb.activeScmId);
+};
+
+kb.getScmIdOnList = function(idx) {
+  var d = kb.scmList[idx];
+  if (d) return d.id;
+  return null;
 };
 
 kb.extractSelectedText = function() {
