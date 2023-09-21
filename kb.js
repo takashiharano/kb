@@ -2282,6 +2282,8 @@ $onEnterKey = function(e) {
     if (!kb.isListLoading()) {
       kb.search();
     }
+  } else if (kb.status & kb.ST_SCM_SELECTING) {
+    kb.switchSchema(kb.activeScmId);
   }
 };
 $onEscKey = function(e) {
@@ -2434,10 +2436,6 @@ kb.keyHandlerDn = function(e) {
   if (kb.activeScmIdx >= kb.scmList.length) kb.activeScmIdx = kb.scmList.length - 1;
   var id = kb.getScmIdOnList(kb.activeScmIdx);
   if (id) kb.setActiveScm(id);
-};
-$onEnterKey = function(e) {
-  if (!(kb.status & kb.ST_SCM_SELECTING)) return;
-  kb.switchSchema(kb.activeScmId);
 };
 
 kb.getScmIdOnList = function(idx) {
