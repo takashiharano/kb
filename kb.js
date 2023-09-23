@@ -1460,7 +1460,7 @@ kb.onCheckId = function(xhr, res, req) {
     var emptyIdInfo = info.empty_id_info;
     var emptyIds = emptyIdInfo.empty_ids;
     var omitCount = emptyIdInfo.omit_count;
-    var m = 'NEXT ID: ' + nextId;
+    var m = 'NEXT ID: <span class="pseudo-link" onclick="kb.selectAndChangeDataId(\'' + nextId + '\');">' + nextId + '</span>';
     if (emptyIds.length > 0) {
       m += '\n';
       m += 'EMPTY: ';
