@@ -409,6 +409,9 @@ h1, h2, h3 {
 table {
   border-collapse: collapse;
 }
+th {
+  text-align: left;
+}
 '''
     css += '.area {'
     css += '  position: relative;'

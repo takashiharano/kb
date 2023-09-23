@@ -401,17 +401,17 @@ kb.buildListRow = function(data, fixed) {
   html += '</span></td>';
 
   html += '<td style="padding-right:16px;text-align:center;">' + dlLink + '</td>';
-  html += '<td style="padding-right:8px;">' + cDateStr + '</td>';
+  html += '<td style="width:145px;padding-right:0.5em;">' + cDateStr + '</td>';
   html += '<td style="padding-right:16px;">' + cUserLink + '</td>';
-  html += '<td style="padding-right:8px;">' + uDateStr + '</td>';
+  html += '<td style="width:145px;padding-right:0.5em;">' + uDateStr + '</td>';
   html += '<td style="padding-right:8px;">' + uUserLink + '</td>';
-  html += '<td style="padding-right:16px;">' + assigneeLink + '</td>';
+  html += '<td style="padding-right:8px;">' + assigneeLink + '</td>';
   html += '<td>' + statusLabel + '</td>';
-  html += '<td style="padding-left:20px;">' + labelsHTML + '</td>';
+  html += '<td>' + labelsHTML + '</td>';
   html += '<td>' + score + '</td>';
-  html += '<td style="text-align:right;padding-left:0.5em;">' + size + '</td>';
+  html += '<td style="text-align:right;padding-left:0.5em;padding-right:0.5em;">' + size + '</td>';
   if (kb.LIST_COLUMNS[12].forAdmin && kb.isSysAdmin) {
-    html += '<td style="padding-left:20px;">' + privsHTML + '</td>';
+    html += '<td>' + privsHTML + '</td>';
   }
   html += '<td style="text-align:center;cursor:default;">' + encrypted + '</td>';
 
