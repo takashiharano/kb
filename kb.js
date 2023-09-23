@@ -404,7 +404,7 @@ kb.buildListRow = function(data, fixed) {
   html += '<td style="width:145px;padding-right:0.5em;">' + cDateStr + '</td>';
   html += '<td style="padding-right:16px;">' + cUserLink + '</td>';
   html += '<td style="width:145px;padding-right:0.5em;">' + uDateStr + '</td>';
-  html += '<td style="padding-right:8px;">' + uUserLink + '</td>';
+  html += '<td style="padding-right:16px;">' + uUserLink + '</td>';
   html += '<td style="padding-right:8px;">' + assigneeLink + '</td>';
   html += '<td>' + statusLabel + '</td>';
   html += '<td>' + labelsHTML + '</td>';
