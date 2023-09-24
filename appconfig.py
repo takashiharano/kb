@@ -83,7 +83,7 @@ state_list = [
 ]
 
 default_data_encryption = True
-data_encryption_n = 3
+data_encryption_key = 'xyz'
 default_encryption_key = 'xyz'
 
 token_valid_sec = 259200

@@ -24,7 +24,7 @@ WK_PATH = WORKSPACE_PATH + 'wk/'
 PROPS_FILENAME = 'properties.txt'
 
 ENCRYPTED_HEAD = '#DATA'
-DATA_ENCRYPTION_N = appconfig.data_encryption_n
+DATA_ENCRYPTION_KEY = appconfig.data_encryption_key
 DEFAULT_ENCRYPTION_KEY = appconfig.default_encryption_key
 
 DEFAULT_CONTENT = {
@@ -673,7 +673,7 @@ def load_data(scm, id, head_only=False):
         data['size'] = fileinfo['size']
 
     if text.startswith(ENCRYPTED_HEAD):
-        text = bsb64.decode_string(text[len(ENCRYPTED_HEAD):], DATA_ENCRYPTION_N)
+        text = util.decode_base64s(text[len(ENCRYPTED_HEAD):], DATA_ENCRYPTION_KEY)
         data['encrypted'] = True
 
     data['content'] = parse_content(text, head_only)
@@ -761,7 +761,10 @@ def save_data(scm, id, new_data, user=''):
 
     data['content'] = content
 
-    write_data(scm, id, content, secure)
+    encryption_key = None
+    if secure:
+        encryption_key = DATA_ENCRYPTION_KEY
+    write_data(scm, id, content, encryption_key)
 
     saved_data = {
         'id': id,
@@ -790,7 +793,7 @@ def is_dataurl(s):
   return util.match(s, '^data:.+;base64,[A-Za-z0-9+/=\n]+$')
 
 #------------------------------------------------------------------------------
-def write_data(scm, id, content, secure=False, path=None):
+def write_data(scm, id, content, encryption_key=None, path=None):
     text = ''
 
     for key in content:
@@ -801,8 +804,8 @@ def write_data(scm, id, content, secure=False, path=None):
     text += '\n'
     text += content['BODY']
 
-    if secure:
-        text = ENCRYPTED_HEAD + bsb64.encode_string(text, DATA_ENCRYPTION_N)
+    if encryption_key is not None:
+        text = ENCRYPTED_HEAD + util.encode_base64s(text, encryption_key)
 
     if path is None:
         path = get_datafile_path(scm, id)
@@ -940,12 +943,12 @@ def export_all_data(context, decrypt=False):
     return b
 
 def decrypt_data(scm, dst_base_dir):
-    encdec_data(scm, dst_base_dir, False)
+    encdec_data(scm, dst_base_dir, encryption_key=None)
 
-def encrypt_data(scm, dst_base_dir):
-    encdec_data(scm, dst_base_dir, True)
+def encrypt_data(scm, dst_base_dir, encryption_key=DATA_ENCRYPTION_KEY):
+    encdec_data(scm, dst_base_dir, encryption_key)
 
-def encdec_data(scm, dst_base_dir, secure):
+def encdec_data(scm, dst_base_dir, encryption_key):
     data_id_list = get_all_data_id_list(scm)
     for i in range(len(data_id_list)):
         id = data_id_list[i]
@@ -953,10 +956,11 @@ def encdec_data(scm, dst_base_dir, secure):
         try:
             data = load_data(scm, id)
             content = data['content']
-            write_data(scm, id, content, secure=secure, path=dst_path)
+            write_data(scm, id, content, encryption_key=encryption_key, path=dst_path)
         except Exception as e:
             text = '!ERROR! ' + str(e) + '\n---\n'
             text += load_data_as_text(scm, id)
+            dst_path = dst_base_dir + '_error_' + id + '.txt'
             util.write_text_file(dst_path, text)
 
 #------------------------------------------------------------------------------
@@ -1068,30 +1072,6 @@ def get_ext_from_base64(s):
     return ext
 
 #------------------------------------------------------------------------------
-def cmd_export():
-    arg1 = util.get_arg(2)
-    arg2 = util.get_arg(3)
-    arg3 = util.get_arg(4)
-
-    scm = arg1
-    dest_path = arg2
-    decrypt = False
-    if arg3 == '-decrypt':
-        decrypt = True
-
-    if dest_path == '' or dest_path.startswith('-'):
-        print('Dest file path is required. (e.g., /tmp/data.zip)')
-        print('Usage: python kb.py export <SCM> <DEST_FILE_PATH> [-decrypt]')
-        return
-
-    if scm == '-all':
-        data_bytes = export_all_data(scm, decrypt)
-    else:
-        data_bytes = export_data(scm, decrypt)
-
-    util.write_binary_file(dest_path, data_bytes)
-
-#------------------------------------------------------------------------------
 def is_access_allowed(context):
     if appconfig.access_control != 'auth' or context.is_authorized():
         return True
@@ -1186,10 +1166,55 @@ def is_token_expired(issued_time):
     return False
 
 #------------------------------------------------------------------------------
+def cmd_export():
+    arg1 = util.get_arg(2)
+    arg2 = util.get_arg(3)
+    arg3 = util.get_arg(4)
+
+    scm = arg1
+    dest_path = arg2
+    decrypt = False
+    if arg3 == '-decrypt':
+        decrypt = True
+
+    if dest_path == '' or dest_path.startswith('-'):
+        print('Dest file path is required. (e.g., /tmp/data.zip)')
+        print('Usage: python kb.py export <SCM> <DEST_FILE_PATH> [-decrypt]')
+        return
+
+    if scm == '-all':
+        data_bytes = export_all_data(scm, decrypt)
+    else:
+        data_bytes = export_data(scm, decrypt)
+
+    util.write_binary_file(dest_path, data_bytes)
+
+#------------------------------------------------------------------------------
+def cmd_encrypt():
+    arg1 = util.get_arg(2)
+    arg2 = util.get_arg(3)
+
+    scm = arg1
+    key = arg2
+    print('scm=' + scm)
+    print('key=' + key)
+
+    if util.get_args_len() < 3:
+        print('Usage: python kb.py cmd_encrypt <SCM> <KEY>')
+        return
+
+    # Decrypt
+    target_path = get_data_dir_path(scm)
+    decrypt_data(scm, target_path)
+    encrypt_data(scm, target_path, key)
+
+#------------------------------------------------------------------------------
 def main():
     cmd = util.get_arg(1)
-    if cmd == 'export':
-        cmd_export()
+    func_name = 'cmd_' + cmd
+    g = globals()
+    if func_name in g:
+        g[func_name]()
     else:
         print('Usage: python kb.py <COMMAND> [<ARG>]')
 
