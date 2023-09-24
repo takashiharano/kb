@@ -760,10 +760,8 @@ def save_data(scm, id, new_data, user=''):
         content['U_USER'] = user
 
     data['content'] = content
+    encryption_key = DATA_ENCRYPTION_KEY if secure else None
 
-    encryption_key = None
-    if secure:
-        encryption_key = DATA_ENCRYPTION_KEY
     write_data(scm, id, content, encryption_key)
 
     saved_data = {

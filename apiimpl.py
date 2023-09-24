@@ -18,6 +18,8 @@ import appconfig
 import web
 import kb
 
+DATA_ENCRYPTION_KEY = appconfig.data_encryption_key
+
 #------------------------------------------------------------------------------
 # Returns None if the value not found
 def get_request_param(key, default=None):
@@ -269,7 +271,8 @@ def proc_touch(context):
         if not keep_updated_by:
             content['U_USER'] = user
         secure = data['encrypted']
-        kb.write_data(scm, id, content, secure)
+        encryption_key = DATA_ENCRYPTION_KEY if secure else None
+        kb.write_data(scm, id, content, encryption_key)
 
     result = create_result_object('OK')
     return result
@@ -305,7 +308,8 @@ def proc_mod_props(context):
     new_content['BODY'] = content['BODY']
 
     secure = data['encrypted']
-    kb.write_data(scm, id, new_content, secure)
+    encryption_key = DATA_ENCRYPTION_KEY if secure else None
+    kb.write_data(scm, id, new_content, encryption_key)
 
     result = create_result_object('OK')
     return result
