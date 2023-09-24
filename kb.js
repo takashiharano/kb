@@ -369,7 +369,7 @@ kb.buildListRow = function(data, fixed) {
   } else {
     statusLabel = '<span class="status-label-err">' + data_status + '</span>';
   }
-  var size = util.formatNumber(data.size);
+  var size = (data.size == undefined ? '' : util.formatNumber(data.size));
   var encrypted = '';
   if (data.encrypted) {
     encrypted = '<span data-tooltip="Encrypted">&#x1F512;</span>';

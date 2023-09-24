@@ -176,10 +176,11 @@ def get_list(context, scm, target_id=None, need_encode_b64=False):
                 if 'LABELS' in content:
                     content['LABELS'] = util.encode_base64(content['LABELS'])
         except:
+            content = DEFAULT_CONTENT.copy()
             data = {
                 'id': id,
                 'status': 'LOAD_ERROR',
-                'content': DEFAULT_CONTENT.copy()
+                'content': content
             }
 
         if target_id is None and should_omit_listing(context, id, content):
