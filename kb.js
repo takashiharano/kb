@@ -2633,14 +2633,17 @@ kb.confirmExecLogic = function() {
   var opt = {
     type: 'textarea',
     style: {
+      content: {
+        'text-align': 'left'
+      },
       textbox: {
-        width: '20em',
-        height: '5em'
+        width: '32em',
+        height: '8em'
       }
     },
     value: logic.param
   };
-  util.dialog.text('Parameters for Logic:', kb.invokeLogic, opt);
+  util.dialog.text('Parameters:', kb.invokeLogic, opt);
 };
 kb.invokeLogic = function(p) {
   var logic = kb.getCurrentLogicParamCode();
