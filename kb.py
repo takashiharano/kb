@@ -38,7 +38,8 @@ DEFAULT_CONTENT = {
     'STATUS': '',
     'FLAGS': '',
     'DATA_TYPE': '',
-    'DATA_PRIVS': ''
+    'DATA_PRIVS': '',
+    'LOGIC': ''
 }
 
 SP_KEYWORD_NANIDS = '*nanids'
@@ -753,6 +754,7 @@ def save_data(scm, id, new_data, user=''):
         content['STATUS'] = new_content['STATUS']
         content['ASSIGNEE'] = new_content['ASSIGNEE']
         content['DATA_TYPE'] = 'dataurl' if isdataurl else ''
+        content['LOGIC'] = new_content['LOGIC']
         content['BODY'] = body
 
     if not silent:

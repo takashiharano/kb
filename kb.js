@@ -15,6 +15,7 @@ kb.ST_SAVE_CONFIRMING = 1 << 8;
 kb.ST_CANCEL_CONFIRMING = 1 << 9;
 kb.ST_TOUCH_CONFIRMING = 1 << 10;
 kb.ST_PROP_EDITING = 1 << 11;
+kb.ST_LOGIC_EDITING = 1 << 12;
 
 kb.UI_ST_NONE = 0;
 kb.UI_ST_AREA_RESIZING = 1;
@@ -33,6 +34,7 @@ kb.LIST_COLUMNS = [
   {key: 'score', label: 'SCORE', meta: true},
   {key: 'size', label: 'SIZE', meta: true},
   {key: 'DATA_PRIVS', label: 'DATA_PRIVS', forAdmin: true},
+  {key: 'LOGIC', label: ''},
   {key: 'encrypted', label: '', meta: true}
 ];
 kb.onselectstart = document.onselectstart;
@@ -66,9 +68,11 @@ kb.dataLoadingTmrId = 0;
 kb.clipboardEnabled = false;
 kb.mode = null;
 kb.toolsWindow = null;
+kb.logicWindow = null;
 kb.scmList = [];
 kb.activeScmIdx = 0;
 kb.activeScmId = null;
+kb.savingLogic = '';
 
 $onReady = function(e) {
   $el('#draw-mode').addEventListener('change', kb.onDrawModeChange);
@@ -370,6 +374,10 @@ kb.buildListRow = function(data, fixed) {
     statusLabel = '<span class="status-label-err">' + data_status + '</span>';
   }
   var size = (data.size == undefined ? '' : util.formatNumber(data.size));
+  var hasLogic = '';
+  if (content.LOGIC) {
+    hasLogic = '<span data-tooltip="Logic">&lt;/&gt;</span>';
+  }
   var encrypted = '';
   if (data.encrypted) {
     encrypted = '<span data-tooltip="Encrypted">&#x1F512;</span>';
@@ -413,6 +421,7 @@ kb.buildListRow = function(data, fixed) {
   if (kb.LIST_COLUMNS[12].forAdmin && kb.isSysAdmin) {
     html += '<td>' + privsHTML + '</td>';
   }
+  html += '<td style="text-align:center;cursor:default;">' + hasLogic + '</td>';
   html += '<td style="text-align:center;cursor:default;">' + encrypted + '</td>';
 
   if (data_status != 'OK') {
@@ -712,6 +721,7 @@ kb.onGetData = function(xhr, res, req) {
     var body = util.decodeBase64(b64Body);
     kb.data.content.TITLE = title;
     kb.data.content.LABELS = labels;
+    kb.data.content.LOGIC = (content.LOGIC ? util.decodeBase64(content.LOGIC) : '');
     kb.data.content.BODY = body;
   }
 
@@ -926,6 +936,7 @@ kb.save = function() {
   labels = labels.replace(/\s{2,}/g, ' ');
   var status = $el('#select-status').value;
   var assignee = $el('#content-assignee-edt').value.trim();
+  var logic = kb.data.content.LOGIC;
 
   if (!title) {
     kb.showInfotip('Title is required', 3000);
@@ -941,6 +952,7 @@ kb.save = function() {
 
   var b64Title = util.encodeBase64(title);
   var b64Labels = util.encodeBase64(labels);
+  var b64Logic = util.encodeBase64(logic);
   var b64Body = util.encodeBase64(body);
 
   var only_labels;
@@ -954,6 +966,7 @@ kb.save = function() {
     content.LABELS = b64Labels;
     content.STATUS = status;
     content.ASSIGNEE = assignee;
+    content.LOGIC = b64Logic;
     content.BODY = b64Body;
   }
 
@@ -964,7 +977,6 @@ kb.save = function() {
     silent: silent,
     content: content
   };
-
 
   kb.drawContentBodyArea4Progress('Saving');
 
@@ -1182,6 +1194,8 @@ kb.drawData = function(data) {
     if (content.ASSIGNEE) $el('#content-assignee').innerHTML = '&nbsp;&nbsp;ASSIGNEE: ' + content.ASSIGNEE;
   }
 
+  $el('#exec-logic-button').disabled = (content.LOGIC ? false : true);
+
   var statusLabel = '';
   if (data_status == 'OK') {
     statusLabel = kb.buildStatusHTML(status);
@@ -1306,6 +1320,7 @@ kb.clearContent = function() {
       FLAGS: '',
       DATA_TYPE: '',
       DATA_PRIVS: '',
+      LOGIC: '',
       BODY: ''
     }
   };
@@ -1380,7 +1395,7 @@ kb.editProps = function() {
   var content = kb.data.content;
   var props = '';
   for (var k in content) {
-    if (k != 'BODY') {
+    if ((k != 'BODY') && (k != 'LOGIC')) {
       props += k + ': ' + content[k] + '\n';
     }
   }
@@ -1541,6 +1556,115 @@ kb.validateId = function(id) {
     return true;
   }
   return false;
+};
+
+
+kb.openLogicEditor = function() {
+  if (kb.logicWindow) {
+    return;
+  }
+  kb.status |= kb.ST_LOGIC_EDITING;
+  var logic = kb.data.content.LOGIC;
+  var html = '';
+  html += '<div style="width:100%;height:100%;">';
+  html += '<div style="text-align:left;margin-bottom:4px;width:150px;">';
+  html += '<span>Logic</span>';
+  html += '<span style="position:absolute;right:5px;">'
+  html += '<button onclick="kb.testExecLogic();">TEST</button>';
+  html += '</span>';
+  html += '</div>';
+  html += '<textarea id="logic" spellcheck="false" style="width:calc(100% - 10px);height:calc(100% - 64px);margin-bottom:8px;">' + logic + '</textarea><br>';
+  html += '<div style="text-align:center;">';
+  html += '<button id="save-props-button" onclick="kb.confirmSaveLogic();">SAVE</button>';
+  html += '<button style="margin-left:10px;" onclick="kb.cancelEditLogic();">Cancel</button>';
+  html += '</div>';
+  html += '</div>';
+
+  var opt = {
+    draggable: true,
+    resizable: true,
+    pos: 'c',
+    closeButton: true,
+    width: 800,
+    height: 450,
+    minWidth: 400,
+    minHeight: 200,
+    scale: 1,
+    hidden: false,
+    modal: false,
+    title: {
+      text: 'Logic'
+    },
+    body: {
+      style: {
+        background: 'rgba(0,0,0,0.8)'
+      }
+    },
+    onclose: kb.onLogicWindowClose,
+    content: html
+  };
+
+  kb.logicWindow = util.newWindow(opt);
+
+  kb.tools.onEncDecModeChange();
+  $el('#logic').focus();
+};
+
+kb.closeLogicWindow = function() {
+  if (kb.logicWindow) {
+    kb.logicWindow.close();
+  }
+};
+
+kb.onLogicWindowClose = function() {
+  kb.logicWindow = null;
+};
+
+
+kb.confirmSaveLogic = function() {
+  util.confirm('Save logic?', kb.saveLogic);
+};
+kb.saveLogic = function() {
+  var logic = $el('#logic').value;
+  kb.savingLogic = logic;
+  var b64logic = util.encodeBase64(logic);
+  var orgUdate = kb.data.content.U_DATE;
+  var param = {
+    scm: kb.scm,
+    id: kb.data.id,
+    org_u_date: orgUdate,
+    logic: b64logic
+  };
+  kb.callApi('save_logic', param, kb.onSaveLogic);
+};
+kb.onSaveLogic = function(xhr, res, req) {
+  if (xhr.status != 200) {
+    kb.onHttpError(xhr.status);
+    return;
+  }
+  if (res.status == 'OK') {
+    kb.closeLogicWindow();
+    kb.onEditLogicEnd();
+    kb.showInfotip('OK');
+    kb.data.content.LOGIC = kb.savingLogic;
+    kb.savingLogic = '';
+  } else if (res.status == 'CONFLICT') {
+    kb.status |= kb.ST_CONFLICTING;
+    var data = res.body;
+    var m = kb.buildConflictMsg(data);
+    util.alert('Conflict!', m, null);
+  } else {
+    m = res.status + ':' + res.body;
+    log.e(m);
+    kb.showInfotip(m);
+  }
+};
+kb.cancelEditLogic = function() {
+  kb.closeLogicWindow();
+  kb.onEditLogicEnd();
+};
+kb.onEditLogicEnd = function() {
+  kb.status &= ~kb.ST_LOGIC_EDITING;
 };
 
 kb.selectSchema = function() {
@@ -2191,14 +2315,16 @@ $onKeyDown = function(e) {
   if (fn) fn(e);
 };
 $onCtrlS = function(e) {
-  if (kb.status & kb.ST_EDITING) {
+  if (kb.status & kb.ST_LOGIC_EDITING) {
+    kb.confirmSaveLogic();
+  } else if (kb.status & kb.ST_PROP_EDITING) {
+    kb.confirmSaveProps();
+  } else if (kb.status & kb.ST_EDITING) {
     if (e.shiftKey) {
       kb.save();
     } else {
       kb.confirmSaveAndExit();
     }
-  } else if (kb.status & kb.ST_PROP_EDITING) {
-    kb.confirmSaveProps();
   }
 };
 kb.onKeyDownY = function(e) {
@@ -2297,6 +2423,8 @@ $onEscKey = function(e) {
   kb.closeDialog();
   if (kb.status & kb.ST_PROP_EDITING) {
     kb.onEditPropsEnd();
+  } else if (kb.status & kb.ST_LOGIC_EDITING) {
+    kb.onEditLogicEnd();
   }
   kb.closeToolsWindow();
 };
@@ -2475,6 +2603,44 @@ kb.hasFlag = function(flgs, flag) {
     if (flgs[i] == flag) return true;
   }
   return false;
+};
+
+//-------------------------------------------------------------------------
+kb.confirmExecLogic = function() {
+  util.confirm('Exec Logic?', kb.invokeLogic);
+};
+kb.invokeLogic = function() {
+  var logic = ((kb.data.content && kb.data.content.LOGIC) ? kb.data.content.LOGIC : '');
+  kb.execLogic(logic);
+};
+kb.testExecLogic = function() {
+  var logic = $el('#logic').value;
+  kb.execLogic(logic);
+};
+kb.execLogic = function(s) {
+  eval(s);
+};
+
+kb.getDataText = function() {
+  var s = ((kb.status & kb.ST_EDITING) ? $el('#content-body-edt').value : $el('#content-body').innerHTML);
+  return s;
+};
+kb.getDataTextAsList = function() {
+  var s = kb.getDataText();
+  return util.text2list(s);
+};
+kb.setDataText = function(s) {
+  if ((kb.status & kb.ST_EDITING)) {
+    $el('#content-body-edt').value = s;
+  } else {
+    $el('#content-body').innerHTML = s;
+  }
+};
+kb.replaceDataText = function(r, s) {
+  var re = new RegExp(re);
+  var t = kb.getDataText();
+  t = t.replace(re, s);
+  kb.setDataText(s);
 };
 
 //-------------------------------------------------------------------------

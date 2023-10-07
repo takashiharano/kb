@@ -304,8 +304,40 @@ def proc_mod_props(context):
         result = create_result_object('CONFLICT', detail)
         return result
 
-    new_content = kb.parse_content(p_props, True)
+    new_content = kb.parse_content(p_props, head_only=True)
+    new_content['LOGIC'] = content['LOGIC']
     new_content['BODY'] = content['BODY']
+
+    secure = data['encrypted']
+    encryption_key = DATA_ENCRYPTION_KEY if secure else None
+    kb.write_data(scm, id, new_content, encryption_key)
+
+    result = create_result_object('OK')
+    return result
+
+#------------------------------------------------------------------------------
+def proc_save_logic(context):
+    scm = get_req_param_scm()
+    id = get_request_param('id')
+    org_u_date = get_request_param('org_u_date')
+    p_b64logic = get_request_param('logic')
+
+    data = kb.load_data(scm, id)
+    if data['status'] != 'OK':
+        result = create_result_object('ERROR:' + data['status'])
+        return result
+
+    content = data['content']
+    if content['U_DATE'] != org_u_date:
+        detail = {
+            'U_DATE': content['U_DATE'],
+            'U_USER': content['U_USER']
+        }
+        result = create_result_object('CONFLICT', detail)
+        return result
+
+    new_content = content
+    new_content['LOGIC'] = p_b64logic
 
     secure = data['encrypted']
     encryption_key = DATA_ENCRYPTION_KEY if secure else None
@@ -490,27 +522,28 @@ def send_error_text(msg):
 def proc_api(context, act):
     status = 'OK'
     result = None
-    funcname_list = [
-        'list',
-        'search',
-        'save',
-        'touch',
-        'mod_props',
-        'delete',
-        'check_exists',
-        'change_data_id',
-        'check_id',
-        'export_html',
-        'get_schema_list',
-        'get_schema_props',
-        'save_schema_props',
-        'create_schema',
-        'delete_schema'
-    ]
+    #funcname_list = [
+    #    'list',
+    #    'search',
+    #    'save',
+    #    'touch',
+    #    'mod_props',
+    #    'delete',
+    #    'check_exists',
+    #    'change_data_id',
+    #    'check_id',
+    #    'export_html',
+    #    'get_schema_list',
+    #    'get_schema_props',
+    #    'save_schema_props',
+    #    'create_schema',
+    #    'delete_schema'
+    #]
 
-    if act in funcname_list:
-        func_name = 'proc_' + act
-        g = globals()
+    #if act in funcname_list:
+    func_name = 'proc_' + act
+    g = globals()
+    if func_name in g:
         result = g[func_name](context)
     else:
         # from url query string w/o encryption

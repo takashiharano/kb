@@ -114,6 +114,7 @@ def build_main_screen(context):
         html += '          <input type="checkbox" id="chk-silent"><label for="chk-silent">Silent</label>'
 
     html += '''
+          <button id="edit-logic-button" style="margin-left:8px;" onclick="kb.openLogicEditor();">LOGIC</button>
         </span>
       </div>
       <div style="display:inline-block;position:absolute;right:10px;">
@@ -131,6 +132,7 @@ def build_main_screen(context):
             <option value="1" selected>Advanced</option>
             <option value="2">HTML</option>
           </select>'''
+    html += '<button id="exec-logic-button" style="margin-left:16px;" onclick="kb.confirmExecLogic();" disabled>LOGIC</button>'
     html += '<button id="copy-text-button" style="margin-left:16px;" onclick="kb.copyContent();">COPY</button>'
     html += '<button id="copy-url-button" style="margin-left:4px;" onclick="kb.showUrl();">URL</button>'
     html += '<button id="save-html-button" style="margin-left:4px;" onclick="kb.confirmSaveAsHtml();">SAVE<span style="font-size:10px;"> AS</span></button>'
