@@ -101,7 +101,6 @@ def build_main_screen(context):
         </span>
 
         <span id="info-edit">
-          <input type="text" id="content-id-edt" spellcheck="false" style="display:none;">
           <span style="margin-left:4px;">TITLE:</span>
           <input type="text" id="content-title-edt" spellcheck="false">
           <span style="margin-left:12px;">LABELS:</span>
@@ -114,7 +113,7 @@ def build_main_screen(context):
         html += '          <input type="checkbox" id="chk-silent"><label for="chk-silent">Silent</label>'
 
     html += '''
-          <button id="edit-logic-button" style="margin-left:8px;" onclick="kb.openLogicEditor();">LOGIC</button>
+          <button id="edit-logic-button" style="margin-left:8px;" onclick="kb.openLogicEditor();" disabled>LOGIC</button>
         </span>
       </div>
       <div style="display:inline-block;position:absolute;right:10px;">
@@ -529,9 +528,6 @@ th {
 
 #content-id {
   display: inline-block;
-}
-#content-id-edt {
-  width: 50px;
 }
 #content-title {
   display: inline-block;

@@ -851,12 +851,13 @@ kb.edit = function() {
   var data = kb.data;
   var content = data.content;
 
-  $el('#content-id-edt').value = data.id;
   $el('#content-title-edt').value = content.TITLE;
   $el('#content-body-edt').value = content.BODY;
   $el('#content-labels-edt').value = content.LABELS;
   $el('#chk-encryption').checked = data.encrypted;
   $el('#chk-silent').checked = false;
+
+  $el('#edit-logic-button').disabled = ((kb.status & kb.ST_NEW) ? true : false);
 };
 
 kb.onEditEnd = function() {
@@ -868,8 +869,6 @@ kb.onEditEnd = function() {
   kb.closeLogicWindow();
 
   $el('#content-body').show();
-
-  $el('#content-id-edt').value = '';
 
   $el('#info-label').show();
   $el('#info-edit').hide();
@@ -919,7 +918,7 @@ kb.saveAndExit = function() {
 
 kb.save = function() {
   kb.status &= ~kb.ST_SAVE_CONFIRMING;
-  var id = $el('#content-id-edt').value.trim();
+  var id = kb.data.id;
   if (kb.status & kb.ST_NEW) {
     if (id == '') {
       kb.status &= ~kb.ST_NEW;
@@ -1001,12 +1000,14 @@ kb.onSaveData = function(xhr, res, req) {
   }
   if (res.status == 'OK') {
     var savedData = res.body;
+    var id = savedData.saved_id;
     if (kb.status & kb.ST_EXIT) {
-      var id = savedData.saved_id;
       kb.reloadListAndData(id);
       kb.status &= ~kb.ST_EXIT;
     }
+    kb.data.id = id;
     kb.data.content.U_DATE = savedData.U_DATE;
+    $el('#edit-logic-button').disabled = false;
     kb.showInfotip('OK');
   } else if (res.status == 'CONFLICT') {
     kb.status |= kb.ST_CONFLICTING;
@@ -1634,7 +1635,6 @@ kb.closeLogicWindow = function() {
 kb.onLogicWindowClose = function() {
   kb.logicWindow = null;
 };
-
 
 kb.confirmSaveLogic = function() {
   util.confirm('Save logic?', kb.saveLogic);

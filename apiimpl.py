@@ -352,7 +352,7 @@ def proc_save_logic(context):
 
     detail = {
         'saved_id': id,
-        'U_DATE': new_content['U_DATE'],
+        'U_DATE': str(new_content['U_DATE']),
         'U_USER': new_content['U_USER']
     }
     result = create_result_object('OK', detail)
