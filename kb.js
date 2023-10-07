@@ -1558,22 +1558,35 @@ kb.validateId = function(id) {
   return false;
 };
 
+kb.getCurrentLogicParamCode = function() {
+  var l = ((kb.data.content && kb.data.content.LOGIC) ? kb.data.content.LOGIC : '');
+  var w = util.split(l, '\t', 2);
+  var logic = {
+    param: w[0],
+    code: w[1] || ''
+  };
+  return logic;
+};
 
 kb.openLogicEditor = function() {
   if (kb.logicWindow) {
     return;
   }
   kb.status |= kb.ST_LOGIC_EDITING;
-  var logic = kb.data.content.LOGIC;
+  var logic = kb.getCurrentLogicParamCode();
   var html = '';
   html += '<div style="width:100%;height:100%;">';
-  html += '<div style="text-align:left;margin-bottom:4px;width:150px;">';
-  html += '<span>Logic</span>';
-  html += '<span style="position:absolute;right:5px;">'
+
+  html += '<div style="height:1em;">';
+  html += '<span style="position:absolute;top:4px;right:5px;">'
   html += '<button onclick="kb.testExecLogic();">TEST</button>';
   html += '</span>';
   html += '</div>';
-  html += '<textarea id="logic" spellcheck="false" style="width:calc(100% - 10px);height:calc(100% - 64px);margin-bottom:8px;">' + logic + '</textarea><br>';
+
+  html += 'param=<br>';
+  html += '<textarea id="logic-param" spellcheck="false" style="width:calc(100% - 10px);height:64px;margin-bottom:8px;">' + logic.param + '</textarea><br>';
+  html += 'Code:<br>';
+  html += '<textarea id="logic-code" spellcheck="false" style="width:calc(100% - 10px);height:calc(100% - 172px);margin-bottom:8px;">' + logic.code + '</textarea><br>';
   html += '<div style="text-align:center;">';
   html += '<button id="save-props-button" onclick="kb.confirmSaveLogic();">SAVE</button>';
   html += '<button style="margin-left:10px;" onclick="kb.cancelEditLogic();">Cancel</button>';
@@ -1586,9 +1599,9 @@ kb.openLogicEditor = function() {
     pos: 'c',
     closeButton: true,
     width: 800,
-    height: 450,
+    height: 540,
     minWidth: 400,
-    minHeight: 200,
+    minHeight: 240,
     scale: 1,
     hidden: false,
     modal: false,
@@ -1607,7 +1620,7 @@ kb.openLogicEditor = function() {
   kb.logicWindow = util.newWindow(opt);
 
   kb.tools.onEncDecModeChange();
-  $el('#logic').focus();
+  $el('#logic-code').focus();
 };
 
 kb.closeLogicWindow = function() {
@@ -1625,7 +1638,9 @@ kb.confirmSaveLogic = function() {
   util.confirm('Save logic?', kb.saveLogic);
 };
 kb.saveLogic = function() {
-  var logic = $el('#logic').value;
+  var logicParam = $el('#logic-param').value;
+  var logicCode = $el('#logic-code').value;
+  var logic = logicParam + '\t' + logicCode;
   kb.savingLogic = logic;
   var b64logic = util.encodeBase64(logic);
   var orgUdate = kb.data.content.U_DATE;
@@ -2607,18 +2622,31 @@ kb.hasFlag = function(flgs, flag) {
 
 //-------------------------------------------------------------------------
 kb.confirmExecLogic = function() {
-  util.confirm('Exec Logic?', kb.invokeLogic);
+  var logic = kb.getCurrentLogicParamCode();
+  var opt = {
+    type: 'textarea',
+    style: {
+      textbox: {
+        width: '20em',
+        height: '5em'
+      }
+    },
+    value: logic.param
+  };
+  util.dialog.text('Parameters for Logic:', kb.invokeLogic, opt);
 };
-kb.invokeLogic = function() {
-  var logic = ((kb.data.content && kb.data.content.LOGIC) ? kb.data.content.LOGIC : '');
-  kb.execLogic(logic);
+kb.invokeLogic = function(p) {
+  var logic = kb.getCurrentLogicParamCode();
+  kb.execLogic(p, logic.code);
 };
 kb.testExecLogic = function() {
-  var logic = $el('#logic').value;
-  kb.execLogic(logic);
+  var logicParam = $el('#logic-param').value;
+  var logicCode = $el('#logic-code').value;
+  kb.execLogic(logicParam, logicCode);
 };
-kb.execLogic = function(s) {
-  eval(s);
+kb.execLogic = function(p, c) {
+  c = 'var param = ' + p + '\n' + c;
+  eval(c);
 };
 
 kb.getDataText = function() {
@@ -2641,6 +2669,14 @@ kb.replaceDataText = function(r, s) {
   var t = kb.getDataText();
   t = t.replace(re, s);
   kb.setDataText(s);
+};
+kb.alert = function(s) {
+  var opt = {
+    style: {
+      'text-align': 'left'
+    }
+  };
+  return util.alert(s, opt);
 };
 
 //-------------------------------------------------------------------------
