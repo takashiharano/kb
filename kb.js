@@ -865,6 +865,8 @@ kb.onEditEnd = function() {
   kb.status &= ~kb.ST_NEW;
   kb.data_bak = null;
 
+  kb.closeLogicWindow();
+
   $el('#content-body').show();
 
   $el('#content-id-edt').value = '';
@@ -1640,14 +1642,17 @@ kb.confirmSaveLogic = function() {
 kb.saveLogic = function() {
   var logicParam = $el('#logic-param').value;
   var logicCode = $el('#logic-code').value;
+  logicParam = logicParam.replace(/\t/g, '  ');
   var logic = logicParam + '\t' + logicCode;
   kb.savingLogic = logic;
   var b64logic = util.encodeBase64(logic);
   var orgUdate = kb.data.content.U_DATE;
+  var silent = ($el('#chk-silent').checked ? '1' : '0');
   var param = {
     scm: kb.scm,
     id: kb.data.id,
     org_u_date: orgUdate,
+    silent: silent,
     logic: b64logic
   };
   kb.callApi('save_logic', param, kb.onSaveLogic);
@@ -1658,11 +1663,13 @@ kb.onSaveLogic = function(xhr, res, req) {
     return;
   }
   if (res.status == 'OK') {
+    var savedInfo = res.body;
     kb.closeLogicWindow();
     kb.onEditLogicEnd();
     kb.showInfotip('OK');
     kb.data.content.LOGIC = kb.savingLogic;
     kb.savingLogic = '';
+    kb.data.content.U_DATE = savedInfo.U_DATE;
   } else if (res.status == 'CONFLICT') {
     kb.status |= kb.ST_CONFLICTING;
     var data = res.body;

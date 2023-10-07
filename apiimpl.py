@@ -321,6 +321,7 @@ def proc_save_logic(context):
     id = get_request_param('id')
     org_u_date = get_request_param('org_u_date')
     p_b64logic = get_request_param('logic')
+    p_silent = get_request_param('silent')
 
     data = kb.load_data(scm, id)
     if data['status'] != 'OK':
@@ -339,11 +340,22 @@ def proc_save_logic(context):
     new_content = content
     new_content['LOGIC'] = p_b64logic
 
+    if p_silent != '1':
+        now = util.get_unixtime_millis()
+        user = context.get_user_name()
+        new_content['U_DATE'] = now
+        new_content['U_USER'] = user
+
     secure = data['encrypted']
     encryption_key = DATA_ENCRYPTION_KEY if secure else None
     kb.write_data(scm, id, new_content, encryption_key)
 
-    result = create_result_object('OK')
+    detail = {
+        'saved_id': id,
+        'U_DATE': new_content['U_DATE'],
+        'U_USER': new_content['U_USER']
+    }
+    result = create_result_object('OK', detail)
     return result
 
 #------------------------------------------------------------------------------
