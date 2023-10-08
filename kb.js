@@ -2682,7 +2682,7 @@ kb.replaceDataText = function(r, s) {
   t = t.replace(re, s);
   kb.setDataText(s);
 };
-kb.alert = function(s) {
+kb.dialog = function(s) {
   var opt = {
     style: {
       'text-align': 'left'
