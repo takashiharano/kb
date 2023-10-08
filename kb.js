@@ -1640,10 +1640,12 @@ kb.confirmSaveLogic = function() {
   util.confirm('Save logic?', kb.saveLogic);
 };
 kb.saveLogic = function() {
-  var logicParam = $el('#logic-param').value;
-  var logicCode = $el('#logic-code').value;
+  var logicParam = $el('#logic-param').value.trim();
+  var logicCode = $el('#logic-code').value.trim();
   logicParam = logicParam.replace(/\t/g, '  ');
-  var logic = logicParam + '\t' + logicCode;
+  if (logicCode) logicCode += '\n';
+  var logic = '';
+  if (logicParam || logicCode) logic = logicParam + '\t' + logicCode;
   kb.savingLogic = logic;
   var b64logic = util.encodeBase64(logic);
   var orgUdate = kb.data.content.U_DATE;
