@@ -1744,6 +1744,11 @@ kb.onGetSchemaList = function(xhr, res, req) {
     html += '<span class="pseudo-link link">' + name + '</span>\n';
     html += '</span>';
     html += '</td>';
+
+    html += '<td style="width:16px;">';
+    html += '<span class="pseudo-link" onclick="kb.switchSchema(\'' + scmId + '\', true);" data-tooltip="Open new window">W</span>\n';
+    html += '</td>';
+
     if (kb.isSysAdmin) {
       html += '<td style="width:24px;">';
       html += '<span class="pseudo-link" onclick="kb.editSchemaProps(\'' + scmId + '\');" data-tooltip="Edit properties">P</span>\n';
@@ -1762,12 +1767,16 @@ kb.onGetSchemaList = function(xhr, res, req) {
   $el('#schema-list').innerHTML = html;
   if (activeScmId) kb.setActiveScm(activeScmId);
 };
-kb.switchSchema = function(scm) {
+kb.switchSchema = function(scm, nw) {
   var url = './';
   if (scm && scm != kb.defaultScm) {
     url += '?scm=' + scm;
   }
-  location.href = url;
+  if (nw) {
+    kb.openNewWindow(url);
+  } else {
+    location.href = url;
+  }
 };
 
 kb.setActiveScm = function(id) {
@@ -1829,9 +1838,6 @@ kb.onCreateSchema = function(xhr, res, req) {
   util.dialog.close();
   kb.updateSchemaList();
   kb.showInfotip('OK');
-};
-kb.switchNewSchema = function(data) {
-  kb.switchSchema(data.scm);
 };
 
 kb.editSchemaProps = function(scm) {
@@ -2872,8 +2878,9 @@ kb.tools.copy = function(id) {
   }
 };
 
-kb.openNewWindow = function() {
-  window.open(location.href);
+kb.openNewWindow = function(url) {
+  if (!url) url = location.href;
+  window.open(url);
 };
 
 //-------------------------------------------------------------------------
