@@ -23,7 +23,7 @@ DATA_BASE_DIR_PATH = WORKSPACE_PATH + 'scm/'
 WK_PATH = WORKSPACE_PATH + 'wk/'
 PROPS_FILENAME = 'properties.txt'
 
-ENCRYPTED_HEAD = '#DATA'
+DATA_ENCRYPTION_HEAD = '#DATA'
 DATA_ENCRYPTION_KEY = appconfig.data_encryption_key
 DEFAULT_ENCRYPTION_KEY = appconfig.default_encryption_key
 
@@ -673,8 +673,8 @@ def load_data(scm, id, head_only=False):
     if fileinfo is not None:
         data['size'] = fileinfo['size']
 
-    if text.startswith(ENCRYPTED_HEAD):
-        text = util.decode_base64s(text[len(ENCRYPTED_HEAD):], DATA_ENCRYPTION_KEY)
+    if text.startswith(DATA_ENCRYPTION_HEAD):
+        text = util.decode_base64s(text[len(DATA_ENCRYPTION_HEAD):], DATA_ENCRYPTION_KEY)
         data['encrypted'] = True
 
     data['content'] = parse_content(text, head_only)
@@ -805,7 +805,7 @@ def write_data(scm, id, content, encryption_key=None, path=None):
     text += content['BODY']
 
     if encryption_key is not None:
-        text = ENCRYPTED_HEAD + util.encode_base64s(text, encryption_key)
+        text = DATA_ENCRYPTION_HEAD + util.encode_base64s(text, encryption_key)
 
     if path is None:
         path = get_datafile_path(scm, id)
