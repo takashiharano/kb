@@ -128,7 +128,7 @@ def proc_get_data(context):
     scm = get_req_param_scm()
     if has_access_privilege(context, scm, id):
         status = 'OK'
-        result_data = kb.get_data(context, scm, id, True)
+        result_data = kb.get_data(context, scm, id, need_encode_b64=True)
     else:
         status = 'NO_ACCESS_RIGHTS'
         result_data = None
@@ -178,7 +178,7 @@ def proc_list(context):
         return create_result_object('SCHEMA_NOT_FOUND')
 
     if kb.has_privilege_for_scm(context, scm):
-        detail = kb.get_list(context, scm, id, True)
+        detail = kb.get_list(context, scm, id)
         result = create_result_object('OK', detail)
     else:
         result = create_result_object('NO_ACCESS_RIGHTS')
@@ -199,9 +199,9 @@ def proc_search(context):
     if id is None:
         q = get_request_param('q')
         q = util.decode_base64(q)
-        detail = kb.search_data(context, scm, q, True)
+        detail = kb.search_data(context, scm, q)
     else:
-        detail = kb.get_data(context, scm, id, True)
+        detail = kb.get_data(context, scm, id, need_encode_b64=True)
     result = create_result_object('OK', detail)
     return result
 

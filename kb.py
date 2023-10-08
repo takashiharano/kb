@@ -156,7 +156,7 @@ def get_all_data_id_list(scm):
     return data_id_list
 
 #------------------------------------------------------------------------------
-def get_list(context, scm, target_id=None, need_encode_b64=False):
+def get_list(context, scm, target_id=None):
     data_id_list = get_all_data_id_list(scm)
     data_list = []
     fixed_data_list = []
@@ -165,17 +165,10 @@ def get_list(context, scm, target_id=None, need_encode_b64=False):
         if target_id is not None and target_id != id or target_id is None and is_nan_id(id):
             continue
         try:
-            data = load_data(scm, id, True)
+            data = load_data(scm, id, head_only=True)
             content = data['content']
             if not has_data_privilege(context, content):
                 continue
-
-            if need_encode_b64:
-                if 'TITLE' in content:
-                    content['TITLE'] = util.encode_base64(content['TITLE'])
-
-                if 'LABELS' in content:
-                    content['LABELS'] = util.encode_base64(content['LABELS'])
         except:
             content = DEFAULT_CONTENT.copy()
             data = {
@@ -296,7 +289,7 @@ def filter_by_id_range(all_id_list, keyword, filtered_id_list):
     return filtered_id_list
 
 #------------------------------------------------------------------------------
-def search_data(context, scm, q, need_encode_b64=False):
+def search_data(context, scm, q):
     q = q.strip()
     q = util.to_half_width(q)
     q = util.replace(q, '\\s{2,}', ' ')
@@ -357,10 +350,6 @@ def search_data(context, scm, q, need_encode_b64=False):
         data = wk_data_list[i]
         content = data['content']
         del content['BODY']
-
-        if need_encode_b64:
-            content['TITLE'] = util.encode_base64(content['TITLE'])
-            content['LABELS'] = util.encode_base64(content['LABELS'])
 
         data['content'] = content
         data_list.append(data)
@@ -633,12 +622,6 @@ def get_data(context, scm, id, need_encode_b64=False):
         return data
 
     if need_encode_b64:
-        if 'TITLE' in content:
-            content['TITLE'] = util.encode_base64(content['TITLE'])
-
-        if 'LABELS' in content:
-            content['LABELS'] = util.encode_base64(content['LABELS'])
-
         if 'BODY' in content:
             content['BODY'] = util.encode_base64(content['BODY'])
         data['content'] = content
@@ -699,7 +682,10 @@ def parse_content(text, head_only=False):
         fielf_value = str.strip(line[p + 1:])
         content[field_name] = fielf_value
 
-    if not head_only:
+    if head_only:
+        if 'LOGIC' in content and content['LOGIC'] != '':
+            content['LOGIC'] = 'Y'
+    else:
         body = ''
         for i in range(idx, len(lines)):
             body += lines[i] + '\n'
@@ -737,14 +723,14 @@ def save_data(scm, id, new_data, user=''):
     if not 'FLAGS' in content:
         content['FLAGS'] = ''
 
-    labels = util.decode_base64(new_content['LABELS'])
+    labels = new_content['LABELS']
     labels = to_set(labels)
 
     if new_data['only_labels']:
         content['LABELS'] = labels
         secure = data['encrypted']
     else:
-        title = util.decode_base64(new_content['TITLE'])
+        title = new_content['TITLE']
         body = util.decode_base64(new_content['BODY'])
         isdataurl = is_dataurl(body)
         secure = True if new_data['encryption'] == '1' else False

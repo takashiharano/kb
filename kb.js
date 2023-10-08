@@ -325,8 +325,8 @@ kb.buildListRow = function(data, fixed) {
   var content = data.content || {};
 
   var status = content.STATUS;
-  var b64Title = ((content.TITLE == undefined) ? '' : content.TITLE);
-  var b64Labels = content.LABELS;
+  var title = ((content.TITLE == undefined) ? '' : content.TITLE);
+  var labels = content.LABELS;
   var cDate = content.C_DATE;
   var uDate = content.U_DATE;
   var score = (data.score == undefined ? '' : data.score);
@@ -362,11 +362,9 @@ kb.buildListRow = function(data, fixed) {
   } else {
     uDateStr = kb.getDateTimeString(+uDate);
   }
-  var title = util.decodeBase64(b64Title);
   if (!title) {
     title = '&lt;NO TITLE&gt;';
   }
-  var labels = util.decodeBase64(b64Labels);
   var statusLabel = '';
   if (data_status == 'OK') {
     statusLabel = kb.buildStatusHTML(status);
@@ -713,11 +711,9 @@ kb.onGetData = function(xhr, res, req) {
 
   var content = data.content;
   if (content) {
-    var b64Title = ((content.TITLE == undefined) ? '' : content.TITLE);
-    var b64Labels = content.LABELS;
+    var title = ((content.TITLE == undefined) ? '' : content.TITLE);
+    var labels = content.LABELS;
     var b64Body = content.BODY;
-    var title = util.decodeBase64(b64Title);
-    var labels = util.decodeBase64(b64Labels);
     var body = util.decodeBase64(b64Body);
     kb.data.content.TITLE = title;
     kb.data.content.LABELS = labels;
@@ -951,8 +947,6 @@ kb.save = function() {
   kb.data.content.LABELS = labels;
   kb.data.content.STATUS = status;
 
-  var b64Title = util.encodeBase64(title);
-  var b64Labels = util.encodeBase64(labels);
   var b64Logic = util.encodeBase64(logic);
   var b64Body = util.encodeBase64(body);
 
@@ -960,11 +954,11 @@ kb.save = function() {
   var content = {};
   if (kb.status & kb.ST_EDIT_ONLY_LABELS) {
     only_labels = true;
-    content.LABELS = b64Labels;
+    content.LABELS = labels;
   } else {
     only_labels = false;
-    content.TITLE = b64Title;
-    content.LABELS = b64Labels;
+    content.TITLE = title;
+    content.LABELS = labels;
     content.STATUS = status;
     content.ASSIGNEE = assignee;
     content.LOGIC = b64Logic;
