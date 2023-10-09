@@ -95,6 +95,7 @@ $onReady = function(e) {
   util.addKeyHandler('W', 'down', kb.keyHandlerW, {ctrl: false, alt: true});
   util.addKeyHandler(38, 'down', kb.keyHandlerUp);
   util.addKeyHandler(40, 'down', kb.keyHandlerDn);
+  dbg.x.addCmdTbl(kb.cmd.CMD_TBL);
   kb.status |= kb.ST_APP_READY;
 };
 
@@ -2882,6 +2883,49 @@ kb.openNewWindow = function(url) {
   if (!url) url = location.href;
   window.open(url);
 };
+
+//-------------------------------------------------------------------------
+kb.cmd = {};
+kb.cmd.cmdKbLog = function(arg) {
+  var n = arg.trim();
+  var params = {n: n};
+  kb.callApi('get_kb_log', params, kb.cmd.onCmdKbLog);
+};
+kb.cmd.onCmdKbLog = function(xhr, res) {
+  if (xhr.status != 200) {
+    kb.onHttpError(xhr.status);
+    return;
+  }
+  if (res.status != 'OK') {
+    kb.showInfotip(res.status);
+    return;
+  }
+  var logs = res.body;
+  var s = '';
+  for (var i = 0; i < logs.length; i++) {
+    var v = logs[i];
+    var a = v.split('\t');
+    var time = a[0];
+    var user = a[1];
+    var op = a[2];
+    var scm = a[3];
+    var id = a[4];
+    var info = a[5];
+    if (!info) info = '';
+
+    time = time.replace(/T/, ' ');
+    if (scm) scm = 'scm:' + scm;
+    if (id) id = 'id:' + id;
+
+    s += time + '\t' + user + '\t' + op + '\t' +scm + '\t' +id + '\t' + info + '\n';
+  }
+  var r = util.alignFields(s, '\t', 2);
+  log.mlt(r);
+};
+
+kb.cmd.CMD_TBL = [
+  {cmd: 'kblog', fn: kb.cmd.cmdKbLog, desc: 'Show KB logs'}
+];
 
 //-------------------------------------------------------------------------
 $onBeforeUnload = function(e) {

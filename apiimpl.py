@@ -17,6 +17,7 @@ util.append_system_path(__file__, ROOT_PATH + 'websys/bin')
 import appconfig
 import web
 import kb
+import logger
 
 DATA_ENCRYPTION_KEY = appconfig.data_encryption_key
 
@@ -89,6 +90,9 @@ def proc_save_schema_props(context):
     result_data = {
         'scm': scm
     }
+
+    logger.write_operation_log(context, 'MOD_SCM_PROPS', scm)
+
     send_result_json('OK', result_data)
     return None
 
@@ -105,6 +109,9 @@ def proc_create_schema(context):
     result_data = {
         'scm': scm
     }
+
+    logger.write_operation_log(context, 'CREATE_SCM', scm)
+
     send_result_json(status, result_data)
     return None
 
@@ -119,6 +126,9 @@ def proc_delete_schema(context):
     result_data = {
         'scm': scm
     }
+
+    logger.write_operation_log(context, 'DELETE_SCM', scm)
+
     send_result_json(status, result_data)
     return None
 
@@ -129,6 +139,7 @@ def proc_get_data(context):
     if has_access_privilege(context, scm, id):
         status = 'OK'
         result_data = kb.get_data(context, scm, id, need_encode_b64=True)
+        logger.write_operation_log(context, 'GET_DATA', scm, id, data=result_data)
     else:
         status = 'NO_ACCESS_RIGHTS'
         result_data = None
@@ -178,6 +189,7 @@ def proc_list(context):
         return create_result_object('SCHEMA_NOT_FOUND')
 
     if kb.has_privilege_for_scm(context, scm):
+        logger.write_operation_log(context, 'LIST', scm, id)
         detail = kb.get_list(context, scm, id)
         result = create_result_object('OK', detail)
     else:
@@ -195,6 +207,8 @@ def proc_search(context):
 
     if not kb.has_privilege_for_scm(context, scm):
         return create_result_object('NO_ACCESS_RIGHTS')
+
+    logger.write_operation_log(context, 'SEARCH', scm, id)
 
     if id is None:
         q = get_request_param('q')
@@ -233,6 +247,8 @@ def proc_save(context):
         saved_id = saved_obj['id']
         saved_date = str(saved_content['U_DATE'])
         saved_user = saved_content['U_USER']
+
+        logger.write_save_log(context, scm, id, new_data, saved_obj)
     else:
         status = 'CONFLICT'
         saved_id = None
@@ -274,6 +290,8 @@ def proc_touch(context):
         encryption_key = DATA_ENCRYPTION_KEY if secure else None
         kb.write_data(scm, id, content, encryption_key)
 
+        logger.write_operation_log(context, 'TOUCH', scm, id)
+
     result = create_result_object('OK')
     return result
 
@@ -311,6 +329,8 @@ def proc_mod_props(context):
     secure = data['encrypted']
     encryption_key = DATA_ENCRYPTION_KEY if secure else None
     kb.write_data(scm, id, new_content, encryption_key)
+
+    logger.write_operation_log(context, 'MOD_PROPS', scm, id, data=data)
 
     result = create_result_object('OK')
     return result
@@ -350,6 +370,8 @@ def proc_save_logic(context):
     encryption_key = DATA_ENCRYPTION_KEY if secure else None
     kb.write_data(scm, id, new_content, encryption_key)
 
+    logger.write_operation_log(context, 'SAVE_LOGIC', scm, id, data=data)
+
     detail = {
         'saved_id': id,
         'U_DATE': str(new_content['U_DATE']),
@@ -366,6 +388,9 @@ def proc_delete(context):
 
     id = get_request_param('id')
     status = kb.delete_data(scm, id)
+
+    logger.write_operation_log(context, 'DELETE', scm, id, info=status)
+
     result = create_result_object(status)
     return result
 
@@ -394,6 +419,8 @@ def proc_change_data_id(context):
         'id_fm': id_fm,
         'id_to': id_to
     }
+
+    logger.write_operation_log(context, 'CHG_DATA_ID', scm, id_fm, 'to:' + id_to)
 
     result = create_result_object(status, detail)
     return result
@@ -456,6 +483,9 @@ def proc_export_html(context):
 '''
     b = html.encode()
     filename = 'kb-' + id + '.html'
+
+    logger.write_operation_log(context, 'EXPORT_HTML', scm, id)
+
     util.send_binary(b, filename=filename)
     result = create_result_object('OK', None, 'octet-stream')
     return result
@@ -476,6 +506,8 @@ def proc_export_data(context):
         filename += '_' + scm
     filename += '.zip'
 
+    logger.write_operation_log(context, 'EXPORT_DATA', scm, dataid='')
+
     util.send_binary(b, filename=filename)
     return None
 
@@ -485,9 +517,31 @@ def proc_export_data_all(context):
         return None
     p_decrypt = web.get_raw_request_param('decrypt')
     decrypt = p_decrypt == '1'
+
+    logger.write_operation_log(context, 'EXPORT_ALL_DATA', scm='', dataid='')
+
     b = kb.export_all_data(context, decrypt)
     util.send_binary(b, filename='kbdata_all.zip')
     return None
+
+#------------------------------------------------------------------------------
+def proc_get_kb_log(context):
+    status = 'OK'
+    if context.is_admin():
+        p_n = get_request_param('n')
+        n = 30
+        if p_n is not None:
+            try:
+                n = int(p_n)
+            except:
+                pass
+        n = n * (-1)
+        logs = logger.get_log()[n:]
+    else:
+        status = 'NO_PRIVILEGE'
+        logs = None
+
+    send_result_json(status, body=logs)
 
 #------------------------------------------------------------------------------
 def _build_css(fontsize='12', fontfamily='', with_color=False):
