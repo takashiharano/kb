@@ -2631,68 +2631,6 @@ kb.hasFlag = function(flgs, flag) {
 };
 
 //-------------------------------------------------------------------------
-kb.confirmExecLogic = function() {
-  var logic = kb.getCurrentLogicParamCode();
-  var opt = {
-    type: 'textarea',
-    style: {
-      content: {
-        'text-align': 'left'
-      },
-      textbox: {
-        width: '32em',
-        height: '8em'
-      }
-    },
-    value: logic.param
-  };
-  util.dialog.text('Parameters:', kb.invokeLogic, opt);
-};
-kb.invokeLogic = function(p) {
-  var logic = kb.getCurrentLogicParamCode();
-  kb.execLogic(p, logic.code);
-};
-kb.testExecLogic = function() {
-  var logicParam = $el('#logic-param').value;
-  var logicCode = $el('#logic-code').value;
-  kb.execLogic(logicParam, logicCode);
-};
-kb.execLogic = function(p, c) {
-  c = 'var param = ' + p + '\n' + c;
-  eval(c);
-};
-
-kb.getDataText = function() {
-  var s = ((kb.status & kb.ST_EDITING) ? $el('#content-body-edt').value : $el('#content-body').innerHTML);
-  return s;
-};
-kb.getDataTextAsList = function() {
-  var s = kb.getDataText();
-  return util.text2list(s);
-};
-kb.setDataText = function(s) {
-  if ((kb.status & kb.ST_EDITING)) {
-    $el('#content-body-edt').value = s;
-  } else {
-    $el('#content-body').innerHTML = s;
-  }
-};
-kb.replaceDataText = function(r, s) {
-  var re = new RegExp(re);
-  var t = kb.getDataText();
-  t = t.replace(re, s);
-  kb.setDataText(s);
-};
-kb.dialog = function(s) {
-  var opt = {
-    style: {
-      'text-align': 'left'
-    }
-  };
-  return util.alert(s, opt);
-};
-
-//-------------------------------------------------------------------------
 kb.tools = {};
 
 kb.tools.buildBsb64Html = function() {
@@ -2926,6 +2864,71 @@ kb.cmd.onCmdKbLog = function(xhr, res) {
 kb.cmd.CMD_TBL = [
   {cmd: 'kblog', fn: kb.cmd.cmdKbLog, desc: 'Show KB logs'}
 ];
+
+//-------------------------------------------------------------------------
+kb.confirmExecLogic = function() {
+  var logic = kb.getCurrentLogicParamCode();
+  var opt = {
+    type: 'textarea',
+    style: {
+      content: {
+        'text-align': 'left'
+      },
+      textbox: {
+        width: '32em',
+        height: '8em'
+      }
+    },
+    value: logic.param
+  };
+  util.dialog.text('Parameters:', kb.invokeLogic, opt);
+};
+kb.invokeLogic = function(p) {
+  var logic = kb.getCurrentLogicParamCode();
+  kb.execLogic(p, logic.code);
+};
+kb.testExecLogic = function() {
+  var logicParam = $el('#logic-param').value;
+  var logicCode = $el('#logic-code').value;
+  kb.execLogic(logicParam, logicCode);
+};
+kb.execLogic = function(p, c) {
+  p = p.trim();
+  if (p) c = 'var param = ' + p + '\n' + c;
+  eval(c);
+};
+//-----------------------------
+var logic = {};
+logic.getDataText = function() {
+  var s = ((kb.status & kb.ST_EDITING) ? $el('#content-body-edt').value : $el('#content-body').innerHTML);
+  return s;
+};
+logic.getDataTextAsList = function() {
+  var s = logic.getDataText();
+  return util.text2list(s);
+};
+logic.setDataText = function(s) {
+  if ((kb.status & kb.ST_EDITING)) {
+    $el('#content-body-edt').value = s;
+  } else {
+    $el('#content-body').innerHTML = s;
+  }
+};
+logic.replaceDataText = function(r, s) {
+  var re = new RegExp(re);
+  var t = logic.getDataText();
+  t = t.replace(re, s);
+  logic.setDataText(s);
+};
+logic.dialog = function(s) {
+  var opt = {
+    style: {
+      'text-align': 'left'
+    }
+  };
+  return util.alert(s, opt);
+};
+//-----------------------------
 
 //-------------------------------------------------------------------------
 $onBeforeUnload = function(e) {
