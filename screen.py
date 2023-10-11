@@ -80,7 +80,8 @@ def build_main_screen(context):
     html += '''
     </div>
     <div style="height:1em;">
-      <pre id="info"></pre>
+      <span id="info"></span>
+      <div style="display:inline-block;position:absolute;right:24px;color:#aaa;"><span id="all-data-size"></span></div>
     </div>
     <div id="list-wrp">
       <pre id="list"></pre>

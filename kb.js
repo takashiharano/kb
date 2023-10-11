@@ -239,6 +239,12 @@ kb.onGetList = function(xhr, res, req) {
   kb.fixedItemList = (data.fixed_data_list ? data.fixed_data_list : []);
   kb.itemList = data.data_list;
   kb.totalCount = data.total_count;
+
+  var allDataSize = data.all_data_size;
+  if (allDataSize != undefined) {
+    $el('#all-data-size').innerHTML = 'Current DB Size: ' + util.convByte(allDataSize) + 'B';
+  }
+
   kb.drawList(kb.fixedItemList, kb.itemList, kb.listStatus.sortIdx, kb.listStatus.sortOrder, kb.totalCount);
   if (kb.itemList.length == 1) {
     $el('#id-txt').value = '';

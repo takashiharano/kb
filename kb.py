@@ -198,7 +198,10 @@ def get_list(context, scm, target_id=None):
             else:
                 break
 
+    all_data_size = util.get_path_size(DATA_BASE_DIR_PATH, recursive=True)
+
     data_list_obj = {
+        'all_data_size': all_data_size,
         'total_count': total_count,
         'fixed_data_list': fixed_data_list,
         'data_list': data_list
