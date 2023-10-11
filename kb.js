@@ -211,13 +211,14 @@ kb.callApi = function(act, params, cb) {
   kb.http(req, cb);
 };
 
-kb.getList = function(id) {
+kb.getList = function(id, reload) {
   var param = {
     scm: kb.scm
   };
   if (id != undefined) {
     param.id = id;
   }
+  if (reload) param.reload = '1';
   kb.onStartListLoading('Loading');
   kb.callApi('list', param, kb.onGetList);
 };
@@ -516,15 +517,15 @@ kb.getListAll = function() {
   kb.listAll();
   $el('#q').focus();
 };
-kb.listAll = function() {
+kb.listAll = function(reload) {
   if (!kb.isListLoading()) {
     kb.listStatus.sortIdx = 5;
     kb.listStatus.sortOrder = 2;
-    kb.getList();
+    kb.getList(null, reload);
   }
 };
 
-kb.search = function() {
+kb.search = function(reload) {
   if (kb.isListLoading()) {
     return;
   }
@@ -534,17 +535,17 @@ kb.search = function() {
   if (id != '') {
     id = util.toHalfWidth(id);
     if (id.match(/[ ,-]/)) {
-      kb.searchByIds(id);
+      kb.searchByIds(id, reload);
     } else {
       kb.listAndShowDataById(id);
     }
   } else if (q) {
-    kb.searchByKeyword(q);
+    kb.searchByKeyword(q, reload);
   } else {
-    kb.listAll();
+    kb.listAll(reload);
   }
 };
-kb.searchByIds = function(ids) {
+kb.searchByIds = function(ids, reload) {
   var q = 'id:';
   ids = util.toSingleSP(ids);
   ids = ids.replace(/\s/g, ',');
@@ -553,9 +554,9 @@ kb.searchByIds = function(ids) {
     if (i > 0) q += ',';
     q += ids[i];
   }
-  kb.searchByKeyword(q);
+  kb.searchByKeyword(q, reload);
 };
-kb.searchByKeyword = function(q) {
+kb.searchByKeyword = function(q, reload) {
   if (q.match(/^label:[^\s]+?$/) || q.match(/^status:[^\s]+?$/) || q.match(/^updated..:[^\s]+?$/)) {
     kb.listStatus.sortIdx = 5;
   } else if (q.match(/^created..:[^\s]+?$/)) {
@@ -568,6 +569,7 @@ kb.searchByKeyword = function(q) {
     scm: kb.scm,
     q: util.encodeBase64(q)
   };
+  if (reload) param.reload = '1';
   kb.onStartListLoading('Searching');
   kb.callApi('search', param, kb.onSearchCb);
 };
@@ -646,14 +648,14 @@ kb.highlightSelectedRow = function(id) {
   $el('#row-' + id).addClass('row-selected');
 };
 
-kb.getData = function(id) {
+kb.getData = function(id, reload) {
   kb.pendingId = id;
   if (kb.status & kb.ST_EDITING) {
     util.confirm('Cancel?', kb.cancelAndGetData, kb.cancelAndGetDataN, {focus: 'no'});
     return;
   }
   kb.status &= ~kb.ST_CONFLICTING;
-  kb._getData();
+  kb._getData(reload);
 };
 kb.cancelAndGetData = function() {
   kb._cancel();
@@ -662,7 +664,7 @@ kb.cancelAndGetData = function() {
 kb.cancelAndGetDataN = function() {
   kb.pendingKey = null;
 };
-kb._getData = function() {
+kb._getData = function(reload) {
   var id = kb.pendingId;
   if (id == null) return;
   kb.pendingId = null;
@@ -673,6 +675,9 @@ kb._getData = function() {
   };
   if (kb.token) {
     param.token = kb.token;
+  }
+  if (reload) {
+    param.reload = '1';
   }
   kb.onStartDataLoading();
   kb.callApi('get', param, kb.onGetData);
@@ -1056,7 +1061,7 @@ kb.onTouchDone = function(xhr, res, req) {
       kb.reloadListAndData(kb.data.id);
     } else {
       $el('#content-body').innerHTML = '';
-      kb.search();
+      kb.search(true);
     }
     kb.showInfotip('OK');
   } else {
@@ -1070,8 +1075,8 @@ kb.cancelTouch = function() {
 kb.reloadListAndData = function(id) {
   kb.listStatus.sortIdx = 5;
   kb.listStatus.sortOrder = 2;
-  kb.search();
-  kb.getData(id);
+  kb.search(true);
+  kb.getData(id, true);
 };
 
 kb.onConflictOK = function() {
@@ -1346,7 +1351,7 @@ kb.onDelete = function(xhr, res, req) {
   }
   if (res.status == 'OK') {
     kb.showInfotip('OK');
-    kb.getList();
+    kb.getList(null, true);
   } else {
     kb.showInfotip(res.status);
     log.e(res.status + ':' + res.body);

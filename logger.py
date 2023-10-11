@@ -26,7 +26,7 @@ def write_log(data):
     util.append_line_to_text_file(LOG_FILE_PATH, data, max=1000)
 
 #----------------------------------------------------------
-def write_app_log(uid, op_type, scm, dataid, info=''):
+def write_app_log(user, op_type, scm, dataid, info=''):
     now = util.get_timestamp()
     date_time = util.get_datetime_str(now, fmt='%Y-%m-%dT%H:%M:%S.%f')
 
@@ -40,7 +40,7 @@ def write_app_log(uid, op_type, scm, dataid, info=''):
 
     data = date_time
     data += '\t'
-    data += uid
+    data += user
     data += '\t'
     data += op_type
     data += '\t'
@@ -53,8 +53,11 @@ def write_app_log(uid, op_type, scm, dataid, info=''):
 
 #----------------------------------------------------------
 def write_operation_log(context, op_type, scm, dataid=None, info='', data=None):
-    user_info = context.get_user_info()
-    uid = user_info['uid']
+    p_reload = web.get_request_param('reload')
+    if p_reload == '1':
+        return
+
+    user = context.get_user_name()
 
     if data is not None:
         if 'content' in data:
@@ -64,12 +67,11 @@ def write_operation_log(context, op_type, scm, dataid=None, info='', data=None):
                     info += ' '
                 info += 'Title:' +  content['TITLE']
 
-    write_app_log(uid, op_type, scm, dataid, info)
+    write_app_log(user, op_type, scm, dataid, info)
 
 #----------------------------------------------------------
 def write_save_log(context, scm, dataid, new_data, saved_obj):
-    user_info = context.get_user_info()
-    uid = user_info['uid']
+    user = context.get_user_name()
 
     op_type = 'SAVE_DATA'
     info = ''
@@ -92,4 +94,4 @@ def write_save_log(context, scm, dataid, new_data, saved_obj):
                 info += ' '
             info += 'Title:' +  content['TITLE']
 
-    write_app_log(uid, op_type, scm, saved_id, info)
+    write_app_log(user, op_type, scm, saved_id, info)

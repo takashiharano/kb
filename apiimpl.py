@@ -208,13 +208,13 @@ def proc_search(context):
     if not kb.has_privilege_for_scm(context, scm):
         return create_result_object('NO_ACCESS_RIGHTS')
 
-    logger.write_operation_log(context, 'SEARCH', scm, id)
-
     if id is None:
         q = get_request_param('q')
         q = util.decode_base64(q)
+        logger.write_operation_log(context, 'SEARCH', scm, id, info='q=' + q)
         detail = kb.search_data(context, scm, q)
     else:
+        logger.write_operation_log(context, 'SEARCH', scm, id)
         detail = kb.get_data(context, scm, id, need_encode_b64=True)
     result = create_result_object('OK', detail)
     return result
@@ -276,6 +276,8 @@ def proc_touch(context):
     keep_updated_by = True if p_keep_updated_by == '1' else False
     ids = p_ids.split(',')
     user = context.get_user_name()
+    info = 'keep_updated_by=1' if keep_updated_by else ''
+    logger.write_operation_log(context, 'TOUCH', scm, p_ids, info=info)
     for i in range(len(ids)):
         id = ids[i]
         data = kb.get_data(context, scm, id)
@@ -289,8 +291,6 @@ def proc_touch(context):
         secure = data['encrypted']
         encryption_key = DATA_ENCRYPTION_KEY if secure else None
         kb.write_data(scm, id, content, encryption_key)
-
-        logger.write_operation_log(context, 'TOUCH', scm, id)
 
     result = create_result_object('OK')
     return result
