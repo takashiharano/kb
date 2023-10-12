@@ -136,11 +136,13 @@ def proc_delete_schema(context):
 def proc_get_data(context):
     id = get_request_param('id')
     scm = get_req_param_scm()
-    if has_access_privilege(context, scm, id):
+
+    if kb.has_privilege_for_scm(context, scm) and has_access_privilege(context, scm, id):
         status = 'OK'
         result_data = kb.get_data(context, scm, id, need_encode_b64=True)
         logger.write_operation_log(context, 'GET_DATA', scm, id, data=result_data)
     else:
+        logger.write_operation_log(context, 'GET_DATA:FORBIDDEN', scm, id)
         status = 'NO_ACCESS_RIGHTS'
         result_data = None
 
@@ -158,8 +160,10 @@ def proc_download_b64content(context):
             idx = int(p_idx)
         except:
             idx = 0
+        logger.write_operation_log(context, 'DOWNLOAD_B64CONTENT', scm, id, info='idx=' + idx)
         kb.download_b64content(context, scm, id, idx)
     else:
+        logger.write_operation_log(context, 'DOWNLOAD_B64CONTENT:FORBIDDEN', scm, id)
         kb.send_error_file('NO_ACCESS_RIGHTS')
     return None
 
@@ -186,6 +190,7 @@ def proc_list(context):
     scm = get_req_param_scm()
 
     if not kb.schema_exists(scm):
+        logger.write_operation_log(context, 'LIST:SCHEMA_NOT_FOUND', scm, id)
         return create_result_object('SCHEMA_NOT_FOUND')
 
     if kb.has_privilege_for_scm(context, scm):
@@ -193,6 +198,7 @@ def proc_list(context):
         detail = kb.get_list(context, scm, id)
         result = create_result_object('OK', detail)
     else:
+        logger.write_operation_log(context, 'LIST:FORBIDDEN', scm, id)
         result = create_result_object('NO_ACCESS_RIGHTS')
 
     return result
@@ -203,9 +209,11 @@ def proc_search(context):
     id = get_request_param('id')
 
     if not kb.schema_exists(scm):
+        logger.write_operation_log(context, 'SEARCH:SCHEMA_NOT_FOUND', scm, id)
         return create_result_object('SCHEMA_NOT_FOUND')
 
     if not kb.has_privilege_for_scm(context, scm):
+        logger.write_operation_log(context, 'SEARCH:FORBIDDEN', scm, id)
         return create_result_object('NO_ACCESS_RIGHTS')
 
     if id is None:
@@ -222,14 +230,16 @@ def proc_search(context):
 #------------------------------------------------------------------------------
 def proc_save(context):
     scm = get_req_param_scm()
+    id = get_request_param('id')
 
     if not kb.schema_exists(scm):
+        logger.write_operation_log(context, 'SAVE_DATA:SCHEMA_NOT_FOUND', scm, id)
         return create_result_object('SCHEMA_NOT_FOUND')
 
     if not kb.has_privilege_for_scm(context, scm):
+        logger.write_operation_log(context, 'SAVE_DATA:FORBIDDEN', scm, id)
         return create_result_object('NO_ACCESS_RIGHTS')
 
-    id = get_request_param('id')
     data_json = get_request_param('data')
     new_data = util.from_json(data_json)
 
@@ -254,6 +264,7 @@ def proc_save(context):
         saved_id = None
         saved_date = content['U_DATE']
         saved_user = content['U_USER']
+        logger.write_operation_log(context, 'SAVE_DATA:CONFLICT', scm, id, data=data)
 
     detail = {
         'saved_id': saved_id,
@@ -267,16 +278,17 @@ def proc_save(context):
 #------------------------------------------------------------------------------
 def proc_touch(context):
     scm = get_req_param_scm()
-
-    if not kb.has_privilege_for_scm(context, scm):
-        return create_result_object('NO_ACCESS_RIGHTS')
-
     p_ids = get_request_param('ids')
     p_keep_updated_by = get_request_param('keep_updated_by', '0')
     keep_updated_by = True if p_keep_updated_by == '1' else False
+    info = 'keep_updated_by=1' if keep_updated_by else ''
+
+    if not kb.has_privilege_for_scm(context, scm):
+        logger.write_operation_log(context, 'TOUCH:FORBIDDEN', scm, p_ids, info=info)
+        return create_result_object('NO_ACCESS_RIGHTS')
+
     ids = p_ids.split(',')
     user = context.get_user_name()
-    info = 'keep_updated_by=1' if keep_updated_by else ''
     logger.write_operation_log(context, 'TOUCH', scm, p_ids, info=info)
     for i in range(len(ids)):
         id = ids[i]
@@ -297,12 +309,14 @@ def proc_touch(context):
 
 #------------------------------------------------------------------------------
 def proc_mod_props(context):
+    scm = get_req_param_scm()
+    id = get_request_param('id')
+
     if not context.is_admin() and not context.has_permission('sysadmin'):
+        logger.write_operation_log(context, 'MOD_PROPS:FORBIDDEN', scm, id)
         result = create_result_object('FORBIDDEN')
         return result
 
-    scm = get_req_param_scm()
-    id = get_request_param('id')
     org_u_date = get_request_param('org_u_date')
     p_props = get_request_param('props')
     p_props = util.decode_base64(p_props)
@@ -354,6 +368,7 @@ def proc_save_logic(context):
             'U_DATE': content['U_DATE'],
             'U_USER': content['U_USER']
         }
+        logger.write_operation_log(context, 'SAVE_LOGIC:CONFLICT', scm, id, data=data)
         result = create_result_object('CONFLICT', detail)
         return result
 
@@ -383,12 +398,13 @@ def proc_save_logic(context):
 #------------------------------------------------------------------------------
 def proc_delete(context):
     scm = get_req_param_scm()
+    id = get_request_param('id')
+
     if not kb.has_privilege_for_scm(context, scm):
+        logger.write_operation_log(context, 'DELETE:FORBIDDEN', scm, id)
         return create_result_object('NO_ACCESS_RIGHTS')
 
-    id = get_request_param('id')
     status = kb.delete_data(scm, id)
-
     logger.write_operation_log(context, 'DELETE', scm, id, info=status)
 
     result = create_result_object(status)
@@ -407,13 +423,15 @@ def proc_check_exists(context):
 
 #------------------------------------------------------------------------------
 def proc_change_data_id(context):
-    if not context.is_admin() and not context.has_permission('sysadmin'):
-        result = create_result_object('FORBIDDEN')
-        return result
-
     scm = get_req_param_scm()
     id_fm = get_request_param('id_fm')
     id_to = get_request_param('id_to')
+
+    if not context.is_admin() and not context.has_permission('sysadmin'):
+        logger.write_operation_log(context, 'CHG_DATA_ID:FORBIDDEN', scm, id_fm, 'to:' + id_to)
+        result = create_result_object('FORBIDDEN')
+        return result
+
     status = kb.change_data_id(scm, id_fm, id_to)
     detail = {
         'id_fm': id_fm,
@@ -446,12 +464,14 @@ def proc_check_id(context):
 #------------------------------------------------------------------------------
 def proc_export_html(context):
     scm = get_req_param_scm()
+    id = get_request_param('id')
+
     if not kb.has_privilege_for_scm(context, scm):
+        logger.write_operation_log(context, 'EXPORT_HTML:FORBIDDEN', scm, id)
         send_error_text('NO_ACCESS_RIGHTS:scm=' + scm)
         result = create_result_object('OK', None, 'octet-stream')
         return result
 
-    id = get_request_param('id')
     body = get_request_param('body')
     body = util.decode_base64(body)
     fontsize = get_request_param('fontsize')
@@ -494,6 +514,7 @@ def proc_export_html(context):
 def proc_export_data(context):
     scm = get_req_param_scm()
     if not kb.has_privilege_for_scm(context, scm):
+        logger.write_operation_log(context, 'EXPORT_DATA:FORBIDDEN', scm, dataid='')
         send_error_text('NO_ACCESS_RIGHTS:scm=' + scm)
         return None
 
@@ -513,6 +534,7 @@ def proc_export_data(context):
 
 def proc_export_data_all(context):
     if not context.is_admin() and not has_valid_apitoken():
+        logger.write_operation_log(context, 'EXPORT_ALL_DATA:FORBIDDEN', scm='', dataid='')
         send_error_text('NO_ACCESS_RIGHTS')
         return None
     p_decrypt = web.get_raw_request_param('decrypt')
