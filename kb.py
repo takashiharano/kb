@@ -37,9 +37,7 @@ DEFAULT_CONTENT = {
     'LABELS': '',
     'STATUS': '',
     'FLAGS': '',
-    'DATA_TYPE': '',
-    'DATA_PRIVS': '',
-    'LOGIC': ''
+    'DATA_PRIVS': ''
 }
 
 SP_KEYWORD_NANIDS = '*nanids'
@@ -120,7 +118,7 @@ def schema_exists(scm):
 def create_schema(scm, props):
     if schema_exists(scm):
         return 'SCM_ALREADY_EXISTS'
-    if not util.match(scm, '^[a-z0-9_\-]+$'):
+    if not util.match(scm, '^[a-z0-9_\\-]+$'):
         return 'ILLEGAL_SCM_ID'
 
     path = DATA_BASE_DIR_PATH + scm
@@ -742,8 +740,23 @@ def save_data(scm, id, new_data, user=''):
         content['LABELS'] = labels
         content['STATUS'] = new_content['STATUS']
         content['ASSIGNEE'] = new_content['ASSIGNEE']
-        content['DATA_TYPE'] = 'dataurl' if isdataurl else ''
+        content['FLAGS'] = new_content['FLAGS']
+        if isdataurl:
+            content['DATA_TYPE'] = 'dataurl'
+        else:
+            content['DATA_TYPE'] = ''
+
+        if 'PASSWORD' in new_content and new_content['PASSWORD'] != '':
+            content['PASSWORD'] = new_content['PASSWORD']
+        else:
+            content['PASSWORD'] = ''
+
         content['LOGIC'] = new_content['LOGIC']
+
+        content = del_if_filed_is_empty(content, 'LOGIC')
+        content = del_if_filed_is_empty(content, 'PASSWORD')
+        content = del_if_filed_is_empty(content, 'DATA_TYPE')
+
         content['BODY'] = body
 
     if not silent:
@@ -760,6 +773,11 @@ def save_data(scm, id, new_data, user=''):
         'data': data
     }
     return saved_data
+
+def del_if_filed_is_empty(obj, key):
+    if key in obj and obj[key] == '':
+        del obj[key]
+    return obj
 
 #------------------------------------------------------------------------------
 def to_set(s):
@@ -804,7 +822,7 @@ def write_data(scm, id, content, encryption_key=None, path=None):
 def delete_data(scm, id):
     if id == '':
         return 'ERR_ROOT_PATH'
-    if util.match(id, '\.\.'):
+    if util.match(id, '\\.\\.'):
         return 'ERR_PARENT_PATH'
     path = get_datafile_path(scm, id)
     if not util.path_exists(path):
@@ -1084,7 +1102,7 @@ def has_privilege(context, target_priv):
         # public-mode
         return True
 
-    target_priv = util.replace(target_priv, 'kb\.', '')
+    target_priv = util.replace(target_priv, 'kb\\.', '')
     return util.has_item_value(access_control, target_priv, separator='|')
 
 def has_data_privilege(context, content):

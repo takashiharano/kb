@@ -160,7 +160,7 @@ def proc_download_b64content(context):
             idx = int(p_idx)
         except:
             idx = 0
-        logger.write_operation_log(context, 'DOWNLOAD_B64CONTENT', scm, id, info='idx=' + idx)
+        logger.write_operation_log(context, 'DOWNLOAD_B64CONTENT', scm, id, info='idx=' + str(idx))
         kb.download_b64content(context, scm, id, idx)
     else:
         logger.write_operation_log(context, 'DOWNLOAD_B64CONTENT:FORBIDDEN', scm, id)
@@ -337,7 +337,10 @@ def proc_mod_props(context):
         return result
 
     new_content = kb.parse_content(p_props, head_only=True)
-    new_content['LOGIC'] = content['LOGIC']
+
+    if 'LOGIC' in content:
+        new_content['LOGIC'] = content['LOGIC']
+
     new_content['BODY'] = content['BODY']
 
     secure = data['encrypted']

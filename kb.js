@@ -35,6 +35,7 @@ kb.LIST_COLUMNS = [
   {key: 'size', label: 'SIZE', meta: true},
   {key: 'DATA_PRIVS', label: 'DATA_PRIVS', forAdmin: true},
   {key: 'LOGIC', label: ''},
+  {key: 'PASSWORD', label: ''},
   {key: 'encrypted', label: '', meta: true}
 ];
 kb.onselectstart = document.onselectstart;
@@ -52,6 +53,10 @@ kb.pendingId = null;
 kb.scm = '';
 kb.scmProps = null;
 kb.data = null;
+kb.pw = {
+  toView: null,
+  toSave: null
+};
 kb.data_bak = null;
 kb.urlOfData = '';
 kb.dndHandler = null;
@@ -384,9 +389,13 @@ kb.buildListRow = function(data, fixed) {
   if (content.LOGIC) {
     hasLogic = '<span data-tooltip="Logic">&lt;/&gt;</span>';
   }
+  var isPwReq = '';
+  if (content.PASSWORD) {
+    isPwReq = '&#x1F512;';
+  }
   var encrypted = '';
   if (data.encrypted) {
-    encrypted = '<span data-tooltip="Encrypted">&#x1F512;</span>';
+    encrypted = '<span data-tooltip="Encrypted">*</span>';
   }
   var dlLink = '';
   if (content.DATA_TYPE == 'dataurl') {
@@ -428,7 +437,8 @@ kb.buildListRow = function(data, fixed) {
     html += '<td>' + privsHTML + '</td>';
   }
   html += '<td style="text-align:center;cursor:default;">' + hasLogic + '</td>';
-  html += '<td style="text-align:center;cursor:default;">' + encrypted + '</td>';
+  html += '<td style="text-align:center;width:16px;cursor:default;">' + isPwReq + '</td>';
+  html += '<td style="text-align:center;width:16px;cursor:default;">' + encrypted + '</td>';
 
   if (data_status != 'OK') {
     html += '<td class="center"><span class="pseudo-link text-red" data-tooltip="Delete" onclick="kb.delete(\'' + id + '\');">X</span></td>';
@@ -670,11 +680,22 @@ kb.cancelAndGetData = function() {
 kb.cancelAndGetDataN = function() {
   kb.pendingKey = null;
 };
+
+kb.clearPwValue = function() {
+  kb.pw = {
+    toView: null,
+    toSave: null
+  };
+};
+
 kb._getData = function(reload) {
   var id = kb.pendingId;
   if (id == null) return;
   kb.pendingId = null;
   kb.requestedId = id;
+  if (!reload) {
+    kb.clearPwValue();
+  }
   var param = {
     scm: kb.scm,
     id: id
@@ -733,8 +754,67 @@ kb.onGetData = function(xhr, res, req) {
     kb.data.content.BODY = body;
   }
 
+  if (kb.hasFieldValue(content, 'PASSWORD') && !kb.pw.toView) {
+    kb.openPasswordInputDialog();
+  } else {
+    kb.showReceivedData();
+  }
+  kb.enableButtons4View();
+};
+kb.showReceivedData = function() {
   kb.drawData(kb.data);
   $el('.for-view').show();
+};
+
+kb.openPasswordInputDialog = function() {
+  var opt = {
+    secure: true,
+    onenter: kb.onPwEnter
+  };
+  util.dialog.text('Enter password', kb.showDataWithPassword, kb.showDataWithPasswordC, opt);
+};
+kb.showDataWithPassword = function(pw) {
+  var pw0 = kb.data.content.PASSWORD;
+  var pw1 = kb.getHash(pw);
+  if (pw0 != pw1) {
+    kb.openPasswordInputDialog();
+    return;
+  }
+  kb.pw.toView = pw;
+  kb.pw.toSave = pw;
+  kb.showReceivedData();
+};
+kb.showDataWithPasswordC = function() {
+  kb.onPwMismatched();
+};
+kb.onPwEnter = function(pw) {
+  kb.showDataWithPassword(pw);
+};
+kb.onPwMismatched = function() {
+  kb.data.content.BODY = '';
+  kb.showReceivedData();
+  kb.disableButtons4View();
+};
+kb.disableButtons4View = function() {
+  kb.switchButtons4View(true);
+};
+kb.enableButtons4View = function() {
+  kb.switchButtons4View(false);
+};
+kb.switchButtons4View = function(f) {
+  var ids = ['edit-button', 'edit-labels-button', 'exec-logic-button', 'copy-text-button', 'save-html-button', 'dup-button'];
+  for (var i = 0; i < ids.length; i++) {
+    $el('#' + ids[i]).disabled = f;
+  }
+};
+
+kb.getHash = function(src) {
+  var SALT = 'kb';
+  var shaObj = new jsSHA('SHA-256', 'TEXT');
+  shaObj.update(src);
+  shaObj.update(SALT);
+  var hash = shaObj.getHash('HEX');
+  return hash;
 };
 
 kb.buildStatusHTML = function(status) {
@@ -791,6 +871,7 @@ kb.buildItemsHTML = function(keyname, items) {
 
 kb.createNew = function() {
   kb.status |= kb.ST_NEW;
+  kb.clearPwValue();
   kb._clear();
   kb.edit();
   var encrypt = kb.config.default_data_encryption;
@@ -866,6 +947,10 @@ kb.edit = function() {
   $el('#chk-silent').checked = false;
 
   $el('#edit-logic-button').disabled = ((kb.status & kb.ST_NEW) ? true : false);
+
+  var pw = kb.pw.toView;
+  kb.pw.toSave = pw;
+  kb.drawPwStatus(pw);
 };
 
 kb.onEditEnd = function() {
@@ -873,6 +958,7 @@ kb.onEditEnd = function() {
   kb.status &= ~kb.ST_EDIT_ONLY_LABELS;
   kb.status &= ~kb.ST_NEW;
   kb.data_bak = null;
+  kb.pw.toSave = null;
 
   kb.closeLogicWindow();
 
@@ -953,6 +1039,15 @@ kb.save = function() {
     return;
   }
 
+  var hash = '';
+  if (kb.pw.toSave) {
+    hash = kb.getHash(kb.pw.toSave);
+  }
+  kb.data.content.PASSWORD = hash;
+  if (kb.pw.toSave != null) {
+    kb.pw.toView = kb.pw.toSave;
+  }
+
   kb.data.id = id;
   kb.data.content.TITLE = title;
   kb.data.content.BODY = body;
@@ -973,6 +1068,8 @@ kb.save = function() {
     content.LABELS = labels;
     content.STATUS = status;
     content.ASSIGNEE = assignee;
+    content.FLAGS = kb.data.content.FLAGS;
+    content.PASSWORD = kb.data.content.PASSWORD;
     content.LOGIC = b64Logic;
     content.BODY = b64Body;
   }
@@ -2631,6 +2728,59 @@ kb.extractSelectedText = function() {
   return s.toString();
 };
 
+kb.openSetPwDialog = function() {
+  var html = '';
+  html += 'Set password for data encryption\n\n';
+  html += '<table>';
+  html += '<tr>';
+  html += '<td>Password:</td>';
+  html += '<td><input type="password" id="pw1" style="width:150px;"></td>';
+  html += '</tr>';
+  html += '<tr>';
+  html += '<td>Re-type:</td>';
+  html += '<td><input type="password" id="pw2" style="width:150px;"></td>';
+  html += '</tr>';
+  html += '</table>\n';
+  html += '<button onclick="kb.setDataPw();">OK</button>';
+  html += '<button style="margin-left:8px;" onclick="kb.closeDialog();">Cancel</button>';
+  util.dialog.open(html);
+
+  var pw = '';
+  if (kb.pw.toSave != null) {
+    pw = kb.pw.toSave;
+  } else if (kb.pw.toView != null) {
+    pw = kb.pw.toView;
+  }
+  $el('#pw1').value = pw;
+  $el('#pw2').value = pw;
+  $el('#pw1').focus();
+};
+kb.setDataPw = function() {
+  var pw1 = $el('#pw1').value;
+  var pw2 = $el('#pw2').value;
+  if (pw1 != pw2) {
+    kb.showInfotip('Password mismatch!');
+    return;
+  }
+
+  kb.pw.toSave = pw1;
+  kb.closeDialog();
+
+  if (pw1) {
+    kb.drawPwStatus(true);
+  } else {
+    kb.drawPwStatus(false);
+  }
+};
+
+kb.drawPwStatus = function(f) {
+  $el('#pw-status').innerHTML = (f ? '&#x1F512;' : '');
+};
+
+kb.hasFieldValue = function(content, key) {
+  return ((key in content) && (content[key]));
+};
+
 kb.hasFlag = function(flgs, flag) {
   if (!flgs) return false;
   flag = flag.toLowerCase();
@@ -2639,6 +2789,35 @@ kb.hasFlag = function(flgs, flag) {
     if (flgs[i] == flag) return true;
   }
   return false;
+};
+
+kb.addFlag = function(flags, flag) {
+  if (!flags) return flag;
+  flgs = flags.split('|');
+  for (var i = 0; i < flgs.length; i++) {
+    if (flgs[i] == flag) return flags;
+  }
+  flgs.push(flag);
+  var s = '';
+  for (i = 0; i < flgs.length; i++) {
+    if (i > 0) s += '|';
+    s += flgs[i];
+  }
+  return s;
+};
+
+kb.removeFlag = function(flags, flag) {
+  flgs = flags.split('|');
+  var s = '';
+  var cnt = 0;
+  for (i = 0; i < flgs.length; i++) {
+    var f = flgs[i];
+    if (f == flag) continue;
+    if (cnt > 0) s += '|';
+    s += f;
+    cnt++;
+  }
+  return s;
 };
 
 //-------------------------------------------------------------------------

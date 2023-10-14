@@ -108,13 +108,14 @@ def build_main_screen(context):
           <input type="text" id="content-labels-edt" spellcheck="false">
           <span style="margin-left:12px;">STATUS:</span>
           <select id="select-status"></select>
+          <button id="set-pw-button" style="margin-left:8px;" onclick="kb.openSetPwDialog();">PW</button><div id="pw-status" style="display:inline-block;margin-left:2px;width:16px;"></div>
           <input type="checkbox" id="chk-encryption"><label for="chk-encryption">Encrypt</label>
 '''
     if context.has_permission('sysadmin'):
         html += '          <input type="checkbox" id="chk-silent"><label for="chk-silent">Silent</label>'
 
     html += '''
-          <button id="edit-logic-button" style="margin-left:8px;" onclick="kb.openLogicEditor();" disabled>LOGIC</button>
+          <button id="edit-logic-button" style="margin-left:16px;" onclick="kb.openLogicEditor();" disabled>LOGIC</button>
         </span>
       </div>
       <div style="display:inline-block;position:absolute;right:10px;">
@@ -550,7 +551,7 @@ th {
   width: 150px;
 }
 #chk-encryption {
-  margin-left: 12px;
+  margin-left: 8px;
 }
 #content-wrp1 {
   width: calc(100% - 6px);
