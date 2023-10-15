@@ -194,9 +194,14 @@ def proc_list(context):
         return create_result_object('SCHEMA_NOT_FOUND')
 
     if kb.has_privilege_for_scm(context, scm):
-        logger.write_operation_log(context, 'LIST', scm, id)
         detail = kb.get_list(context, scm, id)
         result = create_result_object('OK', detail)
+
+        info = ''
+        if detail['total_count'] == 0:
+            info = 'cnt=0'
+        logger.write_operation_log(context, 'LIST', scm, id, info=info)
+
     else:
         logger.write_operation_log(context, 'LIST:FORBIDDEN', scm, id)
         result = create_result_object('NO_ACCESS_RIGHTS')
@@ -219,11 +224,14 @@ def proc_search(context):
     if id is None:
         q = get_request_param('q')
         q = util.decode_base64(q)
-        logger.write_operation_log(context, 'SEARCH', scm, id, info='q=' + q)
         detail = kb.search_data(context, scm, q)
     else:
         logger.write_operation_log(context, 'SEARCH', scm, id)
         detail = kb.get_data(context, scm, id, need_encode_b64=True)
+
+    info = 'q=' + q + ' : ' + 'cnt=' + str(detail['total_count'])
+    logger.write_operation_log(context, 'SEARCH', scm, id, info=info)
+
     result = create_result_object('OK', detail)
     return result
 

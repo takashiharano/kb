@@ -14,6 +14,7 @@ import web
 import appconfig
 
 LOG_FILE_PATH = appconfig.workspace_path + 'kb.log'
+LOCK_FILE_PATH = appconfig.workspace_path + 'lock'
 
 #----------------------------------------------------------
 # Read log
@@ -23,7 +24,9 @@ def get_log():
 #----------------------------------------------------------
 # Write Log
 def write_log(data):
-    util.append_line_to_text_file(LOG_FILE_PATH, data, max=1000)
+    if synchronize_start():
+        util.append_line_to_text_file(LOG_FILE_PATH, data, max=1000)
+        synchronize_end()
 
 #----------------------------------------------------------
 def write_app_log(user, op_type, scm, dataid, info=''):
@@ -60,12 +63,17 @@ def write_operation_log(context, op_type, scm, dataid=None, info='', data=None):
     user = context.get_user_name()
 
     if data is not None:
+        if 'status' in data and data['status'] != 'OK':
+            info = append_info(info, data['status'])
+
         if 'content' in data:
             content = data['content']
+
+            if 'PASSWORD' in content and content['PASSWORD'] != '':
+                info = append_info(info, '[PW]')
+
             if 'TITLE' in content:
-                if info != '':
-                    info += ' '
-                info += 'Title:' +  content['TITLE']
+                info = append_info(info, 'Title:' +  content['TITLE'])
 
     write_app_log(user, op_type, scm, dataid, info)
 
@@ -89,9 +97,26 @@ def write_save_log(context, scm, dataid, new_data, saved_obj):
 
     if 'content' in saved_data:
         content = saved_data['content']
+
+        if 'PASSWORD' in content and content['PASSWORD'] != '':
+            info = append_info(info, '[PW]')
+
         if 'TITLE' in content:
-            if info != '':
-                info += ' '
-            info += 'Title:' +  content['TITLE']
+            info = append_info(info, 'Title:' +  content['TITLE'])
 
     write_app_log(user, op_type, scm, saved_id, info)
+
+def append_info(info, s):
+    if info != '':
+        info += ' '
+    info += s
+    return info
+
+#----------------------------------------------------------
+def synchronize_start():
+    if util.file_lock(LOCK_FILE_PATH, 25, 0.2):
+        return True
+    return False
+
+def synchronize_end():
+    util.file_unlock(LOCK_FILE_PATH)
