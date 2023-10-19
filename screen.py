@@ -468,13 +468,12 @@ th {
     content_height_adj = appconfig.list_height + 32
     css += '.item {'
     css += '  width: 100%;'
-    css += '  background: ' + appconfig.background4 + ';'
+    css += '  background: ' + appconfig.background_upper + ';'
     css += '}'
     css += '#list-area {'
     css += '  width: 100%;'
     css += '  height: ' + str(appconfig.list_height) + 'px;'
     css += '  margin: 4px 2px 2px 2px;'
-    css += '  background: ' + appconfig.background2 + ';'
     css += '}'
 
     css += '''
@@ -503,7 +502,7 @@ th {
     css += '  width: 100%;'
     css += '  height: calc(100vh - ' + str(content_height_adj) + 'px);'
     css += '  margin: 2px;'
-    css += '  background: ' + appconfig.background3 + ';'
+    css += '  background: ' + appconfig.background_lower + ';'
     css += '  font-family: Consolas, Monaco, Menlo, monospace, sans-serif;'
     css += '}'
     css += '.title {'
@@ -629,9 +628,11 @@ th {
         css += '  cursor: pointer;'
         css += '}'
 
+
+    css += 'table.item-list,td.item-list,th.item-list {'
+    css += '  border: ' + appconfig.list_border + ';'
+
     css += '''
-table.item-list,td.item-list,th.item-list {
-  border: 1px solid #888;
   border-top: none;
   border-right: none;
   border-left: none;
