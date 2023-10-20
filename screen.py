@@ -109,9 +109,9 @@ def build_main_screen(context):
           <span style="margin-left:12px;">STATUS:</span>
           <select id="select-status"></select>
           <button id="set-pw-button" style="margin-left:8px;" onclick="kb.openSetPwDialog();">PW</button><div id="pw-status" style="display:inline-block;margin-left:2px;width:16px;"></div>
-          <input type="checkbox" id="chk-encryption"><label for="chk-encryption">Encrypt</label>
 '''
     if context.has_permission('sysadmin'):
+        html += '          <input type="checkbox" id="chk-encryption"><label for="chk-encryption">Encrypt</label>'
         html += '          <input type="checkbox" id="chk-silent"><label for="chk-silent">Silent</label>'
 
     html += '''

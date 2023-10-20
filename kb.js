@@ -904,9 +904,11 @@ kb.editLabels = function() {
   $el('#content-title-edt').disabled = true;
   $el('#content-body-edt').disabled = true;
   $el('#select-status').disabled = true;
+  $el('#set-pw-button').disabled = true;
   $el('#chk-encryption').disabled = true;
-  $el('#content-labels-edt').focus();
   $el('#chk-silent').checked = true;
+  $el('#edit-logic-button').disabled = true;
+  $el('#content-labels-edt').focus();
 };
 
 kb.edit = function() {
@@ -934,8 +936,10 @@ kb.edit = function() {
   $el('#content-title-edt').disabled = false;
   $el('#content-body-edt').disabled = false;
   $el('#select-status').disabled = false;
+  $el('#set-pw-button').disabled = false;
   $el('#chk-encryption').disabled = false;
   $el('#chk-silent').disabled = false;
+  $el('#edit-logic-button').disabled = false;
 
   var data = kb.data;
   var content = data.content;
