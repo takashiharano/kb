@@ -121,9 +121,6 @@ kb.onAppReady1 = function() {
   if (scm) {
     kb.scm = scm;
   }
-  if (kb.scm && (kb.scm != kb.defaultScm)) {
-    $el('#scm-name').innerHTML = ' - ' + scm;
-  }
   if (id) {
     kb.listAndShowDataById(id);
   } else if (q) {

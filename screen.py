@@ -23,6 +23,10 @@ def build_main_screen(context, scm):
     workspace_path = kb.get_workspace_path()
     msg_path = workspace_path + 'info.txt'
     message = util.read_text_file(msg_path, default='')
+    scm_props = kb.load_scm_props(scm)
+    scm_name = scm
+    if 'name' in scm_props and scm_props['name'] != '':
+        scm_name = scm_props['name']
 
     html = '''<!DOCTYPE html><html><head><meta charset="utf-8">
 <meta name="robots" content="none">
@@ -49,7 +53,12 @@ def build_main_screen(context, scm):
 '''
     html += '      <a href="' + appconfig.home_path + '" style="margin-right:4px;">HOME</a>'
     html += '      <span id="system-name" style="color:' + appconfig.system_name_color + ';">' + appconfig.system_name + '</span>'
-    html += '      <span id="scm-name" style="color:' + appconfig.system_name_color + ';"></span>'
+
+    html += '      <span id="scm-name" style="color:' + appconfig.system_name_color + ';">'
+    if scm != kb.get_default_scm_id():
+        html += ' - ' + scm_name
+    html += '</span>'
+
     html += '      <span style="position:absolute;right:5px;">'
     html += '        <span class="pseudo-link text-dim" style="margin-right:10px;" onclick="kb.confirmLogout();">' + context.get_user_name() + '</span>'
     html += '        <span id="clock"></span>'
