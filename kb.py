@@ -1138,9 +1138,13 @@ def satisfy_privs(context, required_privs):
     return True
 
 def can_operate(context, scm, operation_name):
-    priv = 'kb.' + operation_name
-    if has_privilege(context, 'sysadmin') or has_privilege(context, priv):
-        return True
+    scm_kb_admin_priv = scm + '.kb.admin'
+    kb_op_priv = 'kb.' + operation_name
+    scm_kb_op_priv = scm + '.' + kb_op_priv
+    privs = ['sysadmin', 'kb.admin', scm_kb_admin_priv, kb_op_priv, scm_kb_op_priv]
+    for priv in privs:
+        if has_privilege(context, priv):
+            return True
 
     if is_anonymous_op_allowed(scm, operation_name):
         return True
