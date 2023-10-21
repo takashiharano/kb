@@ -41,6 +41,7 @@ DEFAULT_CONTENT = {
 }
 
 SP_KEYWORD_NANIDS = '*nanids'
+DEFAULT_SCM_ID = '0'
 
 #------------------------------------------------------------------------------
 def get_workspace_path():
@@ -61,8 +62,8 @@ def get_props_file_path(scm):
     path = dir_path + PROPS_FILENAME
     return path
 
-def get_default_scm():
-    return '0'
+def get_default_scm_id():
+    return DEFAULT_SCM_ID
 
 #------------------------------------------------------------------------------
 def get_schema_list(context):
@@ -82,9 +83,14 @@ def get_schema_list(context):
 #------------------------------------------------------------------------------
 def has_privilege_for_scm(context, scm):
     props = load_scm_props(scm)
-    if not 'privs' in props:
+    if is_authorized(context):
+        if not 'privs' in props:
+            return True
+        if satisfy_privs(context, props['privs']):
+            return True
+    if is_anonymous_allowed(scm):
         return True
-    return satisfy_privs(context, props['privs'])
+    return False
 
 #------------------------------------------------------------------------------
 def read_scm_props_as_text(scm):
@@ -103,7 +109,7 @@ def load_scm_props(scm):
     if props is None:
         props = {}
 
-    if scm == get_default_scm():
+    if scm == get_default_scm_id():
         if not 'name' in props:
             props['name'] = 'Main'
 
@@ -704,6 +710,9 @@ def save_data(scm, id, new_data, user=''):
     silent = True if new_data['silent'] == '1' else False
     new_content = new_data['content']
 
+    if user == '':
+        user = 'Anonymous'
+
     try:
         data = load_data(scm, id)
     except:
@@ -1079,7 +1088,7 @@ def get_ext_from_base64(s):
     return ext
 
 #------------------------------------------------------------------------------
-def is_access_allowed(context):
+def is_authorized(context):
     if appconfig.access_control != 'auth' or context.is_authorized():
         return True
     return False
@@ -1128,6 +1137,42 @@ def satisfy_privs(context, required_privs):
             return False
     return True
 
+def can_operate(context, scm, operation_name):
+    priv = 'kb.' + operation_name
+    if has_privilege(context, 'sysadmin') or has_privilege(context, priv):
+        return True
+
+    if is_anonymous_op_allowed(scm, operation_name):
+        return True
+
+    return False
+
+def is_anonymous_allowed(scm):
+    return is_anonymous_op_allowed(scm, '*')
+
+def is_anonymous_op_allowed(scm, operation_name):
+    if scm is None:
+        return False
+
+    props = load_scm_props(scm)
+    if not 'privs' in props:
+        return False
+
+    scm_privs = props['privs']
+    if scm_privs == 'anonymous':
+        return True
+
+    scm_privs = scm_privs.lower()
+    privs = scm_privs.split(' ')
+    for i in range(len(privs)):
+        priv = privs[i]
+        w = priv.split('.')
+        if len(w) == 2:
+            if w[0] == 'anonymous':
+                if operation_name == '*' or w[1] == operation_name:
+                    return True
+    return False
+
 def is_valid_token(token_enc, scm, target_id):
     try:
         return _is_valid_token(token_enc, scm, target_id)
@@ -1141,7 +1186,7 @@ def _is_valid_token(token_enc, target_scm, target_id):
     id = fields[1]
     key = fields[2]
     issued_time = int(fields[3])
-    dflt_scm = get_default_scm()
+    dflt_scm = get_default_scm_id()
 
     if scm != target_scm:
         if not scm == '' and target_scm == dflt_scm:

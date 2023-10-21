@@ -19,7 +19,7 @@ import kb
 import js
 
 #------------------------------------------------------------------------------
-def build_main_screen(context):
+def build_main_screen(context, scm):
     workspace_path = kb.get_workspace_path()
     msg_path = workspace_path + 'info.txt'
     message = util.read_text_file(msg_path, default='')
@@ -60,7 +60,7 @@ def build_main_screen(context):
     html += '''
     <div style="position:relative;height:20px;">'''
 
-    if kb.has_privilege(context, 'sysadmin') or kb.has_privilege(context, 'kb.write'):
+    if kb.can_operate(context, scm, 'write'):
         html += '      <button id="new-button" style="margin-right:32px;" onclick="kb.createNew();">NEW</button>'
 
     html += '''
@@ -69,11 +69,12 @@ def build_main_screen(context):
 '''
 
     html += '      <span style="position:absolute;right:5px;">'
-    if kb.has_privilege(context, 'sysadmin') or kb.has_privilege(context, 'kb.write'):
+    if kb.can_operate(context, scm, 'write'):
         html += '        <button id="touch-button" style="margin-right:8px;" onclick="kb.touch();" disabled>TOUCH</button>'
     html += '        <button id="export-button" style="min-width:32px;" onclick="kb.openTools();">TOOLS</button>'
-    html += '        <button id="schema-button" style="min-width:32px;" onclick="kb.selectSchema();">SCHEMA</button>'
-    if kb.has_privilege(context, 'sysadmin') or kb.has_privilege(context, 'kb.export'):
+    html += '        <button id="schema-button" style="min-width:32px;" onclick="kb.openSchemaDialog();">SCHEMA</button>'
+
+    if kb.can_operate(context, scm, 'export'):
         html += '        <button id="export-button" style="margin-left:4px;min-width:32px;" onclick="kb.export();">EXPORT DATA</button>'
     html += '      </span>'
 
@@ -92,7 +93,7 @@ def build_main_screen(context):
     <div>
       <div id="info-area">
 '''
-    if kb.has_privilege(context, 'sysadmin') or kb.has_privilege(context, 'kb.write'):
+    if kb.can_operate(context, scm, 'write'):
         html += '        <button id="edit-button" class="for-view" style="min-width:32px;" onclick="kb.edit();">EDIT</button>'
 
     html += '''
@@ -122,7 +123,7 @@ def build_main_screen(context):
         <span id="buttons-r" class="for-view">
           <span id="content-labels-area">
             <span id="content-labels"></span>'''
-    if kb.has_privilege(context, 'sysadmin') or kb.has_privilege(context, 'kb.write'):
+    if kb.can_operate(context, scm, 'write'):
         html += '<button id="edit-labels-button" class="for-view small-button" style="margin-left:4px;" onclick="kb.editLabels();">EDIT</button>'
 
     html += '''
@@ -141,13 +142,13 @@ def build_main_screen(context):
     if context.has_permission('sysadmin'):
         html += '<button id="props-button" style="min-width:32px;margin-left:8px;" onclick="kb.editProps();">PROPS</button>'
 
-    if kb.has_privilege(context, 'sysadmin') or kb.has_privilege(context, 'kb.write'):
+    if kb.can_operate(context, scm, 'write'):
         html += '<button id="dup-button" style="min-width:16px;margin-left:8px;" onclick="kb.duplicate();">DUP</button>'
 
-    if kb.has_privilege(context, 'sysadmin') or kb.has_privilege(context, 'kb.delete'):
+    if kb.can_operate(context, scm, 'delete'):
         html += '<button id="delete-button" class="red-button" style="min-width:32px;margin-left:8px;" onclick="kb.delete();">DELETE</button>'
 
-    if kb.has_privilege(context, 'sysadmin') or kb.has_privilege(context, 'kb.write'):
+    if kb.can_operate(context, scm, 'write'):
         html += '<button id="clear-button" class="red-button" style="min-width:32px;margin-left:8px;display:hidden;" onclick="kb.clearData();">CLEAR</button>'
 
     html += '''
@@ -331,7 +332,7 @@ def build_css(mode=''):
     css += 'input {'
     css += '  font-size: 13px;'
     css += '  border: none;'
-    css += '  border-bottom: solid 1px #888;'
+    css += '  border-bottom: solid 1px ' + appconfig.input_border_color + ';'
     css += '  padding: 2px;'
     css += '  color: ' + appconfig.fg_color + ';'
     css += '  background: transparent;'
@@ -396,6 +397,7 @@ input[type="checkbox"] {
     css += 'textarea {'
     css += '  outline: none;'
     css += '  background: transparent;'
+    css += '  border: solid 1px ' + appconfig.input_border_color + ';'
     css += '  color: ' + appconfig.fg_color + ';'
     css += '  font-family: Consolas, Monaco, Menlo, monospace, sans-serif;'
     css += '  resize: none;'
@@ -720,13 +722,13 @@ def main():
 
     scm = util.get_request_param('scm', '')
     if scm == '':
-        scm = kb.get_default_scm()
+        scm = kb.get_default_scm_id()
 
     id = util.get_request_param('id')
 
-    if kb.is_access_allowed(context):
+    if kb.is_authorized(context):
         if kb.has_privilege(context, 'sysadmin') or kb.has_privilege(context, 'kb'):
-            html = build_main_screen(context)
+            html = build_main_screen(context, scm)
         else:
             token = util.get_request_param('token', '')
             if token != '':
@@ -736,7 +738,9 @@ def main():
                     html = build_forbidden_screen(context)
             else:
                 # public-mode
-                html = build_main_screen(context)
+                html = build_main_screen(context, scm)
+    elif kb.is_anonymous_allowed(scm):
+        html = build_main_screen(context, scm)
     elif id is not None:
         token = util.get_request_param('token')
         if token is None:

@@ -71,7 +71,7 @@ kb.requestedId = null;
 kb.loadPendingTmrId = 0;
 kb.dataLoadingTmrId = 0;
 kb.clipboardEnabled = false;
-kb.mode = null;
+kb.mode = kb.mode || null;
 kb.toolsWindow = null;
 kb.logicWindow = null;
 kb.scmList = [];
@@ -1798,7 +1798,7 @@ kb.onEditLogicEnd = function() {
   kb.status &= ~kb.ST_LOGIC_EDITING;
 };
 
-kb.selectSchema = function() {
+kb.openSchemaDialog = function() {
   var html = '';
   html += '<div id="select-scm-dlg" style="width:400px;height:180px;">';
   html += 'SELECT SCHEMA';
@@ -1829,6 +1829,7 @@ kb.onGetSchemaList = function(xhr, res, req) {
     return;
   }
   if (res.status != 'OK') {
+    $el('#schema-list').innerHTML = 'ERROR: ' + res.status;
     return;
   }
   var scmList = res.body;
@@ -1908,14 +1909,14 @@ kb.newSchema = function() {
 kb.buildSchemaEditor = function(scm, cbFncName) {
   var title = (scm ? 'EDIT SCHEMA' : 'NEW SCHEMA');
   var html = '';
-  html += '<div style="width:360px;height:180px;">';
+  html += '<div style="width:500px;height:220px;">';
   html += title;
   html += '<div style="overflow:auto;height:calc(100% - 30px);">';
   html += '<div style="display:inline-block;width:80%;">';
   html += '<pre id="schema-list" style="text-align:left;">';
-  html += 'ID: <input type="text" id="scm-id" style="width:260px;">\n';
+  html += 'ID: <input type="text" id="scm-id" style="width:calc(100% - 27px);">\n';
   html += '<div style="margin-top:8px;">Properties:</div>';
-  html += '<textarea id="scm-props" style="width:100%;height:85px;"></textarea>';
+  html += '<textarea id="scm-props" style="width:100%;height:120px;"></textarea>';
   html += '</pre>';
   html += '</div>';
   html += '</div>';

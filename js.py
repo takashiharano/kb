@@ -25,7 +25,7 @@ def build_js(context):
 
     js = ''
     js += 'var kb = kb || {};\n'
-    js += 'kb.defaultScm = \'' + kb.get_default_scm() + '\';\n'
+    js += 'kb.defaultScm = \'' + kb.get_default_scm_id() + '\';\n'
     js += 'kb.config = {\n'
     js += '  list_max: ' + str(appconfig.list_max) + ',\n';
     js += '  default_data_encryption: ' + ('true' if appconfig.default_data_encryption else 'false') + ',\n'

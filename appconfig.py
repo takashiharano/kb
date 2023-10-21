@@ -29,6 +29,8 @@ text_red = '#faa'
 text_disabled = '#888'
 text_error = '#f66'
 
+input_border_color = '#404389'
+
 button_border = '#688EF2'
 button_fgcolor = '#688EF2'
 button_background = '#000'

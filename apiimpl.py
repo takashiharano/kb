@@ -30,7 +30,7 @@ def get_request_param(key, default=None):
 def get_req_param_scm():
     scm = get_request_param('scm', '')
     if scm == '':
-        scm = kb.get_default_scm()
+        scm = kb.get_default_scm_id()
     return scm
 
 #------------------------------------------------------------------------------
@@ -38,15 +38,22 @@ def send_result_json(status, body=None):
     web.send_result_json(status, body)
 
 #------------------------------------------------------------------------------
-def has_access_privilege(context, scm, id):
-    if not kb.is_access_allowed(context):
-        token = get_request_param('token')
-        try:
-            if not kb.is_valid_token(token, scm, id):
-                return False
-        except:
-            return False
-    return True
+def has_data_permission(context, scm, id):
+    if has_valid_token(scm, id):
+        return True
+    if kb.has_privilege_for_scm(context, scm):
+        return True
+    return False
+
+#------------------------------------------------------------------------------
+def has_valid_token(scm, id):
+    token = get_request_param('token')
+    try:
+        if kb.is_valid_token(token, scm, id):
+            return True
+    except:
+        pass
+    return False
 
 #------------------------------------------------------------------------------
 def has_valid_apitoken():
@@ -136,8 +143,7 @@ def proc_delete_schema(context):
 def proc_get_data(context):
     id = get_request_param('id')
     scm = get_req_param_scm()
-
-    if kb.has_privilege_for_scm(context, scm) and has_access_privilege(context, scm, id):
+    if has_data_permission(context, scm, id):
         status = 'OK'
         result_data = kb.get_data(context, scm, id, need_encode_b64=True)
         logger.write_operation_log(context, 'GET_DATA', scm, id, data=result_data)
@@ -153,7 +159,7 @@ def proc_get_data(context):
 def proc_download_b64content(context):
     scm = get_req_param_scm()
     id = get_request_param('id')
-    if has_access_privilege(context, scm, id):
+    if has_data_permission(context, scm, id):
         status = 'OK'
         p_idx = get_request_param('idx')
         try:
@@ -534,7 +540,7 @@ def proc_export_data(context):
     b = kb.export_data(scm, decrypt)
 
     filename = 'kbdata'
-    if scm != kb.get_default_scm():
+    if scm != kb.get_default_scm_id():
         filename += '_' + scm
     filename += '.zip'
 
@@ -677,8 +683,11 @@ def main():
         proc_get_data(context)
     elif act == 'dlb64content':
         proc_download_b64content(context)
+    elif act == 'get_schema_list':
+        proc_api(context, act)
     else:
-        if kb.is_access_allowed(context) or has_valid_apitoken():
+        scm = get_request_param('scm')
+        if kb.is_authorized(context) or has_valid_apitoken() or kb.is_anonymous_allowed(scm):
             proc_api(context, act)
         else:
             proc_on_forbidden(act)
