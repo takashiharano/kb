@@ -38,6 +38,9 @@ kb.LIST_COLUMNS = [
   {key: 'PASSWORD', label: ''},
   {key: 'encrypted', label: '', meta: true}
 ];
+
+kb.ANONYMOUS_USER_NAME = 'Anonymous';
+
 kb.onselectstart = document.onselectstart;
 
 kb.status = 0;
@@ -346,16 +349,24 @@ kb.buildListRow = function(data, fixed) {
 
   var cDateStr = '';
   var cUser = (content.C_USER ? content.C_USER : '');
+  var cUserLabel = cUser;
+  if (cUser == kb.ANONYMOUS_USER_NAME) {
+    cUserLabel = '<span class="text-dim">' + cUserLabel + '</span>';
+  }
   var cUserLink = '';
   if (cUser) {
-    cUserLink = '<span class="pseudo-link" onclick="kb.fieldSearch(\'created_by\', \'' + cUser + '\');">' + cUser + '</span>';
+    cUserLink = '<span class="pseudo-link" onclick="kb.fieldSearch(\'created_by\', \'' + cUser + '\');">' + cUserLabel + '</span>';
   }
 
   var uDateStr = '';
   var uUser = (content.U_USER ? content.U_USER : '');
+  var uUserLabel = uUser;
+  if (uUser == kb.ANONYMOUS_USER_NAME) {
+    uUserLabel = '<span class="text-dim">' + uUserLabel + '</span>';
+  }
   var uUserLink = '';
   if (uUser) {
-    uUserLink = '<span class="pseudo-link" onclick="kb.fieldSearch(\'updated_by\', \'' + uUser + '\');">' + uUser + '</span>';
+    uUserLink = '<span class="pseudo-link" onclick="kb.fieldSearch(\'updated_by\', \'' + uUser + '\');">' + uUserLabel + '</span>';
   }
 
   var assignee = (content.ASSIGNEE ? content.ASSIGNEE : '');
