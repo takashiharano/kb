@@ -42,6 +42,7 @@ DEFAULT_CONTENT = {
 
 SP_KEYWORD_NANIDS = '*nanids'
 DEFAULT_SCM_ID = '0'
+ANONYMOUS_USER_NAME = 'Anonymous'
 
 #------------------------------------------------------------------------------
 def get_workspace_path():
@@ -701,7 +702,7 @@ def parse_content(text, head_only=False):
     return content
 
 #------------------------------------------------------------------------------
-def save_data(scm, id, new_data, user=''):
+def save_data(scm, id, new_data, user='', as_anonymous=False):
     if id == '':
         id = get_next_id(scm)
 
@@ -710,8 +711,8 @@ def save_data(scm, id, new_data, user=''):
     silent = True if new_data['silent'] == '1' else False
     new_content = new_data['content']
 
-    if user == '':
-        user = 'Anonymous'
+    if user == '' or as_anonymous:
+        user = ANONYMOUS_USER_NAME
 
     try:
         data = load_data(scm, id)

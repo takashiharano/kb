@@ -265,7 +265,11 @@ def proc_save(context):
     if id == '' or content is not None and content['U_DATE'] == new_data['org_u_date']:
         status = 'OK'
         user = context.get_user_name()
-        saved_obj = kb.save_data(scm, id, new_data, user)
+
+        p_as_anonymous = get_request_param('as_anonymous', '0')
+        as_anonymous = True if p_as_anonymous == '1' else False
+
+        saved_obj = kb.save_data(scm, id, new_data, user, as_anonymous)
         saved_data = saved_obj['data']
         saved_content = saved_data['content']
         saved_id = saved_obj['id']
