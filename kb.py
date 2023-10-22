@@ -625,7 +625,7 @@ def get_data(context, scm, id, need_encode_b64=False):
     if not has_data_privilege(context, content):
         data = {
             'id': id,
-            'status': 'FORBIDDEN'
+            'status': 'DATA_FORBIDDEN'
         }
         return data
 
