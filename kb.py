@@ -750,6 +750,10 @@ def save_data(scm, id, new_data, user=''):
         content['STATUS'] = new_content['STATUS']
         content['ASSIGNEE'] = new_content['ASSIGNEE']
         content['FLAGS'] = new_content['FLAGS']
+
+        if 'DATA_PRIVS' in new_content:
+            content['DATA_PRIVS'] = new_content['DATA_PRIVS']
+
         if isdataurl:
             content['DATA_TYPE'] = 'dataurl'
         else:
