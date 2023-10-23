@@ -320,7 +320,8 @@ kb.drawList = function(fixedItems, items, sortIdx, sortOrder, totalCount) {
   var html = htmlHead + htmlList; 
   kb.drawListContent(html);
 
-  var infoHtml = items.length + ' ' + util.plural('item', items.length);
+  var n = fixedItems.length + items.length;
+  var infoHtml = n + ' ' + util.plural('item', n);
   if ((kb.config.list_max > 0) && (totalCount > kb.config.list_max)) {
     infoHtml += ' (' + totalCount + ' in total)';
   }
