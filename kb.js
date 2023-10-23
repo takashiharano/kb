@@ -246,8 +246,11 @@ kb.onGetList = function(xhr, res, req) {
   kb.totalCount = data.total_count;
 
   var allDataSize = data.all_data_size;
-  if (allDataSize != undefined) {
-    $el('#all-data-size').innerHTML = 'Current DB Size: ' + util.convByte(allDataSize) + 'B';
+  var scmDataSize = data.scm_data_size;
+  if ((allDataSize != undefined) && (scmDataSize != undefined)) {
+    var aSize = util.convByte(allDataSize);
+    var cSize = util.convByte(scmDataSize)
+    $el('#all-data-size').innerHTML = 'Current DB size: scm=' + cSize + 'B / all=' + aSize + 'B';
   }
 
   kb.drawList(kb.fixedItemList, kb.itemList, kb.listStatus.sortIdx, kb.listStatus.sortOrder, kb.totalCount);

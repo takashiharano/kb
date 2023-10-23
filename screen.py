@@ -91,7 +91,7 @@ def build_main_screen(context, scm):
     </div>
     <div style="height:1em;">
       <span id="info"></span>
-      <div style="display:inline-block;position:absolute;right:24px;color:#aaa;"><span id="all-data-size"></span></div>
+      <div style="display:inline-block;position:absolute;right:10px;color:#aaa;"><span id="all-data-size"></span></div>
     </div>
     <div id="list-wrp">
       <pre id="list"></pre>
