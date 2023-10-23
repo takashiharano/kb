@@ -796,7 +796,6 @@ def del_if_filed_is_empty(obj, key):
 #------------------------------------------------------------------------------
 def to_set(s):
     s = util.to_half_width(s)
-    s = s.lower()
     data_list = s.split(' ')
     data_set = util.to_set(data_list)
     s = ''
