@@ -66,20 +66,24 @@ def build_main_screen(context, scm):
       </span>
     </div>'''
 
-    html += '''
-    <div style="position:relative;height:20px;">'''
+    html += '    <div style="position:relative;height:20px;">'
 
     if kb.can_operate(context, scm, 'write'):
         html += '      <button id="new-button" style="margin-right:32px;" onclick="kb.createNew();">NEW</button>'
 
-    html += '''
-      <span id="id-label">ID:</span> <input type="text" id="id-txt" class="q-txt" spellcheck="false" style="width:46px;">
-      <span id="keyqord-label" style="margin-left:8px;">KEYWORD:</span> <input type="text" id="q" class="q-txt" spellcheck="false" style="margin-left:4px;"><button id="search-button" style="margin-left:4px;min-width:32px;" onclick="kb.search();">SEARCH</button><button class="small-button" style="margin-left:4px;" onclick="kb.clearKeywords();">CLEAR</button><button id="all-button" style="margin-left:16px;min-width:32px;" onclick="kb.getListAll();">LIST ALL</button><button style="margin-left:24px;" onclick="kb.openNewWindow();">NEW WIN</button>
-'''
+    html += '      <span id="id-label">ID:</span> <input type="text" id="id-txt" class="q-txt" spellcheck="false" style="width:46px;">'
+    html += '      <span id="keyqord-label" style="margin-left:8px;">KEYWORD:</span> '
+    html += '<input type="text" id="q" class="q-txt" spellcheck="false" style="margin-left:4px;">'
+    html += '<button id="search-button" style="margin-left:4px;min-width:32px;" onclick="kb.search();">SEARCH</button>'
+    html += '<button class="small-button" style="margin-left:4px;" onclick="kb.clearKeywords();">CLEAR</button>'
+    html += '<button id="all-button" style="margin-left:16px;min-width:32px;" onclick="kb.getListAll();">LIST ALL</button>'
+    html += '<button style="margin-left:36px;" onclick="kb.openNewWindow();">NEW WIN</button>'
 
     html += '      <span style="position:absolute;right:5px;">'
+
     if kb.can_operate(context, scm, 'write'):
         html += '        <button id="touch-button" style="margin-right:8px;" onclick="kb.touch();" disabled>TOUCH</button>'
+
     html += '        <button id="export-button" style="min-width:32px;" onclick="kb.openTools();">TOOLS</button>'
     html += '        <button id="schema-button" style="min-width:32px;" onclick="kb.openSchemaDialog();">SCHEMA</button>'
 
@@ -143,13 +147,14 @@ def build_main_screen(context, scm):
             <option value="1" selected>Advanced</option>
             <option value="2">HTML</option>
           </select>'''
-    html += '<button id="exec-logic-button" style="margin-left:16px;" onclick="kb.confirmExecLogic();" disabled>LOGIC</button>'
-    html += '<button id="copy-text-button" style="margin-left:16px;" onclick="kb.copyContent();">COPY</button>'
-    html += '<button id="copy-url-button" style="margin-left:4px;" onclick="kb.showUrl();">URL</button>'
-    html += '<button id="save-html-button" style="margin-left:4px;" onclick="kb.confirmSaveAsHtml();">SAVE<span style="font-size:10px;"> AS</span></button>'
+    html += '<button id="exec-logic-button" style="margin-left:16px;margin-right:8px;" onclick="kb.confirmExecLogic();" disabled>LOGIC</button>'
 
     if context.has_permission('sysadmin'):
         html += '<button id="props-button" style="min-width:32px;margin-left:8px;" onclick="kb.editProps();">PROPS</button>'
+
+    html += '<button id="copy-text-button" style="margin-left:8px;" onclick="kb.copyContent();">COPY</button>'
+    html += '<button id="copy-url-button" style="margin-left:4px;" onclick="kb.showUrl();">URL</button>'
+    html += '<button id="save-html-button" style="margin-left:4px;" onclick="kb.confirmSaveAsHtml();">SAVE<span style="font-size:10px;"> AS</span></button>'
 
     if kb.can_operate(context, scm, 'write'):
         html += '<button id="dup-button" style="min-width:16px;margin-left:8px;" onclick="kb.duplicate();">DUP</button>'
