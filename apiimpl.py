@@ -26,6 +26,9 @@ DATA_ENCRYPTION_KEY = appconfig.data_encryption_key
 def get_request_param(key, default=None):
     return web.get_request_param(key, default=default)
 
+def get_request_param_as_int(key, default=0):
+    return web.get_request_param_as_int(key, default=default)
+
 #------------------------------------------------------------------------------
 def get_req_param_scm():
     scm = get_request_param('scm', '')
@@ -125,7 +128,8 @@ def proc_data_list(context):
         return create_result_object('SCHEMA_NOT_FOUND')
 
     if kb.has_privilege_for_scm(context, scm):
-        detail = kb.get_data_list(context, scm, id)
+        list_max = get_request_param_as_int('list_max')
+        detail = kb.get_data_list(context, scm, id, list_max=list_max)
         result = create_result_object('OK', detail)
 
         info = ''
@@ -155,7 +159,8 @@ def proc_search(context):
     if id is None:
         q = get_request_param('q')
         q = util.decode_base64(q)
-        detail = kb.search_data(context, scm, q)
+        list_max = get_request_param_as_int('list_max')
+        detail = kb.search_data(context, scm, q, list_max=list_max)
     else:
         logger.write_operation_log(context, 'SEARCH', scm, id)
         detail = kb.get_data(context, scm, id, need_encode_b64=True)

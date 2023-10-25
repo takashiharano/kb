@@ -161,7 +161,9 @@ def get_all_data_id_list(scm):
     return data_id_list
 
 #------------------------------------------------------------------------------
-def get_data_list(context, scm, target_id=None):
+def get_data_list(context, scm, target_id=None, list_max=0):
+    if list_max == 0:
+        list_max = appconfig.list_max
     data_id_list = get_all_data_id_list(scm)
     data_list = []
     fixed_data_list = []
@@ -190,13 +192,15 @@ def get_data_list(context, scm, target_id=None):
         else:
             data_list.append(data)
 
-    total_count = len(fixed_data_list) + len(data_list)
-    if appconfig.list_max > 0 and total_count > appconfig.list_max:
+    fixed_data_list_len = len(fixed_data_list)
+    total_count = fixed_data_list_len + len(data_list)
+    if list_max > 0 and total_count > list_max:
         sorted_data_list = sorted(data_list, key=lambda x: x['content']['U_DATE'], reverse=True)
         data_list = []
+        data_list_max = list_max - fixed_data_list_len
         cnt = 0
         for i in range(len(sorted_data_list)):
-            if appconfig.list_max == 0 or cnt < appconfig.list_max:
+            if cnt < data_list_max:
                 data = sorted_data_list[i]
                 data_list.append(data)
                 cnt += 1
@@ -299,7 +303,10 @@ def filter_by_id_range(all_id_list, keyword, filtered_id_list):
     return filtered_id_list
 
 #------------------------------------------------------------------------------
-def search_data(context, scm, q):
+def search_data(context, scm, q, list_max=0):
+    if list_max == 0:
+        list_max = appconfig.list_max
+
     q = q.strip()
     q = util.to_half_width(q)
     q = util.replace(q, '\\s{2,}', ' ')
@@ -365,12 +372,12 @@ def search_data(context, scm, q):
         data_list.append(data)
 
     total_count = len(data_list)
-    if appconfig.list_max > 0 and total_count > appconfig.list_max:
+    if list_max > 0 and total_count > list_max:
         data_list2 = sorted(data_list, key=lambda x: x['score'], reverse=True)
         data_list = []
         cnt = 0
         for i in range(len(data_list2)):
-            if appconfig.list_max == 0 or cnt < appconfig.list_max:
+            if cnt < list_max:
                 data = data_list2[i]
                 data_list.append(data)
                 cnt += 1
