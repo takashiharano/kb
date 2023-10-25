@@ -397,11 +397,11 @@ def proc_check_id(context):
 
     scm = get_req_param_scm()
     next_id = kb.get_next_id(scm)
-    empty_ids_res = kb.get_empty_ids(scm)
+    vacant_ids_res = kb.get_vacant_ids(scm)
 
     detail = {
         'next_id': next_id,
-        'empty_id_info': empty_ids_res
+        'vacant_id_info': vacant_ids_res
     }
 
     result = create_result_object('OK', detail)

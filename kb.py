@@ -872,7 +872,7 @@ def get_next_id(scm):
     id = get_max_id(scm) + 1
     return str(id)
 
-def get_empty_ids(scm):
+def get_vacant_ids(scm):
     all_ids = get_all_data_id_list(scm)
     n_list = []
     for i in range(len(all_ids)):
@@ -884,8 +884,8 @@ def get_empty_ids(scm):
         n_list.append(n)
     n_list.sort()
 
-    empty_ids = []
-    empty_cnt = 0
+    vacant_ids = []
+    vacant_cnt = 0
     prev_n = -1
     for i in range(len(n_list)):
         n = n_list[i]
@@ -894,24 +894,24 @@ def get_empty_ids(scm):
             st = prev_n + 1
             ed = st + df - 1
             for j in range(st, ed):
-                empty_ids.append(str(j))
-                empty_cnt += 1
+                vacant_ids.append(str(j))
+                vacant_cnt += 1
         prev_n = n
 
     omit_count = 0
     MAX = 10
-    empty_ids_len = len(empty_ids)
-    if empty_ids_len > MAX:
-        omit_count = empty_ids_len - MAX
+    vacant_ids_len = len(vacant_ids)
+    if vacant_ids_len > MAX:
+        omit_count = vacant_ids_len - MAX
         wk_list = []
         mx = MAX - 1
         for i in range(mx):
-            wk_list.append(empty_ids[i])
-        wk_list.append(empty_ids[-1])
-        empty_ids = wk_list
+            wk_list.append(vacant_ids[i])
+        wk_list.append(vacant_ids[-1])
+        vacant_ids = wk_list
 
     result = {
-        'empty_ids': empty_ids,
+        'vacant_ids': vacant_ids,
         'omit_count': omit_count
     }
     return result

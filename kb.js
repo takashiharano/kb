@@ -1595,17 +1595,17 @@ kb.onCheckId = function(xhr, res, req) {
   if (res.status == 'OK') {
     var info = res.body;
     var nextId = info.next_id;
-    var emptyIdInfo = info.empty_id_info;
-    var emptyIds = emptyIdInfo.empty_ids;
-    var omitCount = emptyIdInfo.omit_count;
+    var vacantIdInfo = info.vacant_id_info;
+    var vacantIds = vacantIdInfo.vacant_ids;
+    var omitCount = vacantIdInfo.omit_count;
     var m = 'NEXT ID: <span class="pseudo-link" onclick="kb.selectAndChangeDataId(\'' + nextId + '\');">' + nextId + '</span>';
-    if (emptyIds.length > 0) {
+    if (vacantIds.length > 0) {
       m += '\n';
-      m += 'EMPTY: ';
-      for (var i = 0; i < emptyIds.length; i++) {
-        var id = emptyIds[i];
+      m += 'VACANT: ';
+      for (var i = 0; i < vacantIds.length; i++) {
+        var id = vacantIds[i];
         if (i > 0) m += ', ';
-        if ((omitCount > 0) && (i == emptyIds.length - 1)) m += '..(' + omitCount + ').. ';
+        if ((omitCount > 0) && (i == vacantIds.length - 1)) m += '..(' + omitCount + ').. ';
         var idLink = '<span class="pseudo-link" onclick="kb.selectAndChangeDataId(\'' + id + '\');">' + id + '</span>';
         m += idLink;
       }
