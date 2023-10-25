@@ -161,7 +161,7 @@ def get_all_data_id_list(scm):
     return data_id_list
 
 #------------------------------------------------------------------------------
-def get_list(context, scm, target_id=None):
+def get_data_list(context, scm, target_id=None):
     data_id_list = get_all_data_id_list(scm)
     data_list = []
     fixed_data_list = []

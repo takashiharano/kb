@@ -76,7 +76,7 @@ def build_main_screen(context, scm):
     html += '<input type="text" id="q" class="q-txt" spellcheck="false" style="margin-left:4px;">'
     html += '<button id="search-button" style="margin-left:4px;min-width:32px;" onclick="kb.search();">SEARCH</button>'
     html += '<button class="small-button" style="margin-left:4px;" onclick="kb.clearKeywords();">CLEAR</button>'
-    html += '<button id="all-button" style="margin-left:16px;min-width:32px;" onclick="kb.getListAll();">LIST ALL</button>'
+    html += '<button id="all-button" style="margin-left:16px;min-width:32px;" onclick="kb.getDataListAll();">LIST ALL</button>'
     html += '<button style="margin-left:36px;" onclick="kb.openNewWindow();">NEW WIN</button>'
 
     html += '      <span style="position:absolute;right:5px;">'

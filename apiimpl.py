@@ -65,81 +65,6 @@ def has_valid_apitoken():
     return False
 
 #------------------------------------------------------------------------------
-def proc_get_schema_list(context):
-    scm_list = kb.get_schema_list(context)
-    send_result_json('OK', scm_list)
-    return None
-
-#------------------------------------------------------------------------------
-def proc_get_schema_props(context):
-    scm = get_req_param_scm()
-    props = kb.read_scm_props_as_text(scm)
-    if props is None:
-        props = ''
-    b64props = util.encode_base64(props)
-    result_data = {
-        'scm': scm,
-        'props': b64props
-    }
-    send_result_json('OK', result_data)
-    return None
-
-#------------------------------------------------------------------------------
-def proc_save_schema_props(context):
-    if not context.is_admin() and not context.has_permission('sysadmin'):
-        send_result_json('FORBIDDEN')
-        return None
-
-    scm = get_req_param_scm()
-    b64props = get_request_param('props')
-    props = util.decode_base64(b64props)
-    kb.save_scm_props(scm, props)
-    result_data = {
-        'scm': scm
-    }
-
-    logger.write_operation_log(context, 'MOD_SCM_PROPS', scm)
-
-    send_result_json('OK', result_data)
-    return None
-
-#------------------------------------------------------------------------------
-def proc_create_schema(context):
-    if not context.is_admin() and not context.has_permission('sysadmin'):
-        send_result_json('FORBIDDEN')
-        return None
-
-    scm = get_req_param_scm()
-    b64props = get_request_param('props')
-    props = util.decode_base64(b64props)
-    status = kb.create_schema(scm, props)
-    result_data = {
-        'scm': scm
-    }
-
-    logger.write_operation_log(context, 'CREATE_SCM', scm)
-
-    send_result_json(status, result_data)
-    return None
-
-#------------------------------------------------------------------------------
-def proc_delete_schema(context):
-    if not context.is_admin() and not context.has_permission('sysadmin'):
-        send_result_json('FORBIDDEN')
-        return None
-
-    scm = get_req_param_scm()
-    status = kb.delete_schema(scm)
-    result_data = {
-        'scm': scm
-    }
-
-    logger.write_operation_log(context, 'DELETE_SCM', scm)
-
-    send_result_json(status, result_data)
-    return None
-
-#------------------------------------------------------------------------------
 def proc_get_data(context):
     id = get_request_param('id')
     scm = get_req_param_scm()
@@ -191,7 +116,7 @@ def proc_on_forbidden(act):
     return None
 
 #------------------------------------------------------------------------------
-def proc_list(context):
+def proc_data_list(context):
     id = get_request_param('id')
     scm = get_req_param_scm()
 
@@ -200,7 +125,7 @@ def proc_list(context):
         return create_result_object('SCHEMA_NOT_FOUND')
 
     if kb.has_privilege_for_scm(context, scm):
-        detail = kb.get_list(context, scm, id)
+        detail = kb.get_data_list(context, scm, id)
         result = create_result_object('OK', detail)
 
         info = ''
@@ -242,7 +167,7 @@ def proc_search(context):
     return result
 
 #------------------------------------------------------------------------------
-def proc_save(context):
+def proc_save_data(context):
     scm = get_req_param_scm()
     id = get_request_param('id')
 
@@ -481,6 +406,81 @@ def proc_check_id(context):
 
     result = create_result_object('OK', detail)
     return result
+
+#------------------------------------------------------------------------------
+def proc_get_schema_list(context):
+    scm_list = kb.get_schema_list(context)
+    send_result_json('OK', scm_list)
+    return None
+
+#------------------------------------------------------------------------------
+def proc_get_schema_props(context):
+    scm = get_req_param_scm()
+    props = kb.read_scm_props_as_text(scm)
+    if props is None:
+        props = ''
+    b64props = util.encode_base64(props)
+    result_data = {
+        'scm': scm,
+        'props': b64props
+    }
+    send_result_json('OK', result_data)
+    return None
+
+#------------------------------------------------------------------------------
+def proc_save_schema_props(context):
+    if not context.is_admin() and not context.has_permission('sysadmin'):
+        send_result_json('FORBIDDEN')
+        return None
+
+    scm = get_req_param_scm()
+    b64props = get_request_param('props')
+    props = util.decode_base64(b64props)
+    kb.save_scm_props(scm, props)
+    result_data = {
+        'scm': scm
+    }
+
+    logger.write_operation_log(context, 'MOD_SCM_PROPS', scm)
+
+    send_result_json('OK', result_data)
+    return None
+
+#------------------------------------------------------------------------------
+def proc_create_schema(context):
+    if not context.is_admin() and not context.has_permission('sysadmin'):
+        send_result_json('FORBIDDEN')
+        return None
+
+    scm = get_req_param_scm()
+    b64props = get_request_param('props')
+    props = util.decode_base64(b64props)
+    status = kb.create_schema(scm, props)
+    result_data = {
+        'scm': scm
+    }
+
+    logger.write_operation_log(context, 'CREATE_SCM', scm)
+
+    send_result_json(status, result_data)
+    return None
+
+#------------------------------------------------------------------------------
+def proc_delete_schema(context):
+    if not context.is_admin() and not context.has_permission('sysadmin'):
+        send_result_json('FORBIDDEN')
+        return None
+
+    scm = get_req_param_scm()
+    status = kb.delete_schema(scm)
+    result_data = {
+        'scm': scm
+    }
+
+    logger.write_operation_log(context, 'DELETE_SCM', scm)
+
+    send_result_json(status, result_data)
+    return None
 
 #------------------------------------------------------------------------------
 def proc_export_html(context):

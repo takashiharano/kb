@@ -50,7 +50,8 @@ kb.listStatus = {
   sortOrder: 2
 };
 kb.configInfo = null;
-kb.itemList = [];
+kb.fixedDataList = [];
+kb.dataList = [];
 kb.totalCount = 0;
 kb.pendingId = null;
 kb.scm = '';
@@ -128,7 +129,7 @@ kb.onAppReady1 = function() {
     $el('#q').value = q;
     kb.search();
   } else {
-    kb.getList();
+    kb.getDataList();
   }
   kb.getSchemaProps(scm, kb.onGetSchemaProps);
   kb.storeAreaSize();
@@ -216,7 +217,7 @@ kb.callApi = function(act, params, cb) {
   kb.http(req, cb);
 };
 
-kb.getList = function(id, reload) {
+kb.getDataList = function(id, reload) {
   var param = {
     scm: kb.scm
   };
@@ -225,7 +226,7 @@ kb.getList = function(id, reload) {
   }
   if (reload) param.reload = '1';
   kb.onStartListLoading('Loading');
-  kb.callApi('list', param, kb.onGetList);
+  kb.callApi('data_list', param, kb.onGetList);
 };
 kb.onGetList = function(xhr, res, req) {
   kb.onEndListLoading();
@@ -241,8 +242,8 @@ kb.onGetList = function(xhr, res, req) {
     return;
   }
   var data = res.body;
-  kb.fixedItemList = (data.fixed_data_list ? data.fixed_data_list : []);
-  kb.itemList = data.data_list;
+  kb.fixedDataList = (data.fixed_data_list ? data.fixed_data_list : []);
+  kb.dataList = data.data_list;
   kb.totalCount = data.total_count;
 
   var allDataSize = data.all_data_size;
@@ -253,8 +254,8 @@ kb.onGetList = function(xhr, res, req) {
     $el('#all-data-size').innerHTML = 'Current DB size: scm=' + cSize + 'B / all=' + aSize + 'B';
   }
 
-  kb.drawList(kb.fixedItemList, kb.itemList, kb.listStatus.sortIdx, kb.listStatus.sortOrder, kb.totalCount);
-  if (kb.itemList.length == 1) {
+  kb.drawDataList(kb.fixedDataList, kb.dataList, kb.listStatus.sortIdx, kb.listStatus.sortOrder, kb.totalCount);
+  if (kb.dataList.length == 1) {
     $el('#id-txt').value = '';
     kb.onInputSearch()
   }
@@ -264,13 +265,13 @@ kb.drawInfo = function(html) {
   $el('#info').innerHTML = html;
 };
 
-kb.drawListContent = function(html) {
+kb.drawDataListContent = function(html) {
   $el('#list').innerHTML = html;
   $el('#list-wrp').scrollTop = 0;
 };
 
-kb.sortList = function(itemList, sortKey, desc, byMetaCol) {
-  var items = util.copyObject(itemList);
+kb.sortList = function(dataList, sortKey, desc, byMetaCol) {
+  var items = util.copyObject(dataList);
   var srcList = items;
   if (!byMetaCol) {
     srcList = [];
@@ -299,7 +300,7 @@ kb.sortList = function(itemList, sortKey, desc, byMetaCol) {
   return items;
 };
 
-kb.drawList = function(fixedItems, items, sortIdx, sortOrder, totalCount) {
+kb.drawDataList = function(fixedItems, items, sortIdx, sortOrder, totalCount) {
   if (sortIdx >= 0) {
     if (sortOrder > 0) {
       var srtDef = kb.LIST_COLUMNS[sortIdx];
@@ -321,7 +322,7 @@ kb.drawList = function(fixedItems, items, sortIdx, sortOrder, totalCount) {
 
   var htmlHead = kb.buildListHeader(kb.LIST_COLUMNS, sortIdx, sortOrder);
   var html = htmlHead + htmlList; 
-  kb.drawListContent(html);
+  kb.drawDataListContent(html);
 
   var n = fixedItems.length + items.length;
   var infoHtml = n + ' ' + util.plural('item', n);
@@ -459,13 +460,13 @@ kb.buildListRow = function(data, fixed) {
   return html;
 };
 
-kb.sortItemList = function(sortIdx, sortOrder) {
+kb.sortDataList = function(sortIdx, sortOrder) {
   if (sortOrder > 2) {
     sortOrder = 0;
   }
   kb.listStatus.sortIdx = sortIdx;
   kb.listStatus.sortOrder = sortOrder;
-  kb.drawList(kb.fixedItemList, kb.itemList, sortIdx, sortOrder, kb.totalCount);
+  kb.drawDataList(kb.fixedDataList, kb.dataList, sortIdx, sortOrder, kb.totalCount);
 };
 
 kb.checkedIds = [];
@@ -510,7 +511,7 @@ kb.buildListHeader = function(columns, sortIdx, sortOrder) {
     }
 
     var sortButton = '<span class="sort-button" ';
-    sortButton += ' onclick="kb.sortItemList(' + i + ', ' + nextSortType + ');"';
+    sortButton += ' onclick="kb.sortDataList(' + i + ', ' + nextSortType + ');"';
     sortButton += '>';
     sortButton += '<span';
     if (sortAscClz) {
@@ -533,7 +534,7 @@ kb.buildListHeader = function(columns, sortIdx, sortOrder) {
   return html;
 };
 
-kb.getListAll = function() {
+kb.getDataListAll = function() {
   var url = './';
   if (kb.scm != '') url += '?scm=' + kb.scm;
   history.replaceState(null, '', url);
@@ -549,7 +550,7 @@ kb.listAll = function(reload) {
   if (!kb.isListLoading()) {
     kb.listStatus.sortIdx = 5;
     kb.listStatus.sortOrder = 2;
-    kb.getList(null, reload);
+    kb.getDataList(null, reload);
   }
 };
 
@@ -605,7 +606,7 @@ kb.onSearchCb = function(xhr, res, req) {
   kb.onGetList(xhr, res, req);
   var index = parseInt(util.getQuery('index'));
   if (!isNaN(index)) {
-    var items = kb.sortList(kb.itemList, 'score', true, true);
+    var items = kb.sortList(kb.dataList, 'score', true, true);
     var item = items[index];
     if (item) {
       var id = item.id;
@@ -615,7 +616,7 @@ kb.onSearchCb = function(xhr, res, req) {
 };
 
 kb.listAndShowDataById = function(id) {
-  kb.getList(id);
+  kb.getDataList(id);
   kb.getData(id);
 };
 
@@ -648,15 +649,15 @@ kb.onLoadPendingExpr = function(id) {
 };
 
 kb.getMetaData = function(id) {
-  var d = kb._getMetaData(id, kb.itemList);
+  var d = kb._getMetaData(id, kb.dataList);
   if (d) return d;
-  d = kb._getMetaData(id, kb.fixedItemList);
+  d = kb._getMetaData(id, kb.fixedDataList);
   if (d) return d;
   return null;
 };
-kb._getMetaData = function(id, itemList) {
-  for (var i = 0; i < itemList.length; i++) {
-    var item = itemList[i];
+kb._getMetaData = function(id, dataList) {
+  for (var i = 0; i < dataList.length; i++) {
+    var item = dataList[i];
     if (item.id == id) return item;
   }
   return null;
@@ -865,13 +866,13 @@ kb.buildStatusHTML = function(status) {
 };
 
 kb.buildItemsHTML = function(keyname, items) {
-  var itemList = [];
+  var dataList = [];
   if (items) {
-    itemList = items.replace(/\s{2,}/g, ' ').split(' ');
+    dataList = items.replace(/\s{2,}/g, ' ').split(' ');
   }
   var html = '';
-  for (var i = 0; i < itemList.length; i++) {
-    var item = util.escHtml(itemList[i]);
+  for (var i = 0; i < dataList.length; i++) {
+    var item = util.escHtml(dataList[i]);
     html += '<span class="label"';
     if (kb.mode != 'view') {
       html += ' onclick="kb.fieldSearch(\'' + keyname + '\', \'' + item + '\');"';
@@ -1023,10 +1024,10 @@ kb.confirmSaveAndExit = function() {
 };
 kb.saveAndExit = function() {
   kb.status |= kb.ST_EXIT;
-  kb.save();
+  kb.saveData();
 };
 
-kb.save = function() {
+kb.saveData = function() {
   kb.status &= ~kb.ST_SAVE_CONFIRMING;
   var id = kb.data.id;
   if (kb.status & kb.ST_NEW) {
@@ -1106,7 +1107,7 @@ kb.save = function() {
     id: id,
     data: j
   };
-  kb.callApi('save', param, kb.onSaveData);
+  kb.callApi('save_data', param, kb.onSaveData);
 
   if (kb.status & kb.ST_EXIT) {
     kb.onEditEnd();
@@ -1217,7 +1218,7 @@ kb.onCheckExists = function(xhr, res, req) {
       kb.showInfotip('ALREADY_EXISTS');
     } else {
       kb.status &= ~kb.ST_NEW
-      kb.save();
+      kb.saveData();
     }
   } else {
     log.e(res.status + ':' + res.body);
@@ -1470,7 +1471,7 @@ kb.onDelete = function(xhr, res, req) {
   }
   if (res.status == 'OK') {
     kb.showInfotip('OK');
-    kb.getList(null, true);
+    kb.getDataList(null, true);
   } else {
     kb.showInfotip(res.status);
     log.e(res.status + ':' + res.body);
@@ -2140,7 +2141,7 @@ kb.onApiError = function(res) {
 };
 kb.onNotAvailable = function(s) {
   kb.drawInfo('<span class="text-red">' + s + '</span>');
-  kb.drawListContent('');
+  kb.drawDataListContent('');
   $el('#new-button').disabled = true;
   $el('#search-button').disabled = true;
   $el('#all-button').disabled = true;
@@ -2371,7 +2372,7 @@ kb.getDateTimeString = function(dt, fmt) {
 kb.onStartListLoading = function(msg) {
   kb.status |= kb.ST_LIST_LOADING;
   kb.drawInfo('<span class="progdot">' + msg + '</span>');
-  kb.drawListContent('');
+  kb.drawDataListContent('');
   kb.onStartLoading();
 };
 kb.onEndListLoading = function() {
@@ -2471,7 +2472,7 @@ $onCtrlS = function(e) {
     kb.confirmSaveProps();
   } else if (kb.status & kb.ST_EDITING) {
     if (e.shiftKey) {
-      kb.save();
+      kb.saveData();
     } else {
       kb.confirmSaveAndExit();
     }
@@ -2694,7 +2695,7 @@ kb.keyHandlerE = function(e) {
 };
 kb.keyHandlerL = function(e) {
   if ((kb.status & kb.ST_EDITING) || (kb.mode == 'view')) return;
-  kb.getListAll();
+  kb.getDataListAll();
 };
 kb.keyHandlerP = function(e) {
   if (!kb.isDialogDisplaying('select_scm')) return;
