@@ -2703,7 +2703,7 @@ kb.keyHandlerP = function(e) {
 };
 kb.keyHandlerS = function(e) {
   if ((kb.status & kb.ST_EDITING) || (kb.mode == 'view')) return;
-  kb.selectSchema();
+  kb.openSchemaDialog();
 };
 kb.keyHandlerT = function(e) {
   if (kb.mode == 'view') return;
