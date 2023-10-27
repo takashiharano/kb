@@ -583,9 +583,9 @@ kb.searchByIds = function(ids, reload) {
     if (i > 0) q += ',';
     q += ids[i];
   }
-  kb.searchByKeyword(q, reload);
+  kb.searchByKeyword(q, reload, 0);
 };
-kb.searchByKeyword = function(q, reload) {
+kb.searchByKeyword = function(q, reload, listMax) {
   if (q.match(/^label:[^\s]+?$/) || q.match(/^status:[^\s]+?$/) || q.match(/^updated..:[^\s]+?$/)) {
     kb.listStatus.sortIdx = 5;
   } else if (q.match(/^created..:[^\s]+?$/)) {
@@ -599,6 +599,7 @@ kb.searchByKeyword = function(q, reload) {
     q: util.encodeBase64(q)
   };
   if (reload) param.reload = '1';
+  if (listMax != undefined) param.list_max = listMax;
   kb.onStartListLoading('Searching');
   kb.callApi('search', param, kb.onSearchCb);
 };

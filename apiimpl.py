@@ -26,7 +26,7 @@ DATA_ENCRYPTION_KEY = appconfig.data_encryption_key
 def get_request_param(key, default=None):
     return web.get_request_param(key, default=default)
 
-def get_request_param_as_int(key, default=0):
+def get_request_param_as_int(key, default=None):
     return web.get_request_param_as_int(key, default=default)
 
 #------------------------------------------------------------------------------

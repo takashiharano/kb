@@ -161,8 +161,8 @@ def get_all_data_id_list(scm):
     return data_id_list
 
 #------------------------------------------------------------------------------
-def get_data_list(context, scm, target_id=None, list_max=0):
-    if list_max == 0:
+def get_data_list(context, scm, target_id=None, list_max=None):
+    if list_max is None:
         list_max = appconfig.list_max
     data_id_list = get_all_data_id_list(scm)
     data_list = []
@@ -303,8 +303,8 @@ def filter_by_id_range(all_id_list, keyword, filtered_id_list):
     return filtered_id_list
 
 #------------------------------------------------------------------------------
-def search_data(context, scm, q, list_max=0):
-    if list_max == 0:
+def search_data(context, scm, q, list_max=None):
+    if list_max is None:
         list_max = appconfig.list_max
 
     q = q.strip()
