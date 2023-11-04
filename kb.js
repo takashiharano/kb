@@ -2261,7 +2261,7 @@ kb.setAreaSize = function(h1, dH) {
 };
 kb.onAreaResizeEnd = function(e) {
   kb.enableTextSelect();
-  document.body.style.cursor = 'default';
+  document.body.style.cursor = 'auto';
   kb.uiStatus = kb.UI_ST_NONE;
 };
 
