@@ -2203,7 +2203,7 @@ kb.getSelfSizePos = function(el) {
   sp.x2 = sp.x1 + el.clientWidth;
   sp.y2 = sp.y1 + el.clientHeight;
   return sp;
-},
+};
 
 kb.nop = function() {
   return false;
@@ -2227,7 +2227,6 @@ kb.onAreaResizeStart = function(e) {
   kb.areaSize.orgDH = kb.areaSize.dH;
   kb.disableTextSelect();
   document.body.style.cursor = 'ns-resize';
-
 };
 kb.onAreaResize = function(e) {
   var x = e.clientX;
