@@ -1259,6 +1259,14 @@ def cmd_export():
     util.write_binary_file(dest_path, data_bytes)
 
 #------------------------------------------------------------------------------
+# To encrypt the entier data:
+# Store the plain text data file into the data folder.
+# Execute the following command.
+#
+# > python kb.py encrypt <SCM> <KEY>
+#
+# e.g.,> python kb.py encrypt 0 xyz
+#
 def cmd_encrypt():
     arg1 = util.get_arg(2)
     arg2 = util.get_arg(3)
