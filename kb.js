@@ -1497,7 +1497,7 @@ kb.export = function() {
   if (kb.isAdmin) {
     s += '<input type="checkbox" id="chk-export-all" checked><label for="chk-export-all">All schema</label>\n'
   }
-  s += '<input type="checkbox" id="chk-decrypt"><label for="chk-decrypt">Decrypt</label>'
+  s += '<input type="checkbox" id="chk-decrypt" checked><label for="chk-decrypt">Decrypt</label>'
   s += '</div>';
   util.confirm(s, kb._export);
 };
