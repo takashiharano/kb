@@ -282,7 +282,7 @@ kb.sortList = function(dataList, sortKey, desc, byMetaCol) {
     }
   }
   var asNum = true;
-  var sortedList = util.sortObject(srcList, sortKey, desc, asNum);
+  var sortedList = util.sortObjectList(srcList, sortKey, desc, asNum);
   if (!byMetaCol) {
     var tmpList = [];
     for (i = 0; i < sortedList.length; i++) {
