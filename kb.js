@@ -2637,7 +2637,7 @@ kb.openB64sDialog = function(t, enc) {
     data: {t: t, enc: enc}
   };
   var m = 'Base64s ' + (enc ? 'encryption' : 'decryption') + ' key: ';
-  m += '<button onclick="kb.applyDefaultKey();">USE DEFAULT</button>';
+  m += '<button class="small-button" onclick="kb.applyDefaultKey();">USE DEFAULT</button>';
   util.dialog.text(m, kb.b64sDialogCb, opt);
 };
 kb.getDefaultKey = function() {
