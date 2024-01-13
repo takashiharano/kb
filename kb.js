@@ -1847,53 +1847,78 @@ kb.onGetSchemaList = function(xhr, res, req) {
     return;
   }
   var scmList = res.body;
+  var dfltScmData = null;
+  var tmpList = [];
+  for (var i = 0; i < scmList.length; i++) {
+    var scmData = scmList[i];
+    var scmId = scmData.id;
+    var title = scmId;
+    var prop = scmData.props;
+    if (('name' in prop) && prop.name != '') {
+      title = prop['name'];
+    }
+    scmData['title'] = title;
+    if (scmId == kb.defaultScm) {
+      dfltScmData = scmData;
+      continue;
+    }
+    tmpList.push(scmData);
+  }
+  util.sortObjectList(tmpList, 'title');
+  scmList = tmpList;
+  scmList.unshift(dfltScmData);
   kb.scmList = scmList;
   var activeScmId = null;
   kb.activeScmIdx = 0;
   var html = '<table style="width:100%;">';
   for (var i = 0; i < scmList.length; i++) {
     var scmData = scmList[i];
-    var scmId = scmData.id;
-    var prop = scmData.props;
-    var name = scmId;
-    if (('name' in prop) && prop.name != '') {
-      name = prop['name'];
-    }
-    html += '<tr id="scm-list-' + scmId + '" class="scm-list-row" onmouseover="kb.setActiveScm(\'' + scmId + '\');" >';
-    html += '<td style="width:10px;">';
-    if ((scmId == kb.scm) || (!kb.scm && (scmId == kb.defaultScm))) {
-      activeScmId = scmId;
-      kb.activeScmIdx = i;
-      html += '*';
-    }
-    html += '</td>';
-    html += '<td style="padding-right:20px;white-space:nowrap;">';
-    html += '<span style="display:inline-block;width:100%;overflow:hidden;text-overflow:ellipsis;" class="title pseudo-link" onclick="kb.switchSchema(\'' + scmId + '\');">';
-    html += '<span class="pseudo-link link">' + name + '</span>\n';
-    html += '</span>';
-    html += '</td>';
-
-    html += '<td style="width:16px;">';
-    html += '<span class="pseudo-link" onclick="kb.switchSchema(\'' + scmId + '\', true);" data-tooltip="Open new window">W</span>\n';
-    html += '</td>';
-
-    if (kb.isSysAdmin) {
-      html += '<td style="width:24px;">';
-      html += '<span class="pseudo-link" onclick="kb.editSchemaProps(\'' + scmId + '\');" data-tooltip="Edit properties">P</span>\n';
-      html += '</td>';
-      html += '<td style="width:16px;">';
-      if ((scmId != kb.defaultScm) && (scmId != kb.scm)) {
-        html += '<span class="pseudo-link text-red" onclick="kb.confirmDeleteSchema(\'' + scmId + '\');" data-tooltip="Delete">X</span>\n';
-      } else {
-        html += '&nbsp;';
-      }
-      html += '</td>';
-    }
-    html += '</tr>';
+    html += kb.buildScmListHtml(scmData, i);
   }
   html += '</table>';
   $el('#schema-list').innerHTML = html;
   if (activeScmId) kb.setActiveScm(activeScmId);
+};
+kb.buildScmListHtml = function(scmData, i) {
+  var scmId = scmData.id;
+  var prop = scmData.props;
+  var name = scmId;
+  if (('name' in prop) && prop.name != '') {
+    name = prop['name'];
+  }
+  var html = '';
+  html += '<tr id="scm-list-' + scmId + '" class="scm-list-row" onmouseover="kb.setActiveScm(\'' + scmId + '\');" >';
+  html += '<td style="width:10px;">';
+  if ((scmId == kb.scm) || (!kb.scm && (scmId == kb.defaultScm))) {
+    activeScmId = scmId;
+    kb.activeScmIdx = i;
+    html += '*';
+  }
+  html += '</td>';
+  html += '<td style="padding-right:20px;white-space:nowrap;">';
+  html += '<span style="display:inline-block;width:100%;overflow:hidden;text-overflow:ellipsis;" class="title pseudo-link" onclick="kb.switchSchema(\'' + scmId + '\');">';
+  html += '<span class="pseudo-link link">' + name + '</span>\n';
+  html += '</span>';
+  html += '</td>';
+
+  html += '<td style="width:16px;">';
+  html += '<span class="pseudo-link" onclick="kb.switchSchema(\'' + scmId + '\', true);" data-tooltip="Open new window">W</span>\n';
+  html += '</td>';
+
+  if (kb.isSysAdmin) {
+    html += '<td style="width:24px;">';
+    html += '<span class="pseudo-link" onclick="kb.editSchemaProps(\'' + scmId + '\');" data-tooltip="Edit properties">P</span>\n';
+    html += '</td>';
+    html += '<td style="width:16px;">';
+    if ((scmId != kb.defaultScm) && (scmId != kb.scm)) {
+      html += '<span class="pseudo-link text-red" onclick="kb.confirmDeleteSchema(\'' + scmId + '\');" data-tooltip="Delete">X</span>\n';
+    } else {
+      html += '&nbsp;';
+    }
+    html += '</td>';
+  }
+  html += '</tr>';
+  return html;
 };
 kb.switchSchema = function(scm, nw) {
   var url = './';
