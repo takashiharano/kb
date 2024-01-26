@@ -86,13 +86,13 @@ def build_main_screen(context, scm):
     html += '      <span style="position:absolute;right:5px;">'
 
     if kb.can_operate(context, scm, 'write'):
-        html += '        <button id="touch-button" style="margin-right:8px;" onclick="kb.touch();" disabled>TOUCH</button>'
+        html += '        <button id="touch-button" style="margin-right:16px;" onclick="kb.touch();" disabled>TOUCH</button>'
+
+    if kb.can_operate(context, scm, 'export'):
+        html += '        <button id="export-button" style="margin-left:4px;min-width:32px;" onclick="kb.export();">EXPORT</button>'
 
     html += '        <button id="export-button" style="min-width:32px;" onclick="kb.openTools();">TOOLS</button>'
     html += '        <button id="schema-button" style="min-width:32px;" onclick="kb.openSchemaDialog();">SCHEMA</button>'
-
-    if kb.can_operate(context, scm, 'export'):
-        html += '        <button id="export-button" style="margin-left:4px;min-width:32px;" onclick="kb.export();">EXPORT DATA</button>'
     html += '      </span>'
 
     html += '''
