@@ -1350,6 +1350,17 @@ kb.drawData = function(data) {
     kb.restoreFont();
     kb.forceFontChanged = false;
   }
+
+  setTimeout(kb.postDrawData, 0);
+};
+
+kb.postDrawData = function(id) {
+  var els = $el('.imgdata');
+  for (var i = 0; i < els.length; i++) {
+    var el = els[i];
+    var r = el.getBoundingClientRect();
+    el.rect = r;
+  }
 };
 
 kb.linkDataUrl = function(s, f, index) {
@@ -1379,12 +1390,12 @@ kb.decodeB64Image = function(s) {
   var m = s.match(/^\n*data:image\/.+;base64,\n?[A-za-z0-9+/=][A-za-z0-9+/=\n]+$/);
   if (m) {
     var w =m[0].replace(/\n/g, '');
-    s = s.replace(/data:image\/.+;base64,\n?[A-za-z0-9+/=][A-za-z0-9+/=\n]+/, '<img src="' + w + '">');
+    s = s.replace(/data:image\/.+;base64,\n?[A-za-z0-9+/=][A-za-z0-9+/=\n]+/, '<img src="' + w + '" class="imgdata">');
     return s;
   }
   m = s.match(/data:image\/.+;base64,\n?[A-za-z0-9+/=][A-za-z0-9+/=\n]+\n\n/g);
   if (!m) {
-    s = s.replace(/(data:image\/.+;base64,\n?[A-za-z0-9+/=][A-za-z0-9+/=\n]+)$/, '<img src="$1">');
+    s = s.replace(/(data:image\/.+;base64,\n?[A-za-z0-9+/=][A-za-z0-9+/=\n]+)$/, '<img src="$1" class="imgdata">');
     return s;
   }
   var imgs = [];
@@ -1395,9 +1406,9 @@ kb.decodeB64Image = function(s) {
     imgs.push(w);
   }
   for (i = 0; i < imgs.length; i++) {
-    s = s.replace(/(?<!")data:image\/.+;base64,\n?[A-za-z0-9+/=][A-za-z0-9+/=\n]+\n\n/, '\n<img src="' + imgs[i] + '">\n\n');
+    s = s.replace(/(?<!")data:image\/.+;base64,\n?[A-za-z0-9+/=][A-za-z0-9+/=\n]+\n\n/, '\n<img src="' + imgs[i] + '" class="imgdata">\n\n');
   }
-  s = s.replace(/(data:image\/.+;base64,\n?[A-za-z0-9+/=][A-za-z0-9+/=\n]+)$/, '<img src="$1">');
+  s = s.replace(/(data:image\/.+;base64,\n?[A-za-z0-9+/=][A-za-z0-9+/=\n]+)$/, '<img src="$1" class="imgdata">');
   return s;
 };
 
@@ -2187,7 +2198,32 @@ kb.setFontSize = function(v) {
   $el('#content-body').style.fontSize = fontSize;
   $el('#content-body-edt').style.fontSize = fontSize;
   $el('#fontsize').innerHTML = fontSize;
+  kb.resizeMediaPreview(v);
 };
+
+kb.resizeMediaPreview = function(v) {
+  var els = $el('.imgdata');
+  for (var i = 0; i < els.length; i++) {
+    var el = els[i];
+    kb._resizeMediaPreview(el, v);
+  }
+};
+kb._resizeMediaPreview = function(el, v) {
+  var rect = el.rect;
+  var orgW = rect.width;
+  var orgH = rect.height;
+  var srcV = orgW;
+  var prop = 'width';
+  if (orgW < orgH) {
+    srcV = orgH;
+    prop = 'height';
+  }
+  var p = (v / 14) * srcV;
+  el.style[prop] = p + 'px';
+  el.style['max-width'] = '';
+  el.style['max-height'] = '';
+};
+
 kb.resetFontSize = function() {
   kb.setFontSize(12);
 };
