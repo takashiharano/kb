@@ -114,7 +114,7 @@ def append_info(info, s):
 
 #----------------------------------------------------------
 def synchronize_start():
-    if util.file_lock(LOCK_FILE_PATH, 25, 0.2):
+    if util.file_lock(LOCK_FILE_PATH, 15, 0.2):
         return True
     return False
 
