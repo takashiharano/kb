@@ -815,7 +815,7 @@ kb.showDataWithPassword = function(pw) {
   var pw0 = kb.data.content.PASSWORD;
   var pw1 = kb.getHash(pw);
   if (pw0 != pw1) {
-    kb.openPasswordInputDialog();
+    setTimeout(kb.openPasswordInputDialog, 0);
     return;
   }
   kb.pw.toView = pw;
