@@ -161,6 +161,7 @@ def get_all_data_id_list(scm):
     return data_id_list
 
 #------------------------------------------------------------------------------
+# list_max: None=default, 0=no limit
 def get_data_list(context, scm, target_id=None, list_max=None):
     if list_max is None:
         list_max = appconfig.list_max

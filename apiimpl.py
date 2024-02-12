@@ -128,8 +128,8 @@ def proc_data_list(context):
         return create_result_object('SCHEMA_NOT_FOUND')
 
     if kb.has_privilege_for_scm(context, scm):
-        list_max = get_request_param_as_int('list_max')
-        detail = kb.get_data_list(context, scm, id, list_max=list_max)
+        limit = get_request_param_as_int('limit')
+        detail = kb.get_data_list(context, scm, id, list_max=limit)
         result = create_result_object('OK', detail)
 
         info = ''
@@ -159,8 +159,8 @@ def proc_search(context):
     if id is None:
         q = get_request_param('q')
         q = util.decode_base64(q)
-        list_max = get_request_param_as_int('list_max')
-        detail = kb.search_data(context, scm, q, list_max=list_max)
+        limit = get_request_param_as_int('limit')
+        detail = kb.search_data(context, scm, q, list_max=limit)
     else:
         logger.write_operation_log(context, 'SEARCH', scm, id)
         detail = kb.get_data(context, scm, id, need_encode_b64=True)
