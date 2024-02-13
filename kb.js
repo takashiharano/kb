@@ -641,6 +641,7 @@ kb.onSearchCb = function(xhr, res, req) {
 };
 
 kb.listAndShowDataById = function(id) {
+  id = id.replace(/!$/, '');
   kb.getDataList(id);
   kb.getData(id);
 };

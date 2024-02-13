@@ -255,6 +255,7 @@ def _has_flag(flags_text, target_flag):
 def filter_by_id(all_id_list, keywords):
     filtered_id_list = []
     new_keywords = []
+    include_hidden = False
     for i in range(len(keywords)):
         keyword = keywords[i]
         if not keyword.startswith('id:'):
@@ -273,6 +274,11 @@ def filter_by_id(all_id_list, keywords):
             include_hidden = result['include_hidden']
         else:
             id = keyword
+
+            if id.endswith('!'):
+                include_hidden = True
+                id = id[0:-1]
+
             if id in all_id_list:
                 filtered_id_list.append(id)
 
@@ -333,15 +339,15 @@ def search_data(context, scm, q, list_max=None):
     q = util.replace(q, '\\s{2,}', ' ')
     keywords = util.split_keywords(q)
 
-    id_list = get_all_data_id_list(scm)
+    data_id_list = get_all_data_id_list(scm)
 
-    filtered = filter_by_id(id_list, keywords)
+    filtered = filter_by_id(data_id_list, keywords)
     include_hidden = filtered['include_hidden']
 
     id_filtering = False
     if len(filtered['id_list']) > 0:
         id_filtering = True
-        id_list = filtered['id_list']
+        data_id_list = filtered['id_list']
         keywords = filtered['keywords']
 
     incl_nan_id = False
@@ -351,8 +357,8 @@ def search_data(context, scm, q, list_max=None):
             incl_nan_id = True
 
     all_data = []
-    for i in range(len(id_list)):
-        id = id_list[i]
+    for i in range(len(data_id_list)):
+        id = data_id_list[i]
         if not incl_nan_id and is_nan_id(id):
             continue
         try:
