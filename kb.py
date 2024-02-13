@@ -226,11 +226,11 @@ def should_omit_listing(context, id, content=None):
         return True
     return should_omit_content(context, content)
 
-def should_omit_content(context, content=None):
+def should_omit_content(context, content=None, include_hidden=False):
     if content is not None:
         if not has_data_privilege(context, content):
             return True
-        if has_flag(content, 'HIDDEN'):
+        if not include_hidden and has_flag(content, 'HIDDEN'):
             return True
     return False
 
@@ -262,27 +262,47 @@ def filter_by_id(all_id_list, keywords):
             continue
 
         keyword = util.replace(keyword, 'id:', '', flags=re.IGNORECASE)
+        include_hidden = False
         if util.match(keyword, '-'):
-            filtered_id_list = filter_by_id_range(all_id_list, keyword, filtered_id_list)
+            result = filter_by_id_range(all_id_list, keyword, filtered_id_list)
+            filtered_id_list = result['id_list']
+            include_hidden = result['include_hidden']
         elif util.match(keyword, ','):
-            filtered_id_list = filter_by_ids(all_id_list, keyword, filtered_id_list)
+            result = filter_by_ids(all_id_list, keyword, filtered_id_list)
+            filtered_id_list = result['id_list']
+            include_hidden = result['include_hidden']
         else:
             id = keyword
             if id in all_id_list:
                 filtered_id_list.append(id)
 
-    return {'id_list': filtered_id_list, 'keywords': new_keywords}
+    return {'id_list': filtered_id_list, 'keywords': new_keywords, 'include_hidden': include_hidden}
 
 def filter_by_ids(all_id_list, keyword, filtered_id_list):
     ids = keyword.split(',')
+
+    last_id = ids[-1]
+    include_hidden = False
+    if last_id.endswith('!'):
+        include_hidden = True
+        ids[-1] = last_id[0:-1]
+
     for i in range(len(ids)):
         id = ids[i]
         if id in all_id_list:
             filtered_id_list.append(id)
-    return filtered_id_list
+
+    return {'id_list': filtered_id_list, 'include_hidden': include_hidden}
 
 def filter_by_id_range(all_id_list, keyword, filtered_id_list):
     ids = keyword.split('-')
+
+    last_id = ids[-1]
+    include_hidden = False
+    if last_id.endswith('!'):
+        include_hidden = True
+        ids[-1] = last_id[0:-1]
+
     st_id =  util.to_int(ids[0])
     if len(ids) == 1:
         ed_id = util.to_int(ids[0])
@@ -301,7 +321,7 @@ def filter_by_id_range(all_id_list, keyword, filtered_id_list):
         if id in all_id_list:
             filtered_id_list.append(id)
 
-    return filtered_id_list
+    return {'id_list': filtered_id_list, 'include_hidden': include_hidden}
 
 #------------------------------------------------------------------------------
 def search_data(context, scm, q, list_max=None):
@@ -316,6 +336,7 @@ def search_data(context, scm, q, list_max=None):
     id_list = get_all_data_id_list(scm)
 
     filtered = filter_by_id(id_list, keywords)
+    include_hidden = filtered['include_hidden']
 
     id_filtering = False
     if len(filtered['id_list']) > 0:
@@ -337,7 +358,7 @@ def search_data(context, scm, q, list_max=None):
         try:
             data = load_data(scm, id)
             content = data['content']
-            if should_omit_content(context, content):
+            if should_omit_content(context, content, include_hidden):
                 dontinue
             data['content'] = convert_data_to_half_width(content)
             data['score'] = 0
