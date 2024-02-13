@@ -1252,8 +1252,13 @@ def cmd_export():
         print('Usage: python kb.py export <SCM> <DEST_FILE_PATH> [-decrypt]')
         return
 
+    user_info = {'uid': 'system', 'is_admin': True}
+    context = web.WebContext()
+    context.set_user_info(user_info)
+    context.set_authorized(True)
+
     if scm == '-all':
-        data_bytes = export_all_data(scm, decrypt)
+        data_bytes = export_all_data(context, decrypt)
     else:
         data_bytes = export_data(scm, decrypt)
 
@@ -1295,6 +1300,7 @@ def main():
         g[func_name]()
     else:
         print('Usage: python kb.py <COMMAND> [<ARG>]')
+        print('Commands: export, encrypt')
 
 if __name__ == '__main__':
     main()
