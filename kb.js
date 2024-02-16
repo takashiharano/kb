@@ -2436,9 +2436,10 @@ kb.applyToken = function(id, tokenKey) {
   $el('#valid-until').innerHTML = until;
 };
 
-kb.copy = function(s) {
+kb.copy = function(s, f) {
   util.copy(s);
-  kb.showInfotip('Copied');
+  var o = (f ? {pos: 'pointer'} : null);
+  kb.showInfotip('Copied', o);
 };
 
 kb.showInfotip = function(m, d) {
@@ -2737,26 +2738,44 @@ kb.b64sDialogCb = function(key, data) {
   f(key, data.t);
 };
 kb.decodeB64s = function(key, data) {
-  var m;
   try {
     var s = util.decodeBase64s(data, key);
     util.copy(s);
-    m = 'Decoded';
+    var m = 'Decoded\n\n' + kb.maskText(s);
   } catch(e) {
     m = '<span style="color:#f77;">Decode Error</span>';
   }
-  util.infotip.show(m, {pos: 'pointer'});
+  kb.openResultDialog(m);
+  util.infotip.show('Copied', {pos: 'pointer'});
 };
 kb.encodeB64s = function(key, data) {
   var m;
   try {
     var s = util.encodeBase64s(data, key);
     util.copy(s);
-    m = 'Encoded';
+    var m = 'Encoded\n\n<span style="cursor:pointer;" onclick="kb.copy(\'' + s + '\', true);" data-tooltip="Click to copy">' + s + '</span>';
   } catch(e) {
     m = '<span style="color:#f77;">Decode Error</span>';
   }
-  util.infotip.show(m, {pos: 'pointer'});
+  kb.openResultDialog(m);
+  util.infotip.show('Copied', {pos: 'pointer'});
+};
+kb.openResultDialog = function(s) {
+  util.alert(s);
+};
+
+kb.maskText = function(s) {
+  var r = '';
+  r += '<div style="display:inline-block;position:relative;min-width:110px;">';
+  r += '<div style="display:inline-block;position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(90deg, #aaa, #888 30%);cursor:pointer;" onclick="kb.peel(this);" data-tooltip="Click to open"></div>';
+  r += '<span style="cursor:pointer;" onclick="kb.copy(\'' + s + '\', true);" data-tooltip="Click to copy">';
+  r += s;
+  r += '</span>';
+  r += '</div>';
+  return r;
+};
+kb.peel = function(el) {
+  el.style.display = 'none';
 };
 
 kb.keyHandlerD = function(e) {
