@@ -2746,7 +2746,7 @@ kb.decodeB64s = function(key, data) {
     m = '<span style="color:#f77;">Decode Error</span>';
   }
   kb.openResultDialog(m);
-  util.infotip.show('Copied', {pos: 'pointer'});
+  util.infotip.show('Copied', 600, {pos: 'pointer'});
 };
 kb.encodeB64s = function(key, data) {
   var m;
@@ -2758,7 +2758,7 @@ kb.encodeB64s = function(key, data) {
     m = '<span style="color:#f77;">Decode Error</span>';
   }
   kb.openResultDialog(m);
-  util.infotip.show('Copied', {pos: 'pointer'});
+  util.infotip.show('Copied', 600, {pos: 'pointer'});
 };
 kb.openResultDialog = function(s) {
   util.alert(s);
@@ -2767,7 +2767,7 @@ kb.openResultDialog = function(s) {
 kb.maskText = function(s) {
   var r = '';
   r += '<div style="display:inline-block;position:relative;min-width:110px;">';
-  r += '<div style="display:inline-block;position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(90deg, #aaa, #888 30%);cursor:pointer;" onclick="kb.peel(this);" data-tooltip="Click to open"></div>';
+  r += '<div style="display:inline-block;position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(90deg, #aaa, #888 30%);cursor:pointer;" onclick="kb.peel(this);"></div>';
   r += '<span style="cursor:pointer;" onclick="kb.copy(\'' + s + '\', true);" data-tooltip="Click to copy">';
   r += s;
   r += '</span>';
@@ -2775,6 +2775,9 @@ kb.maskText = function(s) {
   return r;
 };
 kb.peel = function(el) {
+  $el(el).fadeOut(300, kb.onPeel, el);
+};
+kb.onPeel = function(el) {
   el.style.display = 'none';
 };
 
