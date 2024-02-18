@@ -1309,6 +1309,7 @@ kb.drawData = function(data) {
 
     contentBody = kb.linkBsb64Data(contentBody);
     contentBody = kb.linkB64sData(contentBody);
+    contentBody = kb.linkKB(contentBody);
     contentBody = contentBody.replace(/^(\s*)(#.*)/g, '$1<span class="comment">$2</span>');
     contentBody = contentBody.replace(/(\n)(\s*)(#.*)/g, '$1$2<span class="comment">$3</span>');
     contentBody = contentBody.replace(/(?<!\\)```([\s\S]+?)(?<!\\)```/g, '<pre class="code">$1</pre>');
@@ -1451,6 +1452,17 @@ kb.linkB64sData = function(s) {
   s = s.replace(/openB64sDialog\('b64:/g, 'openB64sDialog(\'');
   s = s.replace(/>b64:([A-Za-z0-9+/=$]+)<\/span>/g, '>$1</span>');
   return s;
+};
+
+kb.linkKB = function(s, attr) {
+  var url = './';
+  if (kb.scm != '') url = kb.appendQuery(url, 'scm=' + kb.scm);
+  url = kb.appendQuery(url, 'id=$1');
+  if (attr == undefined) attr = 'target="_blank" rel="noopener"';
+  var t = '<a href="' + url + '"';
+  if (attr) t += ' ' + attr;
+  t += '>KB#$1</a>';
+  return s.replace(/KB#([0-9A-Za-z\-._]+)/g, t);
 };
 
 kb.onDrawModeChange = function() {
