@@ -773,8 +773,9 @@ kb.onGetData = function(xhr, res, req) {
 
   var data_status = data.status;
   if (data_status != 'OK') {
+    var m = ((data_status == 'DATA_FORBIDDEN') ? 'Permission denied' : data_status);
     kb._clear();
-    kb.showInfotip(data_status);
+    kb.showInfotip(m);
     return;
   }
 
