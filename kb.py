@@ -363,6 +363,7 @@ def search_data(context, scm, q, list_max=None):
         keyword = keywords[i]
         if keyword == SP_KEYWORD_NANIDS:
             incl_nan_id = True
+            break
 
     all_data = []
     for i in range(len(data_id_list)):
@@ -413,12 +414,12 @@ def search_data(context, scm, q, list_max=None):
         data_list = []
         cnt = 0
         for i in range(len(data_list2)):
-            if cnt < list_max:
-                data = data_list2[i]
-                data_list.append(data)
-                cnt += 1
-            else:
+            if cnt >= list_max:
                 break
+
+            data = data_list2[i]
+            data_list.append(data)
+            cnt += 1
 
     time_e = util.get_timestamp()
     elapsed = time_e - time_s
