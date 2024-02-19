@@ -163,6 +163,8 @@ def get_all_data_id_list(scm):
 #------------------------------------------------------------------------------
 # list_max: None=default, 0=no limit
 def get_data_list(context, scm, target_id=None, list_max=None):
+    time_s = util.get_timestamp()
+
     if list_max is None:
         list_max = appconfig.list_max
     data_id_list = get_all_data_id_list(scm)
@@ -211,12 +213,16 @@ def get_data_list(context, scm, target_id=None, list_max=None):
     all_data_size = util.get_path_size(DATA_BASE_DIR_PATH, recursive=True)
     scm_data_size = util.get_path_size(get_scm_dir_path(scm), recursive=True)
 
+    time_e = util.get_timestamp()
+    elapsed = time_e - time_s
+
     data_list_obj = {
         'all_data_size': all_data_size,
         'scm_data_size': scm_data_size,
         'total_count': total_count,
         'fixed_data_list': fixed_data_list,
-        'data_list': data_list
+        'data_list': data_list,
+        'elapsed': elapsed
     }
 
     return data_list_obj
@@ -331,6 +337,8 @@ def filter_by_id_range(all_id_list, keyword, filtered_id_list):
 
 #------------------------------------------------------------------------------
 def search_data(context, scm, q, list_max=None):
+    time_s = util.get_timestamp()
+
     if list_max is None:
         list_max = appconfig.list_max
 
@@ -412,9 +420,13 @@ def search_data(context, scm, q, list_max=None):
             else:
                 break
 
+    time_e = util.get_timestamp()
+    elapsed = time_e - time_s
+
     data_list_obj = {
         'total_count': total_count,
-        'data_list': data_list
+        'data_list': data_list,
+        'elapsed': elapsed
     }
 
     return data_list_obj

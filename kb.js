@@ -53,6 +53,7 @@ kb.configInfo = null;
 kb.fixedDataList = [];
 kb.dataList = [];
 kb.totalCount = 0;
+kb.elapsed = 0;
 kb.pendingId = null;
 kb.scm = '';
 kb.scmProps = null;
@@ -247,6 +248,7 @@ kb.onGetList = function(xhr, res, req) {
   kb.fixedDataList = (data.fixed_data_list ? data.fixed_data_list : []);
   kb.dataList = data.data_list;
   kb.totalCount = data.total_count;
+  kb.elapsed = data.elapsed;
 
   var allDataSize = data.all_data_size;
   var scmDataSize = data.scm_data_size;
@@ -256,7 +258,7 @@ kb.onGetList = function(xhr, res, req) {
     $el('#all-data-size').innerHTML = 'Current DB size: scm=' + cSize + 'B / all=' + aSize + 'B';
   }
 
-  kb.drawDataList(kb.fixedDataList, kb.dataList, kb.listStatus.sortIdx, kb.listStatus.sortOrder, kb.totalCount);
+  kb.drawDataList(kb.fixedDataList, kb.dataList, kb.listStatus.sortIdx, kb.listStatus.sortOrder, kb.totalCount, kb.elapsed);
   if (kb.dataList.length == 1) {
     $el('#id-txt').value = '';
     kb.onInputSearch()
@@ -302,7 +304,7 @@ kb.sortList = function(dataList, sortKey, desc, byMetaCol) {
   return items;
 };
 
-kb.drawDataList = function(fixedItems, items, sortIdx, sortOrder, totalCount) {
+kb.drawDataList = function(fixedItems, items, sortIdx, sortOrder, totalCount, elapsed) {
   if (sortIdx >= 0) {
     if (sortOrder > 0) {
       var srtDef = kb.LIST_COLUMNS[sortIdx];
@@ -336,6 +338,9 @@ kb.drawDataList = function(fixedItems, items, sortIdx, sortOrder, totalCount) {
   if ((limit > 0) && (totalCount > limit)) {
     infoHtml += ' (' + totalCount + ' in total)';
   }
+  var ms = Math.floor(elapsed * 1000);
+  var t = util.msToReadableString(ms);
+  infoHtml += '<span style="margin-left:16px;">' + t + '</span>';
 
   kb.drawInfo(infoHtml);
 
@@ -473,7 +478,7 @@ kb.sortDataList = function(sortIdx, sortOrder) {
   }
   kb.listStatus.sortIdx = sortIdx;
   kb.listStatus.sortOrder = sortOrder;
-  kb.drawDataList(kb.fixedDataList, kb.dataList, sortIdx, sortOrder, kb.totalCount);
+  kb.drawDataList(kb.fixedDataList, kb.dataList, sortIdx, sortOrder, kb.totalCount, kb.elapsed);
 };
 
 kb.checkedIds = [];
