@@ -17,7 +17,7 @@ util.append_system_path(__file__, ROOT_PATH + 'websys/bin')
 import appconfig
 import web
 import kb
-import logger
+import kblog
 
 DATA_ENCRYPTION_KEY = appconfig.data_encryption_key
 
@@ -74,9 +74,9 @@ def proc_get_data(context):
     if has_data_permission(context, scm, id):
         status = 'OK'
         result_data = kb.get_data(context, scm, id, need_encode_b64=True)
-        logger.write_operation_log(context, 'GET_DATA', scm, id, data=result_data)
+        kblog.write_operation_log(context, 'GET_DATA', scm, id, data=result_data)
     else:
-        logger.write_operation_log(context, 'GET_DATA:FORBIDDEN', scm, id)
+        kblog.write_operation_log(context, 'GET_DATA:FORBIDDEN', scm, id)
         status = 'NO_ACCESS_RIGHTS'
         result_data = None
 
@@ -94,10 +94,10 @@ def proc_download_b64content(context):
             idx = int(p_idx)
         except:
             idx = 0
-        logger.write_operation_log(context, 'DOWNLOAD_B64CONTENT', scm, id, info='idx=' + str(idx))
+        kblog.write_operation_log(context, 'DOWNLOAD_B64CONTENT', scm, id, info='idx=' + str(idx))
         kb.download_b64content(context, scm, id, idx)
     else:
-        logger.write_operation_log(context, 'DOWNLOAD_B64CONTENT:FORBIDDEN', scm, id)
+        kblog.write_operation_log(context, 'DOWNLOAD_B64CONTENT:FORBIDDEN', scm, id)
         kb.send_error_file('NO_ACCESS_RIGHTS')
     return None
 
@@ -124,7 +124,7 @@ def proc_data_list(context):
     scm = get_req_param_scm()
 
     if not kb.schema_exists(scm):
-        logger.write_operation_log(context, 'LIST:SCHEMA_NOT_FOUND', scm, id)
+        kblog.write_operation_log(context, 'LIST:SCHEMA_NOT_FOUND', scm, id)
         return create_result_object('SCHEMA_NOT_FOUND')
 
     if kb.has_privilege_for_scm(context, scm):
@@ -135,10 +135,10 @@ def proc_data_list(context):
         info = ''
         if detail['total_count'] == 0:
             info = 'cnt=0'
-        logger.write_operation_log(context, 'LIST', scm, id, info=info)
+        kblog.write_operation_log(context, 'LIST', scm, id, info=info)
 
     else:
-        logger.write_operation_log(context, 'LIST:FORBIDDEN', scm, id)
+        kblog.write_operation_log(context, 'LIST:FORBIDDEN', scm, id)
         result = create_result_object('NO_ACCESS_RIGHTS')
 
     return result
@@ -149,11 +149,11 @@ def proc_search(context):
     id = get_request_param('id')
 
     if not kb.schema_exists(scm):
-        logger.write_operation_log(context, 'SEARCH:SCHEMA_NOT_FOUND', scm, id)
+        kblog.write_operation_log(context, 'SEARCH:SCHEMA_NOT_FOUND', scm, id)
         return create_result_object('SCHEMA_NOT_FOUND')
 
     if not kb.has_privilege_for_scm(context, scm):
-        logger.write_operation_log(context, 'SEARCH:FORBIDDEN', scm, id)
+        kblog.write_operation_log(context, 'SEARCH:FORBIDDEN', scm, id)
         return create_result_object('NO_ACCESS_RIGHTS')
 
     if id is None:
@@ -162,11 +162,11 @@ def proc_search(context):
         limit = get_request_param_as_int('limit')
         detail = kb.search_data(context, scm, q, list_max=limit)
     else:
-        logger.write_operation_log(context, 'SEARCH', scm, id)
+        kblog.write_operation_log(context, 'SEARCH', scm, id)
         detail = kb.get_data(context, scm, id, need_encode_b64=True)
 
     info = 'q=' + q + ' : ' + 'cnt=' + str(detail['total_count'])
-    logger.write_operation_log(context, 'SEARCH', scm, id, info=info)
+    kblog.write_operation_log(context, 'SEARCH', scm, id, info=info)
 
     result = create_result_object('OK', detail)
     return result
@@ -177,11 +177,11 @@ def proc_save_data(context):
     id = get_request_param('id')
 
     if not kb.schema_exists(scm):
-        logger.write_operation_log(context, 'SAVE_DATA:SCHEMA_NOT_FOUND', scm, id)
+        kblog.write_operation_log(context, 'SAVE_DATA:SCHEMA_NOT_FOUND', scm, id)
         return create_result_object('SCHEMA_NOT_FOUND')
 
     if not kb.has_privilege_for_scm(context, scm):
-        logger.write_operation_log(context, 'SAVE_DATA:FORBIDDEN', scm, id)
+        kblog.write_operation_log(context, 'SAVE_DATA:FORBIDDEN', scm, id)
         return create_result_object('NO_ACCESS_RIGHTS')
 
     data_json = get_request_param('data')
@@ -206,13 +206,13 @@ def proc_save_data(context):
         saved_date = str(saved_content['U_DATE'])
         saved_user = saved_content['U_USER']
 
-        logger.write_save_log(context, scm, id, new_data, saved_obj)
+        kblog.write_save_log(context, scm, id, new_data, saved_obj)
     else:
         status = 'CONFLICT'
         saved_id = None
         saved_date = content['U_DATE']
         saved_user = content['U_USER']
-        logger.write_operation_log(context, 'SAVE_DATA:CONFLICT', scm, id, data=data)
+        kblog.write_operation_log(context, 'SAVE_DATA:CONFLICT', scm, id, data=data)
 
     detail = {
         'saved_id': saved_id,
@@ -232,12 +232,12 @@ def proc_touch(context):
     info = 'keep_updated_by=1' if keep_updated_by else ''
 
     if not kb.has_privilege_for_scm(context, scm):
-        logger.write_operation_log(context, 'TOUCH:FORBIDDEN', scm, p_ids, info=info)
+        kblog.write_operation_log(context, 'TOUCH:FORBIDDEN', scm, p_ids, info=info)
         return create_result_object('NO_ACCESS_RIGHTS')
 
     ids = p_ids.split(',')
     user = context.get_user_name()
-    logger.write_operation_log(context, 'TOUCH', scm, p_ids, info=info)
+    kblog.write_operation_log(context, 'TOUCH', scm, p_ids, info=info)
     for i in range(len(ids)):
         id = ids[i]
         data = kb.get_data(context, scm, id)
@@ -261,7 +261,7 @@ def proc_mod_props(context):
     id = get_request_param('id')
 
     if not context.is_admin() and not context.has_permission('sysadmin'):
-        logger.write_operation_log(context, 'MOD_PROPS:FORBIDDEN', scm, id)
+        kblog.write_operation_log(context, 'MOD_PROPS:FORBIDDEN', scm, id)
         result = create_result_object('FORBIDDEN')
         return result
 
@@ -295,7 +295,7 @@ def proc_mod_props(context):
     encryption_key = DATA_ENCRYPTION_KEY if secure else None
     kb.write_data(scm, id, new_content, encryption_key)
 
-    logger.write_operation_log(context, 'MOD_PROPS', scm, id, data=data)
+    kblog.write_operation_log(context, 'MOD_PROPS', scm, id, data=data)
 
     result = create_result_object('OK')
     return result
@@ -319,7 +319,7 @@ def proc_save_logic(context):
             'U_DATE': content['U_DATE'],
             'U_USER': content['U_USER']
         }
-        logger.write_operation_log(context, 'SAVE_LOGIC:CONFLICT', scm, id, data=data)
+        kblog.write_operation_log(context, 'SAVE_LOGIC:CONFLICT', scm, id, data=data)
         result = create_result_object('CONFLICT', detail)
         return result
 
@@ -336,7 +336,7 @@ def proc_save_logic(context):
     encryption_key = DATA_ENCRYPTION_KEY if secure else None
     kb.write_data(scm, id, new_content, encryption_key)
 
-    logger.write_operation_log(context, 'SAVE_LOGIC', scm, id, data=data)
+    kblog.write_operation_log(context, 'SAVE_LOGIC', scm, id, data=data)
 
     detail = {
         'saved_id': id,
@@ -352,11 +352,11 @@ def proc_delete(context):
     id = get_request_param('id')
 
     if not kb.has_privilege_for_scm(context, scm):
-        logger.write_operation_log(context, 'DELETE:FORBIDDEN', scm, id)
+        kblog.write_operation_log(context, 'DELETE:FORBIDDEN', scm, id)
         return create_result_object('NO_ACCESS_RIGHTS')
 
     status = kb.delete_data(scm, id)
-    logger.write_operation_log(context, 'DELETE', scm, id, info=status)
+    kblog.write_operation_log(context, 'DELETE', scm, id, info=status)
 
     result = create_result_object(status)
     return result
@@ -379,7 +379,7 @@ def proc_change_data_id(context):
     id_to = get_request_param('id_to')
 
     if not context.is_admin() and not context.has_permission('sysadmin'):
-        logger.write_operation_log(context, 'CHG_DATA_ID:FORBIDDEN', scm, id_fm, 'to:' + id_to)
+        kblog.write_operation_log(context, 'CHG_DATA_ID:FORBIDDEN', scm, id_fm, 'to:' + id_to)
         result = create_result_object('FORBIDDEN')
         return result
 
@@ -389,7 +389,7 @@ def proc_change_data_id(context):
         'id_to': id_to
     }
 
-    logger.write_operation_log(context, 'CHG_DATA_ID', scm, id_fm, 'to:' + id_to)
+    kblog.write_operation_log(context, 'CHG_DATA_ID', scm, id_fm, 'to:' + id_to)
 
     result = create_result_object(status, detail)
     return result
@@ -446,7 +446,7 @@ def proc_save_schema_props(context):
         'scm': scm
     }
 
-    logger.write_operation_log(context, 'MOD_SCM_PROPS', scm)
+    kblog.write_operation_log(context, 'MOD_SCM_PROPS', scm)
 
     send_result_json('OK', result_data)
     return None
@@ -465,7 +465,7 @@ def proc_create_schema(context):
         'scm': scm
     }
 
-    logger.write_operation_log(context, 'CREATE_SCM', scm)
+    kblog.write_operation_log(context, 'CREATE_SCM', scm)
 
     send_result_json(status, result_data)
     return None
@@ -482,7 +482,7 @@ def proc_delete_schema(context):
         'scm': scm
     }
 
-    logger.write_operation_log(context, 'DELETE_SCM', scm)
+    kblog.write_operation_log(context, 'DELETE_SCM', scm)
 
     send_result_json(status, result_data)
     return None
@@ -493,7 +493,7 @@ def proc_export_html(context):
     id = get_request_param('id')
 
     if not kb.has_privilege_for_scm(context, scm):
-        logger.write_operation_log(context, 'EXPORT_HTML:FORBIDDEN', scm, id)
+        kblog.write_operation_log(context, 'EXPORT_HTML:FORBIDDEN', scm, id)
         send_error_text('NO_ACCESS_RIGHTS:scm=' + scm)
         result = create_result_object('OK', None, 'octet-stream')
         return result
@@ -530,7 +530,7 @@ def proc_export_html(context):
     b = html.encode()
     filename = 'kb-' + id + '.html'
 
-    logger.write_operation_log(context, 'EXPORT_HTML', scm, id)
+    kblog.write_operation_log(context, 'EXPORT_HTML', scm, id)
 
     util.send_binary(b, filename=filename)
     result = create_result_object('OK', None, 'octet-stream')
@@ -540,7 +540,7 @@ def proc_export_html(context):
 def proc_export_data(context):
     scm = get_req_param_scm()
     if not kb.has_privilege_for_scm(context, scm):
-        logger.write_operation_log(context, 'EXPORT_DATA:FORBIDDEN', scm, dataid='')
+        kblog.write_operation_log(context, 'EXPORT_DATA:FORBIDDEN', scm, dataid='')
         send_error_text('NO_ACCESS_RIGHTS:scm=' + scm)
         return None
 
@@ -553,20 +553,20 @@ def proc_export_data(context):
         filename += '_' + scm
     filename += '.zip'
 
-    logger.write_operation_log(context, 'EXPORT_DATA', scm, dataid='')
+    kblog.write_operation_log(context, 'EXPORT_DATA', scm, dataid='')
 
     util.send_binary(b, filename=filename)
     return None
 
 def proc_export_data_all(context):
     if not context.is_admin() and not has_valid_apitoken():
-        logger.write_operation_log(context, 'EXPORT_ALL_DATA:FORBIDDEN', scm='', dataid='')
+        kblog.write_operation_log(context, 'EXPORT_ALL_DATA:FORBIDDEN', scm='', dataid='')
         send_error_text('NO_ACCESS_RIGHTS')
         return None
     p_decrypt = web.get_raw_request_param('decrypt')
     decrypt = p_decrypt == '1'
 
-    logger.write_operation_log(context, 'EXPORT_ALL_DATA', scm='', dataid='')
+    kblog.write_operation_log(context, 'EXPORT_ALL_DATA', scm='', dataid='')
 
     b = kb.export_all_data(context, decrypt)
     util.send_binary(b, filename='kbdata_all.zip')
@@ -584,7 +584,7 @@ def proc_get_kb_log(context):
             except:
                 pass
         n = n * (-1)
-        logs = logger.get_log()[n:]
+        logs = kblog.get_log()[n:]
     else:
         status = 'NO_PRIVILEGE'
         logs = None
