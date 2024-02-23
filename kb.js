@@ -339,7 +339,7 @@ kb.drawDataList = function(fixedItems, items, sortIdx, sortOrder, totalCount, el
     infoHtml += ' (' + totalCount + ' in total)';
   }
   var ms = Math.floor(elapsed * 1000);
-  var t = util.msToReadableString(ms);
+  var t = util.ms2time(ms);
   infoHtml += '<span style="margin-left:16px;">' + t + '</span>';
 
   kb.drawInfo(infoHtml);
