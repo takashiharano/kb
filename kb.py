@@ -365,48 +365,7 @@ def search_data(context, scm, q, list_max=None):
             incl_nan_id = True
             break
 
-    all_data = []
-    for i in range(len(data_id_list)):
-        id = data_id_list[i]
-        if not incl_nan_id and is_nan_id(id):
-            continue
-        try:
-            data = load_data(scm, id)
-            content = data['content']
-            if should_omit_content(context, content, include_hidden):
-                dontinue
-            data['content'] = convert_data_to_half_width(content)
-            data['score'] = 0
-            all_data.append(data)
-        except:
-            continue
-
-    wk_data_list = all_data
-    keyword_matched = False
-    for i in range(len(keywords)):
-        keyword = keywords[i]
-        macthed_data_list = []
-        for j in range(len(wk_data_list)):
-            data = wk_data_list[j]
-            score = calc_data_macthed_score(data, keyword)
-            if score > 0:
-                data['score'] += score
-                macthed_data_list.append(data)
-                keyword_matched = True
-
-        wk_data_list = macthed_data_list
-
-    if id_filtering and not keyword_matched:
-        wk_data_list = all_data
-
-    data_list = []
-    for i in range(len(wk_data_list)):
-        data = wk_data_list[i]
-        content = data['content']
-        del content['BODY']
-
-        data['content'] = content
-        data_list.append(data)
+    data_list = _search(context, scm, data_id_list, id_filtering, incl_nan_id, include_hidden, keywords)
 
     total_count = len(data_list)
     if list_max > 0 and total_count > list_max:
@@ -432,6 +391,70 @@ def search_data(context, scm, q, list_max=None):
 
     return data_list_obj
 
+def _search(context, scm, data_id_list, id_filtering, incl_nan_id, include_hidden, keywords):
+    all_data = []
+    for i in range(len(data_id_list)):
+        id = data_id_list[i]
+        if not incl_nan_id and is_nan_id(id):
+            continue
+        try:
+            data = load_data(scm, id)
+            content = data['content']
+            if should_omit_content(context, content, include_hidden):
+                dontinue
+            data['content'] = convert_data_to_half_width(content)
+            data['score'] = 0
+            all_data.append(data)
+        except:
+            continue
+
+    wk_data_list = all_data
+    keyword_matched = False
+    exclude_list = []
+    for i in range(len(keywords)):
+        not_flag = False
+        keyword = keywords[i]
+        if keyword.startswith('-'):
+            not_flag = True
+            keyword = keyword[1:]
+
+        macthed_data_list = []
+        for j in range(len(wk_data_list)):
+            data = wk_data_list[j]
+            score = calc_data_macthed_score(data, keyword)
+            if score > 0:
+                if not_flag:
+                    id = data['id']
+                    exclude_list.append(id)
+                else:
+                    data['score'] += score
+                    macthed_data_list.append(data)
+                    keyword_matched = True
+            elif not_flag:
+                data['score'] += score
+                macthed_data_list.append(data)
+                keyword_matched = True
+
+        wk_data_list = macthed_data_list
+
+    if id_filtering and not keyword_matched:
+        wk_data_list = all_data
+
+    data_list = []
+    for i in range(len(wk_data_list)):
+        data = wk_data_list[i]
+        id = data['id']
+        if id in exclude_list:
+            continue
+
+        content = data['content']
+        del content['BODY']
+
+        data['content'] = content
+        data_list.append(data)
+
+    return data_list
+
 def convert_data_to_half_width(content):
     if 'TITLE' in content:
         content['TITLE'] = util.to_half_width(content['TITLE'])
@@ -451,50 +474,51 @@ def calc_data_macthed_score(data, keyword):
         score = 1
 
     elif keyword_lc.startswith('title:'):
-        keyword = extract_sraech_keyword(keyword, 'title')
+        keyword = get_field_sraech_keyword(keyword, 'title')
         score = is_matches_title(content['TITLE'], keyword)
 
     elif keyword_lc.startswith('label:'):
-        keyword = extract_sraech_keyword(keyword, 'label')
+        keyword = get_field_sraech_keyword(keyword, 'label')
         if is_matches_items(content, 'LABELS', keyword):
             score = 10
 
     elif keyword_lc.startswith('status:'):
-        keyword_lc = extract_sraech_keyword(keyword_lc, 'status')
+        keyword_lc = get_field_sraech_keyword(keyword_lc, 'status')
+        status_lc = ''
         if 'STATUS' in content and content['STATUS']:
             status_lc = content['STATUS'].lower()
-            if status_lc == keyword_lc:
-                score = 10
+        if status_lc == keyword_lc:
+            score = 10
 
     elif keyword_lc.startswith('created_at:'):
-        keyword = extract_sraech_keyword(keyword, 'created_at')
+        keyword = get_field_sraech_keyword(keyword, 'created_at')
         if is_date_matches(content['C_DATE'], keyword):
             score = 10
 
     elif keyword_lc.startswith('updated_at:'):
-        keyword = extract_sraech_keyword(keyword, 'updated_at')
+        keyword = get_field_sraech_keyword(keyword, 'updated_at')
         if is_date_matches(content['U_DATE'], keyword):
             score = 10
 
     elif keyword_lc.startswith('created_by:'):
-        keyword = extract_sraech_keyword(keyword, 'created_by')
+        keyword = get_field_sraech_keyword(keyword, 'created_by')
         score = is_target_matches(content['C_USER'], keyword, True)
 
     elif keyword_lc.startswith('updated_by:'):
-        keyword = extract_sraech_keyword(keyword, 'updated_by')
+        keyword = get_field_sraech_keyword(keyword, 'updated_by')
         score = is_target_matches(content['U_USER'], keyword, True)
 
     elif keyword_lc.startswith('assignee:'):
-        keyword = extract_sraech_keyword(keyword, 'assignee')
+        keyword = get_field_sraech_keyword(keyword, 'assignee')
         score = is_target_matches(content['ASSIGNEE'], keyword, True)
 
     elif keyword_lc.startswith('priv:'):
-        keyword = extract_sraech_keyword(keyword, 'priv')
+        keyword = get_field_sraech_keyword(keyword, 'priv')
         if is_matches_items(content, 'DATA_PRIVS', keyword):
             score = 10
 
     elif keyword_lc.startswith('body:'):
-        keyword = extract_sraech_keyword(keyword, 'body')
+        keyword = get_field_sraech_keyword(keyword, 'body')
         score = count_matched_key(content['BODY'], keyword)
 
     else:
@@ -508,14 +532,20 @@ def calc_data_macthed_score(data, keyword):
 
     return score
 
-def extract_sraech_keyword(s, name):
+def get_field_sraech_keyword(s, name):
     keyword = util.replace(s, name + ':', '', flags=re.IGNORECASE)
-    keyword = util.extract_quoted_string(keyword)
+    keyword = extract_quoted_string(keyword)
     return keyword
 
+def extract_quoted_string(s):
+    return util.extract_quoted_string(s, '"')
+
 def is_target_matches(target, keyword, partial_match):
-    if target == '':
-        return 0
+    if keyword == '':
+        if target == '':
+            return 100
+        else:
+            return 0
     score = 0
     target = target.lower()
     keyword = keyword.lower()
@@ -526,12 +556,6 @@ def is_target_matches(target, keyword, partial_match):
     return score
 
 def is_date_matches(target, search_val):
-    try:
-        return _is_date_matches(target, search_val)
-    except:
-        return False
-
-def _is_date_matches(target, search_val):
     try:
         target = int(target)
     except:
@@ -615,22 +639,30 @@ def fill2359(src):
     return src
 
 def is_matches_title(title, keyword):
-    if title == '':
-        return 0
+    if keyword == '':
+        if title == '':
+            return 300
+        else:
+            return 0
+
     score = 0
     title = title.lower()
     keyword = keyword.lower()
     if title == keyword:
         score += 300
-    score += title.count(keyword) * 10
+
+    count_score = title.count(keyword) * 10
+    score += count_score
     return score
 
 def is_matches_items(content, item_key, keyword):
-    if not item_key in content:
-        return False
-    items = content[item_key]
-    if items == '':
-        return False
+    items = ''
+    if item_key in content:
+        items = content[item_key]
+
+    if keyword == '' and items == '':
+        return True
+
     items = items.lower()
     keyword = keyword.lower()
     item_list = items.split(' ')
