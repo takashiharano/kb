@@ -37,7 +37,7 @@ DEFAULT_CONTENT = {
     'LABELS': '',
     'STATUS': '',
     'FLAGS': '',
-    'DATA_PRIVS': ''
+    'PRIVS': ''
 }
 
 SP_KEYWORD_NANIDS = '*nanids'
@@ -514,7 +514,7 @@ def calc_data_macthed_score(data, keyword):
 
     elif keyword_lc.startswith('priv:'):
         keyword = get_field_sraech_keyword(keyword, 'priv')
-        if is_matches_items(content, 'DATA_PRIVS', keyword):
+        if is_matches_items(content, 'PRIVS', keyword):
             score = 10
 
     elif keyword_lc.startswith('body:'):
@@ -834,8 +834,8 @@ def save_data(scm, id, new_data, user='', as_anonymous=False):
         content['ASSIGNEE'] = new_content['ASSIGNEE']
         content['FLAGS'] = new_content['FLAGS']
 
-        if 'DATA_PRIVS' in new_content:
-            content['DATA_PRIVS'] = new_content['DATA_PRIVS']
+        if 'PRIVS' in new_content:
+            content['PRIVS'] = new_content['PRIVS']
 
         if isdataurl:
             content['DATA_TYPE'] = 'dataurl'
@@ -1203,7 +1203,7 @@ def has_privilege(context, target_priv):
 def has_data_privilege(context, content):
     if context.is_admin():
         return True
-    dataprivs = content['DATA_PRIVS'] if 'DATA_PRIVS' in content else ''
+    dataprivs = content['PRIVS'] if 'PRIVS' in content else ''
     return satisfy_privs(context, dataprivs)
 
 def satisfy_privs(context, required_privs):

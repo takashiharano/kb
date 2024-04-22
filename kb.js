@@ -35,7 +35,7 @@ kb.LIST_COLUMNS = [
   {key: 'LABELS', label: 'LABELS'},
   {key: 'score', label: 'SCORE', meta: true},
   {key: 'size', label: 'SIZE', meta: true},
-  {key: 'DATA_PRIVS', label: 'DATA_PRIVS', forAdmin: true},
+  {key: 'PRIVS', label: 'PRIVS', forAdmin: true},
   {key: 'LOGIC', label: ''},
   {key: 'PASSWORD', label: ''},
   {key: 'encrypted', label: '', meta: true}
@@ -391,7 +391,7 @@ kb.buildListRow = function(data, fixed) {
     assigneeLink = '<span class="pseudo-link" onclick="kb.fieldSearch(\'assignee\', \'' + assignee + '\');">' + assignee + '</span>';
   }
 
-  var dataPrivs = content.DATA_PRIVS || '';
+  var dataPrivs = content.PRIVS || '';
   if ((cDate == undefined) || (cDate == '')) {
     cDateStr = '---------- --:--:--';
   } else {
@@ -1499,7 +1499,7 @@ kb.clearContent = function() {
       STATUS: '',
       FLAGS: '',
       DATA_TYPE: '',
-      DATA_PRIVS: '',
+      PRIVS: '',
       LOGIC: '',
       BODY: ''
     }
@@ -2411,7 +2411,7 @@ kb.showUrl = function() {
   var url = kb.getUrl4Id(id);
   kb.urlOfData = url;
   var m = '<span id="content-url" class="pseudo-link" onclick="kb.copyUrl();" data-tooltip="Click to copy">' + url + '</span>\n\n';
-  if (kb.isSysAdmin && !kb.data.content.DATA_PRIVS) {
+  if (kb.isSysAdmin && !kb.data.content.PRIVS) {
     var listTokens = '<div style="width:100%;text-align:left;line-height:1.8em;">';
     listTokens += 'Token: ';
     listTokens +=  '<span id="valid-until"></span>\n';
