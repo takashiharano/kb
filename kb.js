@@ -20,6 +20,8 @@ kb.ST_LOGIC_EDITING = 1 << 12;
 kb.UI_ST_NONE = 0;
 kb.UI_ST_AREA_RESIZING = 1;
 
+kb.DEFAULT_FONT_SIZE = 14;
+
 kb.LIST_COLUMNS = [
   {key: 'id', label: 'ID', meta: true},
   {key: 'TITLE', label: 'TITLE'},
@@ -87,7 +89,7 @@ kb.savingLogic = '';
 $onReady = function(e) {
   $el('#draw-mode').addEventListener('change', kb.onDrawModeChange);
   var fontSize = util.getQuery('fontsize') | 0;
-  if (!fontSize) fontSize = 12;
+  if (!fontSize) fontSize = kb.DEFAULT_FONT_SIZE;
   kb.setFontSize(fontSize);
   util.clock('#clock');
   if (kb.mode == 'view') {
@@ -2268,7 +2270,7 @@ kb._resizeMediaPreview = function(el, v) {
 };
 
 kb.resetFontSize = function() {
-  kb.setFontSize(12);
+  kb.setFontSize(kb.DEFAULT_FONT_SIZE);
 };
 
 kb.fontFamily = '';
