@@ -609,7 +609,7 @@ th {
     css += '  padding: 1px 8px;'
     css += '  background: ' + appconfig.label_background + ';'
     css += '  color: ' + appconfig.label_fgcolor + ';'
-    css += '  font-size: 13px;'
+    css += '  font-size: 12px;'
     css += '}'
 
     if mode != 'view':
@@ -646,6 +646,7 @@ th {
 .status {
   border-radius: 3px;
   padding: 0 3px;
+  font-size: 12px;
 }
 '''
 
