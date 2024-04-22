@@ -422,6 +422,7 @@ input[type="checkbox"] {
     css += '  background: transparent;'
     css += '  border: solid 1px ' + appconfig.input_border_color + ';'
     css += '  color: ' + appconfig.fg_color + ';'
+    css += '  font-size: 14px;'
     css += '  font-family: Consolas, Monaco, Menlo, monospace, sans-serif;'
     css += '  resize: none;'
     css += '}'
