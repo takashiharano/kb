@@ -899,7 +899,9 @@ kb.buildStatusHTML = function(status) {
   return html;
 };
 
-kb.buildItemsHTML = function(keyname, items) {
+kb.buildItemsHTML = function(keyname, items, snipN, snipL) {
+  if (snipN == undefined) snipN = 0;
+  if (snipL == undefined) snipL = 3;
   var dataList = [];
   if (items) {
     dataList = items.replace(/\s{2,}/g, ' ').split(' ');
@@ -907,12 +909,19 @@ kb.buildItemsHTML = function(keyname, items) {
   var html = '';
   for (var i = 0; i < dataList.length; i++) {
     var item = util.escHtml(dataList[i]);
-    html += '<span class="label"';
-    if (kb.mode != 'view') {
-      html += ' onclick="kb.fieldSearch(\'' + keyname + '\', \'' + item + '\');"';
-    }
-    html += '>' + item + '</span>';
+    var snip = ((snipN > 0) && (i >= snipN));
+    html += kb.createLabel(keyname, item, snip, snipL);
   }
+  return html;
+};
+kb.createLabel = function(keyname, text, snip, snipL) {
+  var dispLabel = (snip ? dispLabel = util.snip(text, snipL, 0) : text);
+  var html = '<span class="label"';
+  if (kb.mode != 'view') {
+    html += ' onclick="kb.fieldSearch(\'' + keyname + '\', \'' + text + '\');"';
+    if (snip) html += ' data-tooltip="' + text + '"';
+  }
+  html += '>' + dispLabel + '</span>';
   return html;
 };
 
@@ -1298,7 +1307,7 @@ kb.drawData = function(data) {
   var uDateStr = '';
   if (cDate != undefined) cDateStr = kb.getDateTimeString(+cDate);
   if (uDate != undefined) uDateStr = kb.getDateTimeString(+uDate);
-  var labelsHTML = kb.buildItemsHTML('label', labels);
+  var labelsHTML = kb.buildItemsHTML('label', labels, 4, 3);
 
   var drawMode = $el('#draw-mode').value;
   if (drawMode != '2') {
