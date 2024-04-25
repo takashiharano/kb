@@ -2785,13 +2785,13 @@ kb.openResultDialog = function(s) {
 };
 
 kb.maskText = function(s) {
+  var v = s.replace(/\\/g, '\\\\').replace(/'/g, '\\\'').replace(/"/g, '&quot;');
   var r = '';
-  r += '<div style="display:inline-block;position:relative;min-width:110px;">';
+  r += '<div style="display:inline-block;position:relative;min-width:110px;margin-left:50px;">';
   r += '<div style="display:inline-block;position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(90deg, #aaa, #888 30%);cursor:pointer;" onclick="kb.peel(this);"></div>';
-  r += '<span style="cursor:pointer;" onclick="kb.copy(\'' + s + '\', true);" data-tooltip="Click to copy">';
   r += s;
-  r += '</span>';
   r += '</div>';
+  r += '<button class="small-button" style="margin-left:8px;margin-right:16px;" onclick="kb.copy(\'' + v + '\', true);">COPY</button>';
   return r;
 };
 kb.peel = function(el) {
