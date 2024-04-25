@@ -2760,25 +2760,23 @@ kb.b64sDialogCb = function(key, data) {
 kb.decodeB64s = function(key, data) {
   try {
     var s = util.decodeBase64s(data, key);
-    util.copy(s);
     var m = 'Decoded\n\n' + kb.maskText(s);
   } catch(e) {
     m = '<span style="color:#f77;">Decode Error</span>';
   }
   kb.openResultDialog(m);
-  util.infotip.show('Copied', 600, {pos: 'pointer'});
 };
 kb.encodeB64s = function(key, data) {
   var m;
   try {
     var s = util.encodeBase64s(data, key);
-    util.copy(s);
-    var m = 'Encoded\n\n<span style="cursor:pointer;" onclick="kb.copy(\'' + s + '\', true);" data-tooltip="Click to copy">' + s + '</span>';
+    var m = 'Encoded\n\n';
+    m += '<span style="margin-left:50px;">' + s + '</span>';
+    m += '<button class="small-button" style="margin-left:12px;margin-right:16px;" onclick="kb.copy(\'' + s + '\', true);">COPY</button>';
   } catch(e) {
     m = '<span style="color:#f77;">Decode Error</span>';
   }
   kb.openResultDialog(m);
-  util.infotip.show('Copied', 600, {pos: 'pointer'});
 };
 kb.openResultDialog = function(s) {
   util.alert(s);
