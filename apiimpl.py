@@ -592,7 +592,7 @@ def proc_get_kb_log(context):
     send_result_json(status, body=logs)
 
 #------------------------------------------------------------------------------
-def _build_css(fontsize='12', fontfamily='', with_color=False):
+def _build_css(fontsize='14', fontfamily='', with_color=False):
     if fontfamily == '':
         fontfamily = 'Consolas, Monaco, Menlo, monospace, sans-serif'
     if with_color:
@@ -602,13 +602,13 @@ def _build_css(fontsize='12', fontfamily='', with_color=False):
 
     css = ''
     css += 'body{\n'
-    css += '  calc(width: 100% - 20px);\n'
+    css += '  width: calc(100% - 20px);\n'
     css += '  height: calc(100vh - 30px);\n'
     css += '  margin: 0;\n'
     css += '  padding: 10px;\n'
 
     if with_color:
-        css += '  background: ' + appconfig.background3 + ';\n'
+        css += '  background: ' + appconfig.background1 + ';\n'
         css += '  color: ' + appconfig.fg_color + ';\n'
 
     css += '  font-size: ' + fontsize + 'px;\n'
@@ -625,6 +625,13 @@ def _build_css(fontsize='12', fontfamily='', with_color=False):
     css += 'a:hover {'
     css += '  text-decoration: underline;'
     css += '}\n'
+    css += '#content-body {\n'
+    css += '  width: 100%;\n'
+    css += '  height: 100%;\n'
+    if with_color:
+        css += '  background: ' + appconfig.background_lower + ';\n'
+    css += '}\n'
+
     return css
 
 #------------------------------------------------------------------------------
