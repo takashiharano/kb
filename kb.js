@@ -1326,6 +1326,7 @@ kb.drawData = function(data) {
 
     contentBody = kb.linkBsb64Data(contentBody);
     contentBody = kb.linkB64sData(contentBody);
+    contentBody = kb.linkCopy(contentBody);
     contentBody = kb.linkKB(contentBody);
     contentBody = contentBody.replace(/^(\s*)(#.*)/g, '$1<span class="comment">$2</span>');
     contentBody = contentBody.replace(/(\n)(\s*)(#.*)/g, '$1$2<span class="comment">$3</span>');
@@ -1456,18 +1457,20 @@ kb.decodeB64Image = function(s) {
 };
 
 kb.linkBsb64Data = function(s) {
-  var t = '<span class="pseudo-link link" onclick="kb.decodeBSB64(\'$1\');" data-tooltip="Click to decode">$1</span>';
-  s = s.replace(/(bsb64:[A-Za-z0-9+/=$]+)/g, t);
-  s = s.replace(/decodeBSB64\('bsb64:/g, 'decodeBSB64(\'');
-  s = s.replace(/>bsb64:([A-Za-z0-9+/=$]+)<\/span>/g, '>$1</span>');
+  var t = '<span class="pseudo-link link" onclick="kb.decodeBSB64(\'$2\');" data-tooltip="Click to decode">$2</span>';
+  s = s.replace(/(bsb64:)([A-Za-z0-9+/=$]+)/g, t);
   return s;
 };
 
 kb.linkB64sData = function(s) {
-  var t = '<span class="pseudo-link link" onclick="kb.openB64sDialog(\'$1\');" data-tooltip="Click to decode">$1</span>';
-  s = s.replace(/(b64:[A-Za-z0-9+/=$]+)/g, t);
-  s = s.replace(/openB64sDialog\('b64:/g, 'openB64sDialog(\'');
-  s = s.replace(/>b64:([A-Za-z0-9+/=$]+)<\/span>/g, '>$1</span>');
+  var t = '<span class="pseudo-link link" onclick="kb.openB64sDialog(\'$2\');" data-tooltip="Click to decode">$2</span>';
+  s = s.replace(/(b64:)([A-Za-z0-9+/=$]+)/g, t);
+  return s;
+};
+
+kb.linkCopy = function(s) {
+  var t = '<span class="pseudo-link" onclick="kb.copy(\'$1\', 1);" data-tooltip="Click to copy">$1</span>';
+  s = s.replace(/&lt;copy&gt;(.+?)&lt;\/copy&gt;/g, t);
   return s;
 };
 
