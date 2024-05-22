@@ -1469,8 +1469,24 @@ kb.linkB64sData = function(s) {
 };
 
 kb.linkCopy = function(s) {
-  var t = '<span class="pseudo-link" onclick="kb.copy(\'$1\', 1);" data-tooltip="Click to copy">$1</span>';
-  s = s.replace(/&lt;copy&gt;(.+?)&lt;\/copy&gt;/g, t);
+  var w = s.match(/&lt;copy&gt;(.+?)&lt;\/copy&gt;/g);
+  if (!w) return s;
+
+  var a = [];
+  for (var i = 0; i < w.length; i++) {
+    var v = w[i].replace(/&lt;copy&gt;(.+?)&lt;\/copy&gt;/, '$1');
+    a.push(v);
+  }
+
+  for (i = 0; i < a.length; i++) {
+    a[i] = a[i].replace(/\\/g, '\\\\').replace(/&#39;/g, '\\\'').replace(/"/g, '&quot;');
+  }
+
+  for (i = 0; i < a.length; i++) {
+    var t = '<span class="pseudo-link" onclick="kb.copy(\'' + a[i] + '\', 1);" data-tooltip="Click to copy">$1</span>';
+    s = s.replace(/&lt;copy&gt;(.+?)&lt;\/copy&gt;/, t);
+  }
+
   return s;
 };
 
