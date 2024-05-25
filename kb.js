@@ -1457,7 +1457,7 @@ kb.decodeB64Image = function(s) {
 };
 
 kb.linkBsb64Data = function(s) {
-  var t = '<span class="pseudo-link link" onclick="kb.decodeBSB64(\'$2\');" data-tooltip="Click to decode">$2</span>';
+  var t = '<span class="pseudo-link link" onclick="kb.openBSB64Dialog(\'$2\', 0);" data-tooltip="Click to decode">$2</span>';
   s = s.replace(/(bsb64:)([A-Za-z0-9+/=$]+)/g, t);
   return s;
 };
@@ -2764,6 +2764,40 @@ kb.decodeBSB64 = function(t) {
     m = '<span style="color:#f77;">Decode Error</span>';
   }
   util.infotip.show(m, {pos: 'pointer'});
+};
+
+kb.openBSB64Dialog = function(t, enc) {
+  var opt = {
+    data: {t: t, enc: enc}
+  };
+  var m = 'BSB64 ' + (enc ? 'encryption' : 'decryption') + ' n=';
+  util.dialog.text(m, kb.bsb64DialogCb, opt);
+};
+kb.bsb64DialogCb = function(n, data) {
+  var f = (data.enc ? kb.encodeBSB64 : kb.decodeBSB64);
+  f(data.t, n);
+};
+kb.decodeBSB64 = function(data, n) {
+  if (n == '') n = 1;
+  try {
+    var s = util.decodeBSB64(data, n);
+    var m = 'Decoded\n\n' + kb.maskText(s);
+  } catch(e) {
+    m = '<span style="color:#f77;">Decode Error</span>';
+  }
+  kb.openResultDialog(m);
+};
+kb.encodeBSB64 = function(data, n) {
+  if (n == '') n = 1;
+  try {
+    var s = util.encodeBSB64(data, n);
+    var m = 'Encoded\n\n';
+    m += '<span style="margin-left:50px;">' + s + '</span>';
+    m += '<button class="small-button" style="margin-left:12px;margin-right:16px;" onclick="kb.copy(\'' + s + '\', true);">COPY</button>';
+  } catch(e) {
+    m = '<span style="color:#f77;">Decode Error</span>';
+  }
+  kb.openResultDialog(m);
 };
 
 kb.openB64sDialog = function(t, enc) {
