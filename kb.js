@@ -1307,7 +1307,7 @@ kb.drawData = function(data) {
   var uDateStr = '';
   if (cDate != undefined) cDateStr = kb.getDateTimeString(+cDate);
   if (uDate != undefined) uDateStr = kb.getDateTimeString(+uDate);
-  var labelsHTML = kb.buildItemsHTML('label', labels, 4, 3);
+  var labelsHTML = kb.buildItemsHTML('label', labels, 3, 3);
 
   var drawMode = $el('#draw-mode').value;
   if (drawMode != '2') {
