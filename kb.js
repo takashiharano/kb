@@ -2754,18 +2754,6 @@ kb.pasteImage = async function() {
   }
 };
 
-kb.decodeBSB64 = function(t) {
-  var m;
-  try {
-    var s = util.decodeBSB64(t, kb.bsb64.n);
-    util.copy(s);
-    m = 'Decoded';
-  } catch(e) {
-    m = '<span style="color:#f77;">Decode Error</span>';
-  }
-  util.infotip.show(m, {pos: 'pointer'});
-};
-
 kb.openBSB64Dialog = function(t, enc) {
   var opt = {
     data: {t: t, enc: enc}

@@ -21,7 +21,7 @@ import kb
 #------------------------------------------------------------------------------
 def build_js(context):
     content_height_adj = appconfig.list_height + 32
-    bsb64_enc_key = bsb64.encode_string(kb.DEFAULT_ENCRYPTION_KEY, 1)
+    default_encryption_key = bsb64.encode_string(kb.DEFAULT_ENCRYPTION_KEY, 1)
 
     js = ''
     js += 'var kb = kb || {};\n'
@@ -29,7 +29,7 @@ def build_js(context):
     js += 'kb.config = {\n'
     js += '  list_max: ' + str(appconfig.list_max) + ',\n';
     js += '  default_data_encryption: ' + ('true' if appconfig.default_data_encryption else 'false') + ',\n'
-    js += '  default_encryption_key: \'' + bsb64_enc_key + '\'\n'
+    js += '  default_encryption_key: \'' + default_encryption_key + '\'\n'
     js += '};\n'
 
     js += 'kb.bsb64 = {n: 1};\n'
