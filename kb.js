@@ -1457,13 +1457,13 @@ kb.decodeB64Image = function(s) {
 };
 
 kb.linkBsb64Data = function(s) {
-  var t = '<span class="pseudo-link link" onclick="kb.openBSB64Dialog(\'$2\', 0);" data-tooltip="Click to decode">$2</span>';
+  var t = '<span class="pseudo-link link" onclick="kb.openBSB64Dialog(\'$2\', 0);" data-tooltip2="Click to decode">$2</span>';
   s = s.replace(/(bsb64:)([A-Za-z0-9+/=$]+)/g, t);
   return s;
 };
 
 kb.linkB64sData = function(s) {
-  var t = '<span class="pseudo-link link" onclick="kb.openB64sDialog(\'$2\');" data-tooltip="Click to decode">$2</span>';
+  var t = '<span class="pseudo-link link" onclick="kb.openB64sDialog(\'$2\');" data-tooltip2="Click to decode">$2</span>';
   s = s.replace(/(b64:)([A-Za-z0-9+/=$]+)/g, t);
   return s;
 };
@@ -1483,7 +1483,7 @@ kb.linkCopy = function(s) {
   }
 
   for (i = 0; i < a.length; i++) {
-    var t = '<span class="pseudo-link" onclick="kb.copy(\'' + a[i] + '\', 1);" data-tooltip="Click to copy">$1</span>';
+    var t = '<span class="pseudo-link" onclick="kb.copy(\'' + a[i] + '\', 1);" data-tooltip2="Click to copy">$1</span>';
     s = s.replace(/&lt;copy&gt;(.+?)&lt;\/copy&gt;/, t);
   }
 
@@ -2438,7 +2438,7 @@ kb.showUrl = function() {
   var id = kb.data.id;
   var url = kb.getUrl4Id(id);
   kb.urlOfData = url;
-  var m = '<span id="content-url" class="pseudo-link" onclick="kb.copyUrl();" data-tooltip="Click to copy">' + url + '</span>\n\n';
+  var m = '<span id="content-url" class="pseudo-link" onclick="kb.copyUrl();" data-tooltip2="Click to copy">' + url + '</span>\n\n';
   if (kb.isSysAdmin && !kb.data.content.PRIVS) {
     var listTokens = '<div style="width:100%;text-align:left;line-height:1.8em;">';
     listTokens += 'Token: ';
