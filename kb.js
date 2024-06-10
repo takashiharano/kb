@@ -80,7 +80,7 @@ kb.dataLoadingTmrId = 0;
 kb.clipboardEnabled = false;
 kb.mode = kb.mode || null;
 kb.toolsWindow = null;
-kb.logicWindow = null;
+kb.logicEditorWindow = null;
 kb.scmList = [];
 kb.activeScmIdx = 0;
 kb.activeScmId = null;
@@ -1020,7 +1020,7 @@ kb.onEditEnd = function() {
   kb.data_bak = null;
   kb.pw.toSave = null;
 
-  kb.closeLogicWindow();
+  kb.closeLogicEditorWindow();
 
   $el('#content-body').show();
 
@@ -1777,7 +1777,7 @@ kb.getCurrentLogicParamCode = function() {
 };
 
 kb.openLogicEditor = function() {
-  if (kb.logicWindow) {
+  if (kb.logicEditorWindow) {
     return;
   }
   kb.status |= kb.ST_LOGIC_EDITING;
@@ -1821,24 +1821,25 @@ kb.openLogicEditor = function() {
         background: 'rgba(0,0,0,0.8)'
       }
     },
-    onclose: kb.onLogicWindowClose,
+    onclose: kb.onLogicEditorWindowClose,
     content: html
   };
 
-  kb.logicWindow = util.newWindow(opt);
+  kb.logicEditorWindow = util.newWindow(opt);
 
   kb.tools.onEncDecModeChange();
   $el('#logic-code').focus();
 };
 
-kb.closeLogicWindow = function() {
-  if (kb.logicWindow) {
-    kb.logicWindow.close();
+kb.closeLogicEditorWindow = function() {
+  if (kb.logicEditorWindow) {
+    kb.logicEditorWindow.close();
   }
 };
 
-kb.onLogicWindowClose = function() {
-  kb.logicWindow = null;
+kb.onLogicEditorWindowClose = function() {
+  kb.onEditLogicEnd();
+  kb.logicEditorWindow = null;
 };
 
 kb.confirmSaveLogic = function() {
@@ -1871,7 +1872,7 @@ kb.onSaveLogic = function(xhr, res, req) {
   }
   if (res.status == 'OK') {
     var savedInfo = res.body;
-    kb.closeLogicWindow();
+    kb.closeLogicEditorWindow();
     kb.onEditLogicEnd();
     kb.showInfotip('OK');
     kb.data.content.LOGIC = kb.savingLogic;
@@ -1889,7 +1890,7 @@ kb.onSaveLogic = function(xhr, res, req) {
   }
 };
 kb.cancelEditLogic = function() {
-  kb.closeLogicWindow();
+  kb.closeLogicEditorWindow();
   kb.onEditLogicEnd();
 };
 kb.onEditLogicEnd = function() {
