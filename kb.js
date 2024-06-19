@@ -179,8 +179,8 @@ kb.insertBinData = function(data) {
   var el = $el('#content-body-edt');
   var cp = el.selectionStart;
   var v = el.value;
-  var v1 = v.substr(0, cp);
-  var v2 = v.substr(cp);
+  var v1 = v.slice(0, cp);
+  var v2 = v.slice(cp);
 
   var p = data.indexOf(',');
   if (p == -1) {
@@ -189,8 +189,8 @@ kb.insertBinData = function(data) {
   }
 
   p++;
-  var h = data.substr(0, p);
-  var d = data.substr(p);
+  var h = data.slice(0, p);
+  var d = data.slice(p);
   d = util.insertCh(d, '\n', 76);
   var s = h + '\n' + d + '\n';
   el.value = v1 + s + v2;
