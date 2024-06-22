@@ -436,7 +436,7 @@ kb.buildListRow = function(data, fixed, cnt) {
   html += '<td><input type="checkbox" onchange="kb.checkItem(\'' + id + '\', this)"';
   if (kb.checkedIds.includes(id)) html += ' checked';
   html += '></td>'
-  html += '<td style="text-align:right;padding-right:16px;">' + (fixed ? '<span style="color:#a44;cursor:default;" data-tooltip2="Fixed">*</span>' : '') + id + '</td>'
+  html += '<td style="text-align:right;padding-right:16px;">' + (fixed ? '<span style="color:#888;cursor:default;" data-tooltip2="Fixed">*</span>' : '') + id + '</td>'
 
   html += '<td style="min-width:300px;max-width:600px;">';
   if (data_status == 'OK') {
