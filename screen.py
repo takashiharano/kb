@@ -63,8 +63,8 @@ def build_main_screen(context, scm):
     if username == '':
         username = context.get_user_id()
 
-    html += '      <span style="position:absolute;right:5px;">'
-    html += '        <span class="pseudo-link text-dim" style="margin-right:10px;" onclick="kb.confirmLogout();">' + username + '</span>'
+    html += '      <span style="position:absolute;right:0;">'
+    html += '        <span class="pseudo-link text-muted" style="margin-right:10px;" onclick="kb.confirmLogout();">' + username + '</span>'
     html += '        <span id="clock"></span>'
     html += '''
       </span>
@@ -88,7 +88,7 @@ def build_main_screen(context, scm):
 
     html += '<button style="margin-left:36px;" onclick="kb.openNewWindow();">NEW WIN</button>'
 
-    html += '      <span style="position:absolute;right:5px;">'
+    html += '      <span style="position:absolute;right:0;">'
 
     if kb.can_operate(context, scm, 'write'):
         html += '        <button id="touch-button" style="margin-right:16px;" onclick="kb.touch();" disabled>TOUCH</button>'
@@ -253,7 +253,7 @@ kb.mode = 'view'
       <div id="meta-info" class="meta-info">
         <span>CREATED: <span id="content-created-date"></span> <span id="content-created-by"></span></span><span>&nbsp;&nbsp;UPDATED: <span id="content-updated-date"></span> <span id="content-updated-by"></span></span>
         <span id="status" style="margin-left:32px;"></span>
-        <span style="position:absolute;right:5px;">
+        <span style="position:absolute;right:0;">
           <span id="clock"></span>
         </span>
       </div>
@@ -343,9 +343,9 @@ $onLoad = function() {
 #------------------------------------------------------------------------------
 def build_css(mode=''):
     css = ''
-    css += 'body{'
+    css += 'body {'
     css += '  width: 100%;'
-    css += '  height: calc(100vh - 10px);'
+    css += '  height: calc(100vh - 32px);'
     css += '  margin: 0;'
     css += '  background: ' + appconfig.background1 + ';'
     css += '  color: ' + appconfig.fg_color + ';'
@@ -419,8 +419,10 @@ input[type="checkbox"] {
 
     css += 'textarea {'
     css += '  outline: none;'
+    css += '  padding: 4px;'
     css += '  background: transparent;'
     css += '  border: solid 1px ' + appconfig.input_border_color + ';'
+    css += '  border-radius: 4px;'
     css += '  color: ' + appconfig.fg_color + ';'
     css += '  font-size: 14px;'
     css += '  font-family: Consolas, Monaco, Menlo, monospace, sans-serif;'
@@ -445,8 +447,8 @@ th {
     css += '.area {'
     css += '  position: relative;'
     css += '  border: 1px solid ' + appconfig.border_color + ';'
-    css += '  border-radius: 3px;'
-    css += '  padding: 4px;'
+    css += '  border-radius: 6px;'
+    css += '  padding: 4px 8px;'
     css += '}'
     css += '.red-button {'
     css += '  border: 1px solid ' + appconfig.button_red_border + ';'
@@ -461,8 +463,8 @@ th {
     css += '  background: ' + appconfig.button_red_hover_background + ';'
     css += '  color: ' + appconfig.button_red_hover_fgcolor + ';'
     css += '}'
-    css += '.text-dim {'
-    css += '  color: ' + appconfig.fg_dim_color + ';'
+    css += '.text-muted {'
+    css += '  color: ' + appconfig.fg_color_muted + ';'
     css += '}'
     css += '.text-red {'
     css += '  color: ' + appconfig.text_red + ';'
@@ -474,7 +476,7 @@ th {
     css += '.small-button {'
     css += '  min-width: 30px;'
     css += '  height: 16px;'
-    css += '  font-size: 8px;'
+    css += '  font-size: 10px;'
     css += '}'
 
     css += '''
@@ -483,9 +485,9 @@ th {
 }
 #body1 {
   display: none;
-  width: calc(100% - 17px);
+  width: calc(100% - 21px);
   min-width: 1500px;
-  min-height: calc(100vh - 4px);
+  min-height: calc(100% - 4px);
 }
 .selected {
   background: #2f3a42;
@@ -518,6 +520,9 @@ th {
   cursor: ns-resize;
 }
 '''
+    css += '.colum-header {'
+    css += '  color: ' + appconfig.colum_header_fg_color + ';'
+    css += '}'
     css += '.data-list-row:hover {'
     css += '  background: ' + appconfig.list_hover_background + ';'
     css += '}'
@@ -598,7 +603,7 @@ th {
 }
 #content-body-edt {
   width: calc(100% - 8px);
-  height: calc(100% - 16px);
+  height: calc(100% - 18px);
 }
 #content-body-st {
   color: #a5afb7;
@@ -620,6 +625,7 @@ th {
         css += '}'
 
     css += '.dialog {'
+    css += '  border-radius: 6px !important;'
     css += '  border: 1px solid ' + appconfig.dialog_border + ';'
     css += '  background: ' + appconfig.dialog_background + '!important;'
     css += '  color: ' + appconfig.dialog_fgcolor + ' !important;'
@@ -627,6 +633,10 @@ th {
     css += '.status-label-ok {'
     css += '  color: ' + appconfig.status_label_ok_fgcolor + ';'
     css += '  background: ' + appconfig.status_label_ok_background + ';'
+    css += '}'
+
+    css += '.color-border-danger {'
+    css += '  border: 1px solid ' + appconfig.color_border_danger + ';'
     css += '}'
 
     css += '.status-label-err {'
@@ -709,6 +719,13 @@ td.center {
     css += '  color: ' + appconfig.text_disabled + ';'
     css += '}'
 
+    css += '.row-odd {'
+    css += '  background: ' + appconfig.list_bg_odd + ';'
+    css += '}'
+    css += '.row-even {'
+    css += '  background: ' + appconfig.list_bg_even + ';'
+    css += '}'
+
     css += '.row-selected {'
     css += '  background: ' + appconfig.list_row_selected_bg + ';'
     css += '}'
@@ -730,12 +747,15 @@ td.center {
 }
 .code {
   display: inline-block;
-  border: 1px solid #888;
-  border-radius: 3px;
+  min-width: 420px;
   padding: 8px;
   margin: 1px 0;
-}
+  border-radius: 3px;
 '''
+    css += '  border: ' + appconfig.code_border + ';'
+    css += '  background: ' + appconfig.code_background + ';'
+    css += '}'
+
     return css
 
 #------------------------------------------------------------------------------

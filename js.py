@@ -41,9 +41,8 @@ def build_js(context):
         if i > 0:
             js += ','
         js += '{'
-        js += '  name: \'' + obj['name'] + '\', '
-        js += '  fgcolor: \'' + obj['fgcolor'] + '\', '
-        js += '  bgcolor: \'' + obj['bgcolor'] + '\', '
+        for key in obj:
+            js += '  ' + key + ': \'' + obj[key] + '\', '
         js += '}'
 
     js += '],\n'

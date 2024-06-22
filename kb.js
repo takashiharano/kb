@@ -316,13 +316,14 @@ kb.drawDataList = function(fixedItems, items, sortIdx, sortOrder, totalCount, el
   }
 
   var htmlList = '';
+  var cnt = 0;
   for (var i = 0; i < fixedItems.length; i++) {
     var data = fixedItems[i];
-    htmlList += kb.buildListRow(data, true);
+    htmlList += kb.buildListRow(data, true, ++cnt);
   }
   for (var i = 0; i < items.length; i++) {
     data = items[i];
-    htmlList += kb.buildListRow(data);
+    htmlList += kb.buildListRow(data, false, ++cnt);
   }
   htmlList += '</table>';
 
@@ -351,7 +352,7 @@ kb.drawDataList = function(fixedItems, items, sortIdx, sortOrder, totalCount, el
   }
 };
 
-kb.buildListRow = function(data, fixed) {
+kb.buildListRow = function(data, fixed, cnt) {
   var id = data.id;
   var data_status = data.status;
   var content = data.content || {};
@@ -367,7 +368,7 @@ kb.buildListRow = function(data, fixed) {
   var cUser = (content.C_USER ? content.C_USER : '');
   var cUserLabel = cUser;
   if (cUser == kb.ANONYMOUS_USER_NAME) {
-    cUserLabel = '<span class="text-dim">' + cUserLabel + '</span>';
+    cUserLabel = '<span class="text-muted">' + cUserLabel + '</span>';
   }
   var cUserLink = '';
   if (cUser) {
@@ -378,7 +379,7 @@ kb.buildListRow = function(data, fixed) {
   var uUser = (content.U_USER ? content.U_USER : '');
   var uUserLabel = uUser;
   if (uUser == kb.ANONYMOUS_USER_NAME) {
-    uUserLabel = '<span class="text-dim">' + uUserLabel + '</span>';
+    uUserLabel = '<span class="text-muted">' + uUserLabel + '</span>';
   }
   var uUserLink = '';
   if (uUser) {
@@ -430,11 +431,12 @@ kb.buildListRow = function(data, fixed) {
   }
   var labelsHTML = kb.buildItemsHTML('label', labels);
   var privsHTML = kb.buildItemsHTML('priv', dataPrivs);
-  var html = '<tr id="row-' + id + '" class="data-list-row">';
+  var rowClass = ((cnt % 2 == 0) ? 'row-even' : 'row-odd');
+  var html = '<tr id="row-' + id + '" class="data-list-row text-muted ' + rowClass + '">';
   html += '<td><input type="checkbox" onchange="kb.checkItem(\'' + id + '\', this)"';
   if (kb.checkedIds.includes(id)) html += ' checked';
   html += '></td>'
-  html += '<td style="padding-right:16px;">' + id + (fixed ? '<span style="color:#888;">*</span>' : '') + '</td>'
+  html += '<td style="text-align:right;padding-right:16px;">' + (fixed ? '<span style="color:#a44;cursor:default;" data-tooltip2="Fixed">*</span>' : '') + id + '</td>'
 
   html += '<td style="min-width:300px;max-width:600px;">';
   if (data_status == 'OK') {
@@ -540,7 +542,7 @@ kb.buildListHeader = function(columns, sortIdx, sortOrder) {
     sortButton += '>▼</span>';
     sortButton += '</span>';
 
-    html += '<th class="item-list"><span>' + label + '</span> ' + sortButton + '</th>';
+    html += '<th class="item-list"><span class="colum-header">' + label + '</span> ' + sortButton + '</th>';
   }
   html += '<th class="item-list" style="width:3em;"><span>&nbsp;</span></th>';
 
@@ -879,17 +881,14 @@ kb.buildStatusHTML = function(status) {
       break;
     }
   }
+
+  var stColor = (st.color ? st.color : '#ccc');
   html = '<span class="status"';
-  if (st.fgcolor || st.bgcolor) {
-    html += ' style="';
-    if (st.fgcolor) {
-      html += 'color:' + st.fgcolor + ';';
-    }
-    if (st.bgcolor) {
-      html += 'background:' + st.bgcolor + ';';
-    }
-   html += '"';
-  }
+  html += ' style="';
+  html += 'color:' + stColor + ';';
+  html += 'border: 1px solid ' + stColor + ';';
+  html += '"';
+
   if (kb.mode != 'view') {
     html += ' onclick="kb.fieldSearch(\'status\', \'' + status + '\');"';
   }
@@ -1336,7 +1335,7 @@ kb.drawData = function(data) {
   }
 
   var idLabel = '';
-  if (id != '') idLabel = '<span class="pseudo-link" onclick="kb.showData(\'' + id + '\');">' + id + '</span>:';
+  if (id != '') idLabel = '<span class="pseudo-link" onclick="kb.showData(\'' + id + '\');" data-tooltip2="Reload">' + id + '</span>:';
   var titleLabel = util.escHtml(title);
 
   $el('#content-id').innerHTML = idLabel;
@@ -1535,7 +1534,7 @@ kb.clearContent = function() {
 };
 
 kb.delete = function(id) {
-  util.confirm('Delete?', kb._delete, {focus: 'no', data: id});
+  util.confirm('Delete?', kb._delete, {focus: 'no', data: id, className: 'color-border-danger'});
 };
 kb._delete = function(id) {
   if (id == undefined) {
@@ -1818,7 +1817,7 @@ kb.openLogicEditor = function() {
     },
     body: {
       style: {
-        background: 'rgba(0,0,0,0.8)'
+        background: 'rgba(40,40,40,0.9)'
       }
     },
     onclose: kb.onLogicEditorWindowClose,
@@ -2212,7 +2211,7 @@ kb.openTools = function() {
     },
     body: {
       style: {
-        background: 'rgba(0,0,0,0.8)'
+        background: 'rgba(40,40,40,0.9)'
       }
     },
     onclose: kb.onToolsWindowClose,
