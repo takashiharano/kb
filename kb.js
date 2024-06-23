@@ -353,6 +353,7 @@ kb.drawDataList = function(fixedItems, items, sortIdx, sortOrder, totalCount, el
 };
 
 kb.buildListRow = function(data, fixed, cnt) {
+  var currentUserName = websys.getUserName();
   var id = data.id;
   var data_status = data.status;
   var content = data.content || {};
@@ -389,7 +390,8 @@ kb.buildListRow = function(data, fixed, cnt) {
   var assignee = (content.ASSIGNEE ? content.ASSIGNEE : '');
   var assigneeLink = '';
   if (assignee) {
-    assigneeLink = '<span class="pseudo-link" onclick="kb.fieldSearch(\'assignee\', \'' + assignee + '\');">' + assignee + '</span>';
+    if (assignee == currentUserName) assigneeLink = '<span style="color:#48d;">*</span>'
+    assigneeLink += '<span class="pseudo-link" onclick="kb.fieldSearch(\'assignee\', \'' + assignee + '\');">' + assignee + '</span>';
   }
 
   var dataPrivs = content.PRIVS || '';
@@ -619,9 +621,9 @@ kb.searchByIds = function(ids, reload, limit) {
   kb.searchByKeyword(q, reload, limit);
 };
 kb.searchByKeyword = function(q, reload, limit) {
-  if (q.match(/^label:[^\s]+?$/) || q.match(/^status:[^\s]+?$/) || q.match(/^updated..:[^\s]+?$/)) {
+  if (q.match(/^label:[^\s]+?$/) || q.match(/^status:[^\s]+?$/) || q.match(/^updated_..:.+?$/) || q.match(/^assignee:.+?$/)) {
     kb.listStatus.sortIdx = 5;
-  } else if (q.match(/^created..:[^\s]+?$/)) {
+  } else if (q.match(/^created_..:.+?$/)) {
     kb.listStatus.sortIdx = 3;
   } else {
     kb.listStatus.sortIdx = 10;
