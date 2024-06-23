@@ -1615,7 +1615,7 @@ kb.editProps = function() {
   html += '<button id="change-id-button" style="margin-left:4px;" onclick="kb.confirmChangeDataId();" disabled>CHANGE</button>';
   html += '<button id="next-id-button" class="small-button" style="margin-left:4px;" onclick="kb.checkId();">CHECK ID</button>';
   html += '</div>';
-  html += '<textarea id="props" spellcheck="false" style="width:100%;height:calc(100% - 54px);margin-bottom:8px;" onfocus="kb.onPropsFocus();">' + props + '</textarea><br>';
+  html += '<textarea id="props" spellcheck="false" style="width:calc(100% - 12px);height:calc(100% - 60px);margin-bottom:8px;" onfocus="kb.onPropsFocus();">' + props + '</textarea><br>';
   html += '<button id="save-props-button" onclick="kb.confirmSaveProps();" disabled>SAVE</button>';
   html += '<button style="margin-left:10px;" onclick="kb.cancelEditProps();">Cancel</button>';
   html += '</div>';
@@ -1784,18 +1784,18 @@ kb.openLogicEditor = function() {
   kb.status |= kb.ST_LOGIC_EDITING;
   var logic = kb.getCurrentLogicParamCode();
   var html = '';
-  html += '<div style="width:100%;height:100%;">';
+  html += '<div style="width:calc(100% - 16px);height:calc(100% - 16px);padding:8px;">';
 
   html += '<div style="height:1em;">';
   html += '<span style="position:absolute;top:4px;right:5px;">'
-  html += '<button onclick="kb.testExecLogic();">TEST</button>';
+  html += '<button onclick="kb.confirmTestExecLogic();">TEST</button>';
   html += '</span>';
   html += '</div>';
 
   html += 'param=<br>';
   html += '<textarea id="logic-param" spellcheck="false" style="width:calc(100% - 10px);height:64px;margin-bottom:8px;">' + logic.param + '</textarea><br>';
   html += 'Code:<br>';
-  html += '<textarea id="logic-code" spellcheck="false" style="width:calc(100% - 10px);height:calc(100% - 172px);margin-bottom:8px;">' + logic.code + '</textarea><br>';
+  html += '<textarea id="logic-code" spellcheck="false" style="width:calc(100% - 10px);height:calc(100% - 180px);margin-bottom:8px;">' + logic.code + '</textarea><br>';
   html += '<div style="text-align:center;">';
   html += '<button id="save-props-button" onclick="kb.confirmSaveLogic();">SAVE</button>';
   html += '<button style="margin-left:10px;" onclick="kb.cancelEditLogic();">Cancel</button>';
@@ -3272,6 +3272,9 @@ kb.confirmExecLogic = function() {
 kb.invokeLogic = function(p) {
   var logic = kb.getCurrentLogicParamCode();
   kb.execLogic(p, logic.code);
+};
+kb.confirmTestExecLogic = function() {
+  util.confirm('Execute Logic?', kb.testExecLogic);
 };
 kb.testExecLogic = function() {
   var logicParam = $el('#logic-param').value;
