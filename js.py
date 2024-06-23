@@ -35,7 +35,8 @@ def build_js(context):
     js += 'kb.bsb64 = {n: 1};\n'
 
     js += 'kb.configInfo = {\n'
-    js += '  state_list: [\n';
+    js += '  user_name_lang: \'' + appconfig.user_name_lang + '\',\n'
+    js += '  state_list: [\n'
     for i in range(len(appconfig.state_list)):
         obj = appconfig.state_list[i]
         if i > 0:

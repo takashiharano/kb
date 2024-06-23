@@ -59,7 +59,7 @@ def build_main_screen(context, scm):
         html += ' - ' + scm_name
     html += '</span>'
 
-    username = context.get_user_name()
+    username = kb.get_user_name(context)
     if username == '':
         username = context.get_user_id()
 

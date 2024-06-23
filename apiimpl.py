@@ -194,7 +194,7 @@ def proc_save_data(context):
 
     if id == '' or content is not None and content['U_DATE'] == new_data['org_u_date']:
         status = 'OK'
-        user = get_user_name(context)
+        user = kb.get_user_name(context)
 
         p_as_anonymous = get_request_param('as_anonymous', '0')
         as_anonymous = True if p_as_anonymous == '1' else False
@@ -236,7 +236,7 @@ def proc_touch(context):
         return create_result_object('NO_ACCESS_RIGHTS')
 
     ids = p_ids.split(',')
-    user = get_user_name(context)
+    user = kb.get_user_name(context)
     kblog.write_operation_log(context, 'TOUCH', scm, p_ids, info=info)
     for i in range(len(ids)):
         id = ids[i]
@@ -328,7 +328,7 @@ def proc_save_logic(context):
 
     if p_silent != '1':
         now = util.get_unixtime_millis()
-        user = get_user_name(context)
+        user = kb.get_user_name(context)
         new_content['U_DATE'] = now
         new_content['U_USER'] = user
 
@@ -590,17 +590,6 @@ def proc_get_kb_log(context):
         logs = None
 
     send_result_json(status, body=logs)
-
-#------------------------------------------------------------------------------
-def get_user_name(context):
-    user_name = ''
-    if appconfig.user_name_lang == 'en':
-        user_name = context.get_user_name()
-    else:
-        user_name = context.get_user_local_name()
-        if user_name == '':
-            user_name = context.get_user_name()
-    return user_name
 
 #------------------------------------------------------------------------------
 def _build_css(fontsize='14', fontfamily='', with_color=False):

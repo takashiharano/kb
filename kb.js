@@ -353,7 +353,7 @@ kb.drawDataList = function(fixedItems, items, sortIdx, sortOrder, totalCount, el
 };
 
 kb.buildListRow = function(data, fixed, cnt) {
-  var currentUserName = websys.getUserName();
+  var currentUserName = kb.getUserName();
   var id = data.id;
   var data_status = data.status;
   var content = data.content || {};
@@ -3014,6 +3014,15 @@ kb.removeFlag = function(flags, flag) {
     cnt++;
   }
   return s;
+};
+
+kb.getUserName = function() {
+  var name = websys.getUserName();
+  if (kb.configInfo && (kb.configInfo.user_name_lang != 'en')) {
+    name = websys.getUserLocalName();
+    if (name == '') name = websys.getUserName();
+  }
+  return name;
 };
 
 //-------------------------------------------------------------------------
