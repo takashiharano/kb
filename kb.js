@@ -544,7 +544,7 @@ kb.buildListHeader = function(columns, sortIdx, sortOrder) {
     sortButton += '>▼</span>';
     sortButton += '</span>';
 
-    html += '<th class="item-list"><span class="colum-header">' + label + '</span> ' + sortButton + '</th>';
+    html += '<th class="item-list"><span class="colum-header" onclick="kb.sortDataList(' + i + ', ' + nextSortType + ');">' + label + '</span> ' + sortButton + '</th>';
   }
   html += '<th class="item-list" style="width:3em;"><span>&nbsp;</span></th>';
 

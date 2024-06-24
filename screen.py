@@ -522,6 +522,7 @@ th {
 '''
     css += '.colum-header {'
     css += '  color: ' + appconfig.colum_header_fg_color + ';'
+    css += '  cursor: pointer;'
     css += '}'
     css += '.data-list-row:hover {'
     css += '  background: ' + appconfig.list_hover_background + ';'
