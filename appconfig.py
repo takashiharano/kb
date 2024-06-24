@@ -75,7 +75,7 @@ dialog_background = '#101010'
 color_border_danger = '#a84040'
 
 clock_color = '#bbff67'
-link_color = '#5595ff'
+link_color = '#66a0ff'
 comment_color = '#00bfff'
 
 code_border = '1px solid #707070'
