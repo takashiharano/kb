@@ -369,8 +369,13 @@ def search_data(context, scm, q, list_max=None):
 
     total_count = len(data_list)
     if list_max > 0 and total_count > list_max:
-        if len(keywords) == 1 and (keywords[0].startswith('created_by') or keywords[0].startswith('updated_by')):
-            data_list2 = sorted(data_list, key=lambda x: x['content']['U_DATE'], reverse=True)
+        if len(keywords) == 1:
+            if keywords[0].startswith('created_by'):
+                data_list2 = sorted(data_list, key=lambda x: x['content']['C_DATE'], reverse=True)
+            elif keywords[0].startswith('updated_by'):
+                data_list2 = sorted(data_list, key=lambda x: x['content']['U_DATE'], reverse=True)
+            else:
+                data_list2 = sorted(data_list, key=lambda x: x['score'], reverse=True)
         else:
             data_list2 = sorted(data_list, key=lambda x: x['score'], reverse=True)
 
