@@ -36,9 +36,9 @@ kb.LIST_COLUMNS = [
   {key: 'score', label: 'SCORE', meta: true},
   {key: 'size', label: 'SIZE', meta: true},
   {key: 'PRIVS', label: 'PRIVS', forAdmin: true},
-  {key: 'LOGIC', label: ''},
-  {key: 'PASSWORD', label: ''},
-  {key: 'encrypted', label: '', meta: true}
+  {key: 'LOGIC', label: '&nbsp;'},
+  {key: 'PASSWORD', label: '&nbsp;'},
+  {key: 'encrypted', label: '&nbsp;', meta: true}
 ];
 
 kb.ANONYMOUS_USER_NAME = 'Anonymous';
@@ -460,7 +460,7 @@ kb.buildListRow = function(data, fixed, cnt) {
   html += '<td style="width:145px;padding-right:0.5em;">' + uDateStr + '</td>';
   html += '<td style="padding-right:16px;">' + uUserLink + '</td>';
   html += '<td style="padding-right:8px;">' + assigneeLink + '</td>';
-  html += '<td>' + statusLabel + '</td>';
+  html += '<td style="padding-right:0.5em;">' + statusLabel + '</td>';
   html += '<td>' + labelsHTML + '</td>';
   html += '<td>' + score + '</td>';
   html += '<td style="text-align:right;padding-left:0.5em;padding-right:0.5em;">' + size + '</td>';
