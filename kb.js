@@ -2937,8 +2937,10 @@ kb.openSetPwDialog = function() {
   html += '<td><input type="password" id="pw2" style="width:150px;"></td>';
   html += '</tr>';
   html += '</table>\n';
+  html += '<div style="margin-top:8px;">';
   html += '<button onclick="kb.setDataPw();">OK</button>';
   html += '<button style="margin-left:8px;" onclick="kb.closeDialog();">Cancel</button>';
+  html += '</div>';
   util.dialog.open(html);
 
   var pw = '';
