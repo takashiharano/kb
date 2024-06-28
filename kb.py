@@ -5,6 +5,7 @@
 import os
 import sys
 import re
+import copy
 
 import appconfig
 
@@ -411,7 +412,6 @@ def _search(context, scm, data_id_list, id_filtering, incl_nan_id, include_hidde
             content = data['content']
             if should_omit_content(context, content, include_hidden):
                 dontinue
-            data['content'] = convert_data_to_half_width(content)
             data['score'] = 0
             all_data.append(data)
         except:
@@ -475,7 +475,8 @@ def convert_data_to_half_width(content):
 
 def calc_data_macthed_score(data, keyword):
     id = data['id']
-    content = data['content']
+    content = copy.copy(data['content'])
+    content = convert_data_to_half_width(content)
     score = 0
 
     keyword_lc = keyword.lower()
