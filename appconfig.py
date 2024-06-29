@@ -25,7 +25,7 @@ colum_header_fg_color = '#e6edf3'
 list_border = '1px solid #888'
 list_bg_odd = '#282828'
 list_bg_even = '#323232'
-list_hover_background = '#4c4c4c'
+list_hover_background = '#444'
 list_row_selected_bg = '#424242'
 title_disabled_color = '#aaa'
 
