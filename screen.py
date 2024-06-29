@@ -21,9 +21,8 @@ import js
 
 #------------------------------------------------------------------------------
 def build_main_screen(context, scm):
-    workspace_path = kb.get_workspace_path()
-    msg_path = workspace_path + 'info.txt'
-    message = util.read_text_file(msg_path, default='')
+    default_message = get_default_message(scm)
+
     scm_props = kb.load_scm_props(scm)
     scm_name = scm
     if 'name' in scm_props and scm_props['name'] != '':
@@ -113,7 +112,7 @@ def build_main_screen(context, scm):
   </div>
   <div id="content-area" class="area">
     <div id="adjuster"></div>
-    <div>
+    <div id="content-header">
       <div id="info-area">
 '''
     if kb.can_operate(context, scm, 'write'):
@@ -187,14 +186,14 @@ def build_main_screen(context, scm):
       <div id="content-wrp1">
         <div id="content-wrp">
 '''
-    html += '          <pre id="content-body">' + message + '</pre>'
+    html += '          <pre id="content-body">' + default_message + '</pre>'
     html += '''
           <div id="content-body-edt-wrp">
             <textarea id="content-body-edt" spellcheck="false"></textarea>
             <div id="content-body-st"></div>
           </div>
         </div>
-        <div style="height:25px;">
+        <div style="position:absolute;bottom:8px;height:25px;width:calc(100% - 8px);">
           <input type="range" value="0" min="6" max="64" step="1" id="font-range" style="position:relative;top:6px;" oninput="kb.onFontRangeChanged(this);" onchange="kb.onFontRangeChanged(this);"><span id="fontsize"></span>
           <button onclick="kb.resetFontSize();">RESET</button>
           <span style="margin-left:16px;">Font: </sapn><input type="text" id="font" oninput="kb.onFontChanged(this);" onchange="kb.onFontChanged(this);">
@@ -215,6 +214,21 @@ def build_main_screen(context, scm):
   </div>
 </div></body></html>'''
     return html
+
+#------------------------------------------------------------------------------
+def get_default_message(scm):
+    workspace_path = kb.get_workspace_path()
+    msg_path = workspace_path + 'info.txt'
+    message = util.read_text_file(msg_path, default='')
+    if message != '':
+        return message
+
+    data = kb.load_data(scm, 'info')
+    if data['status'] == 'OK':
+        content = data['content']
+        message = content['BODY']
+
+    return message
 
 #------------------------------------------------------------------------------
 def build_view_screen(context):
@@ -250,7 +264,7 @@ kb.mode = 'view'
 <body>
 <div id="body1">
   <div id="content-area" class="area">
-    <div>
+    <div id="content-header">
       <div id="meta-info" class="meta-info">
         <span>CREATED: <span id="content-created-date"></span> <span id="content-created-by"></span></span><span>&nbsp;&nbsp;UPDATED: <span id="content-updated-date"></span> <span id="content-updated-by"></span></span>
         <span id="status" style="margin-left:32px;"></span>
@@ -277,13 +291,13 @@ kb.mode = 'view'
         </span>
       </div>
     </div>
-    <div style="height:calc(100% - 79px);">
+    <div style="height:calc(100% - 80px);">
       <div id="content-wrp1">
         <div id="content-wrp">
           <pre id="content-body"><span class="progdot">Please wait</span></pre>
           </div>
         </div>
-        <div style="height:25px;">
+        <div style="position:absolute;bottom:8px;height:25px;width:calc(100% - 8px);">
           <input type="range" value="0" min="6" max="64" step="1" id="font-range" style="position:relative;top:6px;" oninput="kb.onFontRangeChanged(this);" onchange="kb.onFontRangeChanged(this);"><span id="fontsize"></span>
           <button onclick="kb.resetFontSize();">RESET</button>
           <span style="margin-left:16px;">Font: </sapn><input type="text" id="font" oninput="kb.onFontChanged(this);" onchange="kb.onFontChanged(this);">

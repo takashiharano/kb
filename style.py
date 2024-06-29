@@ -249,12 +249,14 @@ th {
 #chk-encryption {
   margin-left: 8px;
 }
+#content-header {
+  margin-bottom: 10px;
+}
 #content-wrp1 {
   width: calc(100% - 6px);
   min-width: 70%;
   height: 100%;
   float: left;
-  margin-top:10px;
   margin-right:2px;
 }
 #content-wrp {

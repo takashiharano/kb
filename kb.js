@@ -96,6 +96,7 @@ $onReady = function(e) {
     kb.view.init();
     kb.onAppReady();
   } else {
+    $el('#content-header').hide();
     kb.init();
   }
   util.addKeyHandler('D', 'down', kb.keyHandlerD, {ctrl: true, alt: true});
@@ -814,6 +815,7 @@ kb.onGetData = function(xhr, res, req) {
 };
 kb.showReceivedData = function() {
   kb.drawData(kb.data);
+  $el('#content-header').show();
   $el('.for-view').show();
 };
 
@@ -907,18 +909,19 @@ kb.buildItemsHTML = function(keyname, items, snipN, snipL) {
   if (items) {
     dataList = items.replace(/\s{2,}/g, ' ').split(' ');
   }
+  var clickable = (kb.mode != 'view');
   var html = '';
   for (var i = 0; i < dataList.length; i++) {
     var item = util.escHtml(dataList[i]);
     var snip = ((snipN > 0) && (i >= snipN));
-    html += kb.createLabel(keyname, item, snip, snipL);
+    html += kb.createLabel(keyname, item, snip, snipL, clickable);
   }
   return html;
 };
-kb.createLabel = function(keyname, text, snip, snipL) {
+kb.createLabel = function(keyname, text, snip, snipL, clickable) {
   var dispLabel = (snip ? dispLabel = util.snip(text, snipL, 0) : text);
   var html = '<span class="label"';
-  if (kb.mode != 'view') {
+  if (clickable) {
     html += ' onclick="kb.fieldSearch(\'' + keyname + '\', \'' + text + '\');"';
     if (snip) html += ' data-tooltip="' + text + '"';
   }

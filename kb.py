@@ -742,9 +742,6 @@ def get_datafile_info(scm, id):
     return util.get_file_info(path)
 
 def load_data(scm, id, head_only=False):
-    fileinfo = get_datafile_info(scm, id)
-    text = load_data_as_text(scm, id)
-
     data = {
         'id': id,
         'status': 'OK',
@@ -752,6 +749,13 @@ def load_data(scm, id, head_only=False):
         'encrypted': False,
         'content': None
     }
+
+    fileinfo = get_datafile_info(scm, id)
+    try:
+        text = load_data_as_text(scm, id)
+    except Exception as e:
+        data['status'] = str(e)
+        return data
 
     if fileinfo is not None:
         data['size'] = fileinfo['size']
