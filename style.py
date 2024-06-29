@@ -291,6 +291,7 @@ th {
         css += '}'
 
     css += '.dialog {'
+    css += '  font-size: 16px;'
     css += '  border-radius: 6px !important;'
     css += '  border: 1px solid ' + appconfig.dialog_border + ';'
     css += '  background: ' + appconfig.dialog_background + '!important;'
