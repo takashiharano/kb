@@ -76,7 +76,7 @@ color_border_danger = '#a84040'
 
 clock_color = '#bbff67'
 link_color = '#66a0ff'
-comment_color = '#00bfff'
+comment_color = '#88abcd'
 
 code_border = '1px solid #707070'
 code_background = '#2e2e2e'
