@@ -175,12 +175,13 @@ def get_data_list(context, scm, target_id=None, list_max=None):
         id = data_id_list[i]
         if target_id is not None and target_id != id or target_id is None and is_nan_id(id):
             continue
-        try:
-            data = load_data(scm, id, head_only=True)
+
+        data = load_data(scm, id, head_only=True)
+        if data['status'] == 'OK':
             content = data['content']
             if not has_data_privilege(context, content):
                 continue
-        except:
+        else:
             content = DEFAULT_CONTENT.copy()
             data = {
                 'id': id,
@@ -407,14 +408,15 @@ def _search(context, scm, data_id_list, id_filtering, incl_nan_id, include_hidde
         id = data_id_list[i]
         if not incl_nan_id and is_nan_id(id):
             continue
-        try:
-            data = load_data(scm, id)
+
+        data = load_data(scm, id)
+        if data['status'] == 'OK':
             content = data['content']
             if should_omit_content(context, content, include_hidden):
                 dontinue
             data['score'] = 0
             all_data.append(data)
-        except:
+        else:
             continue
 
     wk_data_list = all_data
@@ -704,13 +706,8 @@ def count_matched_key_in_dataurl(target, keyword):
 
 #------------------------------------------------------------------------------
 def get_data(context, scm, id, need_encode_b64=False):
-    try:
-        data = load_data(scm, id)
-    except Exception as e:
-        data = {
-            'id': id,
-            'status': str(e)
-        }
+    data = load_data(scm, id)
+    if data['status'] != 'OK':
         return data
 
     content = data['content']
@@ -810,9 +807,8 @@ def save_data(scm, id, new_data, user='', as_anonymous=False):
     if user == '' or as_anonymous:
         user = ANONYMOUS_USER_NAME
 
-    try:
-        data = load_data(scm, id)
-    except:
+    data = load_data(scm, id)
+    if data['status'] != 'OK':
         data = {
             'content': {
                 'C_DATE': now,
@@ -1069,12 +1065,12 @@ def encdec_data(scm, dst_base_dir, encryption_key):
     for i in range(len(data_id_list)):
         id = data_id_list[i]
         dst_path = dst_base_dir + id + '.txt'
-        try:
-            data = load_data(scm, id)
+        data = load_data(scm, id)
+        if data['status'] == 'OK':
             content = data['content']
             write_data(scm, id, content, encryption_key=encryption_key, path=dst_path)
-        except Exception as e:
-            text = '!ERROR! ' + str(e) + '\n---\n'
+        else:
+            text = '!ERROR! ' + data['status'] + '\n---\n'
             text += load_data_as_text(scm, id)
             dst_path = dst_base_dir + '_error_' + id + '.txt'
             util.write_text_file(dst_path, text)
