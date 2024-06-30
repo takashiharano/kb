@@ -931,6 +931,7 @@ kb.createLabel = function(keyname, text, snip, snipL, clickable) {
 
 kb.createNew = function() {
   kb.status |= kb.ST_NEW;
+  $el('#content-header').show();
   kb.clearPwValue();
   kb._clear();
   kb.edit();
