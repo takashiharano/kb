@@ -413,7 +413,7 @@ def _search(context, scm, data_id_list, id_filtering, incl_nan_id, include_hidde
         if data['status'] == 'OK':
             content = data['content']
             if should_omit_content(context, content, include_hidden):
-                dontinue
+                continue
             data['score'] = 0
             all_data.append(data)
         else:
