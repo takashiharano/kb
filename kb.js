@@ -1320,6 +1320,8 @@ kb.drawData = function(data) {
   if (drawMode == '1') {
     contentBody = contentBody.replace(/&quot;/g, '"');
     contentBody = util.linkUrls(contentBody);
+    contentBody = contentBody.replace(/(<a href=.+?)&gt;/g, '$1"');
+    contentBody = contentBody.replace(/&gt;<\/a>/g, '</a>&gt;');
 
     var w = kb.linkDataUrl(contentBody, false, -1);
     contentBody = w.s;
