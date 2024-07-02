@@ -157,9 +157,7 @@ def build_main_screen(context, scm):
             <option value="2">HTML</option>
           </select>'''
     html += '<button id="exec-logic-button" style="margin-left:16px;margin-right:8px;" onclick="kb.confirmExecLogic();" disabled>LOGIC</button>'
-
-    if context.has_permission('sysadmin'):
-        html += '<button id="props-button" style="min-width:32px;margin-left:8px;" onclick="kb.editProps();">PROPS</button>'
+    html += '<button id="props-button" style="min-width:32px;margin-left:8px;" onclick="kb.editProps();">PROPS</button>'
 
     html += '<button id="copy-text-button" style="margin-left:8px;" onclick="kb.copyContent();">COPY</button>'
     html += '<button id="copy-url-button" style="margin-left:4px;" onclick="kb.showUrl();">URL</button>'

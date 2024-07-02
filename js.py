@@ -25,6 +25,14 @@ def build_js(context):
 
     js = ''
     js += 'var kb = kb || {};\n'
+
+    js += 'kb.ALLOWED_PROPS_FOR_ALL = [\n'
+    for i in range(len(kb.ALLOWED_PROPS_FOR_ALL)):
+        if i > 0:
+            js += ',\n'
+        js += '\'' + kb.ALLOWED_PROPS_FOR_ALL[i] + '\''
+    js += '\n];'
+
     js += 'kb.defaultScm = \'' + kb.get_default_scm_id() + '\';\n'
     js += 'kb.config = {\n'
     js += '  list_max: ' + str(appconfig.list_max) + ',\n';

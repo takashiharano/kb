@@ -41,6 +41,12 @@ DEFAULT_CONTENT = {
     'PRIVS': ''
 }
 
+ALLOWED_PROPS_FOR_ALL = [
+    'LABELS',
+    'STATUS',
+    'FLAGS'
+]
+
 SP_KEYWORD_NANIDS = '*nanids'
 DEFAULT_SCM_ID = '0'
 ANONYMOUS_USER_NAME = 'Anonymous'

@@ -260,11 +260,6 @@ def proc_mod_props(context):
     scm = get_req_param_scm()
     id = get_request_param('id')
 
-    if not context.is_admin() and not context.has_permission('sysadmin'):
-        kblog.write_operation_log(context, 'MOD_PROPS:FORBIDDEN', scm, id)
-        result = create_result_object('FORBIDDEN')
-        return result
-
     org_u_date = get_request_param('org_u_date')
     p_props = get_request_param('props')
     p_props = util.decode_base64(p_props)
@@ -286,6 +281,9 @@ def proc_mod_props(context):
 
     new_content = kb.parse_content(p_props, head_only=True)
 
+    if not context.is_admin() and not context.has_permission('sysadmin'):
+        new_content = filter_update_props(new_content, content)
+
     if 'LOGIC' in content:
         new_content['LOGIC'] = content['LOGIC']
 
@@ -299,6 +297,15 @@ def proc_mod_props(context):
 
     result = create_result_object('OK')
     return result
+
+def filter_update_props(new_content, org_content):
+    for key in new_content:
+        if key not in kb.ALLOWED_PROPS_FOR_ALL:
+            if key in org_content:
+                new_content[key] = org_content[key]
+            else:
+                del new_content[key]
+    return new_content
 
 #------------------------------------------------------------------------------
 def proc_save_logic(context):

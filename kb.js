@@ -1608,22 +1608,31 @@ kb.editProps = function() {
   var content = kb.data.content;
   var props = '';
   for (var k in content) {
-    if ((k != 'BODY') && (k != 'LOGIC')) {
+    if (kb.isPropFieldAllowed(k)) {
       props += k + ': ' + content[k] + '\n';
     }
   }
   var html = '';
   html += '<div style="width:50vw;height:50vh;">';
   html += '<div style="text-align:left;margin-bottom:4px;width:150px;">';
-  html += '<span>ID: </span><input type="text" id="prop-data-id" value="' + kb.data.id + '" onfocus="kb.onPropIdFocus();">';
-  html += '<button id="change-id-button" style="margin-left:4px;" onclick="kb.confirmChangeDataId();" disabled>CHANGE</button>';
-  html += '<button id="next-id-button" class="small-button" style="margin-left:4px;" onclick="kb.checkId();">CHECK ID</button>';
+  html += '<span>ID: </span><input type="text" id="prop-data-id" value="' + kb.data.id + '" onfocus="kb.onPropIdFocus();"' + (kb.isAdmin ? '' : ' disabled') + '>';
+  if (kb.isAdmin) {
+    html += '<button id="change-id-button" style="margin-left:4px;" onclick="kb.confirmChangeDataId();" disabled>CHANGE</button>';
+    html += '<button id="next-id-button" class="small-button" style="margin-left:4px;" onclick="kb.checkId();">CHECK ID</button>';
+  }
   html += '</div>';
   html += '<textarea id="props" spellcheck="false" style="width:calc(100% - 12px);height:calc(100% - 60px);margin-bottom:8px;" onfocus="kb.onPropsFocus();">' + props + '</textarea><br>';
   html += '<button id="save-props-button" onclick="kb.confirmSaveProps();" disabled>SAVE</button>';
   html += '<button style="margin-left:10px;" onclick="kb.cancelEditProps();">Cancel</button>';
   html += '</div>';
   util.dialog.open(html);
+};
+
+kb.isPropFieldAllowed = function(k) {
+  if ((k == 'BODY') || (k == 'LOGIC')) return false;
+  if (kb.isAdmin) return true;
+  if (kb.ALLOWED_PROPS_FOR_ALL.includes(k)) return true;
+  return false;
 };
 
 kb.confirmSaveProps = function() {
