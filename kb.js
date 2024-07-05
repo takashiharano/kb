@@ -48,7 +48,7 @@ kb.onselectstart = document.onselectstart;
 kb.status = 0;
 kb.uiStatus = kb.UI_ST_NONE;
 kb.listStatus = {
-  sortIdx: 5,
+  sortKey: 'U_DATE',
   sortOrder: 2
 };
 kb.configInfo = null;
@@ -261,7 +261,7 @@ kb.onGetList = function(xhr, res, req) {
     $el('#all-data-size').innerHTML = 'Current DB size: scm=' + cSize + 'B / all=' + aSize + 'B';
   }
 
-  kb.drawDataList(kb.fixedDataList, kb.dataList, kb.listStatus.sortIdx, kb.listStatus.sortOrder, kb.totalCount, kb.elapsed);
+  kb.drawDataList(kb.fixedDataList, kb.dataList, kb.listStatus.sortKey, kb.listStatus.sortOrder, kb.totalCount, kb.elapsed);
   if (kb.dataList.length == 1) {
     $el('#id-txt').value = '';
     kb.onInputSearch()
@@ -275,6 +275,17 @@ kb.drawInfo = function(html) {
 kb.drawDataListContent = function(html) {
   $el('#list').innerHTML = html;
   $el('#list-wrp').scrollTop = 0;
+};
+
+kb.toSortIndex = function(k) {
+  var idx = -1;
+  for (var i = 0; i < kb.LIST_COLUMNS.length; i++) {
+    if (kb.LIST_COLUMNS[i].key == k) {
+      idx = i;
+      break;
+    }
+  }
+  return idx;
 };
 
 kb.sortList = function(dataList, sortKey, desc, byMetaCol) {
@@ -307,7 +318,8 @@ kb.sortList = function(dataList, sortKey, desc, byMetaCol) {
   return items;
 };
 
-kb.drawDataList = function(fixedItems, items, sortIdx, sortOrder, totalCount, elapsed) {
+kb.drawDataList = function(fixedItems, items, sortKey, sortOrder, totalCount, elapsed) {
+  var sortIdx = kb.toSortIndex(sortKey);
   if (sortIdx >= 0) {
     if (sortOrder > 0) {
       var srtDef = kb.LIST_COLUMNS[sortIdx];
@@ -479,13 +491,13 @@ kb.buildListRow = function(data, fixed, cnt) {
   return html;
 };
 
-kb.sortDataList = function(sortIdx, sortOrder) {
+kb.sortDataList = function(sortKey, sortOrder) {
   if (sortOrder > 2) {
     sortOrder = 0;
   }
-  kb.listStatus.sortIdx = sortIdx;
+  kb.listStatus.sortKey = sortKey;
   kb.listStatus.sortOrder = sortOrder;
-  kb.drawDataList(kb.fixedDataList, kb.dataList, sortIdx, sortOrder, kb.totalCount, kb.elapsed);
+  kb.drawDataList(kb.fixedDataList, kb.dataList, sortKey, sortOrder, kb.totalCount, kb.elapsed);
 };
 
 kb.checkedIds = [];
@@ -515,6 +527,7 @@ kb.buildListHeader = function(columns, sortIdx, sortOrder) {
     if (column.forAdmin && !kb.isSysAdmin) {
       continue;
     }
+    var key = column['key'];
     var label = column['label'];
 
     var sortAscClz = '';
@@ -530,7 +543,7 @@ kb.buildListHeader = function(columns, sortIdx, sortOrder) {
     }
 
     var sortButton = '<span class="sort-button" ';
-    sortButton += ' onclick="kb.sortDataList(' + i + ', ' + nextSortType + ');"';
+    sortButton += ' onclick="kb.sortDataList(\'' + key + '\', ' + nextSortType + ');"';
     sortButton += '>';
     sortButton += '<span';
     if (sortAscClz) {
@@ -545,7 +558,7 @@ kb.buildListHeader = function(columns, sortIdx, sortOrder) {
     sortButton += '>▼</span>';
     sortButton += '</span>';
 
-    html += '<th class="item-list"><span class="colum-header" onclick="kb.sortDataList(' + i + ', ' + nextSortType + ');">' + label + '</span> ' + sortButton + '</th>';
+    html += '<th class="item-list"><span class="colum-header" onclick="kb.sortDataList(\'' + key + '\', ' + nextSortType + ');">' + label + '</span> ' + sortButton + '</th>';
   }
   html += '<th class="item-list" style="width:3em;"><span>&nbsp;</span></th>';
 
@@ -568,7 +581,7 @@ kb.getDataListAll = function() {
 };
 kb.listAll = function(reload, limit) {
   if (!kb.isListLoading()) {
-    kb.listStatus.sortIdx = 5;
+    kb.listStatus.sortKey = 'U_DATE';
     kb.listStatus.sortOrder = 2;
     kb.getDataList(null, reload, limit);
   }
@@ -623,11 +636,11 @@ kb.searchByIds = function(ids, reload, limit) {
 };
 kb.searchByKeyword = function(q, reload, limit) {
   if (q.match(/^label:[^\s]+?$/) || q.match(/^status:[^\s]+?$/) || q.match(/^updated_..:.+?$/) || q.match(/^assignee:.+?$/)) {
-    kb.listStatus.sortIdx = 5;
+    kb.listStatus.sortKey = 'U_DATE';
   } else if (q.match(/^created_..:.+?$/)) {
-    kb.listStatus.sortIdx = 3;
+    kb.listStatus.sortKey = 'C_DATE';
   } else {
-    kb.listStatus.sortIdx = 10;
+    kb.listStatus.sortKey = 'score';
   }
   kb.listStatus.sortOrder = 2;
   var param = {
@@ -1241,7 +1254,7 @@ kb.cancelTouch = function() {
 };
 
 kb.reloadListAndData = function(id) {
-  kb.listStatus.sortIdx = 5;
+  kb.listStatus.sortKey = 'U_DATE';
   kb.listStatus.sortOrder = 2;
   kb.search(true);
   kb.getData(id, true);
