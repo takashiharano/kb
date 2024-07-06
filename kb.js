@@ -472,7 +472,7 @@ kb.buildDataListRow = function(data, fixed, cnt) {
   var html = '<tr id="row-' + id + '" class="data-list-row text-muted ' + rowClass + '">';
   html += '<td>' + chkBox + '</td>';
   html += '<td style="text-align:right;padding-right:8px;">' + idLabel + '</td>';
-  html += '<td style="padding-right:4px;">' + catLabel + '</td>';
+  html += '<td style="padding-right:4px;text-align:center;">' + catLabel + '</td>';
   html += '<td style="min-width:300px;max-width:550px;">' + titleLabel + '</td>';
   html += '<td style="padding-right:16px;text-align:center;">' + dlLink + '</td>';
   html += '<td style="width:145px;padding-right:0.5em;">' + cDateStr + '</td>';
@@ -946,10 +946,9 @@ kb.getCategory = function(labels) {
   var image = cat.image;
   if (image) {
     var imgPath = 'res/' + image;
-    catLabel = '<div style="text-align:center;">';
-    catLabel += '<img src="' + imgPath + '" class="cat-img"';
+    catLabel = '<img src="' + imgPath + '" class="cat-img"';
     if (name) catLabel += 'data-tooltip2="' + name + '"';
-    catLabel += '></div>';
+    catLabel += '>';
   } else {
     catLabel = '[' + name + ']';
   }
