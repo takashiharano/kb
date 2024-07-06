@@ -472,8 +472,8 @@ kb.buildDataListRow = function(data, fixed, cnt) {
   var html = '<tr id="row-' + id + '" class="data-list-row text-muted ' + rowClass + '">';
   html += '<td>' + chkBox + '</td>';
   html += '<td style="text-align:right;padding-right:8px;">' + idLabel + '</td>';
-  html += '<td style="min-width:50px;padding-right:4px;">' + catLabel + '</td>';
-  html += '<td style="min-width:300px;max-width:600px;">' + titleLabel + '</td>';
+  html += '<td style="padding-right:4px;">' + catLabel + '</td>';
+  html += '<td style="min-width:300px;max-width:550px;">' + titleLabel + '</td>';
   html += '<td style="padding-right:16px;text-align:center;">' + dlLink + '</td>';
   html += '<td style="width:145px;padding-right:0.5em;">' + cDateStr + '</td>';
   html += '<td style="padding-right:16px;">' + cUserLink + '</td>';
