@@ -348,6 +348,12 @@ th {
   font-family: Consolas, Monaco, Menlo, monospace, sans-serif;
 }
 
+.category {
+  border-radius: 3px;
+  padding: 0 3px;
+  font-size: 12px;
+}
+
 td.item-list {
   padding-right: 16px;
 }

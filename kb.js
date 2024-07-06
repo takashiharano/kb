@@ -928,11 +928,10 @@ kb.buildStatusHTML = function(status) {
   html += 'color:' + stColor + ';';
   html += 'border: 1px solid ' + stColor + ';';
   html += '"';
-
   if (kb.mode != 'view') {
     html += ' onclick="kb.fieldSearch(\'status\', \'' + status + '\');"';
   }
-   html += '>';
+  html += '>';
   html += status;
   html += '</span>';
   return html;
@@ -943,6 +942,7 @@ kb.getCategory = function(labels) {
   var cat = kb._getCategory(labels);
   if (!cat) return catLabel;
   var name = cat.name;
+  var color = cat.color;
   var image = cat.image;
   if (image) {
     var imgPath = 'res/' + image;
@@ -950,7 +950,7 @@ kb.getCategory = function(labels) {
     if (name) catLabel += 'data-tooltip2="' + name + '"';
     catLabel += '>';
   } else {
-    catLabel = '[' + name + ']';
+    catLabel = kb.buildCategoryHTML(name, color)
   }
   return catLabel;
 };
@@ -971,6 +971,19 @@ kb._getCategory = function(labels) {
     }
   }
   return cat;
+};
+
+kb.buildCategoryHTML = function(name, color) {
+  var stColor = (color ? color : '#ccc');
+  var html = '<span class="category"';
+  html += ' style="';
+  html += 'color:' + stColor + ';';
+  html += 'border: 1px solid ' + stColor + ';';
+  html += '"';
+  html += '>';
+  html += name;
+  html += '</span>';
+  return html;
 };
 
 kb.buildItemsHTML = function(keyname, items, snipN, snipL) {
