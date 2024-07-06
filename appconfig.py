@@ -21,7 +21,7 @@ background_upper = '#282828'
 background_lower = '#282828'
 
 title_color = '#fff'
-colum_header_fg_color = '#e6edf3'
+colum_header_fg_color = '#ddd'
 list_border = '1px solid #888'
 list_bg_odd = '#282828'
 list_bg_even = '#323232'
