@@ -19,19 +19,16 @@ import web
 import kb
 
 #------------------------------------------------------------------------------
-def build_js(context):
+def build_js(context, scm):
     content_height_adj = appconfig.list_height + 32
     default_encryption_key = bsb64.encode_string(kb.DEFAULT_ENCRYPTION_KEY, 1)
+    categories = kb.load_categories(scm)
 
     js = ''
     js += 'var kb = kb || {};\n'
 
-    js += 'kb.ALLOWED_PROPS_FOR_ALL = [\n'
-    for i in range(len(kb.ALLOWED_PROPS_FOR_ALL)):
-        if i > 0:
-            js += ',\n'
-        js += '\'' + kb.ALLOWED_PROPS_FOR_ALL[i] + '\''
-    js += '\n];'
+    js += 'kb.ALLOWED_PROPS_FOR_ALL = ' + util.to_json(kb.ALLOWED_PROPS_FOR_ALL) + ';'
+    js += 'kb.categories = ' + util.to_json(categories) + ';'
 
     js += 'kb.defaultScm = \'' + kb.get_default_scm_id() + '\';\n'
     js += 'kb.config = {\n'
@@ -76,8 +73,8 @@ def build_js(context):
     return js
 
 #------------------------------------------------------------------------------
-def main():
+def main(scm):
     context = web.on_access()
-    js = build_js(context)
+    js = build_js(context, scm)
     util.send_response(js, 'text/javascript')
 

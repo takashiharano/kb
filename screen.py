@@ -43,7 +43,8 @@ def build_main_screen(context, scm):
     html += '<script src="' + ROOT_PATH + 'libs/util.js"></script>'
     html += '<script src="' + ROOT_PATH + 'websys/websys.js"></script>'
     html += '<script src="kb.js"></script>'
-    html += '''<script src="./?res=js"></script>
+    html += '<script src="./?res=js&scm=' + scm + '"></script>'
+    html += '''
 </head>
 <body>
 <div id="body1">
@@ -358,14 +359,16 @@ $onLoad = function() {
 #------------------------------------------------------------------------------
 def main():
     context = web.on_access()
-    res = util.get_request_param('res')
-    if res == 'js':
-        js.main()
-        return
 
     scm = util.get_request_param('scm', '')
     if scm == '':
         scm = kb.get_default_scm_id()
+
+    res = util.get_request_param('res')
+    if res == 'js':
+        res = util.get_request_param('res')
+        js.main(scm)
+        return
 
     id = util.get_request_param('id')
 

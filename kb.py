@@ -23,6 +23,7 @@ WORKSPACE_PATH = appconfig.workspace_path
 DATA_BASE_DIR_PATH = WORKSPACE_PATH + 'scm/'
 WK_PATH = WORKSPACE_PATH + 'wk/'
 PROPS_FILENAME = 'properties.txt'
+CATEGORIES_FILENAME = 'categories.json'
 
 DATA_ENCRYPTION_HEAD = '#DATA'
 DATA_ENCRYPTION_KEY = appconfig.data_encryption_key
@@ -68,6 +69,14 @@ def get_datafile_path(scm, id):
 def get_props_file_path(scm):
     dir_path = get_scm_dir_path(scm)
     path = dir_path + PROPS_FILENAME
+    return path
+
+def get_categories_file_path(scm):
+    if scm is None:
+        dir_path = WORKSPACE_PATH
+    else:
+        dir_path = get_scm_dir_path(scm)
+    path = dir_path + CATEGORIES_FILENAME
     return path
 
 def get_default_scm_id():
@@ -122,6 +131,23 @@ def load_scm_props(scm):
             props['name'] = 'Main'
 
     return props
+
+#------------------------------------------------------------------------------
+# File format:
+# [
+#   {"key": "code", "name": "Code"},
+#   {"key": "linux", "name": "Linux", "image": "linux.png"}
+# ]
+def load_categories(scm):
+    path = get_categories_file_path(scm)
+    categories = util.load_dict(path, None)
+    if categories is not None:
+        return categories
+
+    path = get_categories_file_path(None)
+    categories = util.load_dict(path, [])
+
+    return categories
 
 #------------------------------------------------------------------------------
 def schema_exists(scm):

@@ -24,6 +24,7 @@ kb.DEFAULT_FONT_SIZE = 14;
 
 kb.LIST_COLUMNS = [
   {key: 'id', label: 'ID', meta: true},
+  {key: 'category', label: '&nbsp;', align: 'c', sort: false},
   {key: 'TITLE', label: 'TITLE'},
   {key: 'DATA_TYPE', label: 'DL'},
   {key: 'C_DATE', label: 'CREATED'},
@@ -332,15 +333,15 @@ kb.drawDataList = function(fixedItems, items, sortKey, sortOrder, totalCount, el
   var cnt = 0;
   for (var i = 0; i < fixedItems.length; i++) {
     var data = fixedItems[i];
-    htmlList += kb.buildListRow(data, true, ++cnt);
+    htmlList += kb.buildDataListRow(data, true, ++cnt);
   }
   for (var i = 0; i < items.length; i++) {
     data = items[i];
-    htmlList += kb.buildListRow(data, false, ++cnt);
+    htmlList += kb.buildDataListRow(data, false, ++cnt);
   }
   htmlList += '</table>';
 
-  var htmlHead = kb.buildListHeader(kb.LIST_COLUMNS, sortIdx, sortOrder);
+  var htmlHead = kb.buildListHeader(sortIdx, sortOrder);
   var html = htmlHead + htmlList; 
   kb.drawDataListContent(html);
 
@@ -365,7 +366,7 @@ kb.drawDataList = function(fixedItems, items, sortKey, sortOrder, totalCount, el
   }
 };
 
-kb.buildListRow = function(data, fixed, cnt) {
+kb.buildDataListRow = function(data, fixed, cnt) {
   var currentUserName = kb.getUserName();
   var id = data.id;
   var data_status = data.status;
@@ -447,26 +448,32 @@ kb.buildListRow = function(data, fixed, cnt) {
   var labelsHTML = kb.buildItemsHTML('label', labels);
   var privsHTML = kb.buildItemsHTML('priv', dataPrivs);
   var rowClass = ((cnt % 2 == 0) ? 'row-even' : 'row-odd');
-  var html = '<tr id="row-' + id + '" class="data-list-row text-muted ' + rowClass + '">';
-  html += '<td><input type="checkbox" onchange="kb.checkItem(\'' + id + '\', this)"';
-  if (kb.checkedIds.includes(id)) html += ' checked';
-  html += '></td>'
-  html += '<td style="text-align:right;padding-right:16px;">' + (fixed ? '<span style="color:#888;cursor:default;" data-tooltip2="Fixed">*</span>' : '') + id + '</td>'
 
-  html += '<td style="min-width:300px;max-width:600px;">';
+  var chkBox = '<input type="checkbox" onchange="kb.checkItem(\'' + id + '\', this)"';
+  if (kb.checkedIds.includes(id)) chkBox += ' checked';
+  chkBox += '>';
+
+  var idLabel = (fixed ? '<span style="color:#888;cursor:default;" data-tooltip2="Fixed">*</span>' : '') + id;
+  var catLabel = kb.getCategory(labels);
+  var titleLabel = '';
   if (data_status == 'OK') {
-    html += '<span style="display:inline-block;width:100%;overflow:hidden;text-overflow:ellipsis;" class="title pseudo-link" onclick="kb.onClickTitle(\'' + id + '\');">';
+    titleLabel += '<span style="display:inline-block;width:100%;overflow:hidden;text-overflow:ellipsis;" class="title pseudo-link" onclick="kb.onClickTitle(\'' + id + '\');">';
   } else {
-    html += '<span class="title-disabled">';
+    titleLabel += '<span class="title-disabled">';
   }
-  html += '<span';
+  titleLabel += '<span';
   if (util.lenW(title) > 76) {
     var escTitle = util.escHtml(title);
-    html += ' data-tooltip="' + escTitle + '"';
+    titleLabel += ' data-tooltip="' + escTitle + '"';
   }
-  html += '>' + title + '</span>';
-  html += '</span></td>';
+  titleLabel += '>' + title + '</span>';
+  titleLabel += '</span>';
 
+  var html = '<tr id="row-' + id + '" class="data-list-row text-muted ' + rowClass + '">';
+  html += '<td>' + chkBox + '</td>';
+  html += '<td style="text-align:right;padding-right:8px;">' + idLabel + '</td>';
+  html += '<td style="min-width:50px;padding-right:4px;">' + catLabel + '</td>';
+  html += '<td style="min-width:300px;max-width:600px;">' + titleLabel + '</td>';
   html += '<td style="padding-right:16px;text-align:center;">' + dlLink + '</td>';
   html += '<td style="width:145px;padding-right:0.5em;">' + cDateStr + '</td>';
   html += '<td style="padding-right:16px;">' + cUserLink + '</td>';
@@ -477,9 +484,7 @@ kb.buildListRow = function(data, fixed, cnt) {
   html += '<td>' + labelsHTML + '</td>';
   html += '<td>' + score + '</td>';
   html += '<td style="text-align:right;padding-left:0.5em;padding-right:0.5em;">' + size + '</td>';
-  if (kb.LIST_COLUMNS[12].forAdmin && kb.isSysAdmin) {
-    html += '<td>' + privsHTML + '</td>';
-  }
+  if (kb.LIST_COLUMNS[13].forAdmin && kb.isSysAdmin) html += '<td>' + privsHTML + '</td>';
   html += '<td style="text-align:center;cursor:default;">' + hasLogic + '</td>';
   html += '<td style="text-align:center;width:16px;cursor:default;">' + isPwReq + '</td>';
   html += '<td style="text-align:center;width:16px;cursor:default;">' + encrypted + '</td>';
@@ -517,7 +522,8 @@ kb.checkItem = function(id, el) {
 };
 
 //---------------------------------------------------------
-kb.buildListHeader = function(columns, sortIdx, sortOrder) {
+kb.buildListHeader = function(sortIdx, sortOrder) {
+  var columns = kb.LIST_COLUMNS;
   var html = '<table id="list-table" class="item list-table item-list">';
   html += '<tr class="item-list">';
 
@@ -530,40 +536,57 @@ kb.buildListHeader = function(columns, sortIdx, sortOrder) {
     var key = column['key'];
     var label = column['label'];
 
-    var sortAscClz = '';
-    var sortDescClz = '';
-    var nextSortType = 1;
-    if (i == sortIdx) {
-      if (sortOrder == 1) {
-        sortAscClz = 'sort-active';
-      } else if (sortOrder == 2) {
-        sortDescClz = 'sort-active';
-      }
-      nextSortType = sortOrder + 1;
+    var clz = '';
+    if (column.align == 'c') {
+      clz = 'text-center';
+    } else if (column.align == 'r') {
+      clz = 'text-right';
+    }
+    if (clz) clz = ' ' + clz;
+
+    var head = label;
+    if (column.sort !== false) {
+      var sortButton = kb.buildSortButton(key, i, sortIdx, sortOrder);
+      head = '<span class="colum-header" onclick="kb.sortDataList(\'' + key + '\', ' + sortButton.nextSortType + ');">' + label + '</span> ' + sortButton.button;
     }
 
-    var sortButton = '<span class="sort-button" ';
-    sortButton += ' onclick="kb.sortDataList(\'' + key + '\', ' + nextSortType + ');"';
-    sortButton += '>';
-    sortButton += '<span';
-    if (sortAscClz) {
-       sortButton += ' class="' + sortAscClz + '"';
-    }
-    sortButton += '>▲</span>';
-    sortButton += '<br>';
-    sortButton += '<span';
-    if (sortDescClz) {
-       sortButton += ' class="' + sortDescClz + '"';
-    }
-    sortButton += '>▼</span>';
-    sortButton += '</span>';
-
-    html += '<th class="item-list"><span class="colum-header" onclick="kb.sortDataList(\'' + key + '\', ' + nextSortType + ');">' + label + '</span> ' + sortButton + '</th>';
+    html += '<th class="item-list' + clz + '">' + head + '</th>';
   }
   html += '<th class="item-list" style="width:3em;"><span>&nbsp;</span></th>';
 
   html += '</tr>';
   return html;
+};
+
+kb.buildSortButton = function(key, idx, sortIdx, sortOrder) {
+  var sortAscClz = '';
+  var sortDescClz = '';
+  var nextSortType = 1;
+  if (idx == sortIdx) {
+    if (sortOrder == 1) {
+      sortAscClz = 'sort-active';
+    } else if (sortOrder == 2) {
+      sortDescClz = 'sort-active';
+    }
+    nextSortType = sortOrder + 1;
+  }
+
+  var sortButton = '<span class="sort-button" ';
+  sortButton += ' onclick="kb.sortDataList(\'' + key + '\', ' + nextSortType + ');"';
+  sortButton += '>';
+  sortButton += '<span';
+  if (sortAscClz) {
+     sortButton += ' class="' + sortAscClz + '"';
+  }
+  sortButton += '>▲</span>';
+  sortButton += '<br>';
+  sortButton += '<span';
+  if (sortDescClz) {
+     sortButton += ' class="' + sortDescClz + '"';
+  }
+  sortButton += '>▼</span>';
+  sortButton += '</span>';
+  return {button: sortButton, nextSortType: nextSortType};
 };
 
 kb.getDataListAll = function() {
@@ -913,6 +936,42 @@ kb.buildStatusHTML = function(status) {
   html += status;
   html += '</span>';
   return html;
+};
+
+kb.getCategory = function(labels) {
+  var catLabel = '';
+  var cat = kb._getCategory(labels);
+  if (!cat) return catLabel;
+  var name = cat.name;
+  var image = cat.image;
+  if (image) {
+    var imgPath = 'res/' + image;
+    catLabel = '<div style="text-align:center;">';
+    catLabel += '<img src="' + imgPath + '" class="cat-img"';
+    if (name) catLabel += 'data-tooltip2="' + name + '"';
+    catLabel += '></div>';
+  } else {
+    catLabel = '[' + name + ']';
+  }
+  return catLabel;
+};
+
+kb._getCategory = function(labels) {
+  var itemList = [];
+  if (labels) {
+    itemList = labels.replace(/\s{2,}/g, ' ').split(' ');
+  }
+  var cat = null;
+  if (itemList.length == 0) return cat;
+  var label = itemList[0];
+  for (var i = 0; i < kb.categories.length; i++) {
+    var category = kb.categories[i];
+    if (category.key == label) {
+      cat = category;
+      break;
+    }
+  }
+  return cat;
 };
 
 kb.buildItemsHTML = function(keyname, items, snipN, snipL) {

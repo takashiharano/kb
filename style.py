@@ -409,6 +409,23 @@ td.center {
   border-bottom: 1px solid #333;
 }
 
+.text-left {
+  text-align: left;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.cat-img {
+  max-width: 50px;
+  max-height: 14px;
+}
+
 .code-s {
   border-radius: 3px;
   padding: 1px 2px;

@@ -38,7 +38,7 @@ def get_req_param_scm():
 
 #------------------------------------------------------------------------------
 def send_result_json(status, body=None):
-    web.send_result_json(status, body)
+    web.send_result_json(status, body, encryption=True)
 
 #------------------------------------------------------------------------------
 def has_data_permission(context, scm, id):
@@ -68,6 +68,7 @@ def has_valid_apitoken():
     return False
 
 #------------------------------------------------------------------------------
+# api.cgi?act=get_data&id=1
 def proc_get_data(context):
     id = get_request_param('id')
     scm = get_req_param_scm()
