@@ -135,7 +135,7 @@ def load_scm_props(scm):
 #------------------------------------------------------------------------------
 # File format:
 # [
-#   {"key": "code", "name": "Code"},
+#   {"key": "code", "name": "Code", "alt": "Alternative text"},
 #   {"key": "linux", "name": "Linux", "image": "linux.png"}
 # ]
 def load_categories(scm):

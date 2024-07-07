@@ -942,15 +942,14 @@ kb.getCategory = function(labels) {
   var cat = kb._getCategory(labels);
   if (!cat) return catLabel;
   var name = cat.name;
-  var color = cat.color;
-  var image = cat.image;
-  if (image) {
-    var imgPath = 'res/' + image;
+  var alt = cat.alt;
+  if (cat.image) {
+    var imgPath = 'res/' + cat.image;
     catLabel = '<img src="' + imgPath + '" class="cat-img"';
-    if (name) catLabel += 'data-tooltip2="' + name + '"';
+    if (name) catLabel += 'data-tooltip-1500="' + name + '"';
     catLabel += '>';
   } else {
-    catLabel = kb.buildCategoryHTML(name, color)
+    catLabel = kb.buildCategoryHTML(name, cat.color, alt)
   }
   return catLabel;
 };
@@ -973,13 +972,15 @@ kb._getCategory = function(labels) {
   return cat;
 };
 
-kb.buildCategoryHTML = function(name, color) {
+kb.buildCategoryHTML = function(name, color, alt) {
   var stColor = (color ? color : '#ccc');
   var html = '<span class="category"';
   html += ' style="';
   html += 'color:' + stColor + ';';
   html += 'border: 1px solid ' + stColor + ';';
+  html += 'cursor:default;';
   html += '"';
+  if (alt) html += 'data-tooltip-1500="' + alt + '"';
   html += '>';
   html += name;
   html += '</span>';
