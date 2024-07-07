@@ -34,8 +34,8 @@ kb.LIST_COLUMNS = [
   {key: 'ASSIGNEE', label: 'ASSIGNEE'},
   {key: 'STATUS', label: 'STATUS'},
   {key: 'LABELS', label: 'LABELS'},
-  {key: 'score', label: 'SCORE', meta: true},
-  {key: 'size', label: 'SIZE', meta: true},
+  {key: 'score', label: 'SCORE', align: 'r', meta: true},
+  {key: 'size', label: 'SIZE', align: 'r', meta: true},
   {key: 'PRIVS', label: 'PRIVS', forAdmin: true},
   {key: 'LOGIC', label: '&nbsp;'},
   {key: 'PASSWORD', label: '&nbsp;'},
@@ -482,9 +482,9 @@ kb.buildDataListRow = function(data, fixed, cnt) {
   html += '<td style="padding-right:8px;">' + assigneeLink + '</td>';
   html += '<td style="padding-right:0.5em;">' + statusLabel + '</td>';
   html += '<td>' + labelsHTML + '</td>';
-  html += '<td>' + score + '</td>';
+  html += '<td style="text-align:right;padding-left:0.5em;padding-right:0.5em;">' + score + '</td>';
   html += '<td style="text-align:right;padding-left:0.5em;padding-right:0.5em;">' + size + '</td>';
-  if (kb.LIST_COLUMNS[13].forAdmin && kb.isSysAdmin) html += '<td>' + privsHTML + '</td>';
+  if (kb.LIST_COLUMNS[kb.toSortIndex('PRIVS')].forAdmin && kb.isSysAdmin) html += '<td>' + privsHTML + '</td>';
   html += '<td style="text-align:center;cursor:default;">' + hasLogic + '</td>';
   html += '<td style="text-align:center;width:16px;cursor:default;">' + isPwReq + '</td>';
   html += '<td style="text-align:center;width:16px;cursor:default;">' + encrypted + '</td>';
