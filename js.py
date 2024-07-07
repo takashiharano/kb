@@ -27,7 +27,7 @@ def build_js(context, scm):
     js = ''
     js += 'var kb = kb || {};\n'
 
-    js += 'kb.ALLOWED_PROPS_FOR_ALL = ' + util.to_json(kb.ALLOWED_PROPS_FOR_ALL) + ';'
+    js += 'kb.RESTRICTED_PROP_KEYS = ' + util.to_json(kb.RESTRICTED_PROP_KEYS) + ';'
     js += 'kb.categories = ' + util.to_json(categories) + ';'
 
     js += 'kb.defaultScm = \'' + kb.get_default_scm_id() + '\';\n'

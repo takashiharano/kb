@@ -42,10 +42,14 @@ DEFAULT_CONTENT = {
     'PRIVS': ''
 }
 
-ALLOWED_PROPS_FOR_ALL = [
-    'LABELS',
-    'STATUS',
-    'FLAGS'
+RESTRICTED_PROP_KEYS = [
+    'TITLE',
+    'C_DATE',
+    'C_USER',
+    'U_DATE',
+    'U_USER',
+    'ASSIGNEE',
+    'PRIVS'
 ]
 
 SP_KEYWORD_NANIDS = '*nanids'

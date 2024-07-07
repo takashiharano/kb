@@ -955,12 +955,9 @@ kb.getCategory = function(labels) {
 };
 
 kb._getCategory = function(labels) {
-  var itemList = [];
-  if (labels) {
-    itemList = labels.replace(/\s{2,}/g, ' ').split(' ');
-  }
   var cat = null;
-  if (itemList.length == 0) return cat;
+  if (!labels) return cat;
+  var itemList = labels.replace(/\s{2,}/g, ' ').split(' ');
   var label = itemList[0];
   for (var i = 0; i < kb.categories.length; i++) {
     var category = kb.categories[i];
@@ -1716,8 +1713,8 @@ kb.editProps = function() {
 kb.isPropFieldAllowed = function(k) {
   if ((k == 'BODY') || (k == 'LOGIC')) return false;
   if (kb.isAdmin) return true;
-  if (kb.ALLOWED_PROPS_FOR_ALL.includes(k)) return true;
-  return false;
+  if (kb.RESTRICTED_PROP_KEYS.includes(k)) return false;
+  return true;
 };
 
 kb.confirmSaveProps = function() {
