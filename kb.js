@@ -404,7 +404,7 @@ kb.buildDataListRow = function(data, fixed, cnt) {
   var assignee = (content.ASSIGNEE ? content.ASSIGNEE : '');
   var assigneeLink = '';
   if (assignee) {
-    if (assignee == currentUserName) assigneeLink = '<span style="color:#48d;">*</span>'
+    if (assignee.toLowerCase() == currentUserName.toLowerCase()) assigneeLink = '<span style="color:#d66;cursor:default;" data-tooltip2="You">*</span>'
     assigneeLink += '<span class="pseudo-link" onclick="kb.fieldSearch(\'assignee\', \'' + assignee + '\');">' + assignee + '</span>';
   }
 
