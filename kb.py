@@ -199,7 +199,7 @@ def get_all_data_id_list(scm):
 
 #------------------------------------------------------------------------------
 # list_max: None=default, 0=no limit
-def get_data_list(context, scm, target_id=None, list_max=None):
+def get_data_list(context, scm, target_id=None, list_max=None, include_hidden=False):
     time_s = util.get_timestamp()
 
     if list_max is None:
@@ -225,7 +225,7 @@ def get_data_list(context, scm, target_id=None, list_max=None):
                 'content': content
             }
 
-        if target_id is None and should_omit_listing(context, id, content):
+        if target_id is None and should_omit_listing(context, id, content, include_hidden):
             continue
 
         if is_fixed_data(content):
@@ -265,10 +265,10 @@ def get_data_list(context, scm, target_id=None, list_max=None):
 
     return data_list_obj
 
-def should_omit_listing(context, id, content=None):
+def should_omit_listing(context, id, content=None, include_hidden=False):
     if is_nan_id(id):
         return True
-    return should_omit_content(context, content)
+    return should_omit_content(context, content, include_hidden)
 
 def should_omit_content(context, content=None, include_hidden=False):
     if content is not None:
@@ -383,12 +383,18 @@ def search_data(context, scm, q, list_max=None):
     q = q.strip()
     q = util.to_half_width(q)
     q = util.replace(q, '\\s{2,}', ' ')
+
+    # 'aaa "bbb ccc"' -> ['aaa', 'bbb ccc']
     keywords = util.split_keywords(q)
 
     data_id_list = get_all_data_id_list(scm)
 
     filtered = filter_by_id(data_id_list, keywords)
     include_hidden = filtered['include_hidden']
+
+    if not include_hidden and keywords[-1] == '!':
+        include_hidden = True
+        keywords = keywords[:-1]
 
     id_filtering = False
     if len(filtered['id_list']) > 0:
@@ -458,6 +464,7 @@ def _search(context, scm, data_id_list, id_filtering, incl_nan_id, include_hidde
     wk_data_list = all_data
     keyword_matched = False
     exclude_list = []
+
     for i in range(len(keywords)):
         not_flag = False
         keyword = keywords[i]

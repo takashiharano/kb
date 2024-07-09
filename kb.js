@@ -223,7 +223,7 @@ kb.callApi = function(act, params, cb) {
   kb.http(req, cb);
 };
 
-kb.getDataList = function(id, reload, limit) {
+kb.getDataList = function(id, reload, limit, inclHidden) {
   var param = {
     scm: kb.scm
   };
@@ -232,6 +232,7 @@ kb.getDataList = function(id, reload, limit) {
   }
   if (reload) param.reload = '1';
   if (limit != undefined) param.limit = limit;
+  if (inclHidden) param.include_hidden = '1';
   kb.onStartListLoading('Loading');
   kb.callApi('data_list', param, kb.onGetList);
 };
@@ -602,11 +603,11 @@ kb.getDataListAll = function() {
   kb.listAll(false, limit);
   $el('#q').focus();
 };
-kb.listAll = function(reload, limit) {
+kb.listAll = function(reload, limit, inclHidden) {
   if (!kb.isListLoading()) {
     kb.listStatus.sortKey = 'U_DATE';
     kb.listStatus.sortOrder = 2;
-    kb.getDataList(null, reload, limit);
+    kb.getDataList(null, reload, limit, inclHidden);
   }
 };
 
@@ -641,7 +642,11 @@ kb.search = function(reload) {
       kb.listAndShowDataById(id);
     }
   } else if (q) {
-    kb.searchByKeyword(q, reload, limit);
+    if (q == '!') {
+      kb.listAll(reload, limit, true);
+    } else {
+      kb.searchByKeyword(q, reload, limit);
+    }
   } else {
     kb.listAll(reload, limit);
   }

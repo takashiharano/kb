@@ -29,6 +29,9 @@ def get_request_param(key, default=None):
 def get_request_param_as_int(key, default=None):
     return web.get_request_param_as_int(key, default=default)
 
+def get_request_param_as_bool(key, default=None):
+    return web.get_request_param_as_bool(key, as_true='1')
+
 #------------------------------------------------------------------------------
 def get_req_param_scm():
     scm = get_request_param('scm', '')
@@ -130,7 +133,8 @@ def proc_data_list(context):
 
     if kb.has_privilege_for_scm(context, scm):
         limit = get_request_param_as_int('limit')
-        detail = kb.get_data_list(context, scm, id, list_max=limit)
+        include_hidden = get_request_param_as_bool('include_hidden')
+        detail = kb.get_data_list(context, scm, id, list_max=limit, include_hidden=include_hidden)
         result = create_result_object('OK', detail)
 
         info = ''
