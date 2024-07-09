@@ -953,16 +953,41 @@ kb.getCategory = function(labels) {
 kb._getCategory = function(labels) {
   var cat = null;
   if (!labels) return cat;
-  var itemList = labels.replace(/\s{2,}/g, ' ').split(' ');
-  var label = itemList[0];
+  var labelList = labels.replace(/\s{2,}/g, ' ').split(' ');
+  var label = labelList[0];
+  var macted;
   for (var i = 0; i < kb.categories.length; i++) {
     var category = kb.categories[i];
-    if (category.key == label) {
+    var catLabels = category.labels.replace(/\s/g, '');
+    if (catLabels.includes('||')) {
+      matched = kb.matchLabelsOr(catLabels, label);
+    } else if (catLabels.includes('&&')) {
+      matched = kb.matchLabelsAnd(catLabels, labelList);
+    } else {
+      matched = (catLabels == label);
+    }
+    if (matched) {
       cat = category;
       break;
     }
   }
   return cat;
+};
+
+kb.matchLabelsOr = function(labels, label) {
+  var a = labels.split('||');
+  for (var i = 0; i < a.length; i++) {
+    if (a[i] == label) return true;
+  }
+  return false;
+};
+
+kb.matchLabelsAnd = function(labels, labelList) {
+  var a = labels.split('&&');
+  for (var i = 0; i < a.length; i++) {
+    if (a[i] != labelList[i]) return false;
+  }
+  return true;
 };
 
 kb.buildCategoryHTML = function(name, color, alt) {
