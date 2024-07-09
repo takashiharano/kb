@@ -380,7 +380,7 @@ kb.buildDataListRow = function(data, fixed, cnt) {
   var uDate = content.U_DATE;
   var score = (data.score == undefined ? '' : data.score);
 
-  var cDateStr = '';
+  var cDateStr = kb.toDateTimeString(cDate);
   var cUser = (content.C_USER ? content.C_USER : '');
   var cUserLabel = cUser;
   if (cUser == kb.ANONYMOUS_USER_NAME) {
@@ -391,7 +391,7 @@ kb.buildDataListRow = function(data, fixed, cnt) {
     cUserLink = '<span class="pseudo-link" onclick="kb.fieldSearch(\'created_by\', \'' + cUser + '\');">' + cUserLabel + '</span>';
   }
 
-  var uDateStr = '';
+  var uDateStr = kb.toDateTimeString(uDate);
   var uUser = (content.U_USER ? content.U_USER : '');
   var uUserLabel = uUser;
   if (uUser == kb.ANONYMOUS_USER_NAME) {
@@ -410,16 +410,7 @@ kb.buildDataListRow = function(data, fixed, cnt) {
   }
 
   var dataPrivs = content.PRIVS || '';
-  if ((cDate == undefined) || (cDate == '')) {
-    cDateStr = '---------- --:--:--';
-  } else {
-    cDateStr = kb.getDateTimeString(+cDate);
-  }
-  if ((uDate == undefined) || (uDate == '')) {
-    uDateStr = '---------- --:--:--';
-  } else {
-    uDateStr = kb.getDateTimeString(+uDate);
-  }
+
   if (!title) {
     title = '&lt;NO TITLE&gt;';
   }
@@ -1279,13 +1270,13 @@ kb.cancelSave = function() {
 };
 
 kb.buildConflictMsg = function(data) {
-    var dt = util.getDateTimeString(+data.U_DATE);
-    var m = 'The data is already updated.\n\n'
-    m += '<div style="text-align:left;">';
-    m += 'DATE: ' + dt + '\n';
-    m += 'BY  : ' + data.U_USER;
-    m += '</div>';
-    return m;
+  var dt = util.getDateTimeString(+data.U_DATE);
+  var m = 'The data is already updated.\n\n'
+  m += '<div style="text-align:left;">';
+  m += 'DATE: ' + dt + '\n';
+  m += 'BY  : ' + data.U_USER;
+  m += '</div>';
+  return m;
 }
 
 kb.touch = function() {
@@ -1395,10 +1386,8 @@ kb.drawData = function(data) {
   var data_status = data.status;
   var contentBody = content.BODY;
 
-  var cDateStr = '';
-  var uDateStr = '';
-  if (cDate != undefined) cDateStr = kb.getDateTimeString(+cDate);
-  if (uDate != undefined) uDateStr = kb.getDateTimeString(+uDate);
+  var cDateStr = kb.toDateTimeString(cDate);
+  var uDateStr = kb.toDateTimeString(uDate);
   var labelsHTML = kb.buildItemsHTML('label', labels, 3, 3);
 
   var drawMode = $el('#draw-mode').value;
@@ -2604,6 +2593,14 @@ kb.showInfotip = function(m, d) {
 kb.getDateTimeString = function(dt, fmt) {
   if (!fmt) fmt = '%YYYY-%MM-%DD %HH:%mm:%SS';
   return util.getDateTimeString(dt, fmt);
+};
+
+kb.toDateTimeString = function(s) {
+  var d = '---------- --:--:--';
+  if ((s != undefined) && (s != '')) {
+    d = kb.getDateTimeString(+s);
+  }
+  return d;
 };
 
 kb.onStartListLoading = function(msg) {
