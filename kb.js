@@ -2814,6 +2814,11 @@ kb.updateSearchLabels = function() {
   if ($el('#q').disabled) $el('#keyqord-label').addClass('input-label-disable');
 };
 
+kb.toggleLimit = function() {
+  $el('#limit').value = (($el('#limit').value == '') ? '0' : '');
+  $el('#limit').focus();
+};
+
 kb.confirmLogout = function() {
   util.confirm('Logout?', kb.logout);
 };
