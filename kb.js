@@ -2720,7 +2720,7 @@ kb.closeDialog = function() {
 };
 
 $onKeyDown = function(e) {
-  var FNC_TBL = {78: kb.onKeyDownN, 86: kb.onKeyDownV, 89: kb.onKeyDownY};
+  var FNC_TBL = {78: kb.onKeyDownN, 86: kb.onKeyDownV, 89: kb.onKeyDownY, 119: kb.onKeyDownF8};
   var fn = FNC_TBL[e.keyCode];
   if (fn) fn(e);
 };
@@ -2758,6 +2758,12 @@ kb.onKeyDownN = function(e) {
 kb.onKeyDownV = function(e) {
   if ((e.ctrlKey) && (kb.status & kb.ST_EDITING)) {
     if (kb.clipboardEnabled) kb.pasteImage();
+  }
+};
+
+kb.onKeyDownF8 = function(e) {
+  if (!(kb.status & kb.ST_EDITING) && (util.dialog.count() == 0)) {
+    kb.getDataListAll();
   }
 };
 
@@ -2835,6 +2841,8 @@ $onEscKey = function(e) {
     kb.onEditPropsEnd();
   } else if (kb.status & kb.ST_LOGIC_EDITING) {
     kb.onEditLogicEnd();
+  } else if ($el('.q-txt').hasFocus()) {
+    kb.clearKeywords();
   }
   kb.closeToolsWindow();
 };
