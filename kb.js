@@ -110,6 +110,7 @@ $onReady = function(e) {
   util.addKeyHandler(38, 'down', kb.keyHandlerUp);
   util.addKeyHandler(40, 'down', kb.keyHandlerDn);
   dbg.x.addCmdTbl(kb.cmd.CMD_TBL);
+  kb.historyBuf = new util.RingBuffer(kb.HISTORY_MAX);
   kb.status |= kb.ST_APP_READY;
 };
 
@@ -638,6 +639,7 @@ kb.search = function(reload) {
     } else {
       kb.searchByKeyword(q, reload, limit);
     }
+    saveHistory(q);
   } else {
     kb.listAll(reload, limit);
   }
@@ -2720,7 +2722,7 @@ kb.closeDialog = function() {
 };
 
 $onKeyDown = function(e) {
-  var FNC_TBL = {78: kb.onKeyDownN, 86: kb.onKeyDownV, 89: kb.onKeyDownY, 119: kb.onKeyDownF8};
+  var FNC_TBL = {38: kb.onKeyDownUp, 40: kb.onKeyDownDn, 78: kb.onKeyDownN, 86: kb.onKeyDownV, 89: kb.onKeyDownY, 119: kb.onKeyDownF8};
   var fn = FNC_TBL[e.keyCode];
   if (fn) fn(e);
 };
@@ -2765,6 +2767,54 @@ kb.onKeyDownF8 = function(e) {
   if (!(kb.status & kb.ST_EDITING) && (util.dialog.count() == 0)) {
     kb.getDataListAll();
   }
+};
+
+kb.onKeyDownUp = function(e) {
+  if ($el('#q').hasFocus()) {
+    kb.procHistoryUp();
+    e.preventDefault();
+  }
+};
+kb.onKeyDownDn = function(e) {
+  if ($el('#q').hasFocus()) {
+    kb.procHistoryDn();
+    e.preventDefault();
+  }
+};
+
+kb.HISTORY_MAX = 10;
+kb.historyIdx = kb.HISTORY_MAX;
+kb.kwTmp = '';
+kb.historyBuf = null;
+kb.procHistoryUp = function(e) {
+  var histories = kb.historyBuf.getAll();
+  if (histories.length == 0) return;
+  if (histories.length < kb.historyIdx) {
+    kb.historyIdx = histories.length;
+  }
+  if (kb.historyIdx == histories.length) {
+    kb.kwTmp = $el('#q').value;
+  }
+  if (kb.historyIdx > 0) {
+    kb.historyIdx--;
+  }
+  $el('#q').value = histories[kb.historyIdx];
+};
+
+kb.procHistoryDn = function(e) {
+  var histories = kb.historyBuf.getAll();
+  if (histories.length == 0) return;
+  if (kb.historyIdx < histories.length) kb.historyIdx++;
+  if (kb.historyIdx == histories.length) {
+    $el('#q').value = kb.kwTmp;
+  } else {
+    $el('#q').value = histories[kb.historyIdx];
+  }
+};
+
+saveHistory = function(s) {
+  kb.historyBuf.add(s);
+  kb.historyIdx = (kb.historyBuf.count() < kb.HISTORY_MAX) ? kb.historyBuf.count() : kb.HISTORY_MAX;
 };
 
 kb.onInputId = function() {
