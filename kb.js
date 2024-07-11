@@ -2800,6 +2800,7 @@ kb.onInputSearch = function() {
   kb.onInputId();
   kb.onInputQ();
 };
+
 kb.clearKeywords = function() {
   $el('#id-txt').value = '';
   $el('#q').value = '';
@@ -2847,9 +2848,28 @@ $onEscKey = function(e) {
   } else if (kb.status & kb.ST_LOGIC_EDITING) {
     kb.onEditLogicEnd();
   } else if ($el('.q-txt').hasFocus()) {
-    kb.clearKeywords();
+    var el = document.activeElement;
+    if (el.value == '') {
+      kb.focusNext(el);
+    } else {
+      el.value = '';
+      kb.onInputSearch();
+    }
   }
   kb.closeToolsWindow();
+};
+
+kb.focusNext = function(el) {
+  var tgtList = ['q', 'id-txt'];
+  var nextId = tgtList[0];
+  for (var i = 0; i < tgtList.length; i++) {
+    var id = tgtList[i];
+    if (el.id == id) {
+      nextId = util.arr.next(tgtList, id);
+      break;
+    }
+  }
+  $el('#' + nextId).focus();
 };
 
 kb.onMouseMove = function(e) {
