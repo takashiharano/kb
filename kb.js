@@ -26,7 +26,7 @@ kb.LIST_COLUMNS = [
   {key: 'id', label: 'ID', meta: true},
   {key: 'category', label: '&nbsp;', align: 'c', sort: false},
   {key: 'TITLE', label: 'TITLE'},
-  {key: 'DATA_TYPE', label: 'DL'},
+  {key: 'PASSWORD', label: '', align: 'c'},
   {key: 'C_DATE', label: 'CREATED'},
   {key: 'C_USER', label: 'BY'},
   {key: 'U_DATE', label: 'UPDATED'},
@@ -38,7 +38,7 @@ kb.LIST_COLUMNS = [
   {key: 'size', label: 'SIZE', align: 'r', meta: true},
   {key: 'PRIVS', label: 'PRIVS', forAdmin: true},
   {key: 'LOGIC', label: '&nbsp;'},
-  {key: 'PASSWORD', label: '&nbsp;'},
+  {key: 'DATA_TYPE', label: 'DL', align: 'c'},
   {key: 'encrypted', label: '&nbsp;', meta: true}
 ];
 
@@ -429,6 +429,7 @@ kb.buildDataListRow = function(data, fixed, cnt) {
   var isPwReq = '';
   if (content.PASSWORD) {
     isPwReq = '&#x1F512;';
+    isPwReq = '<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAYhJREFUOE+dkj1IA0EQhd9sUupZ2Xu3OWwVS1PERhQvp4XpYylaq51JJ9aKpfax0MuBYKOClqKt3E+0TmWwTHZkYwLJeZHgwLLszptvZ2eGkGJR5OQBOgIw23O/AXwgpf+YlFPyIgzdRSLuC5s9/7TemSmfy3lPgzEpAOeaiFyAt4X4utBipSbKAJ0xs5fL+esjAUGwagiR/SSiV8vy5geFcey+MPOcUu0p275p9X1DGQSBUxCC7pTiqm37lUFAEDgVIehQiIxpmlfvvwBh6K4IwfvMKBDhPq24fR8RKqZZf9CabgZR5J4AvJMWNPqOTqX0dqnZdCdbLW7pVzsdro4DyWToUGdjGGTQX/8eBevXQyleGgloNDZmlOo0NCRZuLEAP7UpdtslZd1I68ifGeiAOHaP9W5Z3t6/AGHoXOvA5PQNfeHjY81qt0UE4ELK+lbipYI+27Y/NBdRVDwHUM5mlezNQfESwDIRnsdpIzMWANxKWd/sAuLYLTFzCYBe41iNiGqW5dW+AQ941btDhiwFAAAAAElFTkSuQmCC" style="width:14px;margin-right:8px;">';
   }
   var encrypted = '';
   if (data.encrypted) {
@@ -467,7 +468,7 @@ kb.buildDataListRow = function(data, fixed, cnt) {
   html += '<td style="text-align:right;padding-right:8px;">' + idLabel + '</td>';
   html += '<td style="padding-right:4px;text-align:center;">' + catLabel + '</td>';
   html += '<td style="min-width:300px;max-width:550px;">' + titleLabel + '</td>';
-  html += '<td style="padding-right:16px;text-align:center;">' + dlLink + '</td>';
+  html += '<td style="text-align:center;width:16px;cursor:default;">' + isPwReq + '</td>';
   html += '<td style="width:145px;padding-right:0.5em;">' + cDateStr + '</td>';
   html += '<td style="padding-right:16px;">' + cUserLink + '</td>';
   html += '<td style="width:145px;padding-right:0.5em;">' + uDateStr + '</td>';
@@ -479,7 +480,7 @@ kb.buildDataListRow = function(data, fixed, cnt) {
   html += '<td style="text-align:right;padding-left:0.5em;padding-right:0.5em;">' + size + '</td>';
   if (kb.LIST_COLUMNS[kb.toSortIndex('PRIVS')].forAdmin && kb.isSysAdmin) html += '<td>' + privsHTML + '</td>';
   html += '<td style="text-align:center;cursor:default;">' + hasLogic + '</td>';
-  html += '<td style="text-align:center;width:16px;cursor:default;">' + isPwReq + '</td>';
+  html += '<td style="padding-right:16px;text-align:center;">' + dlLink + '</td>';
   html += '<td style="text-align:center;width:16px;cursor:default;">' + encrypted + '</td>';
 
   if (data_status != 'OK') {
