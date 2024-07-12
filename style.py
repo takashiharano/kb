@@ -151,7 +151,7 @@ th {
 #body1 {
   display: none;
   width: calc(100% - 21px);
-  min-width: 1500px;
+  min-width: 1600px;
   min-height: calc(100% - 4px);
 }
 .selected {
@@ -447,5 +447,62 @@ td.center {
     css += '  border: ' + appconfig.code_border + ';'
     css += '  background: ' + appconfig.code_background + ';'
     css += '}'
+
+    css += '''
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 38px;
+  height: 20px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #888;
+  transition: .1s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  top: 2px;
+  left: 3px;
+  background-color: #fff;
+  transition: .1s;
+}
+
+input:checked + .slider {
+  background-color: #2196f3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196f3;
+}
+
+input:checked + .slider:before {
+  transform: translateX(16px);
+}
+
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+'''
 
     return css

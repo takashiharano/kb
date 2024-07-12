@@ -1107,6 +1107,7 @@ kb.edit = function() {
   $el('#chk-encryption').disabled = false;
   $el('#chk-silent').disabled = false;
   $el('#edit-logic-button').disabled = false;
+  $el('#preview-mode').checked = false;
 
   var data = kb.data;
   var content = data.content;
@@ -1682,6 +1683,22 @@ kb._clearData = function(id) {
   kb.edit();
   $el('#content-body-edt').value = '';
   kb.saveAndExit();
+};
+
+kb.switchPreviewMode = function() {
+  if ($el('#preview-mode').checked) {
+    kb.switchToPreview();
+  } else {
+    kb.switchToEdit();
+  }
+};
+kb.switchToEdit = function() {
+  $el('#content-body').hide();
+  $el('#content-body-edt-wrp').show();
+};
+kb.switchToPreview = function() {
+  $el('#content-body').show();
+  $el('#content-body-edt-wrp').hide();
 };
 
 kb.export = function() {

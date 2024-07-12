@@ -129,16 +129,24 @@ def build_main_screen(context, scm):
           <input type="text" id="content-title-edt" spellcheck="false">
           <span style="margin-left:12px;">LABELS:</span>
           <input type="text" id="content-labels-edt" spellcheck="false">
+
+          <label class="switch" style="margin-left:8px;">
+            <input type="checkbox" id="preview-mode" onchange="kb.switchPreviewMode();">
+            <span class="slider round"></span>
+          </label><span style="margin-left:6px;">Preview</span>
+
           <span style="margin-left:12px;">STATUS:</span>
           <select id="select-status"></select>
-          <button id="set-pw-button" style="margin-left:8px;" onclick="kb.openSetPwDialog();">PW</button><div id="pw-status" style="display:inline-block;margin-left:2px;width:16px;"></div>
+
+          <button id="set-pw-button" style="margin-left:16px;" onclick="kb.openSetPwDialog();">PW</button><div id="pw-status" style="display:inline-block;margin-left:2px;width:16px;"></div>
+          <button id="edit-logic-button" style="margin-left:2px;" onclick="kb.openLogicEditor();" disabled>LOGIC</button>
 '''
+
     if context.has_permission('sysadmin'):
         html += '          <input type="checkbox" id="chk-encryption"><label for="chk-encryption">Encrypt</label>'
         html += '          <input type="checkbox" id="chk-silent"><label for="chk-silent">Silent</label>'
 
     html += '''
-          <button id="edit-logic-button" style="margin-left:16px;" onclick="kb.openLogicEditor();" disabled>LOGIC</button>
         </span>
       </div>
       <div style="display:inline-block;position:absolute;right:10px;">
