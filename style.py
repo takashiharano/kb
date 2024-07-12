@@ -151,7 +151,7 @@ th {
 #body1 {
   display: none;
   width: calc(100% - 21px);
-  min-width: 1600px;
+  min-width: 1500px;
   min-height: calc(100% - 4px);
 }
 .selected {
@@ -233,7 +233,7 @@ th {
   max-width: 800px;
 }
 #content-title-edt {
-  width: 480px;
+  width: 420px;
 }
 #content-labels-area {
   display: inline-block;
@@ -241,7 +241,7 @@ th {
   margin-right: 32px;
 }
 #content-labels-edt {
-  width: 200px;
+  width: 150px;
 }
 #content-assignee-edt {
   width: 150px;
