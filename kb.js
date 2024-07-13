@@ -857,7 +857,9 @@ kb.showReceivedData = function() {
 kb.openPasswordInputDialog = function() {
   var opt = {
     secure: true,
-    onenter: kb.onPwEnter
+    closeAnywhere: true,
+    onenter: kb.onPwEnter,
+    onclose: kb.onPwClose
   };
   util.dialog.text('Enter password', kb.showDataWithPassword, kb.showDataWithPasswordC, opt);
 };
@@ -877,6 +879,9 @@ kb.showDataWithPasswordC = function() {
 };
 kb.onPwEnter = function(pw) {
   kb.showDataWithPassword(pw);
+};
+kb.onPwClose = function(pw) {
+  kb.showDataWithPasswordC();
 };
 kb.onPwMismatched = function() {
   kb.data.content.BODY = '';
