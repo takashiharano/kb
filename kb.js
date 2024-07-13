@@ -1083,6 +1083,7 @@ kb.edit = function() {
 
   $el('#id-txt').disabled = true;
   $el('#q').disabled = true;
+  $el('#limit').disabled = true;
   kb.updateSearchLabels();
 
   $el('#new-button').disabled = true;
@@ -1147,6 +1148,7 @@ kb.onEditEnd = function() {
 
   $el('#id-txt').disabled = false;
   $el('#q').disabled = false;
+  $el('#limit').disabled = false;
   kb.onInputSearch()
 
   $el('#new-button').disabled = false;
@@ -2391,10 +2393,12 @@ kb.onNotAvailable = function(s) {
   $el('#new-button').disabled = true;
   $el('#search-button').disabled = true;
   $el('#all-button').disabled = true;
-  $el('#id-txt').disabled = true;
   $el('#id-label').addClass('input-label-disable');
-  $el('#q').disabled = true;
+  $el('#id-txt').disabled = true;
   $el('#keyqord-label').addClass('input-label-disable');
+  $el('#q').disabled = true;
+  $el('#limit-label').addClass('input-label-disable');
+  $el('#limit').disabled = true;
 };
 
 kb.onFontRangeChanged = function(el) {
@@ -2878,9 +2882,11 @@ kb.clearKeywords = function() {
 
 kb.updateSearchLabels = function() {
   $el('#id-label').removeClass('input-label-disable');
-  if ($el('#id-txt').disabled) $el('#id-label').addClass('input-label-disable');
   $el('#keyqord-label').removeClass('input-label-disable');
+  $el('#limit-label').removeClass('input-label-disable');
+  if ($el('#id-txt').disabled) $el('#id-label').addClass('input-label-disable');
   if ($el('#q').disabled) $el('#keyqord-label').addClass('input-label-disable');
+  if ($el('#limit').disabled) $el('#limit-label').addClass('input-label-disable');
 };
 
 kb.toggleLimit = function() {

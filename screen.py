@@ -83,7 +83,7 @@ def build_main_screen(context, scm):
     html += '<button class="small-button" style="margin-left:4px;" onclick="kb.clearKeywords();">CLEAR</button>'
     html += '<button id="all-button" style="margin-left:16px;min-width:32px;" onclick="kb.getDataListAll();">LIST ALL</button>'
 
-    html += '<span style="margin-left:16px;cursor:pointer;" onclick="kb.toggleLimit();">Limit</span>:'
+    html += '<span id="limit-label" style="margin-left:16px;"><span style="cursor:pointer;" onclick="kb.toggleLimit();">Limit</span>:</span>'
     html += '<input type="text" id="limit" class="q-txt" spellcheck="false" style="width:50px;">'
 
     html += '<button style="margin-left:36px;" onclick="kb.openNewWindow();">NEW WIN</button>'
