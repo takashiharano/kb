@@ -49,7 +49,8 @@ RESTRICTED_PROP_KEYS = [
     'U_DATE',
     'U_USER',
     'ASSIGNEE',
-    'PRIVS'
+    'PRIVS',
+    'PASSWORD'
 ]
 
 SP_KEYWORD_NANIDS = '*nanids'

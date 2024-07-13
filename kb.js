@@ -887,6 +887,7 @@ kb.onPwMismatched = function() {
   kb.data.content.BODY = '';
   kb.showReceivedData();
   kb.disableButtons4View();
+  if (kb.isAdmin) $el('#props-button').disabled = false;
 };
 kb.disableButtons4View = function() {
   kb.switchButtons4View(true);
@@ -895,7 +896,7 @@ kb.enableButtons4View = function() {
   kb.switchButtons4View(false);
 };
 kb.switchButtons4View = function(f) {
-  var ids = ['edit-button', 'edit-labels-button', 'exec-logic-button', 'copy-text-button', 'save-html-button', 'dup-button'];
+  var ids = ['edit-button', 'edit-labels-button', 'exec-logic-button', 'props-button', 'copy-text-button', 'save-html-button', 'dup-button'];
   for (var i = 0; i < ids.length; i++) {
     $el('#' + ids[i]).disabled = f;
   }
@@ -1112,7 +1113,7 @@ kb.edit = function() {
   $el('#set-pw-button').disabled = false;
   $el('#chk-encryption').disabled = false;
   $el('#chk-silent').disabled = false;
-  $el('#edit-logic-button').disabled = false;
+  $el('#edit-logic-button').disabled = ((kb.status & kb.ST_NEW) ? true : false);
   $el('#preview-mode').checked = false;
 
   var data = kb.data;
@@ -1123,8 +1124,6 @@ kb.edit = function() {
   $el('#content-labels-edt').value = content.LABELS;
   $el('#chk-encryption').checked = data.encrypted;
   $el('#chk-silent').checked = false;
-
-  $el('#edit-logic-button').disabled = ((kb.status & kb.ST_NEW) ? true : false);
 
   var pw = kb.pw.toView;
   kb.pw.toSave = pw;
