@@ -3252,10 +3252,10 @@ kb.removeFlag = function(flags, flag) {
 };
 
 kb.getUserName = function() {
-  var name = websys.getUserName();
+  var name = websys.getUserFullname();
   if (kb.configInfo && (kb.configInfo.user_name_lang != 'en')) {
     name = websys.getUserLocalName();
-    if (name == '') name = websys.getUserName();
+    if (name == '') name = websys.getUserFullname();
   }
   return name;
 };
