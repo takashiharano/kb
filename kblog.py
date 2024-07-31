@@ -60,7 +60,7 @@ def write_operation_log(context, op_type, scm, dataid=None, info='', data=None):
     if p_reload == '1':
         return
 
-    user = context.get_user_name()
+    user = context.get_user_fullname()
 
     if data is not None:
         if 'status' in data and data['status'] != 'OK':
@@ -79,7 +79,7 @@ def write_operation_log(context, op_type, scm, dataid=None, info='', data=None):
 
 #----------------------------------------------------------
 def write_save_log(context, scm, dataid, new_data, saved_obj):
-    user = context.get_user_name()
+    user = context.get_user_fullname()
 
     op_type = 'SAVE_DATA'
     info = ''
