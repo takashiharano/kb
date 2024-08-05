@@ -544,7 +544,7 @@ def proc_export_html(context):
 
     kblog.write_operation_log(context, 'EXPORT_HTML', scm, id)
 
-    util.send_binary(b, filename=filename)
+    util.send_as_file(b, filename=filename)
     result = create_result_object('OK', None, 'octet-stream')
     return result
 
@@ -567,7 +567,7 @@ def proc_export_data(context):
 
     kblog.write_operation_log(context, 'EXPORT_DATA', scm, dataid='')
 
-    util.send_binary(b, filename=filename)
+    util.send_as_file(b, filename=filename)
     return None
 
 def proc_export_data_all(context):
@@ -581,7 +581,7 @@ def proc_export_data_all(context):
     kblog.write_operation_log(context, 'EXPORT_ALL_DATA', scm='', dataid='')
 
     b = kb.export_all_data(context, decrypt)
-    util.send_binary(b, filename='kbdata_all.zip')
+    util.send_as_file(b, filename='kbdata_all.zip')
     return None
 
 #------------------------------------------------------------------------------
@@ -649,7 +649,7 @@ def _build_css(fontsize='14', fontfamily='', with_color=False):
 #------------------------------------------------------------------------------
 def send_error_text(msg):
     b = msg.encode()
-    util.send_binary(b, filename='error.txt')
+    util.send_as_file(b, filename='error.txt')
 
 #------------------------------------------------------------------------------
 def proc_api(context, act):
