@@ -1153,11 +1153,11 @@ def send_b64content_as_binary(s, ext=None):
         send_error_file('DECODE_ERROR')
         return
 
-    util.send_binary(b, filename=filename)
+    util.send_as_file(b, filename=filename)
 
 def send_error_file(s):
     b = s.encode()
-    util.send_binary(b, filename='error.txt')
+    util.send_as_file(b, filename='error.txt')
 
 #------------------------------------------------------------------------------
 def get_dataurl_content(s, idx):
