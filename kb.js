@@ -107,6 +107,7 @@ $onReady = function(e) {
   util.addKeyHandler('S', 'down', kb.keyHandlerS, {ctrl: false, alt: true});
   util.addKeyHandler('T', 'down', kb.keyHandlerT, {ctrl: false, alt: true});
   util.addKeyHandler('W', 'down', kb.keyHandlerW, {ctrl: false, alt: true});
+  util.addKeyHandler(9, 'down', kb.keyHandlerTab);
   util.addKeyHandler(38, 'down', kb.keyHandlerUp);
   util.addKeyHandler(40, 'down', kb.keyHandlerDn);
   dbg.x.addCmdTbl(kb.cmd.CMD_TBL);
@@ -1426,30 +1427,7 @@ kb.drawData = function(data) {
   var labelsHTML = kb.buildItemsHTML('label', labels, 3, 3);
 
   var drawMode = $el('#draw-mode').value;
-  if (drawMode != '2') {
-    contentBody = util.escHtml(contentBody);
-  }
-  if (drawMode == '1') {
-    contentBody = contentBody.replace(/&quot;/g, '"');
-    contentBody = util.linkUrls(contentBody);
-
-    var w = kb.linkDataUrl(contentBody, false, -1);
-    contentBody = w.s;
-    if (w.i == -1) w.i = 0;
-    w = kb.linkDataUrl(contentBody, true, w.i);
-    contentBody = w.s;
-    contentBody = kb.decodeB64Image(contentBody);
-
-    contentBody = kb.linkBsb64Data(contentBody);
-    contentBody = kb.linkB64sData(contentBody);
-    contentBody = kb.linkCopy(contentBody);
-    contentBody = kb.linkKB(contentBody);
-    contentBody = contentBody.replace(/^(\s*)(#.*)/g, '$1<span class="comment">$2</span>');
-    contentBody = contentBody.replace(/(\n)(\s*)(#.*)/g, '$1$2<span class="comment">$3</span>');
-    contentBody = contentBody.replace(/(?<!\\)```([\s\S]+?)(?<!\\)```/g, '<pre class="code">$1</pre>');
-    contentBody = contentBody.replace(/(?<!\\)`(.+?)(?<!\\)`/g, '<span class="code-s">$1</span>');
-    contentBody = contentBody.replace(/\\`/g, '`');
-  }
+  contentBody = kb.getContentForView(contentBody, drawMode);
 
   var idLabel = '';
   if (id != '') idLabel = '<span class="pseudo-link" onclick="kb.showData(\'' + id + '\');" data-tooltip2="Reload">' + id + '</span>:';
@@ -1512,6 +1490,34 @@ kb.drawData = function(data) {
   }
 
   setTimeout(kb.postDrawData, 0);
+};
+
+kb.getContentForView = function(s, mode) {
+  if (mode != '2') {
+    s = util.escHtml(s);
+  }
+  if (mode == '1') {
+    s = s.replace(/&quot;/g, '"');
+    s = util.linkUrls(s);
+
+    var w = kb.linkDataUrl(s, false, -1);
+    s = w.s;
+    if (w.i == -1) w.i = 0;
+    w = kb.linkDataUrl(s, true, w.i);
+    s = w.s;
+    s = kb.decodeB64Image(s);
+
+    s = kb.linkBsb64Data(s);
+    s = kb.linkB64sData(s);
+    s = kb.linkCopy(s);
+    s = kb.linkKB(s);
+    s = s.replace(/^(\s*)(#.*)/g, '$1<span class="comment">$2</span>');
+    s = s.replace(/(\n)(\s*)(#.*)/g, '$1$2<span class="comment">$3</span>');
+    s = s.replace(/(?<!\\)```([\s\S]+?)(?<!\\)```/g, '<pre class="code">$1</pre>');
+    s = s.replace(/(?<!\\)`(.+?)(?<!\\)`/g, '<span class="code-s">$1</span>');
+    s = s.replace(/\\`/g, '`');
+  }
+  return s;
 };
 
 kb.postDrawData = function(id) {
@@ -1703,6 +1709,9 @@ kb.switchToEdit = function() {
   $el('#content-body-edt-wrp').show();
 };
 kb.switchToPreview = function() {
+  var v = $el('#content-body-edt').value;
+  v = kb.getContentForView(v, 1);
+  $el('#content-body').innerHTML = v;
   $el('#content-body').show();
   $el('#content-body-edt-wrp').hide();
 };
@@ -3123,6 +3132,17 @@ kb.keyHandlerT = function(e) {
 kb.keyHandlerW = function(e) {
   if (kb.mode == 'view') return;
   kb.openNewWindow();
+};
+kb.keyHandlerTab = function(e) {
+  if (!((kb.status & kb.ST_EDITING) && $el('#content-body-edt').hasFocus())) return;
+  e.preventDefault();
+  var el = $el('#content-body-edt');
+  var cp = el.selectionStart;
+  var v = el.value;
+  var v1 = v.slice(0, cp);
+  var v2 = v.slice(cp);
+  el.value = v1 + '\t' + v2;
+  el.selectionEnd = cp + 1;
 };
 kb.keyHandlerUp = function(e) {
   if (!kb.isDialogDisplaying('select_scm')) return;
