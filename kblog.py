@@ -5,13 +5,14 @@
 import os
 import sys
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-import websysconf
-
-sys.path.append(websysconf.UTIL_PATH)
-import util
-import web
 import appconfig
+ROOT_PATH = appconfig.root_path
+
+sys.path.append(os.path.join(os.path.dirname(__file__), ROOT_PATH + 'libs'))
+import util
+
+util.append_system_path(__file__, ROOT_PATH + 'websys')
+import web
 
 LOG_FILE_PATH = appconfig.workspace_path + 'kb.log'
 LOCK_FILE_PATH = appconfig.workspace_path + 'lock'

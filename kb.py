@@ -15,8 +15,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), ROOT_PATH + 'libs'))
 import util
 import bsb64
 
-util.append_system_path(__file__, ROOT_PATH)
-util.append_system_path(__file__, ROOT_PATH + 'websys/bin')
+util.append_system_path(__file__, ROOT_PATH + 'websys')
 import web
 
 WORKSPACE_PATH = appconfig.workspace_path

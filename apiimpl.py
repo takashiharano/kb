@@ -12,10 +12,10 @@ ROOT_PATH = appconfig.root_path
 sys.path.append(os.path.join(os.path.dirname(__file__), ROOT_PATH + 'libs'))
 import util
 
-util.append_system_path(__file__, ROOT_PATH)
-util.append_system_path(__file__, ROOT_PATH + 'websys/bin')
-import appconfig
+util.append_system_path(__file__, ROOT_PATH + 'websys')
 import web
+
+import appconfig
 import kb
 import kblog
 
