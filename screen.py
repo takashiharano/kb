@@ -14,7 +14,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), ROOT_PATH + 'libs'))
 import util
 
 util.append_system_path(__file__, ROOT_PATH + 'websys')
-import web
+import websys
 
 import kb
 import js
@@ -261,7 +261,7 @@ def build_view_screen(context):
 var kb = {};
 kb.mode = 'view'
 '''
-    html += 'kb.token = \'' + web.get_raw_request_param('token', '') + '\';\n'
+    html += 'kb.token = \'' + websys.get_raw_request_param('token', '') + '\';\n'
     html += '</script>'
     html += '<script src="kb.js"></script>'
     html += '<script src="./?res=js"></script>'
@@ -365,7 +365,7 @@ $onLoad = function() {
 
 #------------------------------------------------------------------------------
 def main():
-    context = web.on_access()
+    context = websys.on_access()
 
     scm = util.get_request_param('scm', '')
     if scm == '':

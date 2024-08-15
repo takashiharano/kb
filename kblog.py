@@ -12,7 +12,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), ROOT_PATH + 'libs'))
 import util
 
 util.append_system_path(__file__, ROOT_PATH + 'websys')
-import web
+import websys
 
 LOG_FILE_PATH = appconfig.workspace_path + 'kb.log'
 LOCK_FILE_PATH = appconfig.workspace_path + 'lock'
@@ -57,7 +57,7 @@ def write_app_log(user, op_type, scm, dataid, info=''):
 
 #----------------------------------------------------------
 def write_operation_log(context, op_type, scm, dataid=None, info='', data=None):
-    p_reload = web.get_request_param('reload')
+    p_reload = websys.get_request_param('reload')
     if p_reload == '1':
         return
 

@@ -14,7 +14,7 @@ import util
 import bsb64
 
 util.append_system_path(__file__, ROOT_PATH + 'websys')
-import web
+import websys
 
 import kb
 
@@ -74,7 +74,6 @@ def build_js(context, scm):
 
 #------------------------------------------------------------------------------
 def main(scm):
-    context = web.on_access()
+    context = websys.on_access()
     js = build_js(context, scm)
     util.send_response(js, 'text/javascript')
-

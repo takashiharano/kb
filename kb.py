@@ -16,7 +16,7 @@ import util
 import bsb64
 
 util.append_system_path(__file__, ROOT_PATH + 'websys')
-import web
+import websys
 
 WORKSPACE_PATH = appconfig.workspace_path
 DATA_BASE_DIR_PATH = WORKSPACE_PATH + 'scm/'
@@ -1388,7 +1388,7 @@ def cmd_export():
         return
 
     user_info = {'uid': 'system', 'is_admin': True}
-    context = web.WebContext()
+    context = websys.WebContext()
     context.set_user_info(user_info)
     context.set_authorized(True)
 

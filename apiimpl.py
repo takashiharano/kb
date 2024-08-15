@@ -13,7 +13,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), ROOT_PATH + 'libs'))
 import util
 
 util.append_system_path(__file__, ROOT_PATH + 'websys')
-import web
+import websys
 
 import appconfig
 import kb
@@ -24,13 +24,13 @@ DATA_ENCRYPTION_KEY = appconfig.data_encryption_key
 #------------------------------------------------------------------------------
 # Returns None if the value not found
 def get_request_param(key, default=None):
-    return web.get_request_param(key, default=default)
+    return websys.get_request_param(key, default=default)
 
 def get_request_param_as_int(key, default=None):
-    return web.get_request_param_as_int(key, default=default)
+    return websys.get_request_param_as_int(key, default=default)
 
 def get_request_param_as_bool(key, default=None):
-    return web.get_request_param_as_bool(key, as_true='1')
+    return websys.get_request_param_as_bool(key, as_true='1')
 
 #------------------------------------------------------------------------------
 def get_req_param_scm():
@@ -41,7 +41,7 @@ def get_req_param_scm():
 
 #------------------------------------------------------------------------------
 def send_result_json(status, body=None):
-    web.send_result_json(status, body, encryption=True)
+    websys.send_result_json(status, body, encryption=True)
 
 #------------------------------------------------------------------------------
 def has_data_permission(context, scm, id):
@@ -556,7 +556,7 @@ def proc_export_data(context):
         send_error_text('NO_ACCESS_RIGHTS:scm=' + scm)
         return None
 
-    p_decrypt = web.get_raw_request_param('decrypt')
+    p_decrypt = websys.get_raw_request_param('decrypt')
     decrypt = p_decrypt == '1'
     b = kb.export_data(scm, decrypt)
 
@@ -575,7 +575,7 @@ def proc_export_data_all(context):
         kblog.write_operation_log(context, 'EXPORT_ALL_DATA:FORBIDDEN', scm='', dataid='')
         send_error_text('NO_ACCESS_RIGHTS')
         return None
-    p_decrypt = web.get_raw_request_param('decrypt')
+    p_decrypt = websys.get_raw_request_param('decrypt')
     decrypt = p_decrypt == '1'
 
     kblog.write_operation_log(context, 'EXPORT_ALL_DATA', scm='', dataid='')
@@ -680,9 +680,9 @@ def proc_api(context, act):
         result = g[func_name](context)
     else:
         # from url query string w/o encryption
-        act = web.get_raw_request_param('act')
+        act = websys.get_raw_request_param('act')
         if act == 'export':
-            all = web.get_raw_request_param('all', '')
+            all = websys.get_raw_request_param('all', '')
             if all == '1':
                 # api.cgi?act=export&all=1&decrypt=1
                 proc_export_data_all(context)
@@ -702,7 +702,7 @@ def proc_api(context, act):
 
 #------------------------------------------------------------------------------
 def main():
-    context = web.on_access()
+    context = websys.on_access()
 
     act = get_request_param('act')
     if act is None:
