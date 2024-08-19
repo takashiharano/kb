@@ -340,27 +340,20 @@ ACCESS PRIVILEGE IS REQUIRED.
     return html
 
 #------------------------------------------------------------------------------
-def build_auth_redirection_screen():
-    html = '''<!DOCTYPE html><html><head><meta charset="utf-8">
-<meta name="robots" content="none">
-<meta name="referrer" content="no-referrer">
-<meta name="referrer" content="never">
-'''
-    html += '<title>' + appconfig.title + '</title>'
-    html += '<style>'
-    html += style.build_css(mode='view')
-    html += '</style>'
-    html += '<script src="' + ROOT_PATH + 'libs/debug.js"></script>'
-    html += '<script src="' + ROOT_PATH + 'libs/util.js"></script>'
-    html += '<script src="' + ROOT_PATH + 'websys/websys.js"></script>'
-    html += '<script src="./?res=js"></script>'
-    html += '''
-<script>
-$onLoad = function() {
-  websys.authRedirection(location.href);
-};
-</script>
-</head><body></body></html>'''
+def build_auth_redirection_screen(root_path):
+    html = '<!DOCTYPE html>'
+    html += '<html>'
+    html += '<head>'
+    html += '<meta charset="utf-8">'
+    html += '<script src="' + root_path + 'libs/util.js"></script>'
+    html += '<script src="' + root_path + 'websys/websys.js"></script>'
+    html += '<script>'
+    html += 'websys.init(\'' + root_path + '\');'
+    html += '$onLoad = function() {websys.authRedirection(location.href);};'
+    html += '</script>'
+    html += '</head>'
+    html += '<body></body>'
+    html += '</html>'
     return html
 
 #------------------------------------------------------------------------------
@@ -397,10 +390,10 @@ def main():
     elif id is not None:
         token = util.get_request_param('token')
         if token is None:
-            html = build_auth_redirection_screen()
+            html = build_auth_redirection_screen(ROOT_PATH)
         else:
             html = build_view_screen(context)
     else:
-        html = build_auth_redirection_screen()
+        html = build_auth_redirection_screen(ROOT_PATH)
 
     util.send_html(html)
