@@ -3277,6 +3277,7 @@ kb.getUserName = function() {
     name = websys.getUserLocalName();
     if (name == '') name = websys.getUserFullname();
   }
+  if (!name) name = '';
   return name;
 };
 
