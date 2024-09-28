@@ -65,7 +65,7 @@ def build_main_screen(context, scm):
         username = context.get_user_id()
 
     html += '      <span style="position:absolute;right:0;">'
-    html += '        <span class="pseudo-link text-muted" style="margin-right:10px;" onclick="kb.confirmLogout();">' + username + '</span>'
+    html += '        <span class="pseudo-link text-muted" style="margin-right:10px;" onclick="kb.openUserDialog();">' + username + '</span>'
     html += '        <span id="clock"></span>'
     html += '''
       </span>

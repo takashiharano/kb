@@ -2907,6 +2907,18 @@ kb.toggleLimit = function() {
   $el('#limit').focus();
 };
 
+kb.openUserDialog = function() {
+  var html = '<div style="text-align:left;">'
+  html += '- <span class="pseudo-link" onclick="kb.openChangePwDialog();">Change password</span><br>';
+  html += '- <span class="pseudo-link" onclick="kb.confirmLogout();">Logout</span><br>';
+  html += '</div>';
+  util.alert(html);
+};
+
+kb.openChangePwDialog = function() {
+  websys.openChangePwDialog();
+};
+
 kb.confirmLogout = function() {
   util.confirm('Logout?', kb.logout);
 };
