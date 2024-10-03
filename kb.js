@@ -3049,7 +3049,7 @@ kb.openB64sDialog = function(t, enc) {
     secure: true,
     data: {t: t, enc: enc}
   };
-  var m = 'Base64s ' + (enc ? 'encryption' : 'decryption') + ' key: ';
+  var m = 'Base64S ' + (enc ? 'encryption' : 'decryption') + ' key: ';
   m += '<button class="small-button" onclick="kb.applyDefaultKey();">USE DEFAULT</button>';
   util.dialog.text(m, kb.b64sDialogCb, opt);
 };
@@ -3303,7 +3303,7 @@ kb.tools.buildBsb64Html = function() {
 
   html += '<span style="margin-left:4px;">';
   html += '<input type="radio" name="encdec-mode" id="rdo-b64s" onchange="kb.tools.onEncDecModeChange();" checked>'
-  html += '<label for="rdo-b64s">Base64s</label>';
+  html += '<label for="rdo-b64s">Base64S</label>';
   html += '<input type="radio" name="encdec-mode" id="rdo-bsb64" onchange="kb.tools.onEncDecModeChange();">'
   html += '<label for="rdo-bsb64">BSB64</label>';
   html += '</span>';
