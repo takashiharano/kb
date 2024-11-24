@@ -349,8 +349,8 @@ th {
 }
 
 .category {
-  border-radius: 3px;
-  padding: 0 3px;
+  border-radius: 2em;
+  padding: 0 7px;
   font-size: 12px;
 }
 
