@@ -581,7 +581,7 @@ def proc_export_data_all(context):
     kblog.write_operation_log(context, 'EXPORT_ALL_DATA', scm='', dataid='')
 
     b = kb.export_all_data(context, decrypt)
-    util.send_as_file(b, filename='kbdata_all.zip')
+    util.send_as_file(b, filename='kbdata-all.zip')
     return None
 
 #------------------------------------------------------------------------------
