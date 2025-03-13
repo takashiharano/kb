@@ -580,8 +580,11 @@ def proc_export_data_all(context):
 
     kblog.write_operation_log(context, 'EXPORT_ALL_DATA', scm='', dataid='')
 
+    timestamp = util.get_datetime_str(fmt='%Y%m%dT%H%M%S')
+    fllename = 'kbdata-all-' + timestamp + '.zip'
+
     b = kb.export_all_data(context, decrypt)
-    util.send_as_file(b, filename='kbdata-all.zip')
+    util.send_as_file(b, filename=fllename)
     return None
 
 #------------------------------------------------------------------------------
