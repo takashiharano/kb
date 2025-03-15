@@ -153,7 +153,7 @@ def build_main_screen(context, scm):
         <span id="buttons-r" class="for-view">
           <span id="content-labels-area">
             <span id="content-labels"></span>'''
-    if kb.can_operate(context, scm, 'write'):
+    if context.has_permission('sysadmin'):
         html += '<button id="edit-labels-button" class="for-view small-button" style="margin-left:4px;" onclick="kb.editLabels();">EDIT</button>'
 
     html += '''
