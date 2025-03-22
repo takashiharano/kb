@@ -3595,12 +3595,6 @@ logic.dialog = function(s) {
   return util.alert(s, opt);
 };
 //-----------------------------
-
-//-------------------------------------------------------------------------
-$onBeforeUnload = function(e) {
-  if (kb.status & kb.ST_EDITING) e.returnValue = '';
-};
-
 kb.view = {};
 kb.view.init = function() {
   $el('.for-view').hide();
@@ -3613,4 +3607,14 @@ kb.view.onNoRights = function() {
   msg += 'You do not have permission to access.\n';
   msg += 'Please contact the administrator and get valid token.';
   $el('#content-body').textseq(msg, {cursor: 3});
+};
+
+//-------------------------------------------------------------------------
+$onBeforeUnload = function(e) {
+  if (kb.status & kb.ST_EDITING) {
+    var m = '';
+    e.preventDefault();
+    e.returnValue = m;
+    return m;
+  }
 };
