@@ -1388,8 +1388,15 @@ kb.onCheckExists = function(xhr, res, req) {
 };
 
 kb.confirmCancel = function() {
-  kb.status |= kb.ST_CANCEL_CONFIRMING;
-  util.confirm('Cancel?', kb.cancel, kb.cancelCancel, {focus: 'no'});
+  var title = $el('#content-title-edt').value;
+  var body = $el('#content-body-edt').value;
+  var labels = $el('#content-labels-edt').value;
+  if (!title && !body && !labels) {
+    kb.cancel();
+  } else {
+    kb.status |= kb.ST_CANCEL_CONFIRMING;
+    util.confirm('Cancel?', kb.cancel, kb.cancelCancel, {focus: 'no'});
+  }
 };
 kb.cancel = function() {
   kb.status &= ~kb.ST_CANCEL_CONFIRMING;
