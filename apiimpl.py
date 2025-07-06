@@ -592,7 +592,7 @@ def proc_get_kb_log(context):
     status = 'OK'
     if context.is_admin():
         p_n = get_request_param('n')
-        n = 30
+        n = 50
         if p_n is not None:
             try:
                 n = int(p_n)
