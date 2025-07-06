@@ -1518,11 +1518,16 @@ kb.getContentForView = function(s, mode) {
     s = kb.linkB64sData(s);
     s = kb.linkCopy(s);
     s = kb.linkKB(s);
+
     s = s.replace(/^(\s*)(#.*)/g, '$1<span class="comment">$2</span>');
     s = s.replace(/(\n)(\s*)(#.*)/g, '$1$2<span class="comment">$3</span>');
+
     s = s.replace(/(?<!\\)```([\s\S]+?)(?<!\\)```/g, '<pre class="code">$1</pre>');
     s = s.replace(/(?<!\\)`(.+?)(?<!\\)`/g, '<span class="code-s">$1</span>');
     s = s.replace(/\\`/g, '`');
+
+    s = s.replace(/(?<!\\)\*\*([\s\S]+?)(?<!\\)\*\*/g, '<b>$1</b>');
+    s = s.replace(/\\(\*)/g, '$1');
   }
   return s;
 };
