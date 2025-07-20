@@ -161,7 +161,7 @@ def build_main_screen(context, scm):
           <span id="status" style="margin-right:8px;"></span>
           <select id="draw-mode">
             <option value="0">Plain</option>
-            <option value="1" selected>Advanced</option>
+            <option value="1" selected>MD-Like</option>
             <option value="2">HTML</option>
           </select>'''
     html += '<button id="exec-logic-button" style="margin-left:16px;margin-right:8px;" onclick="kb.confirmExecLogic();" disabled>LOGIC</button>'

@@ -1500,9 +1500,11 @@ kb.drawData = function(data) {
 };
 
 kb.getContentForView = function(s, mode) {
-  if (mode != '2') {
-    s = util.escHtml(s);
+  if (mode == '2') {
+    return s;
   }
+
+  s = util.escHtml(s);
   if (mode == '1') {
     s = s.replace(/&quot;/g, '"');
     s = util.linkUrls(s);
@@ -1529,6 +1531,7 @@ kb.getContentForView = function(s, mode) {
     s = s.replace(/(?<!\\)\*\*([\s\S]+?)(?<!\\)\*\*/g, '<b>$1</b>');
     s = s.replace(/\\(\*)/g, '$1');
   }
+
   return s;
 };
 
