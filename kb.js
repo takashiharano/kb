@@ -1438,7 +1438,8 @@ kb.drawData = function(data) {
 
   var idLabel = '';
   if (id != '') idLabel = '<span class="pseudo-link" onclick="kb.showData(\'' + id + '\');" data-tooltip2="Reload">' + id + '</span>:';
-  var titleLabel = util.escHtml(title);
+  var escTitle =  util.escHtml(title);
+  var titleLabel = '<span class="pseudo-link" onclick="kb.copyTitle(\'' + kb.scm + '\', \'' + id + '\', \'' + title + '\');" data-tooltip2="Reload">' + escTitle + '</span>';
 
   $el('#content-id').innerHTML = idLabel;
   $el('#content-title').innerHTML = titleLabel;
@@ -1539,6 +1540,13 @@ kb.postDrawData = function(id) {
     var r = el.getBoundingClientRect();
     el.rect = r;
   }
+};
+
+kb.copyTitle = function(scm, id, title) {
+  var s = 'KB#';
+  if (scm) s += scm + ':';
+  s += id + ' ' + title;
+  kb.copy(s);
 };
 
 kb.linkDataUrl = function(s, f, index) {
