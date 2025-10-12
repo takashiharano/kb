@@ -1527,9 +1527,6 @@ kb.getContentForView = function(s, mode) {
     s = s.replace(/(?<!\\)```([\s\S]+?)(?<!\\)```/g, '<pre class="code">$1</pre>');
     s = s.replace(/(?<!\\)`(.+?)(?<!\\)`/g, '<span class="code-s">$1</span>');
     s = s.replace(/\\`/g, '`');
-
-    s = s.replace(/(?<!\\)\*\*([\s\S]+?)(?<!\\)\*\*/g, '<b>$1</b>');
-    s = s.replace(/\\(\*)/g, '$1');
   }
 
   return s;
