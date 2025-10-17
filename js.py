@@ -19,10 +19,10 @@ import websys
 import kb
 
 #------------------------------------------------------------------------------
-def build_js(context, scm):
+def build_js(context, repo):
     content_height_adj = appconfig.list_height + 32
     default_encryption_key = bsb64.encode_string(kb.DEFAULT_ENCRYPTION_KEY, 1)
-    categories = kb.load_categories(scm)
+    categories = kb.load_categories(repo)
 
     js = ''
     js += 'var kb = kb || {};\n'
@@ -30,7 +30,7 @@ def build_js(context, scm):
     js += 'kb.RESTRICTED_PROP_KEYS = ' + util.to_json(kb.RESTRICTED_PROP_KEYS) + ';'
     js += 'kb.categories = ' + util.to_json(categories) + ';'
 
-    js += 'kb.defaultScm = \'' + kb.get_default_scm_id() + '\';\n'
+    js += 'kb.defaultRepo = \'' + kb.get_default_repo_id() + '\';\n'
     js += 'kb.config = {\n'
     js += '  list_max: ' + str(appconfig.list_max) + ',\n';
     js += '  default_data_encryption: ' + ('true' if appconfig.default_data_encryption else 'false') + ',\n'
@@ -73,7 +73,7 @@ def build_js(context, scm):
     return js
 
 #------------------------------------------------------------------------------
-def main(scm):
+def main(repo):
     context = websys.on_access()
-    js = build_js(context, scm)
+    js = build_js(context, repo)
     util.send_response(js, 'text/javascript')

@@ -19,7 +19,7 @@ util.append_system_path(__file__, ROOT_PATH + 'websys')
 import websys
 
 WORKSPACE_PATH = appconfig.workspace_path
-DATA_BASE_DIR_PATH = WORKSPACE_PATH + 'scm/'
+DATA_BASE_DIR_PATH = WORKSPACE_PATH + 'repo/'
 WK_PATH = WORKSPACE_PATH + 'wk/'
 PROPS_FILENAME = 'properties.txt'
 CATEGORIES_FILENAME = 'categories.json'
@@ -53,75 +53,75 @@ RESTRICTED_PROP_KEYS = [
 ]
 
 SP_KEYWORD_NANIDS = '*nanids'
-DEFAULT_SCM_ID = '0'
+DEFAULT_REPO_ID = '0'
 ANONYMOUS_USER_NAME = 'Anonymous'
 
 #------------------------------------------------------------------------------
 def get_workspace_path():
     return WORKSPACE_PATH
 
-def get_scm_dir_path(scm):
-    return DATA_BASE_DIR_PATH + scm + '/'
+def get_repo_dir_path(repo):
+    return DATA_BASE_DIR_PATH + repo + '/'
 
-def get_data_dir_path(scm):
-    return DATA_BASE_DIR_PATH + scm + '/data/'
+def get_data_dir_path(repo):
+    return DATA_BASE_DIR_PATH + repo + '/data/'
 
-def get_datafile_path(scm, id):
-    datadir = get_data_dir_path(scm)
+def get_datafile_path(repo, id):
+    datadir = get_data_dir_path(repo)
     return datadir + id + '.txt'
 
-def get_props_file_path(scm):
-    dir_path = get_scm_dir_path(scm)
+def get_props_file_path(repo):
+    dir_path = get_repo_dir_path(repo)
     path = dir_path + PROPS_FILENAME
     return path
 
-def get_categories_file_path(scm):
-    if scm is None:
+def get_categories_file_path(repo):
+    if repo is None:
         dir_path = WORKSPACE_PATH
     else:
-        dir_path = get_scm_dir_path(scm)
+        dir_path = get_repo_dir_path(repo)
     path = dir_path + CATEGORIES_FILENAME
     return path
 
-def get_default_scm_id():
-    return DEFAULT_SCM_ID
+def get_default_repo_id():
+    return DEFAULT_REPO_ID
 
 #------------------------------------------------------------------------------
-def get_schema_list(context):
+def get_repo_list(context):
     dirs = util.list_dirs(DATA_BASE_DIR_PATH)
-    scm_list = []
+    repo_list = []
     for i in range(len(dirs)):
-        scm = dirs[i]
-        if has_privilege_for_scm(context, scm):
-            props = load_scm_props(scm)
-            scm_data = {
-                'id': scm,
+        repo = dirs[i]
+        if has_privilege_for_repo(context, repo):
+            props = load_repo_props(repo)
+            repo_data = {
+                'id': repo,
                 'props': props
             }
-            scm_list.append(scm_data)
-    return scm_list
+            repo_list.append(repo_data)
+    return repo_list
 
 #------------------------------------------------------------------------------
-def has_privilege_for_scm(context, scm):
-    props = load_scm_props(scm)
+def has_privilege_for_repo(context, repo):
+    props = load_repo_props(repo)
     if is_authorized(context):
         if not 'privs' in props:
             return True
         if satisfy_privs(context, props['privs']):
             return True
-    if is_anonymous_allowed(scm):
+    if is_anonymous_allowed(repo):
         return True
     return False
 
 #------------------------------------------------------------------------------
-def read_scm_props_as_text(scm):
-    path = get_props_file_path(scm)
+def read_repo_props_as_text(repo):
+    path = get_props_file_path(repo)
     text = util.read_text_file(path)
     return text
 
 #------------------------------------------------------------------------------
-def load_scm_props(scm):
-    text = read_scm_props_as_text(scm)
+def load_repo_props(repo):
+    text = read_repo_props_as_text(repo)
     try:
         props = util.from_json(text)
     except:
@@ -130,7 +130,7 @@ def load_scm_props(scm):
     if props is None:
         props = {}
 
-    if scm == get_default_scm_id():
+    if repo == get_default_repo_id():
         if not 'name' in props:
             props['name'] = 'Main'
 
@@ -142,8 +142,8 @@ def load_scm_props(scm):
 #   {"key": "code", "name": "Code", "alt": "Alternative text"},
 #   {"key": "linux", "name": "Linux", "image": "linux.png"}
 # ]
-def load_categories(scm):
-    path = get_categories_file_path(scm)
+def load_categories(repo):
+    path = get_categories_file_path(repo)
     categories = util.load_dict(path, None)
     if categories is not None:
         return categories
@@ -154,26 +154,26 @@ def load_categories(scm):
     return categories
 
 #------------------------------------------------------------------------------
-def schema_exists(scm):
-    path = DATA_BASE_DIR_PATH + scm
+def repo_exists(repo):
+    path = DATA_BASE_DIR_PATH + repo
     return util.path_exists(path)
 
 #------------------------------------------------------------------------------
-def create_schema(scm, props):
-    if schema_exists(scm):
-        return 'SCM_ALREADY_EXISTS'
-    if not util.match(scm, '^[a-z0-9_\\-]+$'):
-        return 'ILLEGAL_SCM_ID'
+def create_repo(repo, props):
+    if repo_exists(repo):
+        return 'REPO_ALREADY_EXISTS'
+    if not util.match(repo, '^[a-z0-9_\\-]+$'):
+        return 'ILLEGAL_REPO_ID'
 
-    path = DATA_BASE_DIR_PATH + scm
+    path = DATA_BASE_DIR_PATH + repo
     util.mkdir(path)
-    save_scm_props(scm, props)
+    save_repo_props(repo, props)
     return 'OK'
 
-def delete_schema(scm):
-    if not schema_exists(scm):
-        return 'SCM_NOT_FOUND'
-    path = DATA_BASE_DIR_PATH + scm
+def delete_repo(repo):
+    if not repo_exists(repo):
+        return 'REPO_NOT_FOUND'
+    path = DATA_BASE_DIR_PATH + repo
     try:
         util.rmdir(path, True)
         status = 'OK'
@@ -182,13 +182,13 @@ def delete_schema(scm):
     return status
 
 #------------------------------------------------------------------------------
-def save_scm_props(scm, json_text):
-    path = get_props_file_path(scm)
+def save_repo_props(repo, json_text):
+    path = get_props_file_path(repo)
     util.write_text_file(path, json_text)
 
 #------------------------------------------------------------------------------
-def get_all_data_id_list(scm):
-    datadir = get_data_dir_path(scm)
+def get_all_data_id_list(repo):
+    datadir = get_data_dir_path(repo)
     files = util.list_files(datadir, '.txt')
     data_id_list = []
     for i in range(len(files)):
@@ -199,12 +199,12 @@ def get_all_data_id_list(scm):
 
 #------------------------------------------------------------------------------
 # list_max: None=default, 0=no limit
-def get_data_list(context, scm, target_id=None, list_max=None, include_hidden=False):
+def get_data_list(context, repo, target_id=None, list_max=None, include_hidden=False):
     time_s = util.get_timestamp()
 
     if list_max is None:
         list_max = appconfig.list_max
-    data_id_list = get_all_data_id_list(scm)
+    data_id_list = get_all_data_id_list(repo)
     data_list = []
     fixed_data_list = []
     for i in range(len(data_id_list)):
@@ -212,7 +212,7 @@ def get_data_list(context, scm, target_id=None, list_max=None, include_hidden=Fa
         if target_id is not None and target_id != id or target_id is None and is_nan_id(id):
             continue
 
-        data = load_data(scm, id, head_only=True)
+        data = load_data(repo, id, head_only=True)
         if data['status'] == 'OK':
             content = data['content']
             if not has_data_privilege(context, content):
@@ -249,14 +249,14 @@ def get_data_list(context, scm, target_id=None, list_max=None, include_hidden=Fa
                 break
 
     all_data_size = util.get_path_size(DATA_BASE_DIR_PATH, recursive=True)
-    scm_data_size = util.get_path_size(get_scm_dir_path(scm), recursive=True)
+    repo_data_size = util.get_path_size(get_repo_dir_path(repo), recursive=True)
 
     time_e = util.get_timestamp()
     elapsed = time_e - time_s
 
     data_list_obj = {
         'all_data_size': all_data_size,
-        'scm_data_size': scm_data_size,
+        'repo_data_size': repo_data_size,
         'total_count': total_count,
         'fixed_data_list': fixed_data_list,
         'data_list': data_list,
@@ -374,7 +374,7 @@ def filter_by_id_range(all_id_list, keyword, filtered_id_list):
     return {'id_list': filtered_id_list, 'include_hidden': include_hidden}
 
 #------------------------------------------------------------------------------
-def search_data(context, scm, q, list_max=None):
+def search_data(context, repo, q, list_max=None):
     time_s = util.get_timestamp()
 
     if list_max is None:
@@ -387,7 +387,7 @@ def search_data(context, scm, q, list_max=None):
     # 'aaa "bbb ccc"' -> ['aaa', 'bbb ccc']
     keywords = util.split_keywords(q)
 
-    data_id_list = get_all_data_id_list(scm)
+    data_id_list = get_all_data_id_list(repo)
 
     filtered = filter_by_id(data_id_list, keywords)
     include_hidden = filtered['include_hidden']
@@ -409,7 +409,7 @@ def search_data(context, scm, q, list_max=None):
             incl_nan_id = True
             break
 
-    data_list = _search(context, scm, data_id_list, id_filtering, incl_nan_id, include_hidden, keywords)
+    data_list = _search(context, repo, data_id_list, id_filtering, incl_nan_id, include_hidden, keywords)
 
     total_count = len(data_list)
     if list_max > 0 and total_count > list_max:
@@ -444,14 +444,14 @@ def search_data(context, scm, q, list_max=None):
 
     return data_list_obj
 
-def _search(context, scm, data_id_list, id_filtering, incl_nan_id, include_hidden, keywords):
+def _search(context, repo, data_id_list, id_filtering, incl_nan_id, include_hidden, keywords):
     all_data = []
     for i in range(len(data_id_list)):
         id = data_id_list[i]
         if not incl_nan_id and is_nan_id(id):
             continue
 
-        data = load_data(scm, id)
+        data = load_data(repo, id)
         if data['status'] == 'OK':
             content = data['content']
             if should_omit_content(context, content, include_hidden):
@@ -748,8 +748,8 @@ def count_matched_key_in_dataurl(target, keyword):
     return count
 
 #------------------------------------------------------------------------------
-def get_data(context, scm, id, need_encode_b64=False):
-    data = load_data(scm, id)
+def get_data(context, repo, id, need_encode_b64=False):
+    data = load_data(repo, id)
     if data['status'] != 'OK':
         return data
 
@@ -768,20 +768,20 @@ def get_data(context, scm, id, need_encode_b64=False):
 
     return data
 
-def load_data_as_text(scm, id):
-    text_path = get_datafile_path(scm, id)
+def load_data_as_text(repo, id):
+    text_path = get_datafile_path(repo, id)
     if not util.path_exists(text_path):
         raise Exception('DATA_NOT_FOUND')
     text = util.read_text_file(text_path)
     return text
 
-def get_datafile_info(scm, id):
-    path = get_datafile_path(scm, id)
+def get_datafile_info(repo, id):
+    path = get_datafile_path(repo, id)
     if not util.path_exists(path):
         return None
     return util.get_file_info(path)
 
-def load_data(scm, id, head_only=False):
+def load_data(repo, id, head_only=False):
     data = {
         'id': id,
         'status': 'OK',
@@ -790,9 +790,9 @@ def load_data(scm, id, head_only=False):
         'content': None
     }
 
-    fileinfo = get_datafile_info(scm, id)
+    fileinfo = get_datafile_info(repo, id)
     try:
-        text = load_data_as_text(scm, id)
+        text = load_data_as_text(repo, id)
     except Exception as e:
         data['status'] = str(e)
         return data
@@ -838,9 +838,9 @@ def parse_content(text, head_only=False):
     return content
 
 #------------------------------------------------------------------------------
-def save_data(scm, id, new_data, user='', as_anonymous=False):
+def save_data(repo, id, new_data, user='', as_anonymous=False):
     if id == '':
-        id = get_next_id(scm)
+        id = get_next_id(repo)
 
     now = util.get_unixtime_millis()
 
@@ -850,7 +850,7 @@ def save_data(scm, id, new_data, user='', as_anonymous=False):
     if user == '' or as_anonymous:
         user = ANONYMOUS_USER_NAME
 
-    data = load_data(scm, id)
+    data = load_data(repo, id)
     if data['status'] != 'OK':
         data = {
             'content': {
@@ -915,7 +915,7 @@ def save_data(scm, id, new_data, user='', as_anonymous=False):
     data['content'] = content
     encryption_key = DATA_ENCRYPTION_KEY if secure else None
 
-    write_data(scm, id, content, encryption_key)
+    write_data(repo, id, content, encryption_key)
 
     saved_data = {
         'id': id,
@@ -948,7 +948,7 @@ def is_dataurl(s):
   return util.match(s, '^data:.+;base64,[A-Za-z0-9+/=\n]+$')
 
 #------------------------------------------------------------------------------
-def write_data(scm, id, content, encryption_key=None, path=None):
+def write_data(repo, id, content, encryption_key=None, path=None):
     text = ''
 
     for key in content:
@@ -963,33 +963,33 @@ def write_data(scm, id, content, encryption_key=None, path=None):
         text = DATA_ENCRYPTION_HEAD + util.encode_base64s(text, encryption_key)
 
     if path is None:
-        path = get_datafile_path(scm, id)
+        path = get_datafile_path(repo, id)
 
     util.write_text_file(path, text)
 
-def delete_data(scm, id):
+def delete_data(repo, id):
     if id == '':
         return 'ERR_ROOT_PATH'
     if util.match(id, '\\.\\.'):
         return 'ERR_PARENT_PATH'
-    path = get_datafile_path(scm, id)
+    path = get_datafile_path(repo, id)
     if not util.path_exists(path):
         return 'NOT_FOUND'
     util.delete(path)
     return 'OK'
 
-def check_exists(scm, id):
+def check_exists(repo, id):
     if id == '':
         raise Exception('EMPTY_ID')
-    path = get_datafile_path(scm, id)
+    path = get_datafile_path(repo, id)
     if util.path_exists(path):
         return True
     else:
         return False
 
-def get_max_id(scm):
+def get_max_id(repo):
     max_id = 0
-    data_id_list = get_all_data_id_list(scm)
+    data_id_list = get_all_data_id_list(repo)
     for i in range(len(data_id_list)):
         id = data_id_list[i]
         try:
@@ -1001,12 +1001,12 @@ def get_max_id(scm):
             max_id = n
     return max_id
 
-def get_next_id(scm):
-    id = get_max_id(scm) + 1
+def get_next_id(repo):
+    id = get_max_id(repo) + 1
     return str(id)
 
-def get_vacant_ids(scm):
-    all_ids = get_all_data_id_list(scm)
+def get_vacant_ids(repo):
+    all_ids = get_all_data_id_list(repo)
     n_list = []
     for i in range(len(all_ids)):
         id = all_ids[i]
@@ -1049,26 +1049,26 @@ def get_vacant_ids(scm):
     }
     return result
 
-def change_data_id(scm, id_fm, id_to):
-    if not check_exists(scm, id_fm):
+def change_data_id(repo, id_fm, id_to):
+    if not check_exists(repo, id_fm):
         return 'SRC_NOT_FOUND'
-    if check_exists(scm, id_to):
+    if check_exists(repo, id_to):
         return 'DEST_ALREADY_EXISTS'
-    path_fm = get_datafile_path(scm, id_fm)
-    path_to = get_datafile_path(scm, id_to)
+    path_fm = get_datafile_path(repo, id_fm)
+    path_to = get_datafile_path(repo, id_to)
     ret = util.move(path_fm, path_to)
     if ret:
         return 'OK'
     return 'FAILED:NEED_TO_FILE_CHECK_ON_THE_SERVER'
 
-def export_data(scm, decrypt=False):
+def export_data(repo, decrypt=False):
     if decrypt:
-        wk_data_path = WK_PATH + scm + '/data/'
+        wk_data_path = WK_PATH + repo + '/data/'
         util.mkdir(wk_data_path)
-        decrypt_data(scm, wk_data_path)
+        decrypt_data(repo, wk_data_path)
         target_path = wk_data_path
     else:
-        target_path = get_data_dir_path(scm)
+        target_path = get_data_dir_path(repo)
 
     b = util.zip(None, target_path)
     util.delete(WK_PATH, True)
@@ -1078,18 +1078,18 @@ def export_all_data(context, decrypt=False):
     util.delete(WK_PATH, True)
     if decrypt:
         target_path = WK_PATH + 'kbdata/'
-        scm_list = get_schema_list(context)
+        repo_list = get_repo_list(context)
 
-        for i in range(len(scm_list)):
-            scm_data = scm_list[i]
-            scm = scm_data['id']
-            src_scm_props_path = get_props_file_path(scm)
-            wk_scm_path = target_path + scm + '/'
-            wk_data_path = wk_scm_path + 'data/'
+        for i in range(len(repo_list)):
+            repo_data = repo_list[i]
+            repo = repo_data['id']
+            src_repo_props_path = get_props_file_path(repo)
+            wk_repo_path = target_path + repo + '/'
+            wk_data_path = wk_repo_path + 'data/'
             util.mkdir(wk_data_path)
-            decrypt_data(scm, wk_data_path)
-            if util.path_exists(src_scm_props_path):
-                util.copy(src_scm_props_path, wk_scm_path)
+            decrypt_data(repo, wk_data_path)
+            if util.path_exists(src_repo_props_path):
+                util.copy(src_repo_props_path, wk_repo_path)
     else:
         target_path = DATA_BASE_DIR_PATH
 
@@ -1097,33 +1097,33 @@ def export_all_data(context, decrypt=False):
     util.delete(WK_PATH, True)
     return b
 
-def decrypt_data(scm, dst_base_dir):
-    encdec_data(scm, dst_base_dir, encryption_key=None)
+def decrypt_data(repo, dst_base_dir):
+    encdec_data(repo, dst_base_dir, encryption_key=None)
 
-def encrypt_data(scm, dst_base_dir, encryption_key=DATA_ENCRYPTION_KEY):
-    encdec_data(scm, dst_base_dir, encryption_key)
+def encrypt_data(repo, dst_base_dir, encryption_key=DATA_ENCRYPTION_KEY):
+    encdec_data(repo, dst_base_dir, encryption_key)
 
-def encdec_data(scm, dst_base_dir, encryption_key):
-    data_id_list = get_all_data_id_list(scm)
+def encdec_data(repo, dst_base_dir, encryption_key):
+    data_id_list = get_all_data_id_list(repo)
     for i in range(len(data_id_list)):
         id = data_id_list[i]
         dst_path = dst_base_dir + id + '.txt'
-        data = load_data(scm, id)
+        data = load_data(repo, id)
         if data['status'] == 'OK':
             content = data['content']
-            write_data(scm, id, content, encryption_key=encryption_key, path=dst_path)
+            write_data(repo, id, content, encryption_key=encryption_key, path=dst_path)
         else:
             text = '!ERROR! ' + data['status'] + '\n---\n'
-            text += load_data_as_text(scm, id)
+            text += load_data_as_text(repo, id)
             dst_path = dst_base_dir + '_error_' + id + '.txt'
             util.write_text_file(dst_path, text)
 
 #------------------------------------------------------------------------------
-def download_b64content(context, scm, id, idx=None):
+def download_b64content(context, repo, id, idx=None):
     if idx is None:
         idx = 0
 
-    data = get_data(context, scm, id)
+    data = get_data(context, repo, id)
     content = data['content']
     s = get_dataurl_content(content['BODY'], idx)
     if s is None:
@@ -1286,37 +1286,37 @@ def satisfy_privs(context, required_privs):
             return False
     return True
 
-def can_operate(context, scm, operation_name):
-    scm_kb_admin_priv = scm + '.kb.admin'
+def can_operate(context, repo, operation_name):
+    repo_kb_admin_priv = repo + '.kb.admin'
     kb_op_priv = 'kb.' + operation_name
-    scm_kb_op_priv = scm + '.' + kb_op_priv
-    privs = ['sysadmin', 'kb.admin', scm_kb_admin_priv, kb_op_priv, scm_kb_op_priv]
+    repo_kb_op_priv = repo + '.' + kb_op_priv
+    privs = ['sysadmin', 'kb.admin', repo_kb_admin_priv, kb_op_priv, repo_kb_op_priv]
     for priv in privs:
         if has_privilege(context, priv):
             return True
 
-    if is_anonymous_op_allowed(scm, operation_name):
+    if is_anonymous_op_allowed(repo, operation_name):
         return True
 
     return False
 
-def is_anonymous_allowed(scm):
-    return is_anonymous_op_allowed(scm, '*')
+def is_anonymous_allowed(repo):
+    return is_anonymous_op_allowed(repo, '*')
 
-def is_anonymous_op_allowed(scm, operation_name):
-    if scm is None:
+def is_anonymous_op_allowed(repo, operation_name):
+    if repo is None:
         return False
 
-    props = load_scm_props(scm)
+    props = load_repo_props(repo)
     if not 'privs' in props:
         return False
 
-    scm_privs = props['privs']
-    if scm_privs == 'anonymous':
+    repo_privs = props['privs']
+    if repo_privs == 'anonymous':
         return True
 
-    scm_privs = scm_privs.lower()
-    privs = scm_privs.split(' ')
+    repo_privs = repo_privs.lower()
+    privs = repo_privs.split(' ')
     for i in range(len(privs)):
         priv = privs[i]
         w = priv.split('.')
@@ -1326,23 +1326,23 @@ def is_anonymous_op_allowed(scm, operation_name):
                     return True
     return False
 
-def is_valid_token(token_enc, scm, target_id):
+def is_valid_token(token_enc, repo, target_id):
     try:
-        return _is_valid_token(token_enc, scm, target_id)
+        return _is_valid_token(token_enc, repo, target_id)
     except:
         return False
 
-def _is_valid_token(token_enc, target_scm, target_id):
+def _is_valid_token(token_enc, target_repo, target_id):
     token = bsb64.decode_string(token_enc, 0)
     fields = token.split(':')
-    scm = fields[0]
+    repo = fields[0]
     id = fields[1]
     key = fields[2]
     issued_time = int(fields[3])
-    dflt_scm = get_default_scm_id()
+    dflt_repo = get_default_repo_id()
 
-    if scm != target_scm:
-        if not scm == '' and target_scm == dflt_scm:
+    if repo != target_repo:
+        if not repo == '' and target_repo == dflt_repo:
             return False
 
     if id != target_id:
@@ -1376,7 +1376,7 @@ def cmd_export():
     arg2 = util.get_arg(3)
     arg3 = util.get_arg(4)
 
-    scm = arg1
+    repo = arg1
     dest_path = arg2
     decrypt = False
     if arg3 == '-decrypt':
@@ -1384,7 +1384,7 @@ def cmd_export():
 
     if dest_path == '' or dest_path.startswith('-'):
         print('Dest file path is required. (e.g., /tmp/data.zip)')
-        print('Usage: python kb.py export <SCM> <DEST_FILE_PATH> [-decrypt]')
+        print('Usage: python kb.py export <REPO> <DEST_FILE_PATH> [-decrypt]')
         return
 
     user_info = {'uid': 'system', 'is_admin': True}
@@ -1392,10 +1392,10 @@ def cmd_export():
     context.set_user_info(user_info)
     context.set_authorized(True)
 
-    if scm == '-all':
+    if repo == '-all':
         data_bytes = export_all_data(context, decrypt)
     else:
-        data_bytes = export_data(scm, decrypt)
+        data_bytes = export_data(repo, decrypt)
 
     util.write_binary_file(dest_path, data_bytes)
 
@@ -1404,7 +1404,7 @@ def cmd_export():
 # Store the plain text data file into the data folder.
 # Execute the following command.
 #
-# > python kb.py encrypt <SCM> <KEY>
+# > python kb.py encrypt <REPO> <KEY>
 #
 # e.g.,> python kb.py encrypt 0 xyz
 #
@@ -1412,19 +1412,19 @@ def cmd_encrypt():
     arg1 = util.get_arg(2)
     arg2 = util.get_arg(3)
 
-    scm = arg1
+    repo = arg1
     key = arg2
-    print('scm=' + scm)
+    print('repo=' + repo)
     print('key=' + key)
 
     if util.get_args_len() < 3:
-        print('Usage: python kb.py cmd_encrypt <SCM> <KEY>')
+        print('Usage: python kb.py cmd_encrypt <REPO> <KEY>')
         return
 
     # Decrypt
-    target_path = get_data_dir_path(scm)
-    decrypt_data(scm, target_path)
-    encrypt_data(scm, target_path, key)
+    target_path = get_data_dir_path(repo)
+    decrypt_data(repo, target_path)
+    encrypt_data(repo, target_path, key)
 
 #------------------------------------------------------------------------------
 def main():

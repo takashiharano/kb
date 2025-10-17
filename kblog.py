@@ -30,14 +30,14 @@ def write_log(data):
         synchronize_end()
 
 #----------------------------------------------------------
-def write_app_log(user, op_type, scm, dataid, info=''):
+def write_app_log(user, op_type, repo, dataid, info=''):
     now = util.get_timestamp()
     date_time = util.get_datetime_str(now, fmt='%Y-%m-%dT%H:%M:%S.%f')
 
-    if scm is None:
-        scm = ''
-    elif scm == '0':
-        scm = 'main'
+    if repo is None:
+        repo = ''
+    elif repo == '0':
+        repo = 'main'
 
     if dataid is None:
         dataid = ''
@@ -48,7 +48,7 @@ def write_app_log(user, op_type, scm, dataid, info=''):
     data += '\t'
     data += op_type
     data += '\t'
-    data += scm
+    data += repo
     data += '\t'
     data += dataid
     data += '\t'
@@ -56,7 +56,7 @@ def write_app_log(user, op_type, scm, dataid, info=''):
     write_log(data)
 
 #----------------------------------------------------------
-def write_operation_log(context, op_type, scm, dataid=None, info='', data=None):
+def write_operation_log(context, op_type, repo, dataid=None, info='', data=None):
     p_reload = websys.get_request_param('reload')
     if p_reload == '1':
         return
@@ -76,10 +76,10 @@ def write_operation_log(context, op_type, scm, dataid=None, info='', data=None):
                 if 'TITLE' in content:
                     info = append_info(info, 'Title:' +  content['TITLE'])
 
-    write_app_log(user, op_type, scm, dataid, info)
+    write_app_log(user, op_type, repo, dataid, info)
 
 #----------------------------------------------------------
-def write_save_log(context, scm, dataid, new_data, saved_obj):
+def write_save_log(context, repo, dataid, new_data, saved_obj):
     user = context.get_user_fullname()
 
     op_type = 'SAVE_DATA'
@@ -105,7 +105,7 @@ def write_save_log(context, scm, dataid, new_data, saved_obj):
         if 'TITLE' in content:
             info = append_info(info, 'Title:' +  content['TITLE'])
 
-    write_app_log(user, op_type, scm, saved_id, info)
+    write_app_log(user, op_type, repo, saved_id, info)
 
 def append_info(info, s):
     if info != '':

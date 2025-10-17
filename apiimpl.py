@@ -33,29 +33,29 @@ def get_request_param_as_bool(key, default=None):
     return websys.get_request_param_as_bool(key, as_true='1')
 
 #------------------------------------------------------------------------------
-def get_req_param_scm():
-    scm = get_request_param('scm', '')
-    if scm == '':
-        scm = kb.get_default_scm_id()
-    return scm
+def get_req_param_repo():
+    repo = get_request_param('repo', '')
+    if repo == '':
+        repo = kb.get_default_repo_id()
+    return repo
 
 #------------------------------------------------------------------------------
 def send_result_json(status, body=None):
     websys.send_result_json(status, body, encryption=True)
 
 #------------------------------------------------------------------------------
-def has_data_permission(context, scm, id):
-    if has_valid_token(scm, id):
+def has_data_permission(context, repo, id):
+    if has_valid_token(repo, id):
         return True
-    if kb.has_privilege_for_scm(context, scm):
+    if kb.has_privilege_for_repo(context, repo):
         return True
     return False
 
 #------------------------------------------------------------------------------
-def has_valid_token(scm, id):
+def has_valid_token(repo, id):
     token = get_request_param('token')
     try:
-        if kb.is_valid_token(token, scm, id):
+        if kb.is_valid_token(token, repo, id):
             return True
     except:
         pass
@@ -74,13 +74,13 @@ def has_valid_apitoken():
 # api.cgi?act=get_data&id=1
 def proc_get_data(context):
     id = get_request_param('id')
-    scm = get_req_param_scm()
-    if has_data_permission(context, scm, id):
+    repo = get_req_param_repo()
+    if has_data_permission(context, repo, id):
         status = 'OK'
-        result_data = kb.get_data(context, scm, id, need_encode_b64=True)
-        kblog.write_operation_log(context, 'GET_DATA', scm, id, data=result_data)
+        result_data = kb.get_data(context, repo, id, need_encode_b64=True)
+        kblog.write_operation_log(context, 'GET_DATA', repo, id, data=result_data)
     else:
-        kblog.write_operation_log(context, 'GET_DATA:FORBIDDEN', scm, id)
+        kblog.write_operation_log(context, 'GET_DATA:FORBIDDEN', repo, id)
         status = 'NO_ACCESS_RIGHTS'
         result_data = None
 
@@ -89,19 +89,19 @@ def proc_get_data(context):
 
 #------------------------------------------------------------------------------
 def proc_download_b64content(context):
-    scm = get_req_param_scm()
+    repo = get_req_param_repo()
     id = get_request_param('id')
-    if has_data_permission(context, scm, id):
+    if has_data_permission(context, repo, id):
         status = 'OK'
         p_idx = get_request_param('idx')
         try:
             idx = int(p_idx)
         except:
             idx = 0
-        kblog.write_operation_log(context, 'DOWNLOAD_B64CONTENT', scm, id, info='idx=' + str(idx))
-        kb.download_b64content(context, scm, id, idx)
+        kblog.write_operation_log(context, 'DOWNLOAD_B64CONTENT', repo, id, info='idx=' + str(idx))
+        kb.download_b64content(context, repo, id, idx)
     else:
-        kblog.write_operation_log(context, 'DOWNLOAD_B64CONTENT:FORBIDDEN', scm, id)
+        kblog.write_operation_log(context, 'DOWNLOAD_B64CONTENT:FORBIDDEN', repo, id)
         kb.send_error_file('NO_ACCESS_RIGHTS')
     return None
 
@@ -125,68 +125,68 @@ def proc_on_forbidden(act):
 #------------------------------------------------------------------------------
 def proc_data_list(context):
     id = get_request_param('id')
-    scm = get_req_param_scm()
+    repo = get_req_param_repo()
 
-    if not kb.schema_exists(scm):
-        kblog.write_operation_log(context, 'LIST:SCHEMA_NOT_FOUND', scm, id)
+    if not kb.repo_exists(repo):
+        kblog.write_operation_log(context, 'LIST:SCHEMA_NOT_FOUND', repo, id)
         return create_result_object('SCHEMA_NOT_FOUND')
 
-    if kb.has_privilege_for_scm(context, scm):
+    if kb.has_privilege_for_repo(context, repo):
         limit = get_request_param_as_int('limit')
         include_hidden = get_request_param_as_bool('include_hidden')
-        detail = kb.get_data_list(context, scm, id, list_max=limit, include_hidden=include_hidden)
+        detail = kb.get_data_list(context, repo, id, list_max=limit, include_hidden=include_hidden)
         result = create_result_object('OK', detail)
 
         info = ''
         if detail['total_count'] == 0:
             info = 'cnt=0'
-        kblog.write_operation_log(context, 'LIST', scm, id, info=info)
+        kblog.write_operation_log(context, 'LIST', repo, id, info=info)
 
     else:
-        kblog.write_operation_log(context, 'LIST:FORBIDDEN', scm, id)
+        kblog.write_operation_log(context, 'LIST:FORBIDDEN', repo, id)
         result = create_result_object('NO_ACCESS_RIGHTS')
 
     return result
 
 #------------------------------------------------------------------------------
 def proc_search(context):
-    scm = get_req_param_scm()
+    repo = get_req_param_repo()
     id = get_request_param('id')
 
-    if not kb.schema_exists(scm):
-        kblog.write_operation_log(context, 'SEARCH:SCHEMA_NOT_FOUND', scm, id)
+    if not kb.repo_exists(repo):
+        kblog.write_operation_log(context, 'SEARCH:SCHEMA_NOT_FOUND', repo, id)
         return create_result_object('SCHEMA_NOT_FOUND')
 
-    if not kb.has_privilege_for_scm(context, scm):
-        kblog.write_operation_log(context, 'SEARCH:FORBIDDEN', scm, id)
+    if not kb.has_privilege_for_repo(context, repo):
+        kblog.write_operation_log(context, 'SEARCH:FORBIDDEN', repo, id)
         return create_result_object('NO_ACCESS_RIGHTS')
 
     if id is None:
         q = get_request_param('q')
         q = util.decode_base64(q)
         limit = get_request_param_as_int('limit')
-        detail = kb.search_data(context, scm, q, list_max=limit)
+        detail = kb.search_data(context, repo, q, list_max=limit)
     else:
-        kblog.write_operation_log(context, 'SEARCH', scm, id)
-        detail = kb.get_data(context, scm, id, need_encode_b64=True)
+        kblog.write_operation_log(context, 'SEARCH', repo, id)
+        detail = kb.get_data(context, repo, id, need_encode_b64=True)
 
     info = 'q=' + q + ' : ' + 'cnt=' + str(detail['total_count'])
-    kblog.write_operation_log(context, 'SEARCH', scm, id, info=info)
+    kblog.write_operation_log(context, 'SEARCH', repo, id, info=info)
 
     result = create_result_object('OK', detail)
     return result
 
 #------------------------------------------------------------------------------
 def proc_save_data(context):
-    scm = get_req_param_scm()
+    repo = get_req_param_repo()
     id = get_request_param('id')
 
-    if not kb.schema_exists(scm):
-        kblog.write_operation_log(context, 'SAVE_DATA:SCHEMA_NOT_FOUND', scm, id)
+    if not kb.repo_exists(repo):
+        kblog.write_operation_log(context, 'SAVE_DATA:SCHEMA_NOT_FOUND', repo, id)
         return create_result_object('SCHEMA_NOT_FOUND')
 
-    if not kb.has_privilege_for_scm(context, scm):
-        kblog.write_operation_log(context, 'SAVE_DATA:FORBIDDEN', scm, id)
+    if not kb.has_privilege_for_repo(context, repo):
+        kblog.write_operation_log(context, 'SAVE_DATA:FORBIDDEN', repo, id)
         return create_result_object('NO_ACCESS_RIGHTS')
 
     data_json = get_request_param('data')
@@ -194,7 +194,7 @@ def proc_save_data(context):
 
     content = None
     if id != '':
-        data = kb.get_data(context, scm, id)
+        data = kb.get_data(context, repo, id)
         content = data['content']
 
     if id == '' or content is not None and content['U_DATE'] == new_data['org_u_date']:
@@ -204,20 +204,20 @@ def proc_save_data(context):
         p_as_anonymous = get_request_param('as_anonymous', '0')
         as_anonymous = True if p_as_anonymous == '1' else False
 
-        saved_obj = kb.save_data(scm, id, new_data, user, as_anonymous)
+        saved_obj = kb.save_data(repo, id, new_data, user, as_anonymous)
         saved_data = saved_obj['data']
         saved_content = saved_data['content']
         saved_id = saved_obj['id']
         saved_date = str(saved_content['U_DATE'])
         saved_user = saved_content['U_USER']
 
-        kblog.write_save_log(context, scm, id, new_data, saved_obj)
+        kblog.write_save_log(context, repo, id, new_data, saved_obj)
     else:
         status = 'CONFLICT'
         saved_id = None
         saved_date = content['U_DATE']
         saved_user = content['U_USER']
-        kblog.write_operation_log(context, 'SAVE_DATA:CONFLICT', scm, id, data=data)
+        kblog.write_operation_log(context, 'SAVE_DATA:CONFLICT', repo, id, data=data)
 
     detail = {
         'saved_id': saved_id,
@@ -230,22 +230,22 @@ def proc_save_data(context):
 
 #------------------------------------------------------------------------------
 def proc_touch(context):
-    scm = get_req_param_scm()
+    repo = get_req_param_repo()
     p_ids = get_request_param('ids')
     p_keep_updated_by = get_request_param('keep_updated_by', '0')
     keep_updated_by = True if p_keep_updated_by == '1' else False
     info = 'keep_updated_by=1' if keep_updated_by else ''
 
-    if not kb.has_privilege_for_scm(context, scm):
-        kblog.write_operation_log(context, 'TOUCH:FORBIDDEN', scm, p_ids, info=info)
+    if not kb.has_privilege_for_repo(context, repo):
+        kblog.write_operation_log(context, 'TOUCH:FORBIDDEN', repo, p_ids, info=info)
         return create_result_object('NO_ACCESS_RIGHTS')
 
     ids = p_ids.split(',')
     user = kb.get_user_name(context)
-    kblog.write_operation_log(context, 'TOUCH', scm, p_ids, info=info)
+    kblog.write_operation_log(context, 'TOUCH', repo, p_ids, info=info)
     for i in range(len(ids)):
         id = ids[i]
-        data = kb.get_data(context, scm, id)
+        data = kb.get_data(context, repo, id)
         if data['status'] != 'OK':
             continue
         now = util.get_unixtime_millis()
@@ -255,14 +255,14 @@ def proc_touch(context):
             content['U_USER'] = user
         secure = data['encrypted']
         encryption_key = DATA_ENCRYPTION_KEY if secure else None
-        kb.write_data(scm, id, content, encryption_key)
+        kb.write_data(repo, id, content, encryption_key)
 
     result = create_result_object('OK')
     return result
 
 #------------------------------------------------------------------------------
 def proc_mod_props(context):
-    scm = get_req_param_scm()
+    repo = get_req_param_repo()
     id = get_request_param('id')
 
     org_u_date = get_request_param('org_u_date')
@@ -270,7 +270,7 @@ def proc_mod_props(context):
     p_props = util.decode_base64(p_props)
     p_props = util.replace(p_props, ' {2,}', ' ')
 
-    data = kb.load_data(scm, id)
+    data = kb.load_data(repo, id)
     if data['status'] != 'OK':
         result = create_result_object('ERROR:' + data['status'])
         return result
@@ -296,9 +296,9 @@ def proc_mod_props(context):
 
     secure = data['encrypted']
     encryption_key = DATA_ENCRYPTION_KEY if secure else None
-    kb.write_data(scm, id, new_content, encryption_key)
+    kb.write_data(repo, id, new_content, encryption_key)
 
-    kblog.write_operation_log(context, 'MOD_PROPS', scm, id, data=data)
+    kblog.write_operation_log(context, 'MOD_PROPS', repo, id, data=data)
 
     result = create_result_object('OK')
     return result
@@ -314,13 +314,13 @@ def filter_update_props(new_content, org_content):
 
 #------------------------------------------------------------------------------
 def proc_save_logic(context):
-    scm = get_req_param_scm()
+    repo = get_req_param_repo()
     id = get_request_param('id')
     org_u_date = get_request_param('org_u_date')
     p_b64logic = get_request_param('logic')
     p_silent = get_request_param('silent')
 
-    data = kb.load_data(scm, id)
+    data = kb.load_data(repo, id)
     if data['status'] != 'OK':
         result = create_result_object('ERROR:' + data['status'])
         return result
@@ -331,7 +331,7 @@ def proc_save_logic(context):
             'U_DATE': content['U_DATE'],
             'U_USER': content['U_USER']
         }
-        kblog.write_operation_log(context, 'SAVE_LOGIC:CONFLICT', scm, id, data=data)
+        kblog.write_operation_log(context, 'SAVE_LOGIC:CONFLICT', repo, id, data=data)
         result = create_result_object('CONFLICT', detail)
         return result
 
@@ -346,9 +346,9 @@ def proc_save_logic(context):
 
     secure = data['encrypted']
     encryption_key = DATA_ENCRYPTION_KEY if secure else None
-    kb.write_data(scm, id, new_content, encryption_key)
+    kb.write_data(repo, id, new_content, encryption_key)
 
-    kblog.write_operation_log(context, 'SAVE_LOGIC', scm, id, data=data)
+    kblog.write_operation_log(context, 'SAVE_LOGIC', repo, id, data=data)
 
     detail = {
         'saved_id': id,
@@ -360,48 +360,48 @@ def proc_save_logic(context):
 
 #------------------------------------------------------------------------------
 def proc_delete(context):
-    scm = get_req_param_scm()
+    repo = get_req_param_repo()
     id = get_request_param('id')
 
-    if not kb.has_privilege_for_scm(context, scm):
-        kblog.write_operation_log(context, 'DELETE:FORBIDDEN', scm, id)
+    if not kb.has_privilege_for_repo(context, repo):
+        kblog.write_operation_log(context, 'DELETE:FORBIDDEN', repo, id)
         return create_result_object('NO_ACCESS_RIGHTS')
 
-    status = kb.delete_data(scm, id)
-    kblog.write_operation_log(context, 'DELETE', scm, id, info=status)
+    status = kb.delete_data(repo, id)
+    kblog.write_operation_log(context, 'DELETE', repo, id, info=status)
 
     result = create_result_object(status)
     return result
 
 #------------------------------------------------------------------------------
 def proc_check_exists(context):
-    scm = get_req_param_scm()
-    if not kb.has_privilege_for_scm(context, scm):
+    repo = get_req_param_repo()
+    if not kb.has_privilege_for_repo(context, repo):
         return create_result_object('NO_ACCESS_RIGHTS')
 
     id = get_request_param('id')
-    detail = kb.check_exists(scm, id)
+    detail = kb.check_exists(repo, id)
     result = create_result_object('OK', detail)
     return result
 
 #------------------------------------------------------------------------------
 def proc_change_data_id(context):
-    scm = get_req_param_scm()
+    repo = get_req_param_repo()
     id_fm = get_request_param('id_fm')
     id_to = get_request_param('id_to')
 
     if not context.is_admin() and not context.has_permission('sysadmin'):
-        kblog.write_operation_log(context, 'CHG_DATA_ID:FORBIDDEN', scm, id_fm, 'to:' + id_to)
+        kblog.write_operation_log(context, 'CHG_DATA_ID:FORBIDDEN', repo, id_fm, 'to:' + id_to)
         result = create_result_object('FORBIDDEN')
         return result
 
-    status = kb.change_data_id(scm, id_fm, id_to)
+    status = kb.change_data_id(repo, id_fm, id_to)
     detail = {
         'id_fm': id_fm,
         'id_to': id_to
     }
 
-    kblog.write_operation_log(context, 'CHG_DATA_ID', scm, id_fm, 'to:' + id_to)
+    kblog.write_operation_log(context, 'CHG_DATA_ID', repo, id_fm, 'to:' + id_to)
 
     result = create_result_object(status, detail)
     return result
@@ -412,9 +412,9 @@ def proc_check_id(context):
         result = create_result_object('FORBIDDEN')
         return result
 
-    scm = get_req_param_scm()
-    next_id = kb.get_next_id(scm)
-    vacant_ids_res = kb.get_vacant_ids(scm)
+    repo = get_req_param_repo()
+    next_id = kb.get_next_id(repo)
+    vacant_ids_res = kb.get_vacant_ids(repo)
 
     detail = {
         'next_id': next_id,
@@ -425,88 +425,88 @@ def proc_check_id(context):
     return result
 
 #------------------------------------------------------------------------------
-def proc_get_schema_list(context):
-    scm_list = kb.get_schema_list(context)
-    send_result_json('OK', scm_list)
+def proc_get_repo_list(context):
+    repo_list = kb.get_repo_list(context)
+    send_result_json('OK', repo_list)
     return None
 
 #------------------------------------------------------------------------------
-def proc_get_schema_props(context):
-    scm = get_req_param_scm()
-    props = kb.read_scm_props_as_text(scm)
+def proc_get_repo_props(context):
+    repo = get_req_param_repo()
+    props = kb.read_repo_props_as_text(repo)
     if props is None:
         props = ''
     b64props = util.encode_base64(props)
     result_data = {
-        'scm': scm,
+        'repo': repo,
         'props': b64props
     }
     send_result_json('OK', result_data)
     return None
 
 #------------------------------------------------------------------------------
-def proc_save_schema_props(context):
+def proc_save_repo_props(context):
     if not context.is_admin() and not context.has_permission('sysadmin'):
         send_result_json('FORBIDDEN')
         return None
 
-    scm = get_req_param_scm()
+    repo = get_req_param_repo()
     b64props = get_request_param('props')
     props = util.decode_base64(b64props)
-    kb.save_scm_props(scm, props)
+    kb.save_repo_props(repo, props)
     result_data = {
-        'scm': scm
+        'repo': repo
     }
 
-    kblog.write_operation_log(context, 'MOD_SCM_PROPS', scm)
+    kblog.write_operation_log(context, 'MOD_REPO_PROPS', repo)
 
     send_result_json('OK', result_data)
     return None
 
 #------------------------------------------------------------------------------
-def proc_create_schema(context):
+def proc_create_repo(context):
     if not context.is_admin() and not context.has_permission('sysadmin'):
         send_result_json('FORBIDDEN')
         return None
 
-    scm = get_req_param_scm()
+    repo = get_req_param_repo()
     b64props = get_request_param('props')
     props = util.decode_base64(b64props)
-    status = kb.create_schema(scm, props)
+    status = kb.create_repo(repo, props)
     result_data = {
-        'scm': scm
+        'repo': repo
     }
 
-    kblog.write_operation_log(context, 'CREATE_SCM', scm)
+    kblog.write_operation_log(context, 'CREATE_REPO', repo)
 
     send_result_json(status, result_data)
     return None
 
 #------------------------------------------------------------------------------
-def proc_delete_schema(context):
+def proc_delete_repo(context):
     if not context.is_admin() and not context.has_permission('sysadmin'):
         send_result_json('FORBIDDEN')
         return None
 
-    scm = get_req_param_scm()
-    status = kb.delete_schema(scm)
+    repo = get_req_param_repo()
+    status = kb.delete_repo(repo)
     result_data = {
-        'scm': scm
+        'repo': repo
     }
 
-    kblog.write_operation_log(context, 'DELETE_SCM', scm)
+    kblog.write_operation_log(context, 'DELETE_REPO', repo)
 
     send_result_json(status, result_data)
     return None
 
 #------------------------------------------------------------------------------
 def proc_export_html(context):
-    scm = get_req_param_scm()
+    repo = get_req_param_repo()
     id = get_request_param('id')
 
-    if not kb.has_privilege_for_scm(context, scm):
-        kblog.write_operation_log(context, 'EXPORT_HTML:FORBIDDEN', scm, id)
-        send_error_text('NO_ACCESS_RIGHTS:scm=' + scm)
+    if not kb.has_privilege_for_repo(context, repo):
+        kblog.write_operation_log(context, 'EXPORT_HTML:FORBIDDEN', repo, id)
+        send_error_text('NO_ACCESS_RIGHTS:repo=' + repo)
         result = create_result_object('OK', None, 'octet-stream')
         return result
 
@@ -542,7 +542,7 @@ def proc_export_html(context):
     b = html.encode()
     filename = 'kb-' + id + '.html'
 
-    kblog.write_operation_log(context, 'EXPORT_HTML', scm, id)
+    kblog.write_operation_log(context, 'EXPORT_HTML', repo, id)
 
     util.send_as_file(b, filename=filename)
     result = create_result_object('OK', None, 'octet-stream')
@@ -550,35 +550,35 @@ def proc_export_html(context):
 
 #------------------------------------------------------------------------------
 def proc_export_data(context):
-    scm = get_req_param_scm()
-    if not kb.has_privilege_for_scm(context, scm):
-        kblog.write_operation_log(context, 'EXPORT_DATA:FORBIDDEN', scm, dataid='')
-        send_error_text('NO_ACCESS_RIGHTS:scm=' + scm)
+    repo = get_req_param_repo()
+    if not kb.has_privilege_for_repo(context, repo):
+        kblog.write_operation_log(context, 'EXPORT_DATA:FORBIDDEN', repo, dataid='')
+        send_error_text('NO_ACCESS_RIGHTS:repo=' + repo)
         return None
 
     p_decrypt = websys.get_raw_request_param('decrypt')
     decrypt = p_decrypt == '1'
-    b = kb.export_data(scm, decrypt)
+    b = kb.export_data(repo, decrypt)
 
     filename = 'kbdata'
-    if scm != kb.get_default_scm_id():
-        filename += '_' + scm
+    if repo != kb.get_default_repo_id():
+        filename += '_' + repo
     filename += '.zip'
 
-    kblog.write_operation_log(context, 'EXPORT_DATA', scm, dataid='')
+    kblog.write_operation_log(context, 'EXPORT_DATA', repo, dataid='')
 
     util.send_as_file(b, filename=filename)
     return None
 
 def proc_export_data_all(context):
     if not context.is_admin() and not has_valid_apitoken():
-        kblog.write_operation_log(context, 'EXPORT_ALL_DATA:FORBIDDEN', scm='', dataid='')
+        kblog.write_operation_log(context, 'EXPORT_ALL_DATA:FORBIDDEN', repo='', dataid='')
         send_error_text('NO_ACCESS_RIGHTS')
         return None
     p_decrypt = websys.get_raw_request_param('decrypt')
     decrypt = p_decrypt == '1'
 
-    kblog.write_operation_log(context, 'EXPORT_ALL_DATA', scm='', dataid='')
+    kblog.write_operation_log(context, 'EXPORT_ALL_DATA', repo='', dataid='')
 
     timestamp = util.get_datetime_str(fmt='%Y%m%dT%H%M%S')
     fllename = 'kbdata-all-' + timestamp + '.zip'
@@ -669,11 +669,11 @@ def proc_api(context, act):
     #    'change_data_id',
     #    'check_id',
     #    'export_html',
-    #    'get_schema_list',
-    #    'get_schema_props',
-    #    'save_schema_props',
-    #    'create_schema',
-    #    'delete_schema'
+    #    'get_repo_list',
+    #    'get_repo_props',
+    #    'save_repo_props',
+    #    'create_repo',
+    #    'delete_repo'
     #]
 
     #if act in funcname_list:
@@ -690,7 +690,7 @@ def proc_api(context, act):
                 # api.cgi?act=export&all=1&decrypt=1
                 proc_export_data_all(context)
             else:
-                # api.cgi?act=export&scm=xyz&decrypt=1
+                # api.cgi?act=export&repo=xyz&decrypt=1
                 proc_export_data(context)
             return
         else:
@@ -714,11 +714,11 @@ def main():
         proc_get_data(context)
     elif act == 'dlb64content':
         proc_download_b64content(context)
-    elif act == 'get_schema_list':
+    elif act == 'get_repo_list':
         proc_api(context, act)
     else:
-        scm = get_request_param('scm')
-        if kb.is_authorized(context) or has_valid_apitoken() or kb.is_anonymous_allowed(scm):
+        repo = get_request_param('repo')
+        if kb.is_authorized(context) or has_valid_apitoken() or kb.is_anonymous_allowed(repo):
             proc_api(context, act)
         else:
             proc_on_forbidden(act)

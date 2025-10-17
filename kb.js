@@ -58,8 +58,8 @@ kb.dataList = [];
 kb.totalCount = 0;
 kb.elapsed = 0;
 kb.pendingId = null;
-kb.scm = '';
-kb.scmProps = null;
+kb.repo = '';
+kb.repoProps = null;
 kb.data = null;
 kb.pw = {
   toView: null,
@@ -82,9 +82,9 @@ kb.clipboardEnabled = false;
 kb.mode = kb.mode || null;
 kb.toolsWindow = null;
 kb.logicEditorWindow = null;
-kb.scmList = [];
-kb.activeScmIdx = 0;
-kb.activeScmId = null;
+kb.repoList = [];
+kb.activeRepoIdx = 0;
+kb.activeRepoId = null;
 kb.savingLogic = '';
 
 $onReady = function(e) {
@@ -123,11 +123,11 @@ kb.onAppReady = function() {
 };
 
 kb.onAppReady1 = function() {
-  var scm = util.getQuery('scm');
+  var repo = util.getQuery('repo');
   var q = util.getQuery('q');
   var id = util.getQuery('id');
-  if (scm) {
-    kb.scm = scm;
+  if (repo) {
+    kb.repo = repo;
   }
   if (id) {
     kb.listAndShowDataById(id);
@@ -139,7 +139,7 @@ kb.onAppReady1 = function() {
     var limit = kb.getLimit();
     kb.getDataList(null, null, limit);
   }
-  kb.getSchemaProps(scm, kb.onGetSchemaProps);
+  kb.getRepoProps(repo, kb.onGetRepoProps);
   kb.storeAreaSize();
   if (!id) $el('#q').focus();
 };
@@ -227,7 +227,7 @@ kb.callApi = function(act, params, cb) {
 
 kb.getDataList = function(id, reload, limit, inclHidden) {
   var param = {
-    scm: kb.scm
+    repo: kb.repo
   };
   if (id != undefined) {
     param.id = id;
@@ -258,11 +258,11 @@ kb.onGetList = function(xhr, res, req) {
   kb.elapsed = data.elapsed;
 
   var allDataSize = data.all_data_size;
-  var scmDataSize = data.scm_data_size;
-  if ((allDataSize != undefined) && (scmDataSize != undefined)) {
+  var repoDataSize = data.repo_data_size;
+  if ((allDataSize != undefined) && (repoDataSize != undefined)) {
     var aSize = util.convByte(allDataSize);
-    var cSize = util.convByte(scmDataSize)
-    $el('#all-data-size').innerHTML = 'Current DB size: scm=' + cSize + 'B / all=' + aSize + 'B';
+    var cSize = util.convByte(repoDataSize)
+    $el('#all-data-size').innerHTML = 'Current DB size: repo=' + cSize + 'B / all=' + aSize + 'B';
   }
 
   kb.drawDataList(kb.fixedDataList, kb.dataList, kb.listStatus.sortKey, kb.listStatus.sortOrder, kb.totalCount, kb.elapsed);
@@ -586,7 +586,7 @@ kb.buildSortButton = function(key, idx, sortIdx, sortOrder) {
 
 kb.getDataListAll = function() {
   var url = './';
-  if (kb.scm != '') url = kb.appendQuery(url, 'scm=' + kb.scm);
+  if (kb.repo != '') url = kb.appendQuery(url, 'repo=' + kb.repo);
   var limit = kb.getLimit();
   history.replaceState(null, '', url);
   $el('#q').value = '';
@@ -667,7 +667,7 @@ kb.searchByKeyword = function(q, reload, limit) {
   }
   kb.listStatus.sortOrder = 2;
   var param = {
-    scm: kb.scm,
+    repo: kb.repo,
     q: util.encodeBase64(q)
   };
   if (reload) param.reload = '1';
@@ -784,7 +784,7 @@ kb._getData = function(reload) {
     kb.clearPwValue();
   }
   var param = {
-    scm: kb.scm,
+    repo: kb.repo,
     id: id
   };
   if (kb.token) {
@@ -1049,8 +1049,8 @@ kb.createNew = function() {
   kb._clear();
   kb.edit();
   var encrypt = kb.config.default_data_encryption;
-  if ('encrypt' in kb.scmProps) {
-    encrypt = kb.scmProps.encrypt;
+  if ('encrypt' in kb.repoProps) {
+    encrypt = kb.repoProps.encrypt;
   }
   $el('#chk-encryption').checked = encrypt;
   $el('#content-title-edt').focus();
@@ -1064,8 +1064,8 @@ kb.duplicate = function() {
   kb.drawData(kb.data);
   kb.edit();
   var encrypt = kb.config.default_data_encryption;
-  if ('encrypt' in kb.scmProps) {
-    encrypt = kb.scmProps.encrypt;
+  if ('encrypt' in kb.repoProps) {
+    encrypt = kb.repoProps.encrypt;
   }
   $el('#chk-encryption').checked = encrypt;
   $el('#content-title-edt').focus();
@@ -1097,7 +1097,7 @@ kb.edit = function() {
   $el('#search-button').disabled = true;
   $el('#all-button').disabled = true;
   $el('#touch-button').disabled = true;
-  $el('#schema-button').disabled = true;
+  $el('#repo-button').disabled = true;
   $el('#clear-button').disabled = true;
   $el('.for-view').hide();
   $el('.for-edit').show();
@@ -1160,7 +1160,7 @@ kb.onEditEnd = function() {
   $el('#search-button').disabled = false;
   $el('#all-button').disabled = false;
   $el('#clear-button').disabled = false;
-  $el('#schema-button').disabled = false;
+  $el('#repo-button').disabled = false;
   kb.enableTouchButton();
 
   if (kb.data) kb.drawData(kb.data);
@@ -1265,7 +1265,7 @@ kb.saveData = function() {
 
   var j = util.toJSON(data);
   var param = {
-    scm: kb.scm,
+    repo: kb.repo,
     id: id,
     data: j
   };
@@ -1328,7 +1328,7 @@ kb._touch = function() {
     ids += kb.checkedIds[i];
   }
   var keepUpdatedBy = ($el('#chk-keep-updated-by').checked ? '1' : '0');
-  var param = {scm: kb.scm, ids: ids, keep_updated_by: keepUpdatedBy};
+  var param = {repo: kb.repo, ids: ids, keep_updated_by: keepUpdatedBy};
   kb.callApi('touch', param, kb.onTouchDone);
   kb.drawContentBodyArea4Progress('Updating');
 };
@@ -1366,7 +1366,7 @@ kb.onConflictOK = function() {
 };
 
 kb.checkExists = function(id) {
-  var param = {scm: kb.scm, id: id};
+  var param = {repo: kb.repo, id: id};
   kb.callApi('check_exists', param, kb.onCheckExists);
 };
 kb.onCheckExists = function(xhr, res, req) {
@@ -1439,7 +1439,7 @@ kb.drawData = function(data) {
   var idLabel = '';
   if (id != '') idLabel = '<span class="pseudo-link" onclick="kb.showData(\'' + id + '\');" data-tooltip2="Reload">' + id + '</span>:';
   var escTitle =  util.escHtml(title);
-  var titleLabel = '<span class="pseudo-link" onclick="kb.copyTitle(\'' + kb.scm + '\', \'' + id + '\', \'' + title + '\');" data-tooltip2="Reload">' + escTitle + '</span>';
+  var titleLabel = '<span class="pseudo-link" onclick="kb.copyTitle(\'' + kb.repo + '\', \'' + id + '\', \'' + title + '\');" data-tooltip2="Reload">' + escTitle + '</span>';
 
   $el('#content-id').innerHTML = idLabel;
   $el('#content-title').innerHTML = titleLabel;
@@ -1542,10 +1542,10 @@ kb.postDrawData = function(id) {
   }
 };
 
-kb.copyTitle = function(scm, id, title) {
-  var s = 'KB#';
-  if (scm) s += scm + ':';
-  s += id + ' ' + title;
+kb.copyTitle = function(repo, id, title) {
+  var s = 'KB';
+  if (repo) s += ':' + repo;
+  s += '#' + id + ' ' + title;
   kb.copy(s);
 };
 
@@ -1634,7 +1634,7 @@ kb.linkCopy = function(s) {
 
 kb.linkKB = function(s, attr) {
   var url = './';
-  if (kb.scm != '') url = kb.appendQuery(url, 'scm=' + kb.scm);
+  if (kb.repo != '') url = kb.appendQuery(url, 'repo=' + kb.repo);
   url = kb.appendQuery(url, 'id=$1');
   if (attr == undefined) attr = 'target="_blank" rel="noopener"';
   var t = '<a href="' + url + '"';
@@ -1683,7 +1683,7 @@ kb._delete = function(id) {
   if (id == undefined) {
     id = kb.data.id;
   }
-  var param = {scm: kb.scm, id: id};
+  var param = {repo: kb.repo, id: id};
   kb.callApi('delete', param, kb.onDelete);
   kb._clear();
 };
@@ -1740,7 +1740,7 @@ kb.export = function() {
   var s = '<div style="width:280px;">Export data?</div>\n';
   s += '<div style="display:inline-block;text-align:left;">'
   if (kb.isAdmin) {
-    s += '<input type="checkbox" id="chk-export-all" checked><label for="chk-export-all">All schema</label>\n'
+    s += '<input type="checkbox" id="chk-export-all" checked><label for="chk-export-all">All repository</label>\n'
   }
   s += '<input type="checkbox" id="chk-decrypt" checked><label for="chk-decrypt">Decrypt</label>'
   s += '</div>';
@@ -1751,7 +1751,7 @@ kb._export = function() {
   if ($el('#chk-export-all').checked) {
     param.all = '1'
   } else {
-    param.scm = kb.scm;
+    param.repo = kb.repo;
   }
   if ($el('#chk-decrypt').checked) {
     param.decrypt = '1';
@@ -1801,7 +1801,7 @@ kb.saveProps = function() {
   var p = util.encodeBase64(props);
   var orgUdate = kb.data.content.U_DATE;
   var param = {
-    scm: kb.scm,
+    repo: kb.repo,
     id: kb.data.id,
     org_u_date: orgUdate,
     props: p
@@ -1839,7 +1839,7 @@ kb.onEditPropsEnd = function() {
 };
 
 kb.checkId = function() {
-  var param = {scm: kb.scm};
+  var param = {repo: kb.repo};
   kb.callApi('check_id', param, kb.onCheckId);
 };
 kb.onCheckId = function(xhr, res, req) {
@@ -1896,7 +1896,7 @@ kb.changeDataId = function() {
   var idFm = kb.data.id;
   var idTo = $el('#prop-data-id').value.trim();
   var param = {
-    scm: kb.scm,
+    repo: kb.repo,
     id_fm: idFm,
     id_to: idTo
   };
@@ -2027,7 +2027,7 @@ kb.saveLogic = function() {
   var orgUdate = kb.data.content.U_DATE;
   var silent = ($el('#chk-silent').checked ? '1' : '0');
   var param = {
-    scm: kb.scm,
+    repo: kb.repo,
     id: kb.data.id,
     org_u_date: orgUdate,
     silent: silent,
@@ -2067,16 +2067,16 @@ kb.onEditLogicEnd = function() {
   kb.status &= ~kb.ST_LOGIC_EDITING;
 };
 
-kb.openSchemaDialog = function() {
+kb.openRepoDialog = function() {
   var html = '';
-  html += '<div id="select-scm-dlg" style="width:400px;height:180px;">';
-  html += 'SELECT SCHEMA';
+  html += '<div id="select-repo-dlg" style="width:400px;height:180px;">';
+  html += 'SELECT REPOSITORY';
   if (kb.isSysAdmin) {
-    html += '<button style="position:absolute;right:16px;" onclick="kb.newSchema();">New</button>';
+    html += '<button style="position:absolute;right:16px;" onclick="kb.newRepo();">New</button>';
   }
   html += '<div style="margin-top:16px;height:calc(100% - 60px);">';
   html += '<div style="display:inline-block;width:70%;height:100%;overflow:auto;">';
-  html += '<pre id="schema-list" style="text-align:left;"><span class="progdot">Loading</span></pre>';
+  html += '<pre id="repo-list" style="text-align:left;"><span class="progdot">Loading</span></pre>';
   html += '</div>';
   html += '</div>';
   html += '<div style="margin:16px 0;">';
@@ -2084,89 +2084,89 @@ kb.openSchemaDialog = function() {
   html += '</div>';
   html += '</div>';
   var d = util.dialog.open(html);
-  d.id = 'select_scm';
-  kb.updateSchemaList();
+  d.id = 'select_repo';
+  kb.updateRepoList();
   $el('#id-txt').blur();
   $el('#q').blur();
 };
-kb.updateSchemaList = function() {
-  kb.callApi('get_schema_list', null, kb.onGetSchemaList);
+kb.updateRepoList = function() {
+  kb.callApi('get_repo_list', null, kb.onGetRepoList);
 };
-kb.onGetSchemaList = function(xhr, res, req) {
+kb.onGetRepoList = function(xhr, res, req) {
   if (xhr.status != 200) {
     kb.onHttpError(xhr.status);
     return;
   }
   if (res.status != 'OK') {
-    $el('#schema-list').innerHTML = 'ERROR: ' + res.status;
+    $el('#repo-list').innerHTML = 'ERROR: ' + res.status;
     return;
   }
-  var scmList = res.body;
-  var dfltScmData = null;
+  var repoList = res.body;
+  var dfltRepoData = null;
   var tmpList = [];
-  for (var i = 0; i < scmList.length; i++) {
-    var scmData = scmList[i];
-    var scmId = scmData.id;
-    var title = scmId;
-    var prop = scmData.props;
+  for (var i = 0; i < repoList.length; i++) {
+    var repoData = repoList[i];
+    var repoId = repoData.id;
+    var title = repoId;
+    var prop = repoData.props;
     if (('name' in prop) && prop.name != '') {
       title = prop['name'];
     }
-    scmData['title'] = title;
-    if (scmId == kb.defaultScm) {
-      dfltScmData = scmData;
+    repoData['title'] = title;
+    if (repoId == kb.defaultRepo) {
+      dfltRepoData = repoData;
       continue;
     }
-    tmpList.push(scmData);
+    tmpList.push(repoData);
   }
   util.sortObjectList(tmpList, 'title');
-  scmList = tmpList;
-  scmList.unshift(dfltScmData);
-  kb.scmList = scmList;
-  var activeScmId = null;
-  kb.activeScmIdx = 0;
+  repoList = tmpList;
+  repoList.unshift(dfltRepoData);
+  kb.repoList = repoList;
+  var activeRepoId = null;
+  kb.activeRepoIdx = 0;
   var html = '<table style="width:100%;">';
-  for (var i = 0; i < scmList.length; i++) {
-    var scmData = scmList[i];
-    html += kb.buildScmListHtml(scmData, i);
+  for (var i = 0; i < repoList.length; i++) {
+    var repoData = repoList[i];
+    html += kb.buildRepoListHtml(repoData, i);
   }
   html += '</table>';
-  $el('#schema-list').innerHTML = html;
-  if (activeScmId) kb.setActiveScm(activeScmId);
+  $el('#repo-list').innerHTML = html;
+  if (activeRepoId) kb.setActiveRepo(activeRepoId);
 };
-kb.buildScmListHtml = function(scmData, i) {
-  var scmId = scmData.id;
-  var prop = scmData.props;
-  var name = scmId;
+kb.buildRepoListHtml = function(repoData, i) {
+  var repoId = repoData.id;
+  var prop = repoData.props;
+  var name = repoId;
   if (('name' in prop) && prop.name != '') {
     name = prop['name'];
   }
   var html = '';
-  html += '<tr id="scm-list-' + scmId + '" class="scm-list-row" onmouseover="kb.setActiveScm(\'' + scmId + '\');" >';
+  html += '<tr id="repo-list-' + repoId + '" class="repo-list-row" onmouseover="kb.setActiveRepo(\'' + repoId + '\');" >';
   html += '<td style="width:10px;">';
-  if ((scmId == kb.scm) || (!kb.scm && (scmId == kb.defaultScm))) {
-    activeScmId = scmId;
-    kb.activeScmIdx = i;
+  if ((repoId == kb.repo) || (!kb.repo && (repoId == kb.defaultRepo))) {
+    activeRepoId = repoId;
+    kb.activeRepoIdx = i;
     html += '*';
   }
   html += '</td>';
   html += '<td style="padding-right:20px;white-space:nowrap;">';
-  html += '<span style="display:inline-block;width:100%;overflow:hidden;text-overflow:ellipsis;" class="title pseudo-link" onclick="kb.switchSchema(\'' + scmId + '\');">';
+  html += '<span style="display:inline-block;width:100%;overflow:hidden;text-overflow:ellipsis;" class="title pseudo-link" onclick="kb.switchRepo(\'' + repoId + '\');">';
   html += '<span class="pseudo-link link">' + name + '</span>\n';
   html += '</span>';
   html += '</td>';
 
   html += '<td style="width:16px;">';
-  html += '<span class="pseudo-link" onclick="kb.switchSchema(\'' + scmId + '\', true);" data-tooltip="Open new window">W</span>\n';
+  html += '<span class="pseudo-link" onclick="kb.switchRepo(\'' + repoId + '\', true);" data-tooltip="Open new window">W</span>\n';
   html += '</td>';
 
   if (kb.isSysAdmin) {
     html += '<td style="width:24px;">';
-    html += '<span class="pseudo-link" onclick="kb.editSchemaProps(\'' + scmId + '\');" data-tooltip="Edit properties">P</span>\n';
+    html += '<span class="pseudo-link" onclick="kb.editRepoProps(\'' + repoId + '\');" data-tooltip="Edit properties">P</span>\n';
     html += '</td>';
     html += '<td style="width:16px;">';
-    if ((scmId != kb.defaultScm) && (scmId != kb.scm)) {
-      html += '<span class="pseudo-link text-red" onclick="kb.confirmDeleteSchema(\'' + scmId + '\');" data-tooltip="Delete">X</span>\n';
+    if ((repoId != kb.defaultRepo) && (repoId != kb.repo)) {
+      html += '<span class="pseudo-link text-red" onclick="kb.confirmDeleteRepo(\'' + repoId + '\');" data-tooltip="Delete">X</span>\n';
     } else {
       html += '&nbsp;';
     }
@@ -2175,10 +2175,10 @@ kb.buildScmListHtml = function(scmData, i) {
   html += '</tr>';
   return html;
 };
-kb.switchSchema = function(scm, nw) {
+kb.switchRepo = function(repo, nw) {
   var url = './';
-  if (scm && scm != kb.defaultScm) {
-    url += '?scm=' + scm;
+  if (repo && repo != kb.defaultRepo) {
+    url += '?repo=' + repo;
   }
   if (nw) {
     kb.openNewWindow(url);
@@ -2187,30 +2187,30 @@ kb.switchSchema = function(scm, nw) {
   }
 };
 
-kb.setActiveScm = function(id) {
-  kb.activeScmId = id;
-  kb.activeScmIdx = kb.getScmIdxFromId(id);
-  $el('.scm-list-row').removeClass('data-list-row-active');
-  $el('#scm-list-' + id).addClass('data-list-row-active');
+kb.setActiveRepo = function(id) {
+  kb.activeRepoId = id;
+  kb.activeRepoIdx = kb.getRepoIdxFromId(id);
+  $el('.repo-list-row').removeClass('data-list-row-active');
+  $el('#repo-list-' + id).addClass('data-list-row-active');
 };
 
-kb.newSchema = function() {
-  var html = kb.buildSchemaEditor(null, 'kb.createSchema');
+kb.newRepo = function() {
+  var html = kb.buildRepoEditor(null, 'kb.createRepo');
   util.dialog.open(html);
-  $el('#scm-props').value = '{\n  "name": "",\n  "privs": "",\n  "encrypt": ' + kb.config.default_data_encryption + '\n}\n';
-  $el('#scm-id').focus();
+  $el('#repo-props').value = '{\n  "name": "",\n  "privs": "",\n  "encrypt": ' + kb.config.default_data_encryption + '\n}\n';
+  $el('#repo-id').focus();
 };
-kb.buildSchemaEditor = function(scm, cbFncName) {
-  var title = (scm ? 'EDIT SCHEMA' : 'NEW SCHEMA');
+kb.buildRepoEditor = function(repo, cbFncName) {
+  var title = (repo ? 'EDIT REPOSITORY' : 'NEW REPOSITORY');
   var html = '';
   html += '<div style="width:500px;height:220px;">';
   html += title;
   html += '<div style="overflow:auto;height:calc(100% - 30px);">';
   html += '<div style="display:inline-block;width:80%;">';
-  html += '<pre id="schema-list" style="text-align:left;">';
-  html += 'ID: <input type="text" id="scm-id" style="width:calc(100% - 27px);">\n';
+  html += '<pre id="repo-list" style="text-align:left;">';
+  html += 'ID: <input type="text" id="repo-id" style="width:calc(100% - 27px);">\n';
   html += '<div style="margin-top:8px;">Properties:</div>';
-  html += '<textarea id="scm-props" style="width:100%;height:120px;"></textarea>';
+  html += '<textarea id="repo-props" style="width:100%;height:120px;"></textarea>';
   html += '</pre>';
   html += '</div>';
   html += '</div>';
@@ -2220,21 +2220,21 @@ kb.buildSchemaEditor = function(scm, cbFncName) {
   return html;
 };
 
-kb.createSchema = function() {
-  var scmId = $el('#scm-id').value.trim();
-  if (!scmId.match(/^[a-z0-9_\-]+$/)) {
+kb.createRepo = function() {
+  var repoId = $el('#repo-id').value.trim();
+  if (!repoId.match(/^[a-z0-9_\-]+$/)) {
     kb.showInfotip('Available chars are:\n- Lowercase letters\n- Numerical character\n- Hyphen\n- Underscore', 3000);
     return;
   }
-  var props = $el('#scm-props').value.trim();
+  var props = $el('#repo-props').value.trim();
   var b64props = util.encodeBase64(props);
   var params = {
-    scm: scmId,
+    repo: repoId,
     props: b64props
   };
-  kb.callApi('create_schema', params, kb.onCreateSchema);
+  kb.callApi('create_repo', params, kb.onCreateRepo);
 };
-kb.onCreateSchema = function(xhr, res, req) {
+kb.onCreateRepo = function(xhr, res, req) {
   if (xhr.status != 200) {
     kb.onHttpError(xhr.status);
     return;
@@ -2244,22 +2244,22 @@ kb.onCreateSchema = function(xhr, res, req) {
     return;
   }
   util.dialog.close();
-  kb.updateSchemaList();
+  kb.updateRepoList();
   kb.showInfotip('OK');
 };
 
-kb.editSchemaProps = function(scm) {
-  var html = kb.buildSchemaEditor(scm, 'kb.saveSchemaProps');
+kb.editRepoProps = function(repo) {
+  var html = kb.buildRepoEditor(repo, 'kb.saveRepoProps');
   util.dialog.open(html);
-  $el('#scm-id').value = scm;
-  $el('#scm-id').disabled = true;
-  kb.getSchemaProps(scm, kb.onGetSchemaPropsForEdit);
+  $el('#repo-id').value = repo;
+  $el('#repo-id').disabled = true;
+  kb.getRepoProps(repo, kb.onGetRepoPropsForEdit);
 };
-kb.getSchemaProps = function(scm, cb) {
-  var params = {scm: scm};
-  kb.callApi('get_schema_props', params, cb);
+kb.getRepoProps = function(repo, cb) {
+  var params = {repo: repo};
+  kb.callApi('get_repo_props', params, cb);
 };
-kb.onGetSchemaProps = function(xhr, res, req) {
+kb.onGetRepoProps = function(xhr, res, req) {
   if (xhr.status != 200) {
     kb.onHttpError(xhr.status);
     return;
@@ -2271,10 +2271,10 @@ kb.onGetSchemaProps = function(xhr, res, req) {
   var b64props = res.body.props;
   var props = util.decodeBase64(b64props);
   if (!props) props = '{}';
-  kb.scmProps = util.fromJSON(props);
+  kb.repoProps = util.fromJSON(props);
 };
 
-kb.onGetSchemaPropsForEdit = function(xhr, res, req) {
+kb.onGetRepoPropsForEdit = function(xhr, res, req) {
   if (xhr.status != 200) {
     kb.onHttpError(xhr.status);
     return;
@@ -2285,20 +2285,20 @@ kb.onGetSchemaPropsForEdit = function(xhr, res, req) {
   }
   var b64props = res.body.props;
   var props = util.decodeBase64(b64props);
-  $el('#scm-props').value = props;
+  $el('#repo-props').value = props;
 };
 
-kb.saveSchemaProps = function() {
-  var scmId = $el('#scm-id').value.trim();
-  var props = $el('#scm-props').value.trim() + '\n';
+kb.saveRepoProps = function() {
+  var repoId = $el('#repo-id').value.trim();
+  var props = $el('#repo-props').value.trim() + '\n';
   var b64props = util.encodeBase64(props);
   var params = {
-    scm: scmId,
+    repo: repoId,
     props: b64props
   };
-  kb.callApi('save_schema_props', params, kb.onSaveSchemaProps);
+  kb.callApi('save_repo_props', params, kb.onSaveRepoProps);
 };
-kb.onSaveSchemaProps = function(xhr, res, req) {
+kb.onSaveRepoProps = function(xhr, res, req) {
   if (xhr.status != 200) {
     kb.onHttpError(xhr.status);
     return;
@@ -2307,40 +2307,40 @@ kb.onSaveSchemaProps = function(xhr, res, req) {
     kb.showInfotip(res.status);
     return;
   }
-  var scm = res.body.scm;
+  var repo = res.body.repo;
   util.dialog.close();
-  kb.updateSchemaList();
-  if (scm == kb.scm) {
-    kb.getSchemaProps(scm, kb.onGetSchemaProps);
+  kb.updateRepoList();
+  if (repo == kb.repo) {
+    kb.getRepoProps(repo, kb.onGetRepoProps);
   }
   kb.showInfotip('OK');
 };
 
-kb.confirmDeleteSchema = function(scm) {
+kb.confirmDeleteRepo = function(repo) {
   var code = util.randomString('0123456789', 6);
   var opt = {
     focus: 'no',
     data: {
-      scm: scm,
+      repo: repo,
       code: code
     }
   };
-  var title = '<span class="text-red">!!! DELETE SCHEMA !!!</span>';
-  var msg = '\nDelete the schema <b>' + scm + '</b> ?\n';
+  var title = '<span class="text-red">!!! DELETE REPOSITORY !!!</span>';
+  var msg = '\nDelete the repo <b>' + repo + '</b> ?\n';
   msg += 'Once you get started, you cannot rollback.\n';
   msg += '\n';
   msg += 'Enter the code ' + code + ' to proceed.';
-  util.dialog.text(title, msg, kb.deleteSchema, opt);
+  util.dialog.text(title, msg, kb.deleteRepo, opt);
 };
-kb.deleteSchema = function(text, data) {
+kb.deleteRepo = function(text, data) {
   if (text != data.code) {
     util.alert('Incorrect passcode. Aborted.');
     return;
   }
-  var params = {scm: data.scm};
-  kb.callApi('delete_schema', params, kb.onDeleteSchema);
+  var params = {repo: data.repo};
+  kb.callApi('delete_repo', params, kb.onDeleteRepo);
 };
-kb.onDeleteSchema = function(xhr, res, req) {
+kb.onDeleteRepo = function(xhr, res, req) {
   if (xhr.status != 200) {
     kb.onHttpError(xhr.status);
     return;
@@ -2350,7 +2350,7 @@ kb.onDeleteSchema = function(xhr, res, req) {
     return;
   }
   kb.showInfotip('OK');
-  kb.updateSchemaList();
+  kb.updateRepoList();
 };
 
 kb.openTools = function() {
@@ -2412,7 +2412,7 @@ kb.onHttpError = function(status) {
 };
 kb.onApiError = function(res) {
   var s = res.status;
-  if ((s == 'SCHEMA_NOT_FOUND') || (s == 'NO_ACCESS_RIGHTS')) {
+  if ((s == 'REPOSITORY_NOT_FOUND') || (s == 'NO_ACCESS_RIGHTS')) {
     kb.onNotAvailable('Not Available');
   } else {
     if (res.body) s += ': ' + res.body;
@@ -2589,7 +2589,7 @@ kb.saveAsHtml = function() {
   var wColor = ($el('#chk-export-color').checked ? '1' : '0');
   param = {
     act: 'export_html',
-    scm: kb.scm,
+    repo: kb.repo,
     id: kb.data.id,
     fontsize: fontSize,
     fontfamily: fontFamily,
@@ -2602,7 +2602,7 @@ kb.saveAsHtml = function() {
 kb.getUrl4Id = function(id) {
   var url = location.href;
   url = url.replace(/\?.*/, '') + '?';
-  if (kb.scm != '') url += 'scm=' + kb.scm + '&';
+  if (kb.repo != '') url += 'repo=' + kb.repo + '&';
   url += 'id=' + id;
   return url;
 };
@@ -2647,7 +2647,7 @@ kb.applyToken = function(id, tokenKey) {
   var now = Date.now();
   var validUntilTime = now + kb.configInfo.token_valid_sec * 1000;
   var validUntil = util.getDateTimeString(validUntilTime, '%YYYY-%MM-%DD %HH:%mm:%SS %Z');
-  var srcToken = kb.scm + ':' + id + ':' + tokenKey + ':' + now;
+  var srcToken = kb.repo + ':' + id + ':' + tokenKey + ':' + now;
   var token = util.encodeBSB64(srcToken, 0);
   token = encodeURIComponent(token);
   var url = kb.urlOfData + '&token=' + token;
@@ -2717,13 +2717,13 @@ kb.onStartLoading = function() {
   $el('#search-button').disabled = true;
   $el('#all-button').disabled = true;
   $el('#touch-button').disabled = true;
-  $el('#schema-button').disabled = true;
+  $el('#repo-button').disabled = true;
   kb.clear();
 };
 kb.onEndLoading = function() {
   $el('#search-button').disabled = false;
   $el('#all-button').disabled = false;
-  $el('#schema-button').disabled = false;
+  $el('#repo-button').disabled = false;
   kb.enableTouchButton();
 };
 
@@ -2947,7 +2947,7 @@ kb.logout = function() {
 };
 kb.cbLogout = function() {
   var url = './';
-  if (kb.scm != '') url += '?scm=' + kb.scm;
+  if (kb.repo != '') url += '?repo=' + kb.repo;
   location.href = url;
 };
 
@@ -2956,8 +2956,8 @@ $onEnterKey = function(e) {
     if (!kb.isListLoading()) {
       kb.search();
     }
-  } else if (kb.isDialogDisplaying('select_scm')) {
-    kb.switchSchema(kb.activeScmId);
+  } else if (kb.isDialogDisplaying('select_repo')) {
+    kb.switchRepo(kb.activeRepoId);
   }
 };
 $onEscKey = function(e) {
@@ -3150,12 +3150,12 @@ kb.keyHandlerL = function(e) {
   kb.getDataListAll();
 };
 kb.keyHandlerP = function(e) {
-  if (!kb.isDialogDisplaying('select_scm')) return;
-  kb.editSchemaProps(kb.activeScmId);
+  if (!kb.isDialogDisplaying('select_repo')) return;
+  kb.editRepoProps(kb.activeRepoId);
 };
 kb.keyHandlerS = function(e) {
   if ((kb.status & kb.ST_EDITING) || (kb.mode == 'view')) return;
-  kb.openSchemaDialog();
+  kb.openRepoDialog();
 };
 kb.keyHandlerT = function(e) {
   if (kb.mode == 'view') return;
@@ -3177,28 +3177,28 @@ kb.keyHandlerTab = function(e) {
   el.selectionEnd = cp + 1;
 };
 kb.keyHandlerUp = function(e) {
-  if (!kb.isDialogDisplaying('select_scm')) return;
-  kb.activeScmIdx--;
-  if (kb.activeScmIdx < 0) kb.activeScmIdx = 0;
-  var id = kb.getScmIdOnList(kb.activeScmIdx);
-  if (id) kb.setActiveScm(id);
+  if (!kb.isDialogDisplaying('select_repo')) return;
+  kb.activeRepoIdx--;
+  if (kb.activeRepoIdx < 0) kb.activeRepoIdx = 0;
+  var id = kb.getRepoIdOnList(kb.activeRepoIdx);
+  if (id) kb.setActiveRepo(id);
 };
 kb.keyHandlerDn = function(e) {
-  if (!kb.isDialogDisplaying('select_scm')) return;
-  kb.activeScmIdx++;
-  if (kb.activeScmIdx >= kb.scmList.length) kb.activeScmIdx = kb.scmList.length - 1;
-  var id = kb.getScmIdOnList(kb.activeScmIdx);
-  if (id) kb.setActiveScm(id);
+  if (!kb.isDialogDisplaying('select_repo')) return;
+  kb.activeRepoIdx++;
+  if (kb.activeRepoIdx >= kb.repoList.length) kb.activeRepoIdx = kb.repoList.length - 1;
+  var id = kb.getRepoIdOnList(kb.activeRepoIdx);
+  if (id) kb.setActiveRepo(id);
 };
 
-kb.getScmIdOnList = function(idx) {
-  var d = kb.scmList[idx];
+kb.getRepoIdOnList = function(idx) {
+  var d = kb.repoList[idx];
   if (d) return d.id;
   return null;
 };
-kb.getScmIdxFromId = function(id) {
-  for (var i = 0; i < kb.scmList.length; i++) {
-    var d = kb.scmList[i];
+kb.getRepoIdxFromId = function(id) {
+  for (var i = 0; i < kb.repoList.length; i++) {
+    var d = kb.repoList[i];
     if (d.id == id) return i;
   }
   return -1;
@@ -3529,16 +3529,16 @@ kb.cmd.onCmdKbLog = function(xhr, res) {
     var time = a[0];
     var user = a[1];
     var op = a[2];
-    var scm = a[3];
+    var repo = a[3];
     var id = a[4];
     var info = a[5];
     if (!info) info = '';
 
     time = time.replace(/T/, ' ');
-    if (scm) scm = 'scm:' + scm;
+    if (repo) repo = 'repo:' + repo;
     if (id) id = 'id:' + id;
 
-    s += time + '\t' + user + '\t' + op + '\t' +scm + '\t' +id + '\t' + info + '\n';
+    s += time + '\t' + user + '\t' + op + '\t' +repo + '\t' +id + '\t' + info + '\n';
   }
   var r = util.alignFields(s, '\t', 2);
   log.mlt(r);

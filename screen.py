@@ -20,13 +20,13 @@ import kb
 import js
 
 #------------------------------------------------------------------------------
-def build_main_screen(context, scm):
-    default_message = get_default_message(scm)
+def build_main_screen(context, repo):
+    default_message = get_default_message(repo)
 
-    scm_props = kb.load_scm_props(scm)
-    scm_name = scm
-    if 'name' in scm_props and scm_props['name'] != '':
-        scm_name = scm_props['name']
+    repo_props = kb.load_repo_props(repo)
+    repo_name = repo
+    if 'name' in repo_props and repo_props['name'] != '':
+        repo_name = repo_props['name']
 
     html = '''<!DOCTYPE html><html><head><meta charset="utf-8">
 <meta name="robots" content="none">
@@ -43,7 +43,7 @@ def build_main_screen(context, scm):
     html += '<script src="' + ROOT_PATH + 'libs/util.js"></script>'
     html += '<script src="' + ROOT_PATH + 'websys/websys.js"></script>'
     html += '<script src="kb.js"></script>'
-    html += '<script src="./?res=js&scm=' + scm + '"></script>'
+    html += '<script src="./?res=js&repo=' + repo + '"></script>'
     html += '''
 </head>
 <body>
@@ -55,9 +55,9 @@ def build_main_screen(context, scm):
     html += '      <a href="' + appconfig.home_path + '" style="margin-right:4px;">HOME</a>'
     html += '      <span id="system-name" style="color:' + appconfig.system_name_color + ';">' + appconfig.system_name + '</span>'
 
-    html += '      <span id="scm-name" style="color:' + appconfig.system_name_color + ';">'
-    if scm != kb.get_default_scm_id():
-        html += ' - ' + scm_name
+    html += '      <span id="repo-name" style="color:' + appconfig.system_name_color + ';">'
+    if repo != kb.get_default_repo_id():
+        html += ' - ' + repo_name
     html += '</span>'
 
     username = kb.get_user_name(context)
@@ -73,7 +73,7 @@ def build_main_screen(context, scm):
 
     html += '    <div style="position:relative;height:20px;">'
 
-    if kb.can_operate(context, scm, 'write'):
+    if kb.can_operate(context, repo, 'write'):
         html += '      <button id="new-button" style="margin-right:32px;" onclick="kb.createNew();">NEW</button>'
 
     html += '      <span id="id-label">ID:</span> <input type="text" id="id-txt" class="q-txt" spellcheck="false" style="width:46px;">'
@@ -90,14 +90,14 @@ def build_main_screen(context, scm):
 
     html += '      <span style="position:absolute;right:0;">'
 
-    if kb.can_operate(context, scm, 'write'):
+    if kb.can_operate(context, repo, 'write'):
         html += '        <button id="touch-button" style="margin-right:16px;" onclick="kb.touch();" disabled>TOUCH</button>'
 
-    if kb.can_operate(context, scm, 'export'):
+    if kb.can_operate(context, repo, 'export'):
         html += '        <button id="export-button" style="margin-left:4px;min-width:32px;" onclick="kb.export();">EXPORT</button>'
 
     html += '        <button id="export-button" style="min-width:32px;" onclick="kb.openTools();">TOOLS</button>'
-    html += '        <button id="schema-button" style="min-width:32px;" onclick="kb.openSchemaDialog();">SCHEMA</button>'
+    html += '        <button id="schema-button" style="min-width:32px;" onclick="kb.openRepoDialog();">REPO</button>'
     html += '      </span>'
 
     html += '''
@@ -115,7 +115,7 @@ def build_main_screen(context, scm):
     <div id="content-header">
       <div id="info-area">
 '''
-    if kb.can_operate(context, scm, 'write'):
+    if kb.can_operate(context, repo, 'write'):
         html += '        <button id="edit-button" class="for-view" style="min-width:32px;" onclick="kb.edit();">EDIT</button>'
 
     html += '''
@@ -171,13 +171,13 @@ def build_main_screen(context, scm):
     html += '<button id="copy-url-button" style="margin-left:4px;" onclick="kb.showUrl();">URL</button>'
     html += '<button id="save-html-button" style="margin-left:4px;" onclick="kb.confirmSaveAsHtml();">SAVE<span style="font-size:10px;"> AS</span></button>'
 
-    if kb.can_operate(context, scm, 'write'):
+    if kb.can_operate(context, repo, 'write'):
         html += '<button id="dup-button" style="min-width:16px;margin-left:8px;" onclick="kb.duplicate();">DUP</button>'
 
-    if kb.can_operate(context, scm, 'delete'):
+    if kb.can_operate(context, repo, 'delete'):
         html += '<button id="delete-button" class="red-button" style="min-width:32px;margin-left:8px;" onclick="kb.delete();">DELETE</button>'
 
-    if kb.can_operate(context, scm, 'write'):
+    if kb.can_operate(context, repo, 'write'):
         html += '<button id="clear-button" class="red-button" style="min-width:32px;margin-left:8px;display:hidden;" onclick="kb.clearData();">CLEAR</button>'
 
     html += '''
@@ -222,14 +222,14 @@ def build_main_screen(context, scm):
     return html
 
 #------------------------------------------------------------------------------
-def get_default_message(scm):
+def get_default_message(repo):
     workspace_path = kb.get_workspace_path()
     msg_path = workspace_path + 'info.txt'
     message = util.read_text_file(msg_path, default='')
     if message != '':
         return message
 
-    data = kb.load_data(scm, 'info')
+    data = kb.load_data(repo, 'info')
     if data['status'] == 'OK':
         content = data['content']
         message = content['BODY']
@@ -360,33 +360,33 @@ def build_auth_redirection_screen(root_path):
 def main():
     context = websys.on_access()
 
-    scm = util.get_request_param('scm', '')
-    if scm == '':
-        scm = kb.get_default_scm_id()
+    repo = util.get_request_param('repo', '')
+    if repo == '':
+        repo = kb.get_default_repo_id()
 
     res = util.get_request_param('res')
     if res == 'js':
         res = util.get_request_param('res')
-        js.main(scm)
+        js.main(repo)
         return
 
     id = util.get_request_param('id')
 
     if kb.is_authorized(context):
         if kb.has_privilege(context, 'sysadmin') or kb.has_privilege(context, 'kb'):
-            html = build_main_screen(context, scm)
+            html = build_main_screen(context, repo)
         else:
             token = util.get_request_param('token', '')
             if token != '':
-                if kb.is_valid_token(token, scm, id):
+                if kb.is_valid_token(token, repo, id):
                     html = build_view_screen(context)
                 else:
                     html = build_forbidden_screen(context)
             else:
                 # public-mode
-                html = build_main_screen(context, scm)
-    elif kb.is_anonymous_allowed(scm):
-        html = build_main_screen(context, scm)
+                html = build_main_screen(context, repo)
+    elif kb.is_anonymous_allowed(repo):
+        html = build_main_screen(context, repo)
     elif id is not None:
         token = util.get_request_param('token')
         if token is None:
