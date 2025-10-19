@@ -96,8 +96,8 @@ def build_main_screen(context, repo):
     if kb.can_operate(context, repo, 'export'):
         html += '        <button id="export-button" style="margin-left:4px;min-width:32px;" onclick="kb.export();">EXPORT</button>'
 
-    html += '        <button id="export-button" style="min-width:32px;" onclick="kb.openTools();">TOOLS</button>'
-    html += '        <button id="schema-button" style="min-width:32px;" onclick="kb.openRepoDialog();">REPO</button>'
+    html += '        <button id="export-button" style="width:54px;" onclick="kb.openTools();">TOOLS</button>'
+    html += '        <button id="schema-button" style="width:54px;" onclick="kb.openRepoDialog();">REPO</button>'
     html += '      </span>'
 
     html += '''
