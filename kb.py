@@ -19,7 +19,7 @@ util.append_system_path(__file__, ROOT_PATH + 'websys')
 import websys
 
 WORKSPACE_PATH = appconfig.workspace_path
-DATA_BASE_DIR_PATH = WORKSPACE_PATH + 'repo/'
+DATA_BASE_DIR_PATH = WORKSPACE_PATH + 'repos/'
 WK_PATH = WORKSPACE_PATH + 'wk/'
 PROPS_FILENAME = 'properties.txt'
 CATEGORIES_FILENAME = 'categories.json'
@@ -178,7 +178,7 @@ def delete_repo(repo):
         util.rmdir(path, True)
         status = 'OK'
     except Exception as e:
-        status = 'DELETE_SCHEMA_ERR:' + str(e)
+        status = 'DELETE_REPO_ERR:' + str(e)
     return status
 
 #------------------------------------------------------------------------------

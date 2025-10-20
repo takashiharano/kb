@@ -128,8 +128,8 @@ def proc_data_list(context):
     repo = get_req_param_repo()
 
     if not kb.repo_exists(repo):
-        kblog.write_operation_log(context, 'LIST:SCHEMA_NOT_FOUND', repo, id)
-        return create_result_object('SCHEMA_NOT_FOUND')
+        kblog.write_operation_log(context, 'LIST:REPOSITORY_NOT_FOUND', repo, id)
+        return create_result_object('REPOSITORY_NOT_FOUND')
 
     if kb.has_privilege_for_repo(context, repo):
         limit = get_request_param_as_int('limit')
@@ -154,8 +154,8 @@ def proc_search(context):
     id = get_request_param('id')
 
     if not kb.repo_exists(repo):
-        kblog.write_operation_log(context, 'SEARCH:SCHEMA_NOT_FOUND', repo, id)
-        return create_result_object('SCHEMA_NOT_FOUND')
+        kblog.write_operation_log(context, 'SEARCH:REPOSITORY_NOT_FOUND', repo, id)
+        return create_result_object('REPOSITORY_NOT_FOUND')
 
     if not kb.has_privilege_for_repo(context, repo):
         kblog.write_operation_log(context, 'SEARCH:FORBIDDEN', repo, id)
@@ -182,8 +182,8 @@ def proc_save_data(context):
     id = get_request_param('id')
 
     if not kb.repo_exists(repo):
-        kblog.write_operation_log(context, 'SAVE_DATA:SCHEMA_NOT_FOUND', repo, id)
-        return create_result_object('SCHEMA_NOT_FOUND')
+        kblog.write_operation_log(context, 'SAVE_DATA:REPOSITORY_NOT_FOUND', repo, id)
+        return create_result_object('REPOSITORY_NOT_FOUND')
 
     if not kb.has_privilege_for_repo(context, repo):
         kblog.write_operation_log(context, 'SAVE_DATA:FORBIDDEN', repo, id)
