@@ -929,10 +929,13 @@ kb.buildStatusHTML = function(status) {
   }
 
   var stColor = (st.color ? st.color : '#ccc');
+  var stBackground = (st.background ? st.background : '');
+  var stBorder = (st.border ? st.border : '1px solid ' + stColor);
   html = '<span class="status"';
   html += ' style="';
   html += 'color:' + stColor + ';';
-  html += 'border: 1px solid ' + stColor + ';';
+  html += 'background:' + stBackground + ';';
+  html += 'border:' + stBorder + ';';
   html += '"';
   if (kb.mode != 'view') {
     html += ' onclick="kb.fieldSearch(\'status\', \'' + status + '\');"';
@@ -1439,7 +1442,7 @@ kb.drawData = function(data) {
   var idLabel = '';
   if (id != '') idLabel = '<span class="pseudo-link" onclick="kb.showData(\'' + id + '\');" data-tooltip2="Reload">' + id + '</span>:';
   var escTitle =  util.escHtml(title);
-  var titleLabel = '<span class="pseudo-link" onclick="kb.copyTitle(\'' + kb.repo + '\', \'' + id + '\', \'' + title + '\');" data-tooltip2="Reload">' + escTitle + '</span>';
+  var titleLabel = '<span class="pseudo-link" onclick="kb.copyTitle(\'' + kb.repo + '\', \'' + id + '\', \'' + title + '\');" data-tooltip2="Copy title">' + escTitle + '</span>';
 
   $el('#content-id').innerHTML = idLabel;
   $el('#content-title').innerHTML = titleLabel;
