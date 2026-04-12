@@ -220,10 +220,12 @@ th {
   margin-bottom: 4px;
   height: 1.2em;
 }
-.meta-info {
-  color: #aaa;
-}
+'''
+    css += '.meta-info {'
+    css += '  color: ' + appconfig.fg_color_muted2 + ';'
+    css += '}'
 
+    css += '''
 #content-id {
   display: inline-block;
 }
@@ -334,7 +336,6 @@ th {
         css += '.status:hover {'
         css += '  cursor: pointer;'
         css += '}'
-
 
     css += 'table.item-list,td.item-list,th.item-list {'
     css += '  border: ' + appconfig.list_border + ';'
