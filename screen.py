@@ -1,6 +1,6 @@
 #==============================================================================
 # Knowledge Base System
-# Copyright (c) 2021 Takashi Harano
+# Copyright 2021 Takashi Harano
 #==============================================================================
 import os
 import sys
@@ -154,7 +154,7 @@ def build_main_screen(context, repo):
           <span id="content-labels-area">
             <span id="content-labels"></span>'''
     if context.has_permission('sysadmin'):
-        html += '<button id="edit-labels-button" class="for-view small-button" style="margin-left:4px;" onclick="kb.editLabels();">EDIT</button>'
+        html += '<button id="edit-labels-button" class="for-view small-button" style="margin-left:4px;" onclick="kb.editLabels();">LABELS</button>'
 
     html += '''
           </span>
