@@ -1,6 +1,6 @@
 /*!
  * Knowledge Base System
- * Copyright (c) 2021 Takashi Harano
+ * Copyright 2021 Takashi Harano
  */
 var kb = kb || {};
 kb.ST_APP_READY = 1;
@@ -1442,7 +1442,7 @@ kb.drawData = function(data) {
   var idLabel = '';
   if (id != '') idLabel = '<span class="pseudo-link" onclick="kb.showData(\'' + id + '\');" data-tooltip2="Reload">' + id + '</span>:';
   var escTitle =  util.escHtml(title);
-  var titleLabel = '<span class="pseudo-link" onclick="kb.copyTitle(\'' + kb.repo + '\', \'' + id + '\', \'' + title + '\');" data-tooltip2="Copy title">' + escTitle + '</span>';
+  var titleLabel = '<span class="pseudo-link" onclick="kb.copyTitleAndUrl(\'' + kb.repo + '\', \'' + id + '\', \'' + title + '\');" data-tooltip2="Copy title">' + escTitle + '</span>';
 
   $el('#content-id').innerHTML = idLabel;
   $el('#content-title').innerHTML = titleLabel;
@@ -1545,10 +1545,10 @@ kb.postDrawData = function(id) {
   }
 };
 
-kb.copyTitle = function(repo, id, title) {
+kb.copyTitleAndUrl = function(repo, id, title) {
   var s = 'KB';
   if (repo) s += ':' + repo;
-  s += '#' + id + ' ' + title;
+  s += '#' + id + ' ' + title + '\n' + kb.getUrl();
   kb.copy(s);
 };
 
@@ -2633,6 +2633,12 @@ kb.showUrl = function() {
     m += listTokens;
   }
   util.alert(m)
+};
+
+kb.getUrl = function() {
+  var id = kb.data.id;
+  var url = kb.getUrl4Id(id);
+  return url;
 };
 
 kb.copyUrl = function() {
