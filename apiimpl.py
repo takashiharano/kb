@@ -1,6 +1,6 @@
 #==============================================================================
 # Knowledge Base System
-# Copyright (c) 2021 Takashi Harano
+# Copyright 2021 Takashi Harano
 #==============================================================================
 import os
 import sys

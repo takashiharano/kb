@@ -1,6 +1,6 @@
 #==============================================================================
 # Knowledge Base System - Stylesheet
-# Copyright (c) 2024 Takashi Harano
+# Copyright 2024 Takashi Harano
 #==============================================================================
 import appconfig
 
