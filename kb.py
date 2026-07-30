@@ -1230,11 +1230,11 @@ def get_ext_from_base64(s):
 def get_user_name(context):
     user_name = ''
     if appconfig.user_name_lang == 'en':
-        user_name = context.get_user_fullname()
+        user_name = context.get_user_full_name()
     else:
-        user_name = context.get_user_local_name()
+        user_name = context.get_user_localized_name()
         if user_name == '':
-            user_name = context.get_user_fullname()
+            user_name = context.get_user_full_name()
     return user_name
 
 def is_authorized(context):

@@ -61,7 +61,7 @@ def write_operation_log(context, op_type, repo, dataid=None, info='', data=None)
     if p_reload == '1':
         return
 
-    user = context.get_user_fullname()
+    user = context.get_user_full_name()
 
     if data is not None:
         if 'status' in data and data['status'] != 'OK':
@@ -80,7 +80,7 @@ def write_operation_log(context, op_type, repo, dataid=None, info='', data=None)
 
 #----------------------------------------------------------
 def write_save_log(context, repo, dataid, new_data, saved_obj):
-    user = context.get_user_fullname()
+    user = context.get_user_full_name()
 
     op_type = 'SAVE_DATA'
     info = ''

@@ -3313,10 +3313,10 @@ kb.removeFlag = function(flags, flag) {
 };
 
 kb.getUserName = function() {
-  var name = websys.getUserFullname();
+  var name = websys.getUserFullName();
   if (kb.configInfo && (kb.configInfo.user_name_lang != 'en')) {
     name = websys.getUserLocalName();
-    if (name == '') name = websys.getUserFullname();
+    if (name == '') name = websys.getUserFullName();
   }
   if (!name) name = '';
   return name;
