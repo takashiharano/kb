@@ -1,6 +1,7 @@
 /*!
  * Knowledge Base System
  * Copyright 2021 Takashi Harano
+ * Released under the MIT License
  */
 var kb = kb || {};
 kb.ST_APP_READY = 1;

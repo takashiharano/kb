@@ -1,6 +1,7 @@
 #==============================================================================
 # Knowledge Base System
 # Copyright 2021 Takashi Harano
+# Released under the MIT License
 #==============================================================================
 import os
 import sys

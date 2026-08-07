@@ -1,6 +1,7 @@
 #==============================================================================
 # Knowledge Base System - Stylesheet
 # Copyright 2024 Takashi Harano
+# Released under the MIT License
 #==============================================================================
 import appconfig
 
