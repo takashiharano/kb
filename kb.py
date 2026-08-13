@@ -447,18 +447,34 @@ def search_data(context, repo, q, list_max=None):
 
 def _search(context, repo, data_id_list, id_filtering, incl_nan_id, include_hidden, keywords):
     all_data = []
+    original_content_map = {}
+
     for i in range(len(data_id_list)):
         id = data_id_list[i]
+
         if not incl_nan_id and is_nan_id(id):
             continue
 
         data = load_data(repo, id)
+
         if data['status'] == 'OK':
             content = data['content']
+
             if should_omit_content(context, content, include_hidden):
                 continue
+
+            # Keep original metadata since search content is normalized below.
+            original_content = copy.copy(content)
+            if 'BODY' in original_content:
+                del original_content['BODY']
+            original_content_map[id] = original_content
+
+            # Normalize search target only once.
+            data['content'] = convert_data_to_half_width(content)
+
             data['score'] = 0
             all_data.append(data)
+
         else:
             continue
 
@@ -469,14 +485,17 @@ def _search(context, repo, data_id_list, id_filtering, incl_nan_id, include_hidd
     for i in range(len(keywords)):
         not_flag = False
         keyword = keywords[i]
+
         if keyword.startswith('-'):
             not_flag = True
             keyword = keyword[1:]
 
         macthed_data_list = []
+
         for j in range(len(wk_data_list)):
             data = wk_data_list[j]
             score = calc_data_macthed_score(data, keyword)
+
             if score > 0:
                 if not_flag:
                     id = data['id']
@@ -485,6 +504,7 @@ def _search(context, repo, data_id_list, id_filtering, incl_nan_id, include_hidd
                     data['score'] += score
                     macthed_data_list.append(data)
                     keyword_matched = True
+
             elif not_flag:
                 data['score'] += score
                 macthed_data_list.append(data)
@@ -496,16 +516,16 @@ def _search(context, repo, data_id_list, id_filtering, incl_nan_id, include_hidd
         wk_data_list = all_data
 
     data_list = []
+
     for i in range(len(wk_data_list)):
         data = wk_data_list[i]
         id = data['id']
+
         if id in exclude_list:
             continue
 
-        content = data['content']
-        del content['BODY']
-
-        data['content'] = content
+        # Restore original metadata.
+        data['content'] = original_content_map[id]
         data_list.append(data)
 
     return data_list
@@ -521,11 +541,11 @@ def convert_data_to_half_width(content):
 
 def calc_data_macthed_score(data, keyword):
     id = data['id']
-    content = copy.copy(data['content'])
-    content = convert_data_to_half_width(content)
-    score = 0
+    content = data['content']
 
+    score = 0
     keyword_lc = keyword.lower()
+
     if keyword_lc == SP_KEYWORD_NANIDS and is_nan_id(id):
         score = 1
 
