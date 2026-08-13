@@ -832,11 +832,13 @@ def parse_content(text, head_only=False):
     content = DEFAULT_CONTENT.copy()
     lines = util.text2list(text)
     idx = 0
+
     for i in range(len(lines)):
         line = lines[i]
         if line == '':
             idx = i + 1
             break
+
         line = str.strip(line)
 
         p = line.find(':')
@@ -851,10 +853,7 @@ def parse_content(text, head_only=False):
         if 'LOGIC' in content and content['LOGIC'] != '':
             content['LOGIC'] = 'Y'
     else:
-        body = ''
-        for i in range(idx, len(lines)):
-            body += lines[i] + '\n'
-        content['BODY'] = body
+        content['BODY'] = ''.join(line + '\n' for line in lines[idx:])
 
     return content
 
