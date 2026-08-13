@@ -296,27 +296,28 @@ kb.toSortIndex = function(k) {
 kb.sortList = function(dataList, sortKey, desc, byMetaCol) {
   var items = util.copyObject(dataList);
   var srcList = items;
+  var itemMap = null;
+
   if (!byMetaCol) {
     srcList = [];
+    itemMap = new Map();
     for (var i = 0; i < items.length; i++) {
       var item = items[i];
       item.content.id = item.id;
       srcList.push(item.content);
+      itemMap.set(item.id, item);
     }
   }
+
   var asNum = true;
   var sortedList = util.sortObjectList(srcList, sortKey, desc, asNum);
   if (!byMetaCol) {
     var tmpList = [];
     for (i = 0; i < sortedList.length; i++) {
       var content = sortedList[i];
-      for (var j = 0; j < items.length; j++) {
-        var item = items[j];
-        if (content.id == item.id) {
-          item.content = content;
-          tmpList.push(item);
-        }
-      }
+      var item = itemMap.get(content.id);
+      item.content = content;
+      tmpList.push(item);
     }
     items = tmpList;
   }
