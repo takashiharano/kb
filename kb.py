@@ -249,8 +249,9 @@ def get_data_list(context, repo, target_id=None, list_max=None, include_hidden=F
             else:
                 break
 
-    all_data_size = util.get_path_size(DATA_BASE_DIR_PATH, recursive=True)
-    repo_data_size = util.get_path_size(get_repo_dir_path(repo), recursive=True)
+    sizes = get_storage_sizes(repo)
+    all_data_size = sizes['all']
+    repo_data_size = sizes['repo']
 
     time_e = util.get_timestamp()
     elapsed = time_e - time_s
@@ -265,6 +266,33 @@ def get_data_list(context, repo, target_id=None, list_max=None, include_hidden=F
     }
 
     return data_list_obj
+
+def get_storage_sizes(repo):
+    repo_path = get_repo_dir_path(repo)
+    return _get_storage_sizes(DATA_BASE_DIR_PATH, repo_path)
+
+def _get_storage_sizes(path, repo_path):
+    all_size = 0
+    repo_size = 0
+
+    for name in os.listdir(path):
+        full_path = os.path.join(path, name)
+
+        if os.path.isdir(full_path):
+            sizes = _get_storage_sizes(full_path, repo_path)
+            all_size += sizes['all']
+            repo_size += sizes['repo']
+        else:
+            size = os.path.getsize(full_path)
+            all_size += size
+
+            if full_path.startswith(repo_path):
+                repo_size += size
+
+    return {
+        'all': all_size,
+        'repo': repo_size
+    }
 
 def should_omit_listing(context, id, content=None, include_hidden=False):
     if is_nan_id(id):
