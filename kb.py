@@ -329,22 +329,30 @@ def filter_by_id(all_id_list, keywords):
     filtered_id_list = []
     new_keywords = []
     include_hidden = False
+    all_id_set = None
+
     for i in range(len(keywords)):
         keyword = keywords[i]
         if not keyword.startswith('id:'):
             new_keywords.append(keyword)
             continue
 
+        if all_id_set is None:
+            all_id_set = set(all_id_list)
+
         keyword = util.replace(keyword, 'id:', '', flags=re.IGNORECASE)
         include_hidden = False
+
         if util.match(keyword, '-'):
-            result = filter_by_id_range(all_id_list, keyword, filtered_id_list)
+            result = filter_by_id_range(all_id_set, keyword, filtered_id_list)
             filtered_id_list = result['id_list']
             include_hidden = result['include_hidden']
+
         elif util.match(keyword, ','):
-            result = filter_by_ids(all_id_list, keyword, filtered_id_list)
+            result = filter_by_ids(all_id_set, keyword, filtered_id_list)
             filtered_id_list = result['id_list']
             include_hidden = result['include_hidden']
+
         else:
             id = keyword
 
@@ -352,12 +360,16 @@ def filter_by_id(all_id_list, keywords):
                 include_hidden = True
                 id = id[0:-1]
 
-            if id in all_id_list:
+            if id in all_id_set:
                 filtered_id_list.append(id)
 
-    return {'id_list': filtered_id_list, 'keywords': new_keywords, 'include_hidden': include_hidden}
+    return {
+        'id_list': filtered_id_list,
+        'keywords': new_keywords,
+        'include_hidden': include_hidden
+    }
 
-def filter_by_ids(all_id_list, keyword, filtered_id_list):
+def filter_by_ids(all_id_set, keyword, filtered_id_list):
     ids = keyword.split(',')
 
     last_id = ids[-1]
@@ -368,12 +380,15 @@ def filter_by_ids(all_id_list, keyword, filtered_id_list):
 
     for i in range(len(ids)):
         id = ids[i]
-        if id in all_id_list:
+        if id in all_id_set:
             filtered_id_list.append(id)
 
-    return {'id_list': filtered_id_list, 'include_hidden': include_hidden}
+    return {
+        'id_list': filtered_id_list,
+        'include_hidden': include_hidden
+    }
 
-def filter_by_id_range(all_id_list, keyword, filtered_id_list):
+def filter_by_id_range(all_id_set, keyword, filtered_id_list):
     ids = keyword.split('-')
 
     last_id = ids[-1]
@@ -382,7 +397,7 @@ def filter_by_id_range(all_id_list, keyword, filtered_id_list):
         include_hidden = True
         ids[-1] = last_id[0:-1]
 
-    st_id =  util.to_int(ids[0])
+    st_id = util.to_int(ids[0])
     if len(ids) == 1:
         ed_id = util.to_int(ids[0])
     else:
@@ -397,10 +412,13 @@ def filter_by_id_range(all_id_list, keyword, filtered_id_list):
 
     for i in range(st_id, ed_id):
         id = str(i)
-        if id in all_id_list:
+        if id in all_id_set:
             filtered_id_list.append(id)
 
-    return {'id_list': filtered_id_list, 'include_hidden': include_hidden}
+    return {
+        'id_list': filtered_id_list,
+        'include_hidden': include_hidden
+    }
 
 #------------------------------------------------------------------------------
 def search_data(context, repo, q, list_max=None):
