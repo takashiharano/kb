@@ -758,14 +758,14 @@ def count_matched_key(target, keyword):
 
 def count_matched_key_in_dataurl(target, keyword):
     target = target.lower()
+    target = util.replace(target, '\n{2,}', '#')
+    pattern = 'data:.+;base64,[A-Za-z0-9+/=\n]+'
+
     count = 0
-    idx = 0
-    while True:
-        s = get_dataurl_content(target, idx)
-        if s is None:
-            break
-        count += s.count(keyword)
-        idx += 1
+    for itr in re.finditer(pattern, target):
+        dataurl = itr.group()
+        count += dataurl.count(keyword)
+
     return count
 
 #------------------------------------------------------------------------------
