@@ -1523,7 +1523,7 @@ kb.getContentForView = function(s, mode) {
     s = kb.decodeB64Image(s);
 
     s = kb.linkBsb64Data(s);
-    s = kb.linkB64sData(s);
+    s = kb.linkXB64Data(s);
     s = kb.linkCopy(s);
     s = kb.linkKB(s);
 
@@ -1609,8 +1609,8 @@ kb.linkBsb64Data = function(s) {
   return s;
 };
 
-kb.linkB64sData = function(s) {
-  var t = '<span class="pseudo-link link" onclick="kb.openB64sDialog(\'$2\');" data-tooltip2="Click to decode">$2</span>';
+kb.linkXB64Data = function(s) {
+  var t = '<span class="pseudo-link link" onclick="kb.openXB64Dialog(\'$2\');" data-tooltip2="Click to decode">$2</span>';
   s = s.replace(/(b64:)([A-Za-z0-9+/=$]+)/g, t);
   return s;
 };
@@ -3075,14 +3075,14 @@ kb.encodeBSB64 = function(data, n) {
   kb.openResultDialog(m);
 };
 
-kb.openB64sDialog = function(t, enc) {
+kb.openXB64Dialog = function(t, enc) {
   var opt = {
     secure: true,
     data: {t: t, enc: enc}
   };
-  var m = 'Base64S ' + (enc ? 'encryption' : 'decryption') + ' key: ';
+  var m = 'XB64 ' + (enc ? 'encryption' : 'decryption') + ' key: ';
   m += '<button class="small-button" onclick="kb.applyDefaultKey();">USE DEFAULT</button>';
-  util.dialog.text(m, kb.b64sDialogCb, opt);
+  util.dialog.text(m, kb.xb64DialogCb, opt);
 };
 kb.getDefaultKey = function() {
   return util.decodeBSB64(kb.config.default_encryption_key, 1);
@@ -3090,23 +3090,23 @@ kb.getDefaultKey = function() {
 kb.applyDefaultKey = function() {
   $el('.dialog-textbox')[0].value = kb.getDefaultKey();
 };
-kb.b64sDialogCb = function(key, data) {
-  var f = (data.enc ? kb.encodeB64s : kb.decodeB64s);
+kb.xb64DialogCb = function(key, data) {
+  var f = (data.enc ? kb.encodeXB64 : kb.decodeXB64);
   f(key, data.t);
 };
-kb.decodeB64s = function(key, data) {
+kb.decodeXB64 = function(key, data) {
   try {
-    var s = util.decodeBase64s(data, key);
+    var s = util.decodeXB64(data, key);
     var m = 'Decoded\n\n' + kb.maskText(s);
   } catch(e) {
     m = '<span style="color:#f77;">Decode Error</span>';
   }
   kb.openResultDialog(m);
 };
-kb.encodeB64s = function(key, data) {
+kb.encodeXB64 = function(key, data) {
   var m;
   try {
-    var s = util.encodeBase64s(data, key);
+    var s = util.encodeXB64(data, key);
     var m = 'Encoded\n\n';
     m += '<span style="margin-left:50px;">' + s + '</span>';
     m += '<button class="small-button" style="margin-left:12px;margin-right:16px;" onclick="kb.copy(\'' + s + '\', true);">COPY</button>';
@@ -3144,7 +3144,7 @@ kb.keyHandlerD = function(e) {
   }
   var t = kb.extractSelectedText();
   if (!t) return;
-  kb.openB64sDialog(t);
+  kb.openXB64Dialog(t);
 };
 kb.keyHandlerE = function(e) {
   if (kb.status & kb.ST_EDITING) {
@@ -3154,7 +3154,7 @@ kb.keyHandlerE = function(e) {
   }
   var t = kb.extractSelectedText();
   if (!t) return;
-  kb.openB64sDialog(t, true);
+  kb.openXB64Dialog(t, true);
 };
 kb.keyHandlerL = function(e) {
   if ((kb.status & kb.ST_EDITING) || (kb.mode == 'view')) return;
@@ -3333,8 +3333,8 @@ kb.tools.buildBsb64Html = function() {
   html += '<b>Encoder/Decoder</b>';
 
   html += '<span style="margin-left:4px;">';
-  html += '<input type="radio" name="encdec-mode" id="rdo-b64s" onchange="kb.tools.onEncDecModeChange();" checked>'
-  html += '<label for="rdo-b64s">Base64S</label>';
+  html += '<input type="radio" name="encdec-mode" id="rdo-xb64" onchange="kb.tools.onEncDecModeChange();" checked>'
+  html += '<label for="rdo-xb64">XB64</label>';
   html += '<input type="radio" name="encdec-mode" id="rdo-bsb64" onchange="kb.tools.onEncDecModeChange();">'
   html += '<label for="rdo-bsb64">BSB64</label>';
   html += '</span>';
@@ -3342,7 +3342,7 @@ kb.tools.buildBsb64Html = function() {
   html += '<span style="margin-left:168px;">';
   html += '<button onclick="kb.tools.resetB64Input();">Reset</button>';
 
-  html += '<span class="area-b64s">';
+  html += '<span class="area-xb64">';
   html += '<button style="margin-left:100px;" onclick="kb.tools.applyDefaultKey();">DefaultKey</button>';
   html += '</span>';
 
@@ -3369,11 +3369,11 @@ kb.tools.buildBsb64Html = function() {
   html += '</select>';
   html += '</span>';
 
-  html += '<span class="area-b64s">';
+  html += '<span class="area-xb64">';
   html += '<span style="margin-left:4px;">Key:</span>';
-  html += '<input type="password" id="b64s-key" style="width:150px;">';
-  html += '<input type="checkbox" id="b64s-key-s" onchange="kb.tools.b64KeySecretChange();">';
-  html += '<label for="b64s-key-s">Show</label>';
+  html += '<input type="password" id="xb64-key" style="width:150px;">';
+  html += '<input type="checkbox" id="xb64-key-s" onchange="kb.tools.b64KeySecretChange();">';
+  html += '<label for="xb64-key-s">Show</label>';
   html += '</span>';
 
   html += '</td>';
@@ -3401,22 +3401,22 @@ kb.tools.buildBsb64Html = function() {
 };
 
 kb.tools.onEncDecModeChange = function() {
-  if ($el('#rdo-b64s').checked) {
+  if ($el('#rdo-xb64').checked) {
     $el('.area-bsb64').setStyle('display', 'none');
-    $el('.area-b64s').setStyle('display', '');
+    $el('.area-xb64').setStyle('display', '');
   } else {
     $el('.area-bsb64').setStyle('display', '');
-    $el('.area-b64s').setStyle('display', 'none');
+    $el('.area-xb64').setStyle('display', 'none');
   }
 };
 
 kb.tools.b64KeySecretChange = function() {
-  var type = ($el('#b64s-key-s').checked ? 'text' : 'password');
-  $el('#b64s-key').type = type;
+  var type = ($el('#xb64-key-s').checked ? 'text' : 'password');
+  $el('#xb64-key').type = type;
 };
 
 kb.tools.applyDefaultKey = function() {
-  $el('#b64s-key').value = kb.getDefaultKey();
+  $el('#xb64-key').value = kb.getDefaultKey();
 };
 
 kb.tools.encB64 = function() {
@@ -3429,9 +3429,9 @@ kb.tools.decB64 = function() {
 
 kb.tools.encdecB64 = function(enc) {
   var s = $el('#b64-text-in').value;
-  if ($el('#rdo-b64s').checked) {
-    var k = $el('#b64s-key').value;
-    var f = (enc ? util.encodeBase64s : util.decodeBase64s);
+  if ($el('#rdo-xb64').checked) {
+    var k = $el('#xb64-key').value;
+    var f = (enc ? util.encodeXB64 : util.decodeXB64);
   } else {
     k = $el('#bsb64-n').value;
     f = (enc ? util.encodeBSB64 : util.decodeBSB64);

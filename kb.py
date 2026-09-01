@@ -868,7 +868,7 @@ def load_data(repo, id, head_only=False):
         data['size'] = fileinfo['size']
 
     if text.startswith(DATA_ENCRYPTION_HEAD):
-        text = util.decode_base64s(text[len(DATA_ENCRYPTION_HEAD):], DATA_ENCRYPTION_KEY)
+        text = util.decode_xb64(text[len(DATA_ENCRYPTION_HEAD):], DATA_ENCRYPTION_KEY)
         data['encrypted'] = True
 
     data['content'] = parse_content(text, head_only)
@@ -1026,7 +1026,7 @@ def write_data(repo, id, content, encryption_key=None, path=None):
     text += content['BODY']
 
     if encryption_key is not None:
-        text = DATA_ENCRYPTION_HEAD + util.encode_base64s(text, encryption_key)
+        text = DATA_ENCRYPTION_HEAD + util.encode_xb64(text, encryption_key)
 
     if path is None:
         path = get_datafile_path(repo, id)
