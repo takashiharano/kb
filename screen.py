@@ -341,23 +341,6 @@ ACCESS PRIVILEGE IS REQUIRED.
     return html
 
 #------------------------------------------------------------------------------
-def build_auth_redirection_screen(root_path):
-    html = '<!DOCTYPE html>'
-    html += '<html>'
-    html += '<head>'
-    html += '<meta charset="utf-8">'
-    html += '<script src="' + root_path + 'libs/util.js"></script>'
-    html += '<script src="' + root_path + 'websys/websys.js"></script>'
-    html += '<script>'
-    html += 'websys.init(\'' + root_path + '\');'
-    html += '$onLoad = function() {websys.authRedirection(location.href);};'
-    html += '</script>'
-    html += '</head>'
-    html += '<body></body>'
-    html += '</html>'
-    return html
-
-#------------------------------------------------------------------------------
 def main():
     context = websys.on_access()
 
@@ -391,10 +374,10 @@ def main():
     elif id is not None:
         token = util.get_request_param('token')
         if token is None:
-            html = build_auth_redirection_screen(ROOT_PATH)
+            html = websys.build_auth_redirection_screen(ROOT_PATH)
         else:
             html = build_view_screen(context)
     else:
-        html = build_auth_redirection_screen(ROOT_PATH)
+        html = websys.build_auth_redirection_screen(ROOT_PATH)
 
     util.send_html(html)
