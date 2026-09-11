@@ -3096,7 +3096,7 @@ kb.xb64DialogCb = function(key, data) {
 };
 kb.decodeXB64 = function(key, data) {
   try {
-    var s = util.decodeXB64(data, key);
+    var s = util.xb64.decodeToString(data, key);
     var m = 'Decoded\n\n' + kb.maskText(s);
   } catch(e) {
     m = '<span style="color:#f77;">Decode Error</span>';
@@ -3106,7 +3106,7 @@ kb.decodeXB64 = function(key, data) {
 kb.encodeXB64 = function(key, data) {
   var m;
   try {
-    var s = util.encodeXB64(data, key);
+    var s = util.xb64.encode(data, key);
     var m = 'Encoded\n\n';
     m += '<span style="margin-left:50px;">' + s + '</span>';
     m += '<button class="small-button" style="margin-left:12px;margin-right:16px;" onclick="kb.copy(\'' + s + '\', true);">COPY</button>';
@@ -3431,7 +3431,7 @@ kb.tools.encdecB64 = function(enc) {
   var s = $el('#b64-text-in').value;
   if ($el('#rdo-xb64').checked) {
     var k = $el('#xb64-key').value;
-    var f = (enc ? util.encodeXB64 : util.decodeXB64);
+    var f = (enc ? util.xb64.encode : util.xb64.decodeToString);
   } else {
     k = $el('#bsb64-n').value;
     f = (enc ? util.encodeBSB64 : util.decodeBSB64);
