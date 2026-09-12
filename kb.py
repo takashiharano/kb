@@ -15,6 +15,7 @@ ROOT_PATH = appconfig.root_path
 sys.path.append(os.path.join(os.path.dirname(__file__), ROOT_PATH + 'libs'))
 import util
 import bsb64
+import xb64
 
 util.append_system_path(__file__, ROOT_PATH + 'websys')
 import websys
@@ -868,7 +869,7 @@ def load_data(repo, id, head_only=False):
         data['size'] = fileinfo['size']
 
     if text.startswith(DATA_ENCRYPTION_HEAD):
-        text = util.decode_xb64(text[len(DATA_ENCRYPTION_HEAD):], DATA_ENCRYPTION_KEY)
+        text = xb64.decode_to_string(text[len(DATA_ENCRYPTION_HEAD):], DATA_ENCRYPTION_KEY)
         data['encrypted'] = True
 
     data['content'] = parse_content(text, head_only)
@@ -1026,7 +1027,7 @@ def write_data(repo, id, content, encryption_key=None, path=None):
     text += content['BODY']
 
     if encryption_key is not None:
-        text = DATA_ENCRYPTION_HEAD + util.encode_xb64(text, encryption_key)
+        text = DATA_ENCRYPTION_HEAD + xb64.encode(text, encryption_key)
 
     if path is None:
         path = get_datafile_path(repo, id)
