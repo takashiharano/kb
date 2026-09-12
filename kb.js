@@ -2659,7 +2659,7 @@ kb.applyToken = function(id, tokenKey) {
   var validUntilTime = now + kb.configInfo.token_valid_sec * 1000;
   var validUntil = util.getDateTimeString(validUntilTime, '%YYYY-%MM-%DD %HH:%mm:%SS %Z');
   var srcToken = kb.repo + ':' + id + ':' + tokenKey + ':' + now;
-  var token = util.encodeBSB64(srcToken, 0);
+  var token = util.bsb64.encode(srcToken, 0);
   token = encodeURIComponent(token);
   var url = kb.urlOfData + '&token=' + token;
   var until = 'Valid until ' + validUntil;
@@ -3055,7 +3055,7 @@ kb.bsb64DialogCb = function(n, data) {
 kb.decodeBSB64 = function(data, n) {
   if (n == '') n = 1;
   try {
-    var s = util.decodeBSB64(data, n);
+    var s = util.bsb64.decodeToString(data, n);
     var m = 'Decoded\n\n' + kb.maskText(s);
   } catch(e) {
     m = '<span style="color:#f77;">Decode Error</span>';
@@ -3065,7 +3065,7 @@ kb.decodeBSB64 = function(data, n) {
 kb.encodeBSB64 = function(data, n) {
   if (n == '') n = 1;
   try {
-    var s = util.encodeBSB64(data, n);
+    var s = util.bsb64.encode(data, n);
     var m = 'Encoded\n\n';
     m += '<span style="margin-left:50px;">' + s + '</span>';
     m += '<button class="small-button" style="margin-left:12px;margin-right:16px;" onclick="kb.copy(\'' + s + '\', true);">COPY</button>';
@@ -3085,7 +3085,7 @@ kb.openXB64Dialog = function(t, enc) {
   util.dialog.text(m, kb.xb64DialogCb, opt);
 };
 kb.getDefaultKey = function() {
-  return util.decodeBSB64(kb.config.default_encryption_key, 1);
+  return util.bsb64.decodeToString(kb.config.default_encryption_key, 1);
 };
 kb.applyDefaultKey = function() {
   $el('.dialog-textbox')[0].value = kb.getDefaultKey();
@@ -3434,7 +3434,7 @@ kb.tools.encdecB64 = function(enc) {
     var f = (enc ? util.xb64.encode : util.xb64.decodeToString);
   } else {
     k = $el('#bsb64-n').value;
-    f = (enc ? util.encodeBSB64 : util.decodeBSB64);
+    f = (enc ? util.bsb64.encode : util.bsb64.decodeToString);
   }
   try {
     var v = f(s, k);
