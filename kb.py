@@ -1399,7 +1399,7 @@ def is_valid_token(token_enc, repo, target_id):
         return False
 
 def _is_valid_token(token_enc, target_repo, target_id):
-    token = bsb64.decode_string(token_enc, 0)
+    token = bsb64.decode_to_string(token_enc, 0)
     fields = token.split(':')
     repo = fields[0]
     id = fields[1]

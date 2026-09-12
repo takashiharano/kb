@@ -22,7 +22,7 @@ import kb
 #------------------------------------------------------------------------------
 def build_js(context, repo):
     content_height_adj = appconfig.list_height + 32
-    default_encryption_key = bsb64.encode_string(kb.DEFAULT_ENCRYPTION_KEY, 1)
+    default_encryption_key = bsb64.encode(kb.DEFAULT_ENCRYPTION_KEY, 1)
     categories = kb.load_categories(repo)
 
     js = ''
