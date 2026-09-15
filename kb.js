@@ -2375,19 +2375,19 @@ kb.openTools = function() {
     resizable: true,
     pos: 'c',
     closeButton: true,
-    width: 720,
-    height: 280,
-    minWidth: 720,
-    minHeight: 280,
+    width: 740,
+    height: 320,
+    minWidth: 740,
+    minHeight: 320,
     scale: 1,
     hidden: false,
     modal: false,
     title: {
-      text: 'Tools'
+      text: 'TOOLS'
     },
     body: {
       style: {
-        background: 'rgba(40,40,40,0.9)'
+        background: 'rgba(30,34,42,0.9)'
       }
     },
     onclose: kb.onToolsWindowClose,
@@ -3330,7 +3330,7 @@ kb.tools = {};
 kb.tools.buildBsb64Html = function() {
   var html = '';
   html += '<div style="margin-bottom:8px;">';
-  html += '<b>Encoder/Decoder</b>';
+  html += '<b>BASE64 ENCODER/DECODER</b>';
 
   html += '<span style="margin-left:4px;">';
   html += '<input type="radio" name="encdec-mode" id="rdo-bsb64" onchange="kb.tools.onEncDecModeChange();">'
@@ -3338,21 +3338,25 @@ kb.tools.buildBsb64Html = function() {
   html += '<input type="radio" name="encdec-mode" id="rdo-xb64" onchange="kb.tools.onEncDecModeChange();" checked>'
   html += '<label for="rdo-xb64">XB64</label>';
   html += '</span>';
-
-  html += '<span style="margin-left:168px;">';
-  html += '<button onclick="kb.tools.resetB64Input();">Reset</button>';
-
-  html += '<span class="area-xb64">';
-  html += '<button style="margin-left:100px;" onclick="kb.tools.applyDefaultKey();">DefaultKey</button>';
-  html += '</span>';
-
-  html += '</span>';
   html += '</div>';
+
   html += '<table>';
+  html += '<tr>';
+  html += '<td>';
+  html += '<button class="small-button" onclick="kb.tools.resetB64Input();">RESET</button>';
+  html += '</td>';
+  html += '<td>&nbsp;</td>';
+  html += '<td>';
+  html += '<span class="area-xb64">';
+  html += '<button class="small-button" style="margin-left:32px;" onclick="kb.tools.applyDefaultKey();">Use Default Key</button>';
+  html += '</span>';
+  html += '</td>';
+
+  html += '</tr>';
   html += '<tr style="height:28px;">';
   html += '<td>Input: </td>';
   html += '<td>';
-  html += '<input type="text" id="b64-text-in" style="width:400px;">';
+  html += '<input type="text" id="b64-text-in" style="width:310px;">';
   html += '</td>';
   html += '<td>';
 
@@ -3371,29 +3375,34 @@ kb.tools.buildBsb64Html = function() {
 
   html += '<span class="area-xb64">';
   html += '<span style="margin-left:4px;">Key:</span>';
-  html += '<input type="password" id="xb64-key" style="width:150px;">';
+  html += '<input type="password" id="xb64-key" style="width:110px;">';
   html += '<input type="checkbox" id="xb64-key-s" onchange="kb.tools.b64KeySecretChange();">';
   html += '<label for="xb64-key-s">Show</label>';
   html += '</span>';
+
+  html += '<button style="margin-left:16px;" onclick="kb.tools.encB64();">ENCODE</button>';
+  html += '<button style="margin-left:8px;" onclick="kb.tools.decB64();">DECODE</button>';
 
   html += '</td>';
   html += '</tr>';
   html += '<tr>';
   html += '<td>&nbsp;</td>';
   html += '<td style="padding-top:8px;">';
-  html += '<button onclick="kb.tools.encB64();">Encode</button>';
-  html += '<button style="margin-left:8px;" onclick="kb.tools.decB64();">Decode</button>';
-  html += '<button style="margin-left:24px;min-width:20px;" onclick="kb.tools.switchB64Value();">^v</button>';
+  html += '<button class="small-button" style="margin-left:128px;min-width:20px;" onclick="kb.tools.switchB64Value();">&#x21C5;</button>';
   html += '</td>';
   html += '</tr>';
   html += '<tr>';
   html += '<td>Output: </td>';
   html += '<td>';
-  html += '<input type="text" id="b64-text-out" class="tools-output" style="width:400px;" readonly>';
+  html += '<input type="text" id="b64-text-out" class="tools-output" style="width:300px;" readonly>';
   html += '</td>';
   html += '<td>';
-  html += '<button class="small-button" style="margin-left:4px;" onclick="kb.tools.copy(\'b64-text-out\');">Copy</button>';
-  html += '<button class="small-button" style="margin-left:16px;" onclick="kb.tools.clearB64out();;">Clear</button>';
+  html += '<button class="small-button" style="margin-left:4px;" data-tooltip="Copy" onclick="kb.tools.copy(\'b64-text-out\');">&#x29C9;</button>';
+  html += '</td>';
+  html += '</tr>';
+  html += '<tr>';
+  html += '<td>';
+  html += '<button class="small-button" onclick="kb.tools.clearB64out();;">CLEAR</button>';
   html += '</td>';
   html += '</tr>';
   html += '</table>';
@@ -3469,7 +3478,7 @@ kb.tools.clearB64out = function() {
 kb.tools.buildPwGenHtml = function() {
   var html = '';
   html += '<div style="margin-top:32px;">';
-  html += '<div style="margin-bottom:8px;"><b>Password Generator</b></div>';
+  html += '<div style="margin-bottom:8px;"><b>PASSWORD GENERATOR</b></div>';
   html += '<table>';
   html += '<tr>';
   html += '<td>';
@@ -3478,7 +3487,7 @@ kb.tools.buildPwGenHtml = function() {
   html += '<td>';
   html += '<input type="text" id="pwgen-chars" style="width:480px;" value="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789">';
   html += '<span style="margin-left:4px;">Length:</span><input type="text" id="pwgen-len" style="width:28px;" value="8">';
-  html += '<button style="margin-left:4px;" onclick="kb.tools.genPw();">Generate</button>';
+  html += '<button style="margin-left:4px;" onclick="kb.tools.genPw();">GENERATE</button>';
   html += '</td>';
   html += '</tr>';
   html += '<tr>';
@@ -3486,8 +3495,8 @@ kb.tools.buildPwGenHtml = function() {
   html += 'Output:';
   html += '</td>';
   html += '<td>';
-  html += '<input type="text" id="pwgen-out" class="tools-output" style="width:400px;" readonly>';
-  html += '<button class="small-button" style="margin-left:4px;" onclick="kb.tools.copy(\'pwgen-out\');">Copy</button>';
+  html += '<input type="text" id="pwgen-out" class="tools-output" style="width:480px;" readonly>';
+  html += '<button class="small-button" style="margin-left:4px;" data-tooltip="Copy" onclick="kb.tools.copy(\'pwgen-out\');">&#x29C9;</button>';
   html += '</td>';
   html += '</tr>';
   html += '</table>';
