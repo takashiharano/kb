@@ -3045,7 +3045,7 @@ kb.openBSB64Dialog = function(t, enc) {
   var opt = {
     data: {t: t, enc: enc}
   };
-  var m = 'BSB64 ' + (enc ? 'encryption' : 'decryption') + ' n=';
+  var m = 'BSB64 parameter (n) for ' + (enc ? 'encoding' : 'decoding');
   util.dialog.text(m, kb.bsb64DialogCb, opt);
 };
 kb.bsb64DialogCb = function(n, data) {
@@ -3068,7 +3068,7 @@ kb.encodeBSB64 = function(data, n) {
     var s = util.bsb64.encode(data, n);
     var m = 'Encoded\n\n';
     m += '<span style="margin-left:50px;">' + s + '</span>';
-    m += '<button class="small-button" style="margin-left:12px;margin-right:16px;" onclick="kb.copy(\'' + s + '\', true);">COPY</button>';
+    m += '<button class="small-button" style="margin-left:12px;margin-right:16px;" onclick="kb.copy(\'' + s + '\', true);" data-tooltip="Copy">&#x29C9;</button>';
   } catch(e) {
     m = '<span style="color:#f77;">Decode Error</span>';
   }
@@ -3080,8 +3080,8 @@ kb.openXB64Dialog = function(t, enc) {
     secure: true,
     data: {t: t, enc: enc}
   };
-  var m = 'XB64 ' + (enc ? 'encryption' : 'decryption') + ' key: ';
-  m += '<button class="small-button" onclick="kb.applyDefaultKey();">USE DEFAULT</button>';
+  var m = 'XB64 key for ' + (enc ? 'encoding' : 'decoding');
+  m += '<button class="small-button" style="margin-left:16px;" onclick="kb.applyDefaultKey();">USE DEFAULT</button>';
   util.dialog.text(m, kb.xb64DialogCb, opt);
 };
 kb.getDefaultKey = function() {
@@ -3109,7 +3109,7 @@ kb.encodeXB64 = function(key, data) {
     var s = util.xb64.encode(data, key);
     var m = 'Encoded\n\n';
     m += '<span style="margin-left:50px;">' + s + '</span>';
-    m += '<button class="small-button" style="margin-left:12px;margin-right:16px;" onclick="kb.copy(\'' + s + '\', true);">COPY</button>';
+    m += '<button class="small-button" style="margin-left:12px;margin-right:16px;" onclick="kb.copy(\'' + s + '\', true);" data-tooltip="Copy">&#x29C9;</button>';
   } catch(e) {
     m = '<span style="color:#f77;">Decode Error</span>';
   }
@@ -3126,7 +3126,7 @@ kb.maskText = function(s) {
   r += '<div style="display:inline-block;position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(90deg, #aaa, #888 30%);cursor:pointer;" onclick="kb.peel(this);"></div>';
   r += s;
   r += '</div>';
-  r += '<button class="small-button" style="margin-left:8px;margin-right:16px;" onclick="kb.copy(\'' + v + '\', true);">COPY</button>';
+  r += '<button class="small-button" style="margin-left:8px;margin-right:16px;" onclick="kb.copy(\'' + v + '\', true);" data-tooltip="Copy">&#x29C9;</button>';
   return r;
 };
 kb.peel = function(el) {
