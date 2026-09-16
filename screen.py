@@ -54,7 +54,7 @@ def build_main_screen(context, repo):
 
 '''
     html += '      <a href="' + appconfig.home_path + '" style="margin-right:4px;">HOME</a>'
-    html += '      <span id="system-name" style="color:' + appconfig.system_name_color + ';">' + appconfig.system_name + '</span>'
+    html += '      <span id="system-name" class="pseudo-link" style="color:' + appconfig.system_name_color + ';" onclick="kb.openAboutDialog();">' + appconfig.system_name + '</span>'
 
     html += '      <span id="repo-name" style="color:' + appconfig.system_name_color + ';">'
     if repo != kb.get_default_repo_id():

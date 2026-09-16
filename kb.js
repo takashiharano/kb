@@ -3664,6 +3664,10 @@ kb.view.onNoRights = function() {
   $el('#content-body').textseq(msg, {cursor: 3});
 };
 
+kb.openAboutDialog = function() {
+  util.alert('Knowledge Base System\n\n&copy; 2021 Takashi Harano\nMIT License\n\n<a href="https://github.com/takashiharano/kb" target="_blank">GitHub</a>');
+};
+
 //-------------------------------------------------------------------------
 $onBeforeUnload = function(e) {
   if (kb.status & kb.ST_EDITING) {
