@@ -3448,6 +3448,8 @@ kb.tools.encdecB64 = function(enc) {
   } else {
     f = (enc ? util.encodeBase64 : util.decodeBase64);
   }
+  $el('#copy-button-b64').disabled = true;
+  $el('#swap-b64value-button').disabled = true;
   try {
     var v = f(s, k);
     var clz = '';
