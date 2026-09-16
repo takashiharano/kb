@@ -2387,7 +2387,7 @@ kb.openTools = function() {
     },
     body: {
       style: {
-        background: 'rgba(30,34,42,0.9)'
+        background: 'rgba(30,34,42,0.95)'
       }
     },
     onclose: kb.onToolsWindowClose,
