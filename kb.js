@@ -3375,9 +3375,9 @@ kb.tools.buildBsb64Html = function() {
 
   html += '<span class="area-xb64">';
   html += '<span style="margin-left:4px;">Key:</span>';
-  html += '<input type="password" id="xb64-key" style="width:110px;">';
-  html += '<input type="checkbox" id="xb64-key-s" onchange="kb.tools.b64KeySecretChange();">';
-  html += '<label for="xb64-key-s">Show</label>';
+  html += '<input type="text" id="xb64-key" style="width:110px;">';
+  html += '<input type="checkbox" id="xb64-key-hide" onchange="kb.tools.b64KeySecretChange();">';
+  html += '<label for="xb64-key-hide">Hide</label>';
   html += '</span>';
 
   html += '<button style="margin-left:16px;" onclick="kb.tools.encB64();">ENCODE</button>';
@@ -3420,7 +3420,7 @@ kb.tools.onEncDecModeChange = function() {
 };
 
 kb.tools.b64KeySecretChange = function() {
-  var type = ($el('#xb64-key-s').checked ? 'text' : 'password');
+  var type = ($el('#xb64-key-hide').checked ? 'password' : 'text');
   $el('#xb64-key').type = type;
 };
 
