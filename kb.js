@@ -3331,8 +3331,9 @@ kb.tools.buildBsb64Html = function() {
   var html = '';
   html += '<div style="margin-bottom:8px;">';
   html += '<b>BASE64 ENCODER/DECODER</b>';
-
   html += '<span style="margin-left:4px;">';
+  html += '<input type="radio" name="encdec-mode" id="rdo-b64" onchange="kb.tools.onEncDecModeChange();" checked>'
+  html += '<label for="rdo-b64">Base64</label>';
   html += '<input type="radio" name="encdec-mode" id="rdo-bsb64" onchange="kb.tools.onEncDecModeChange();">'
   html += '<label for="rdo-bsb64">BSB64</label>';
   html += '<input type="radio" name="encdec-mode" id="rdo-xb64" onchange="kb.tools.onEncDecModeChange();" checked>'
@@ -3388,7 +3389,7 @@ kb.tools.buildBsb64Html = function() {
   html += '<tr>';
   html += '<td>&nbsp;</td>';
   html += '<td style="padding-top:8px;">';
-  html += '<button class="small-button" style="margin-left:128px;min-width:20px;" onclick="kb.tools.switchB64Value();">&#x21C5;</button>';
+  html += '<button id="swap-b64value-button" class="small-button" style="margin-left:128px;min-width:20px;" onclick="kb.tools.swapB64Value();" disabled>&#x21C5;</button>';
   html += '</td>';
   html += '</tr>';
   html += '<tr>';
@@ -3397,12 +3398,12 @@ kb.tools.buildBsb64Html = function() {
   html += '<input type="text" id="b64-text-out" class="tools-output" style="width:300px;" readonly>';
   html += '</td>';
   html += '<td>';
-  html += '<button class="small-button" style="margin-left:4px;" data-tooltip="Copy" onclick="kb.tools.copy(\'b64-text-out\');">&#x29C9;</button>';
+  html += '<button id="copy-button-b64" class="small-button" style="margin-left:4px;" data-tooltip="Copy" onclick="kb.tools.copy(\'b64-text-out\');" disabled>&#x29C9;</button>';
   html += '</td>';
   html += '</tr>';
   html += '<tr>';
   html += '<td>';
-  html += '<button class="small-button" onclick="kb.tools.clearB64out();;">CLEAR</button>';
+  html += '<button id="clear-button-b64-out" class="small-button" onclick="kb.tools.clearB64out();" disabled>CLEAR</button>';
   html += '</td>';
   html += '</tr>';
   html += '</table>';
@@ -3410,12 +3411,12 @@ kb.tools.buildBsb64Html = function() {
 };
 
 kb.tools.onEncDecModeChange = function() {
-  if ($el('#rdo-xb64').checked) {
-    $el('.area-bsb64').setStyle('display', 'none');
-    $el('.area-xb64').setStyle('display', '');
-  } else {
+  $el('.area-bsb64').setStyle('display', 'none');
+  $el('.area-xb64').setStyle('display', 'none');
+  if ($el('#rdo-bsb64').checked) {
     $el('.area-bsb64').setStyle('display', '');
-    $el('.area-xb64').setStyle('display', 'none');
+  } else if ($el('#rdo-xb64').checked) {
+    $el('.area-xb64').setStyle('display', '');
   }
 };
 
@@ -3438,16 +3439,21 @@ kb.tools.decB64 = function() {
 
 kb.tools.encdecB64 = function(enc) {
   var s = $el('#b64-text-in').value;
-  if ($el('#rdo-xb64').checked) {
-    var k = $el('#xb64-key').value;
-    var f = (enc ? util.xb64.encode : util.xb64.decodeToString);
+  if ($el('#rdo-bsb64').checked) {
+    var k = $el('#bsb64-n').value;
+    var f = (enc ? util.bsb64.encode : util.bsb64.decodeToString);
+  } else if ($el('#rdo-xb64').checked) {
+    k = $el('#xb64-key').value;
+    f = (enc ? util.xb64.encode : util.xb64.decodeToString);
   } else {
-    k = $el('#bsb64-n').value;
-    f = (enc ? util.bsb64.encode : util.bsb64.decodeToString);
+    f = (enc ? util.encodeBase64 : util.decodeBase64);
   }
   try {
     var v = f(s, k);
     var clz = '';
+    $el('#copy-button-b64').disabled = false;
+    $el('#swap-b64value-button').disabled = false;
+    $el('#clear-button-b64-out').disabled = false;
   } catch (e) {
     v = 'ERROR';
   }
@@ -3462,9 +3468,12 @@ kb.tools.encdecB64 = function(enc) {
 kb.tools.resetB64Input = function() {
   $el('#b64-text-in').value = '';
   $el('#b64-text-out').value = '';
+  $el('#copy-button-b64').disabled = true;
+  $el('#swap-b64value-button').disabled = true;
+  $el('#clear-button-b64-out').disabled = true;
 };
 
-kb.tools.switchB64Value = function() {
+kb.tools.swapB64Value = function() {
   var v1 = $el('#b64-text-in').value;
   var v2 = $el('#b64-text-out').value;
   $el('#b64-text-in').value = v2;
@@ -3473,6 +3482,9 @@ kb.tools.switchB64Value = function() {
 
 kb.tools.clearB64out = function() {
   $el('#b64-text-out').value = '';
+  $el('#copy-button-b64').disabled = true;
+  $el('#swap-b64value-button').disabled = true;
+  $el('#clear-button-b64-out').disabled = true;
 };
 
 kb.tools.buildPwGenHtml = function() {
@@ -3482,7 +3494,7 @@ kb.tools.buildPwGenHtml = function() {
   html += '<table>';
   html += '<tr>';
   html += '<td>';
-  html += 'Chars:';
+  html += 'CHARS:';
   html += '</td>';
   html += '<td>';
   html += '<input type="text" id="pwgen-chars" style="width:480px;" value="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789">';
@@ -3496,7 +3508,7 @@ kb.tools.buildPwGenHtml = function() {
   html += '</td>';
   html += '<td>';
   html += '<input type="text" id="pwgen-out" class="tools-output" style="width:480px;" readonly>';
-  html += '<button class="small-button" style="margin-left:4px;" data-tooltip="Copy" onclick="kb.tools.copy(\'pwgen-out\');">&#x29C9;</button>';
+  html += '<button id="copy-button-pw"  class="small-button" style="margin-left:4px;" data-tooltip="Copy" onclick="kb.tools.copy(\'pwgen-out\');" disabled>&#x29C9;</button>';
   html += '</td>';
   html += '</tr>';
   html += '</table>';
@@ -3510,6 +3522,7 @@ kb.tools.genPw = function() {
   var s = '';
   if (len > 0) s = util.randomString(chars, len);
   $el('#pwgen-out').value = s;
+  $el('#copy-button-pw').disabled = false;
 };
 
 kb.tools.copy = function(id) {
