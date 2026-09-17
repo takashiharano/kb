@@ -204,8 +204,7 @@ def build_main_screen(context, repo):
           <input type="range" value="0" min="6" max="64" step="1" id="font-range" style="position:relative;top:6px;" oninput="kb.onFontRangeChanged(this);" onchange="kb.onFontRangeChanged(this);"><span id="fontsize"></span>
           <button onclick="kb.resetFontSize();">RESET</button>
           <span style="margin-left:16px;">Font: </sapn><input type="text" id="font" oninput="kb.onFontChanged(this);" onchange="kb.onFontChanged(this);">
-          <span class="pseudo-link subfunc" onclick="kb.changeFont('monospace');">[monospace]</span>
-          <button onclick="kb.changeFont('');">RESET</button>
+          <button id="monospace-button-w" class="small-button" onclick="kb.toggleMonospaceFont('');">monospace</button>
           <span style="position:absolute;right:8px;margin-top:10px;">
             <span class="for-view meta-info">
               <span>CREATED: <span id="content-created-date"></span> <span id="content-created-by"></span></span><span>&nbsp;&nbsp;UPDATED: <span id="content-updated-date"></span> <span id="content-updated-by"></span><span id="content-assignee"></span></span>
@@ -308,8 +307,7 @@ kb.mode = 'view'
           <input type="range" value="0" min="6" max="64" step="1" id="font-range" style="position:relative;top:6px;" oninput="kb.onFontRangeChanged(this);" onchange="kb.onFontRangeChanged(this);"><span id="fontsize"></span>
           <button onclick="kb.resetFontSize();">RESET</button>
           <span style="margin-left:16px;">Font: </sapn><input type="text" id="font" oninput="kb.onFontChanged(this);" onchange="kb.onFontChanged(this);">
-          <span class="pseudo-link subfunc" onclick="kb.changeFont('monospace');">[monospace]</span>
-          <button onclick="kb.changeFont('');">RESET</button>
+          <button id="monospace-button-r" class="small-button" onclick="kb.toggleMonospaceFont('');">monospace</button>
         </div>
       </div>
     </div>

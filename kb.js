@@ -2480,6 +2480,7 @@ kb.resetFontSize = function() {
 };
 
 kb.fontFamily = '';
+kb.fontFamilyBk = null;
 kb.forceFontChanged = false;
 kb.onFontChanged = function(el) {
   var v = el.value;
@@ -2502,6 +2503,25 @@ kb.setFont = function(n) {
 kb.changeFont = function(n) {
   kb.setFont(n);
   kb.fontFamily = n;
+};
+kb.toggleMonospaceFont = function() {
+  if (kb.fontFamilyBk === null) {
+    kb.setMonospaceFontMode();
+  } else {
+    kb.unsetMonospaceFontMode();
+  }
+};
+kb.setMonospaceFontMode = function() {
+  kb.fontFamilyBk = kb.fontFamily;
+  kb.changeFont('monospace');
+  $el('#monospace-button-r').addClass('button-active');
+  $el('#monospace-button-w').addClass('button-active');
+};
+kb.unsetMonospaceFontMode = function() {
+  kb.changeFont(kb.fontFamilyBk);
+  kb.fontFamilyBk = null;
+  $el('#monospace-button-r').removeClass('button-active');
+  $el('#monospace-button-w').removeClass('button-active');
 };
 
 kb.getSelfSizePos = function(el) {

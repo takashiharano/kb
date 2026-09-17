@@ -1,5 +1,5 @@
 #==============================================================================
-# Knowledge Base System - Stylesheet
+# Knowledge Base System - Style Sheet
 # Copyright 2024 Takashi Harano
 # Released under the MIT License
 #==============================================================================
@@ -62,6 +62,10 @@ input[type="checkbox"] {
     css += '  border: 1px solid ' + appconfig.button_disabled_border + ';'
     css += '  background: ' + appconfig.button_disabled_background + ';'
     css += '  color: ' + appconfig.button_disabled_fgcolor + ';'
+    css += '}'
+    css += '.button-active {'
+    css += '  background: ' + appconfig.button_focus_background + ';'
+    css += '  color: ' + appconfig.button_focus_fgcolor + ';'
     css += '}'
 
     css += 'pre {'
