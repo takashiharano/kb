@@ -36,9 +36,8 @@ def build_main_screen(context, repo):
 <meta name="viewport" content="width=device-width,initial-scale=1">
 '''
     html += '<title>' + appconfig.title + '</title>'
-    html += '<style>'
-    html += style.build_css(mode='main')
-    html += '</style>'
+    html += '<link rel="stylesheet" href="./style.css" />'
+    html += '<style>' + style.build_css() + '</style>'
     html += '<script src="' + ROOT_PATH + 'libs/sha.js"></script>'
     html += '<script src="' + ROOT_PATH + 'libs/debug.js"></script>'
     html += '<script src="' + ROOT_PATH + 'libs/util.js"></script>'
@@ -54,9 +53,9 @@ def build_main_screen(context, repo):
 
 '''
     html += '      <a href="' + appconfig.home_path + '" style="margin-right:4px;">HOME</a>'
-    html += '      <span id="system-name" class="pseudo-link" style="color:' + appconfig.system_name_color + ';" onclick="kb.openAboutDialog();">' + appconfig.system_name + '</span>'
+    html += '      <span id="system-name" class="pseudo-link" onclick="kb.openAboutDialog();">' + appconfig.system_name + '</span>'
 
-    html += '      <span id="repo-name" style="color:' + appconfig.system_name_color + ';">'
+    html += '      <span id="repo-name">'
     if repo != kb.get_default_repo_id():
         html += ' - ' + repo_name
     html += '</span>'
@@ -245,9 +244,8 @@ def build_view_screen(context):
 <meta name="viewport" content="width=device-width,initial-scale=1">
 '''
     html += '<title>' + appconfig.title + '</title>'
-    html += '<style>'
-    html += style.build_css(mode='view')
-    html += '</style>'
+    html += '<link rel="stylesheet" href="./style.css" />'
+    html += '<style>' + style.build_css() + '</style>'
     html += '<script src="' + ROOT_PATH + 'libs/debug.js"></script>'
     html += '<script src="' + ROOT_PATH + 'libs/util.js"></script>'
     html += '<script src="' + ROOT_PATH + 'websys/websys.js"></script>'
@@ -324,9 +322,8 @@ def build_forbidden_screen(context):
 <meta name="viewport" content="width=device-width,initial-scale=1">
 '''
     html += '<title>' + appconfig.title + '</title>'
-    html += '<style>'
-    html += style.build_css(mode='main')
-    html += '</style>'
+    html += '<link rel="stylesheet" href="./style.css" />'
+    html += '<style>' + style.build_css() + '</style>'
     html += '<script src="' + ROOT_PATH + 'libs/debug.js"></script>'
     html += '<script src="' + ROOT_PATH + 'libs/util.js"></script>'
     html += '<script src="' + ROOT_PATH + 'websys/websys.js"></script>'

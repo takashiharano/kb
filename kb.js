@@ -544,7 +544,7 @@ kb.buildListHeader = function(sortIdx, sortOrder) {
     var head = label;
     if (column.sort !== false) {
       var sortButton = kb.buildSortButton(key, i, sortIdx, sortOrder);
-      head = '<span class="colum-header" onclick="kb.sortDataList(\'' + key + '\', ' + sortButton.nextSortType + ');">' + label + '</span> ' + sortButton.button;
+      head = '<span class="column-header" onclick="kb.sortDataList(\'' + key + '\', ' + sortButton.nextSortType + ');">' + label + '</span> ' + sortButton.button;
     }
 
     html += '<th class="item-list' + clz + '">' + head + '</th>';
