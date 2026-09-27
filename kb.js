@@ -32,7 +32,6 @@ kb.LIST_COLUMNS = [
   {key: 'C_USER', label: 'BY'},
   {key: 'U_DATE', label: 'UPDATED'},
   {key: 'U_USER', label: 'BY'},
-  {key: 'ASSIGNEE', label: 'ASSIGNEE'},
   {key: 'STATUS', label: 'STATUS'},
   {key: 'LABELS', label: 'LABELS'},
   {key: 'score', label: 'SCORE', align: 'r', meta: true},
@@ -406,13 +405,6 @@ kb.buildDataListRow = function(data, fixed, cnt) {
     uUserLink = '<span class="pseudo-link" onclick="kb.fieldSearch(\'updated_by\', \'' + uUser + '\');">' + uUserLabel + '</span>';
   }
 
-  var assignee = (content.ASSIGNEE ? content.ASSIGNEE : '');
-  var assigneeLink = '';
-  if (assignee) {
-    if (assignee.toLowerCase() == currentUserName.toLowerCase()) assigneeLink = '<span style="color:#d66;cursor:default;" data-tooltip2="You">*</span>'
-    assigneeLink += '<span class="pseudo-link" onclick="kb.fieldSearch(\'assignee\', \'' + assignee + '\');">' + assignee + '</span>';
-  }
-
   var dataPrivs = content.PRIVS || '';
 
   if (!title) {
@@ -476,7 +468,6 @@ kb.buildDataListRow = function(data, fixed, cnt) {
   html += '<td style="padding-right:16px;">' + cUserLink + '</td>';
   html += '<td style="width:145px;padding-right:0.5em;">' + uDateStr + '</td>';
   html += '<td style="padding-right:16px;">' + uUserLink + '</td>';
-  html += '<td style="padding-right:8px;">' + assigneeLink + '</td>';
   html += '<td style="padding-right:0.5em;">' + statusLabel + '</td>';
   html += '<td>' + labelsHTML + '</td>';
   html += '<td style="text-align:right;padding-left:0.5em;padding-right:0.5em;">' + score + '</td>';
@@ -660,7 +651,7 @@ kb.searchByIds = function(ids, reload, limit) {
   kb.searchByKeyword(q, reload, limit);
 };
 kb.searchByKeyword = function(q, reload, limit) {
-  if (q.match(/^label:[^\s]+?$/) || q.match(/^status:[^\s]+?$/) || q.match(/^updated_..:.+?$/) || q.match(/^assignee:.+?$/)) {
+  if (q.match(/^label:[^\s]+?$/) || q.match(/^status:[^\s]+?$/) || q.match(/^updated_..:.+?$/)) {
     kb.listStatus.sortKey = 'U_DATE';
   } else if (q.match(/^created_..:.+?$/)) {
     kb.listStatus.sortKey = 'C_DATE';
@@ -1214,7 +1205,6 @@ kb.saveData = function() {
   var labels = $el('#content-labels-edt').value.trim();
   labels = labels.replace(/\s{2,}/g, ' ');
   var status = $el('#select-status').value;
-  var assignee = $el('#content-assignee-edt').value.trim();
   var logic = kb.data.content.LOGIC;
 
   if (!title) {
@@ -1251,7 +1241,6 @@ kb.saveData = function() {
     content.TITLE = title;
     content.LABELS = labels;
     content.STATUS = status;
-    content.ASSIGNEE = assignee;
     content.FLAGS = kb.data.content.FLAGS;
     content.PASSWORD = kb.data.content.PASSWORD;
     content.LOGIC = b64Logic;
@@ -1429,7 +1418,6 @@ kb.drawData = function(data) {
   var title = content.TITLE;
   var labels = content.LABELS;
   var status = content.STATUS;
-  var assignee = content.ASSIGNEE;
   var fontFamily = content.FONT;
   var data_status = data.status;
   var contentBody = content.BODY;
@@ -1450,7 +1438,6 @@ kb.drawData = function(data) {
   $el('#content-title').innerHTML = titleLabel;
   $el('#content-labels').innerHTML = labelsHTML;
   $el('#select-status').value = status;
-  $el('#content-assignee-edt').value = assignee;
   if (kb.status & kb.ST_APP_READY) {
     $el('#content-body').innerHTML = contentBody;
   }
@@ -1460,13 +1447,11 @@ kb.drawData = function(data) {
     $el('#content-created-by').innerHTML = '';
     $el('#content-updated-date').innerHTML = '';
     $el('#content-updated-by').innerHTML = '';
-    $el('#content-assignee').innerHTML = '';
   } else {
     $el('#content-created-date').innerHTML = cDateStr;
     $el('#content-created-by').innerHTML = 'by ' + content.C_USER;
     $el('#content-updated-date').innerHTML = uDateStr;
     $el('#content-updated-by').innerHTML = 'by ' + content.U_USER;
-    if (content.ASSIGNEE) $el('#content-assignee').innerHTML = '&nbsp;&nbsp;ASSIGNEE: ' + content.ASSIGNEE;
   }
 
   $el('#exec-logic-button').disabled = (content.LOGIC ? false : true);
@@ -1668,7 +1653,6 @@ kb.clearContent = function() {
       C_USER: '',
       U_DATE: '',
       U_USER: '',
-      ASSIGNEE: '',
       TITLE: '',
       LABELS: '',
       STATUS: '',

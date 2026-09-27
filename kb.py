@@ -36,7 +36,6 @@ DEFAULT_CONTENT = {
     'C_USER': '',
     'U_DATE': '',
     'U_USER': '',
-    'ASSIGNEE': '',
     'LABELS': '',
     'STATUS': '',
     'FLAGS': '',
@@ -49,7 +48,6 @@ RESTRICTED_PROP_KEYS = [
     'C_USER',
     'U_DATE',
     'U_USER',
-    'ASSIGNEE',
     'PRIVS',
     'PASSWORD'
 ]
@@ -631,10 +629,6 @@ def calc_data_macthed_score(data, keyword):
         keyword = get_field_sraech_keyword(keyword, 'updated_by')
         score = is_target_matches(content['U_USER'], keyword, True)
 
-    elif keyword_lc.startswith('assignee:'):
-        keyword = get_field_sraech_keyword(keyword, 'assignee')
-        score = is_target_matches(content['ASSIGNEE'], keyword, True)
-
     elif keyword_lc.startswith('priv:'):
         keyword = get_field_sraech_keyword(keyword, 'priv')
         if is_matches_items(content, 'PRIVS', keyword):
@@ -951,7 +945,6 @@ def save_data(repo, id, new_data, user='', as_anonymous=False):
         content['TITLE'] = title
         content['LABELS'] = labels
         content['STATUS'] = new_content['STATUS']
-        content['ASSIGNEE'] = new_content['ASSIGNEE']
         content['FLAGS'] = new_content['FLAGS']
 
         if 'PRIVS' in new_content:

@@ -206,11 +206,7 @@ def build_main_screen(context, repo):
           <button id="monospace-button-w" class="small-button" onclick="kb.toggleMonospaceFont('');">monospace</button>
           <span style="position:absolute;right:8px;margin-top:10px;">
             <span class="for-view meta-info">
-              <span>CREATED: <span id="content-created-date"></span> <span id="content-created-by"></span></span><span>&nbsp;&nbsp;UPDATED: <span id="content-updated-date"></span> <span id="content-updated-by"></span><span id="content-assignee"></span></span>
-            </span>
-            <span class="for-edit">
-              <span style="margin-left:12px;">ASSIGNEE:</span>
-              <input type="text" id="content-assignee-edt" spellcheck="false">
+              <span>CREATED: <span id="content-created-date"></span> <span id="content-created-by"></span></span><span>&nbsp;&nbsp;UPDATED: <span id="content-updated-date"></span> <span id="content-updated-by"></span></span>
             </span>
           </span>
         </div>
