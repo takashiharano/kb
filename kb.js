@@ -2359,9 +2359,9 @@ kb.openTools = function() {
     resizable: true,
     pos: 'c',
     closeButton: true,
-    width: 740,
+    width: 830,
     height: 320,
-    minWidth: 740,
+    minWidth: 830,
     minHeight: 320,
     scale: 1,
     hidden: false,
@@ -3503,8 +3503,8 @@ kb.tools.buildPwGenHtml = function() {
   html += 'CHARS:';
   html += '</td>';
   html += '<td>';
-  html += '<input type="text" id="pwgen-chars" style="width:480px;" value="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789">';
-  html += '<span style="margin-left:4px;">Length:</span><input type="text" id="pwgen-len" style="width:28px;" value="8">';
+  html += '<input type="text" id="pwgen-chars" style="width:580px;" value="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&*+-=@^_">';
+  html += '<span style="margin-left:4px;">Length:</span><input type="text" id="pwgen-len" style="width:28px;" value="16">';
   html += '<button style="margin-left:4px;" onclick="kb.tools.genPw();">GENERATE</button>';
   html += '</td>';
   html += '</tr>';
@@ -3513,7 +3513,7 @@ kb.tools.buildPwGenHtml = function() {
   html += 'Output:';
   html += '</td>';
   html += '<td>';
-  html += '<input type="text" id="pwgen-out" class="tools-output" style="width:480px;" readonly>';
+  html += '<input type="text" id="pwgen-out" class="tools-output" style="width:600px;" readonly>';
   html += '<button id="copy-button-pw"  class="small-button" style="margin-left:4px;" data-tooltip="Copy" onclick="kb.tools.copy(\'pwgen-out\');" disabled>&#x29C9;</button>';
   html += '</td>';
   html += '</tr>';
