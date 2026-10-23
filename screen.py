@@ -84,7 +84,7 @@ def build_main_screen(context, repo):
     html += '<button id="all-button" style="margin-left:16px;min-width:32px;" onclick="kb.getDataListAll();">LIST ALL</button>'
 
     html += '<span id="limit-label" style="margin-left:16px;"><span style="cursor:pointer;" onclick="kb.toggleLimit();">Limit</span>:</span>'
-    html += '<input type="text" id="limit" class="q-txt" spellcheck="false" style="width:50px;">'
+    html += '<input type="text" id="limit" class="q-txt" style="width:50px;">'
 
     html += '<button style="margin-left:36px;" onclick="kb.openNewWindow();">NEW WIN</button>'
 
@@ -202,7 +202,7 @@ def build_main_screen(context, repo):
         <div style="position:absolute;bottom:8px;height:25px;width:calc(100% - 8px);">
           <input type="range" value="0" min="6" max="64" step="1" id="font-range" style="position:relative;top:6px;" oninput="kb.onFontRangeChanged(this);" onchange="kb.onFontRangeChanged(this);"><span id="fontsize"></span>
           <button onclick="kb.resetFontSize();">RESET</button>
-          <span style="margin-left:16px;">Font: </sapn><input type="text" id="font" oninput="kb.onFontChanged(this);" onchange="kb.onFontChanged(this);">
+          <span style="margin-left:16px;">Font: </sapn><input type="text" id="font" spellcheck="false" oninput="kb.onFontChanged(this);" onchange="kb.onFontChanged(this);">
           <button id="monospace-button-w" class="small-button" onclick="kb.toggleMonospaceFont('');">monospace</button>
           <span style="position:absolute;right:8px;margin-top:10px;">
             <span class="for-view meta-info">

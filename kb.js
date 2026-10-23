@@ -3361,7 +3361,7 @@ kb.tools.buildBsb64Html = function() {
   html += '<tr style="height:28px;">';
   html += '<td>Input: </td>';
   html += '<td>';
-  html += '<input type="text" id="b64-text-in" style="width:310px;">';
+  html += '<input type="text" id="b64-text-in" style="width:400px;" spellcheck="false">';
   html += '</td>';
   html += '<td>';
 
@@ -3380,7 +3380,7 @@ kb.tools.buildBsb64Html = function() {
 
   html += '<span class="area-xb64">';
   html += '<span style="margin-left:4px;">Key:</span>';
-  html += '<input type="text" id="xb64-key" style="width:110px;">';
+  html += '<input type="text" id="xb64-key" style="width:113px;" spellcheck="false">';
   html += '<input type="checkbox" id="xb64-key-hide" onchange="kb.tools.b64KeySecretChange();">';
   html += '<label for="xb64-key-hide">Hide</label>';
   html += '</span>';
@@ -3398,10 +3398,8 @@ kb.tools.buildBsb64Html = function() {
   html += '</tr>';
   html += '<tr>';
   html += '<td>Output: </td>';
-  html += '<td>';
-  html += '<input type="text" id="b64-text-out" class="tools-output" style="width:300px;" readonly>';
-  html += '</td>';
-  html += '<td>';
+  html += '<td colspan="2">';
+  html += '<input type="text" id="b64-text-out" class="tools-output" style="width:400px;" spellcheck="false" readonly>';
   html += '<button id="copy-button-b64" class="small-button" style="margin-left:4px;" data-tooltip="Copy" onclick="kb.tools.copy(\'b64-text-out\');" disabled>&#x29C9;</button>';
   html += '</td>';
   html += '</tr>';
@@ -3503,7 +3501,7 @@ kb.tools.buildPwGenHtml = function() {
   html += 'CHARS:';
   html += '</td>';
   html += '<td>';
-  html += '<input type="text" id="pwgen-chars" style="width:580px;" value="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&*+-=@^_">';
+  html += '<input type="text" id="pwgen-chars" style="width:580px;" spellcheck="false" value="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&*+-=@^_">';
   html += '<span style="margin-left:4px;">Length:</span><input type="text" id="pwgen-len" style="width:28px;" value="16">';
   html += '<button style="margin-left:4px;" onclick="kb.tools.genPw();">GENERATE</button>';
   html += '</td>';
@@ -3513,7 +3511,7 @@ kb.tools.buildPwGenHtml = function() {
   html += 'Output:';
   html += '</td>';
   html += '<td>';
-  html += '<input type="text" id="pwgen-out" class="tools-output" style="width:600px;" readonly>';
+  html += '<input type="text" id="pwgen-out" class="tools-output" style="width:600px;" spellcheck="false" readonly>';
   html += '<button id="copy-button-pw"  class="small-button" style="margin-left:4px;" data-tooltip="Copy" onclick="kb.tools.copy(\'pwgen-out\');" disabled>&#x29C9;</button>';
   html += '</td>';
   html += '</tr>';
