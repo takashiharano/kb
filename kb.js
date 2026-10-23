@@ -3356,6 +3356,11 @@ kb.tools.buildBsb64Html = function() {
   html += '<input type="radio" name="encdec-mode" id="rdo-xb64" onchange="kb.tools.onEncDecModeChange();" checked>'
   html += '<label for="rdo-xb64">XB64</label>';
   html += '</span>';
+
+  html += '<span style="margin-left:8px;">';
+  html += '<input type="checkbox" id="b64-notation">';
+  html += '<label for="b64-notation">Notation</label>';
+  html += '</span>';
   html += '</div>';
 
   html += '<table>';
@@ -3454,19 +3459,31 @@ kb.tools.decB64 = function() {
 
 kb.tools.encdecB64 = function(enc) {
   var s = $el('#b64-text-in').value;
-  if ($el('#rdo-bsb64').checked) {
-    var k = $el('#bsb64-n').value;
-    var f = (enc ? util.bsb64.encode : util.bsb64.decodeToString);
-  } else if ($el('#rdo-xb64').checked) {
-    k = $el('#xb64-key').value;
-    f = (enc ? util.xb64.encode : util.xb64.decodeToString);
-  } else {
-    f = (enc ? util.encodeBase64 : util.decodeBase64);
+  var mode = ($el('#rdo-bsb64').checked ? 'bsb64' : ($el('#rdo-xb64').checked ? 'xb64' : 'b64'));
+  switch (mode) {
+    case 'bsb64':
+      var k = $el('#bsb64-n').value;
+      var f = (enc ? util.bsb64.encode : util.bsb64.decodeToString);
+      break;
+    case 'xb64':
+      k = $el('#xb64-key').value;
+      f = (enc ? util.xb64.encode : util.xb64.decodeToString);
+      break;
+    default:
+      f = (enc ? util.encodeBase64 : util.decodeBase64);
   }
   $el('#copy-button-b64').disabled = true;
   $el('#swap-b64value-button').disabled = true;
   try {
     var v = f(s, k);
+    if (enc && $el('#b64-notation').checked) {
+      v = mode + ':' + v;
+      if (mode == 'bsb64') {
+        v += '#' + k;
+      } else if (mode == 'xb64') {
+        v += (k ? '#' + k : '');
+      }
+    }
     var clz = '';
     $el('#copy-button-b64').disabled = false;
     $el('#swap-b64value-button').disabled = false;
