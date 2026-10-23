@@ -1589,9 +1589,18 @@ kb.decodeB64Image = function(s) {
 };
 
 kb.linkBsb64Data = function(s) {
-  var t = '<span class="pseudo-link link" onclick="kb.openBSB64Dialog(\'$2\', 0);" data-tooltip2="Click to decode">$2</span>';
-  s = s.replace(/(bsb64:)([A-Za-z0-9+/=$]+)/g, t);
-  return s;
+  return s.replace(/bsb64:([A-Za-z0-9+/=$]+)(?:#(\d+))?/g, kb._linkBsb64Data);
+};
+kb._linkBsb64Data = function(match, payload, n) {
+  var onclick;
+  var attr = '';
+  if (n === undefined) {
+    onclick = 'kb.openBSB64Dialog(this.textContent);';
+  } else {
+    attr = ' data-bsb64-n="' + n + '"';
+    onclick = 'kb.decodeBSB64(this.textContent, this.dataset.bsb64N);';
+  }
+  return '<span class="pseudo-link link"' + attr + ' onclick="' + onclick + '" data-tooltip2="Click to decode">' + payload + '</span>';
 };
 
 kb.linkXB64Data = function(s) {
