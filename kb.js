@@ -3469,6 +3469,15 @@ kb.tools.decB64 = function() {
 kb.tools.encdecB64 = function(enc) {
   var s = $el('#b64-text-in').value;
   var mode = ($el('#rdo-bsb64').checked ? 'bsb64' : ($el('#rdo-xb64').checked ? 'xb64' : 'b64'));
+
+  if (!enc) {
+    var parsed = kb.tools.applyB64Notation(s);
+    if (parsed) {
+      mode = parsed.mode;
+      s = parsed.payload;
+    }
+  }
+
   switch (mode) {
     case 'bsb64':
       var k = $el('#bsb64-n').value;
@@ -3506,6 +3515,31 @@ kb.tools.encdecB64 = function(enc) {
   } else {
     util.removeClass('#b64-text-out', 'text-error');
   }
+};
+
+kb.tools.applyB64Notation = function(s) {
+  var m = s.match(/^(b64|bsb64|xb64):([A-Za-z0-9+/=]+)(?:#(.+))?$/);
+  if (!m) return null;
+  var mode = m[1];
+  var payload = m[2];
+  var param = m[3];
+
+  if (((mode == 'bsb64') && (param !== undefined) && !/^\d+$/.test(param)) ||
+      ((mode == 'b64') && (param !== undefined))) {
+    return null;
+  }
+
+  $el('#rdo-' + mode).checked = true;
+
+  if ((mode == 'bsb64') && (param !== undefined)) {
+    var n = String(Number(param.slice(-3))) % 8;
+    $el('#bsb64-n').value = n;
+  } else if ((mode == 'xb64') && (param !== undefined)) {
+    $el('#xb64-key').value = param;
+  }
+
+  kb.tools.onEncDecModeChange();
+  return {mode: mode, payload: payload};
 };
 
 kb.tools.resetB64Input = function() {
