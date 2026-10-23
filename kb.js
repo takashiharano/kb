@@ -1595,8 +1595,21 @@ kb.linkBsb64Data = function(s) {
 };
 
 kb.linkXB64Data = function(s) {
-  var t = '<span class="pseudo-link link" onclick="kb.openXB64Dialog(\'$2\');" data-tooltip2="Click to decode">$2</span>';
-  s = s.replace(/(b64:)([A-Za-z0-9+/=$]+)/g, t);
+  return s.replace(/xb64:([A-Za-z0-9+/=$]+)(?:#([^\s<>]+))?|(?<!x)b64:([A-Za-z0-9+/=$]+)/g, kb._linkXB64Data);
+};
+kb._linkXB64Data = function(match, payload, key, b64) {
+  var s = '<span class="pseudo-link link" ';
+  var label;
+  var onclick;
+  if (key === undefined) {
+    label = (payload === undefined ? b64 : payload);
+    onclick = 'kb.openXB64Dialog(\'' + label + '\');';
+  } else {
+    s += 'data-xb64-key="' + key.replace(/"/g, '&quot;') + '"';
+    onclick = 'kb.decodeXB64(this.dataset.xb64Key, this.textContent);';
+    label = payload;
+  }
+  s += ' onclick="' + onclick + '" data-tooltip2="Click to decode">' + label + '</span>';
   return s;
 };
 
