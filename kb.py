@@ -60,12 +60,16 @@ def get_workspace_path():
     return WORKSPACE_PATH
 
 def get_repo_dir_path(repo):
+    if not is_valid_repo_id(repo):
+        raise ValueError('ILLEGAL_REPO_ID')
     return DATA_BASE_DIR_PATH + repo + '/'
 
 def get_data_dir_path(repo):
-    return DATA_BASE_DIR_PATH + repo + '/data/'
+    return get_repo_dir_path(repo) + 'data/'
 
 def get_datafile_path(repo, id):
+    if not is_valid_data_id(id):
+        raise ValueError('ILLEGAL_DATA_ID')
     datadir = get_data_dir_path(repo)
     return datadir + id + '.txt'
 
@@ -85,12 +89,20 @@ def get_categories_file_path(repo):
 def get_default_repo_id():
     return DEFAULT_REPO_ID
 
+def is_valid_repo_id(repo):
+    return bool(repo) and re.fullmatch(r'[a-z0-9_-]+', repo) is not None
+
+def is_valid_data_id(id):
+    return bool(id) and re.fullmatch(r'[A-Za-z0-9_-]+', id) is not None
+
 #------------------------------------------------------------------------------
 def get_repo_list(context):
     dirs = util.list_dirs(DATA_BASE_DIR_PATH)
     repo_list = []
     for i in range(len(dirs)):
         repo = dirs[i]
+        if not is_valid_repo_id(repo):
+            continue
         if has_privilege_for_repo(context, repo):
             props = load_repo_props(repo)
             repo_data = {
@@ -102,6 +114,8 @@ def get_repo_list(context):
 
 #------------------------------------------------------------------------------
 def has_privilege_for_repo(context, repo):
+    if not is_valid_repo_id(repo):
+        return False
     props = load_repo_props(repo)
     if is_authorized(context):
         if not 'privs' in props:
@@ -154,17 +168,20 @@ def load_categories(repo):
 
 #------------------------------------------------------------------------------
 def repo_exists(repo):
-    path = DATA_BASE_DIR_PATH + repo
+    if not is_valid_repo_id(repo):
+        return False
+    path = get_repo_dir_path(repo)
     return util.path_exists(path)
 
 #------------------------------------------------------------------------------
 def create_repo(repo, props):
-    if repo_exists(repo):
-        return 'REPO_ALREADY_EXISTS'
-    if not util.match(repo, '^[a-z0-9_\\-]+$'):
+    if not is_valid_repo_id(repo):
         return 'ILLEGAL_REPO_ID'
 
-    path = DATA_BASE_DIR_PATH + repo
+    if repo_exists(repo):
+        return 'REPO_ALREADY_EXISTS'
+
+    path = get_repo_dir_path(repo)
     util.mkdir(path)
     save_repo_props(repo, props)
     return 'OK'
@@ -172,7 +189,7 @@ def create_repo(repo, props):
 def delete_repo(repo):
     if not repo_exists(repo):
         return 'REPO_NOT_FOUND'
-    path = DATA_BASE_DIR_PATH + repo
+    path = get_repo_dir_path(repo)
     try:
         util.rmdir(path, True)
         status = 'OK'
@@ -851,8 +868,8 @@ def load_data(repo, id, head_only=False):
         'content': None
     }
 
-    fileinfo = get_datafile_info(repo, id)
     try:
+        fileinfo = get_datafile_info(repo, id)
         text = load_data_as_text(repo, id)
     except Exception as e:
         data['status'] = str(e)
@@ -1029,8 +1046,8 @@ def write_data(repo, id, content, encryption_key=None, path=None):
 def delete_data(repo, id):
     if id == '':
         return 'ERR_ROOT_PATH'
-    if util.match(id, '\\.\\.'):
-        return 'ERR_PARENT_PATH'
+    if not is_valid_data_id(id):
+        return 'ILLEGAL_DATA_ID'
     path = get_datafile_path(repo, id)
     if not util.path_exists(path):
         return 'NOT_FOUND'
@@ -1109,25 +1126,32 @@ def get_vacant_ids(repo):
     return result
 
 def change_data_id(repo, id_fm, id_to):
+    if not is_valid_data_id(id_fm) or not is_valid_data_id(id_to):
+        return 'ILLEGAL_DATA_ID'
+
     if not check_exists(repo, id_fm):
         return 'SRC_NOT_FOUND'
+
     if check_exists(repo, id_to):
         return 'DEST_ALREADY_EXISTS'
+
     path_fm = get_datafile_path(repo, id_fm)
     path_to = get_datafile_path(repo, id_to)
     ret = util.move(path_fm, path_to)
+
     if ret:
         return 'OK'
     return 'FAILED:NEED_TO_FILE_CHECK_ON_THE_SERVER'
 
 def export_data(repo, decrypt=False):
+    data_dir_path = get_data_dir_path(repo)
     if decrypt:
         wk_data_path = WK_PATH + repo + '/data/'
         util.mkdir(wk_data_path)
         decrypt_data(repo, wk_data_path)
         target_path = wk_data_path
     else:
-        target_path = get_data_dir_path(repo)
+        target_path = data_dir_path
 
     b = util.zip(None, target_path)
     util.delete(WK_PATH, True)
@@ -1363,7 +1387,7 @@ def is_anonymous_allowed(repo):
     return is_anonymous_op_allowed(repo, '*')
 
 def is_anonymous_op_allowed(repo, operation_name):
-    if repo is None:
+    if not is_valid_repo_id(repo):
         return False
 
     props = load_repo_props(repo)
