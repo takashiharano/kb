@@ -702,6 +702,21 @@ def main():
     context = websys.on_access()
 
     act = get_request_param('act')
+    mutating_actions = (
+        'save_data',
+        'touch',
+        'mod_props',
+        'save_logic',
+        'delete',
+        'change_data_id',
+        'save_repo_props',
+        'create_repo',
+        'delete_repo'
+    )
+    if act in mutating_actions and not websys.is_valid_api_request():
+        send_result_json('FORBIDDEN')
+        return
+
     if act is None:
         util.send_response(appconfig.system_name)
     elif act == 'get':
