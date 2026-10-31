@@ -46,12 +46,12 @@ def send_result_json(status, body=None):
 
 #------------------------------------------------------------------------------
 def has_valid_api_token():
-    apitoken = get_request_param('apitoken')
-    if not apitoken:
+    api_token = get_request_param('api_token')
+    if not api_token:
         return False
     for i in range(len(appconfig.api_tokens)):
         token = appconfig.api_tokens[i]
-        if token and apitoken == token:
+        if token and api_token == token:
             return True
     return False
 
@@ -170,7 +170,7 @@ def proc_save_data(context):
         kblog.write_operation_log(context, 'SAVE_DATA:REPOSITORY_NOT_FOUND', repo, id)
         return create_result_object('REPOSITORY_NOT_FOUND')
 
-    if not kb.has_privilege_for_repo(context, repo):
+    if not kb.has_privilege_for_repo(context, repo) or not kb.can_operate(context, repo, 'write'):
         kblog.write_operation_log(context, 'SAVE_DATA:FORBIDDEN', repo, id)
         return create_result_object('NO_ACCESS_RIGHTS')
 
@@ -221,7 +221,7 @@ def proc_touch(context):
     keep_updated_by = True if p_keep_updated_by == '1' else False
     info = 'keep_updated_by=1' if keep_updated_by else ''
 
-    if not kb.has_privilege_for_repo(context, repo):
+    if not kb.has_privilege_for_repo(context, repo) or not kb.can_operate(context, repo, 'write'):
         kblog.write_operation_log(context, 'TOUCH:FORBIDDEN', repo, p_ids, info=info)
         return create_result_object('NO_ACCESS_RIGHTS')
 
@@ -249,6 +249,10 @@ def proc_touch(context):
 def proc_mod_props(context):
     repo = get_req_param_repo()
     id = get_request_param('id')
+
+    if not kb.has_privilege_for_repo(context, repo) or not kb.can_operate(context, repo, 'write'):
+        kblog.write_operation_log(context, 'MOD_PROPS:FORBIDDEN', repo, id)
+        return create_result_object('NO_ACCESS_RIGHTS')
 
     org_u_date = get_request_param('org_u_date')
     p_props = get_request_param('props')
@@ -301,6 +305,11 @@ def filter_update_props(new_content, org_content):
 def proc_save_logic(context):
     repo = get_req_param_repo()
     id = get_request_param('id')
+
+    if not kb.has_privilege_for_repo(context, repo) or not kb.can_operate(context, repo, 'write'):
+        kblog.write_operation_log(context, 'SAVE_LOGIC:FORBIDDEN', repo, id)
+        return create_result_object('NO_ACCESS_RIGHTS')
+
     org_u_date = get_request_param('org_u_date')
     p_b64logic = get_request_param('logic')
     p_silent = get_request_param('silent')
@@ -348,7 +357,7 @@ def proc_delete(context):
     repo = get_req_param_repo()
     id = get_request_param('id')
 
-    if not kb.has_privilege_for_repo(context, repo):
+    if not kb.has_privilege_for_repo(context, repo) or not kb.can_operate(context, repo, 'delete'):
         kblog.write_operation_log(context, 'DELETE:FORBIDDEN', repo, id)
         return create_result_object('NO_ACCESS_RIGHTS')
 
