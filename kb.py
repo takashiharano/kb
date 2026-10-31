@@ -1081,6 +1081,9 @@ def mod_data_props(repo, id, org_u_date, props_text, context):
             return {'status': data['status']}
 
         content = data['content']
+        if not has_data_privilege(context, content):
+            return {'status': 'NO_ACCESS_RIGHTS'}
+
         if content['U_DATE'] != org_u_date:
             detail = {'U_DATE': content['U_DATE'], 'U_USER': content['U_USER']}
             return {'status': 'CONFLICT', 'detail': detail}
@@ -1108,13 +1111,16 @@ def filter_update_props(new_content, org_content):
     return new_content
 
 
-def save_logic(repo, id, org_u_date, b64logic, silent, user):
+def save_logic(repo, id, org_u_date, b64logic, silent, user, context):
     with repo_write_lock(repo):
         data = load_data(repo, id)
         if data['status'] != 'OK':
             return {'status': data['status']}
 
         content = data['content']
+        if not has_data_privilege(context, content):
+            return {'status': 'NO_ACCESS_RIGHTS'}
+
         if content['U_DATE'] != org_u_date:
             detail = {'U_DATE': content['U_DATE'], 'U_USER': content['U_USER']}
             return {'status': 'CONFLICT', 'detail': detail, 'data': data}

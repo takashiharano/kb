@@ -239,11 +239,17 @@ def proc_mod_props(context):
 
     outcome = kb.mod_data_props(repo, id, org_u_date, p_props, context)
     status = outcome['status']
+
     if status == 'OK':
         kblog.write_operation_log(context, 'MOD_PROPS', repo, id, data=outcome['data'])
         return create_result_object('OK')
+
     if status == 'CONFLICT':
         return create_result_object('CONFLICT', outcome['detail'])
+
+    if status == 'NO_ACCESS_RIGHTS':
+        return create_result_object('NO_ACCESS_RIGHTS')
+
     return create_result_object('ERROR:' + status)
 
 #------------------------------------------------------------------------------
@@ -259,14 +265,20 @@ def proc_save_logic(context):
     p_b64logic = get_request_param('logic')
     p_silent = get_request_param('silent')
     user = kb.get_user_name(context)
-    outcome = kb.save_logic(repo, id, org_u_date, p_b64logic, p_silent == '1', user)
+    outcome = kb.save_logic(repo, id, org_u_date, p_b64logic, p_silent == '1', user, context)
     status = outcome['status']
+
     if status == 'OK':
         kblog.write_operation_log(context, 'SAVE_LOGIC', repo, id, data=outcome['data'])
         return create_result_object('OK', outcome['detail'])
+
     if status == 'CONFLICT':
         kblog.write_operation_log(context, 'SAVE_LOGIC:CONFLICT', repo, id, data=outcome['data'])
         return create_result_object('CONFLICT', outcome['detail'])
+
+    if status == 'NO_ACCESS_RIGHTS':
+        return create_result_object('NO_ACCESS_RIGHTS')
+
     return create_result_object('ERROR:' + status)
 
 #------------------------------------------------------------------------------
