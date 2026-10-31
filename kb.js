@@ -3653,10 +3653,10 @@ logic.setDataText = function(s) {
   }
 };
 logic.replaceDataText = function(r, s) {
-  var re = new RegExp(re);
+  var re = new RegExp(r);
   var t = logic.getDataText();
   t = t.replace(re, s);
-  logic.setDataText(s);
+  logic.setDataText(t);
 };
 logic.dialog = function(s) {
   var opt = {
