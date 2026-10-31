@@ -45,11 +45,13 @@ def send_result_json(status, body=None):
     websys.send_result_json(status, body, encryption=True)
 
 #------------------------------------------------------------------------------
-def has_valid_apitoken():
+def has_valid_api_token():
     apitoken = get_request_param('apitoken')
+    if not apitoken:
+        return False
     for i in range(len(appconfig.api_tokens)):
         token = appconfig.api_tokens[i]
-        if apitoken == token:
+        if token and apitoken == token:
             return True
     return False
 
@@ -554,7 +556,7 @@ def proc_export_data(context):
     return None
 
 def proc_export_data_all(context):
-    if not context.is_admin() and not has_valid_apitoken():
+    if not context.is_admin() and not has_valid_api_token():
         kblog.write_operation_log(context, 'EXPORT_ALL_DATA:FORBIDDEN', repo='', dataid='')
         send_error_text('NO_ACCESS_RIGHTS')
         return None
@@ -701,7 +703,7 @@ def main():
         proc_api(context, act)
     else:
         repo = get_request_param('repo')
-        if kb.is_authorized(context) or has_valid_apitoken() or kb.is_anonymous_allowed(repo):
+        if kb.is_authorized(context) or has_valid_api_token() or kb.is_anonymous_allowed(repo):
             proc_api(context, act)
         else:
             proc_on_forbidden(act)
