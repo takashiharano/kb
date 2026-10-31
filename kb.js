@@ -1767,7 +1767,7 @@ kb.editProps = function() {
   var html = '';
   html += '<div style="width:50vw;height:50vh;">';
   html += '<div style="text-align:left;margin-bottom:4px;width:150px;">';
-  html += '<span>ID: </span><input type="text" id="prop-data-id" value="' + kb.data.id + '" onfocus="kb.onPropIdFocus();"' + (kb.isAdmin ? '' : ' disabled') + '>';
+  html += '<span>ID: </span><input type="text" id="prop-data-id" value="' + kb.data.id + '" onfocus="kb.onPropIdFocus();"' + (kb.isAdmin ? '' : ' spellcheck="false" disabled') + '>';
   if (kb.isAdmin) {
     html += '<button id="change-id-button" style="margin-left:4px;" onclick="kb.confirmChangeDataId();" disabled>CHANGE</button>';
     html += '<button id="next-id-button" class="small-button" style="margin-left:4px;" onclick="kb.checkId();">CHECK ID</button>';
@@ -2204,9 +2204,9 @@ kb.buildRepoEditor = function(repo, cbFncName) {
   html += '<div style="overflow:auto;height:calc(100% - 30px);">';
   html += '<div style="display:inline-block;width:80%;">';
   html += '<pre id="repo-list" style="text-align:left;">';
-  html += 'ID: <input type="text" id="repo-id" style="width:calc(100% - 27px);">\n';
+  html += 'ID: <input type="text" id="repo-id" style="width:calc(100% - 27px);" spellcheck="false" >\n';
   html += '<div style="margin-top:8px;">Properties:</div>';
-  html += '<textarea id="repo-props" style="width:100%;height:120px;"></textarea>';
+  html += '<textarea id="repo-props" style="width:100%;height:120px;" spellcheck="false" ></textarea>';
   html += '</pre>';
   html += '</div>';
   html += '</div>';
