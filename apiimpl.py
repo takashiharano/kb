@@ -427,14 +427,21 @@ def proc_get_repo_list(context):
 #------------------------------------------------------------------------------
 def proc_get_repo_props(context):
     repo = get_req_param_repo()
+
+    if not kb.has_privilege_for_repo(context, repo):
+        send_result_json('NO_ACCESS_RIGHTS')
+        return None
+
     props = kb.read_repo_props_as_text(repo)
     if props is None:
         props = ''
+
     b64props = util.encode_base64(props)
     result_data = {
         'repo': repo,
         'props': b64props
     }
+
     send_result_json('OK', result_data)
     return None
 
