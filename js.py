@@ -51,19 +51,7 @@ def build_js(context, repo):
         for key in obj:
             js += '  ' + key + ': \'' + obj[key] + '\', '
         js += '}'
-
-    js += '],\n'
-
-    js += 'token_keys: [\n'
-    for i in range(len(appconfig.token_keys)):
-        key = appconfig.token_keys[i]
-        if i > 0:
-            js += ','
-        js += '\'' + key + '\''
-
-    js += '],\n'
-
-    js += 'token_valid_sec: ' + str(appconfig.token_valid_sec) + ','
+    js += ']\n'
 
     js += '};\n'
 

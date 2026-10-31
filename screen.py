@@ -232,106 +232,6 @@ def get_default_message(repo):
     return message
 
 #------------------------------------------------------------------------------
-def build_view_screen(context):
-    html = '''<!DOCTYPE html><html><head><meta charset="utf-8">
-<meta name="robots" content="none">
-<meta name="referrer" content="no-referrer">
-<meta name="referrer" content="never">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-'''
-    html += '<title>' + appconfig.title + '</title>'
-    html += '<link rel="stylesheet" href="./style.css" />'
-    html += '<style>' + style.build_css() + '</style>'
-    html += '<script src="' + ROOT_PATH + 'libs/debug.js"></script>'
-    html += '<script src="' + ROOT_PATH + 'libs/util.js"></script>'
-    html += '<script src="' + ROOT_PATH + 'websys/websys.js"></script>'
-    html += '''
-<style>
-#content-area {
-  height: calc(100vh - 18px);
-}
-</style>
-<script>
-var kb = {};
-kb.mode = 'view'
-'''
-    html += 'kb.token = \'' + websys.get_raw_request_param('token', '') + '\';\n'
-    html += '</script>'
-    html += '<script src="kb.js"></script>'
-    html += '<script src="./?res=js"></script>'
-    html += '''
-</head>
-<body>
-<div id="body1">
-  <div id="content-area" class="area">
-    <div id="content-header">
-      <div id="meta-info" class="meta-info">
-        <span>CREATED: <span id="content-created-date"></span> <span id="content-created-by"></span></span><span>&nbsp;&nbsp;UPDATED: <span id="content-updated-date"></span> <span id="content-updated-by"></span></span>
-        <span id="status" style="margin-left:32px;"></span>
-        <span style="position:absolute;right:0;">
-          <span id="clock"></span>
-        </span>
-      </div>
-      <div id="info-area">
-        <span id="content-id"></span>
-        <span id="content-title"></span>
-        <span id="info-label">
-      </div>
-      <div style="display:inline-block;position:absolute;right:10px;">
-        <span id="content-labels-area">
-          <span id="content-labels"></span>
-        </span>
-        <span id="buttons-r">
-          <select id="draw-mode">
-            <option value="0">Plain</option>
-            <option value="1" selected>Advanced</option>
-            <option value="2">HTML</option>
-          </select>
-          <button id="copy-text-button" style="margin-left:8px;" onclick="kb.copyContent();">COPY</button>
-        </span>
-      </div>
-    </div>
-    <div style="height:calc(100% - 80px);">
-      <div id="content-wrp1">
-        <div id="content-wrp">
-          <pre id="content-body"><span class="progdot">Please wait</span></pre>
-          </div>
-        </div>
-        <div style="position:absolute;bottom:8px;height:25px;width:calc(100% - 8px);">
-          <input type="range" value="0" min="6" max="64" step="1" id="font-range" style="position:relative;top:6px;" oninput="kb.onFontRangeChanged(this);" onchange="kb.onFontRangeChanged(this);"><span id="fontsize"></span>
-          <button onclick="kb.resetFontSize();">RESET</button>
-          <span style="margin-left:16px;">Font: </sapn><input type="text" id="font" oninput="kb.onFontChanged(this);" onchange="kb.onFontChanged(this);">
-          <button id="monospace-button-r" class="small-button" onclick="kb.toggleMonospaceFont('');">monospace</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div></body></html>'''
-    return html
-
-#------------------------------------------------------------------------------
-def build_forbidden_screen(context):
-    html = '''<!DOCTYPE html><html><head><meta charset="utf-8">
-<meta name="robots" content="none">
-<meta name="referrer" content="no-referrer">
-<meta name="referrer" content="never">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-'''
-    html += '<title>' + appconfig.title + '</title>'
-    html += '<link rel="stylesheet" href="./style.css" />'
-    html += '<style>' + style.build_css() + '</style>'
-    html += '<script src="' + ROOT_PATH + 'libs/debug.js"></script>'
-    html += '<script src="' + ROOT_PATH + 'libs/util.js"></script>'
-    html += '<script src="' + ROOT_PATH + 'websys/websys.js"></script>'
-    html += '''
-</head>
-<body>
-KB SYSTEM<br>
-ACCESS PRIVILEGE IS REQUIRED.
-</body></html>'''
-    return html
-
-#------------------------------------------------------------------------------
 def main():
     context = websys.on_access()
 
@@ -345,29 +245,8 @@ def main():
         js.main(repo)
         return
 
-    id = util.get_request_param('id')
-
-    if kb.is_authorized(context):
-        if kb.has_privilege(context, 'sysadmin') or kb.has_privilege(context, 'kb'):
-            html = build_main_screen(context, repo)
-        else:
-            token = util.get_request_param('token', '')
-            if token != '':
-                if kb.is_valid_token(token, repo, id):
-                    html = build_view_screen(context)
-                else:
-                    html = build_forbidden_screen(context)
-            else:
-                # public-mode
-                html = build_main_screen(context, repo)
-    elif kb.is_anonymous_allowed(repo):
+    if kb.is_authorized(context) or kb.is_anonymous_allowed(repo):
         html = build_main_screen(context, repo)
-    elif id is not None:
-        token = util.get_request_param('token')
-        if token is None:
-            html = websys.build_auth_redirection_screen(ROOT_PATH)
-        else:
-            html = build_view_screen(context)
     else:
         html = websys.build_auth_redirection_screen(ROOT_PATH)
 

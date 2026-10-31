@@ -45,24 +45,6 @@ def send_result_json(status, body=None):
     websys.send_result_json(status, body, encryption=True)
 
 #------------------------------------------------------------------------------
-def has_data_permission(context, repo, id):
-    if has_valid_token(repo, id):
-        return True
-    if kb.has_privilege_for_repo(context, repo):
-        return True
-    return False
-
-#------------------------------------------------------------------------------
-def has_valid_token(repo, id):
-    token = get_request_param('token')
-    try:
-        if kb.is_valid_token(token, repo, id):
-            return True
-    except:
-        pass
-    return False
-
-#------------------------------------------------------------------------------
 def has_valid_apitoken():
     apitoken = get_request_param('apitoken')
     for i in range(len(appconfig.api_tokens)):
@@ -76,7 +58,7 @@ def has_valid_apitoken():
 def proc_get_data(context):
     id = get_request_param('id')
     repo = get_req_param_repo()
-    if has_data_permission(context, repo, id):
+    if kb.has_privilege_for_repo(context, repo):
         status = 'OK'
         result_data = kb.get_data(context, repo, id, need_encode_b64=True)
         kblog.write_operation_log(context, 'GET_DATA', repo, id, data=result_data)
@@ -92,7 +74,7 @@ def proc_get_data(context):
 def proc_download_b64content(context):
     repo = get_req_param_repo()
     id = get_request_param('id')
-    if has_data_permission(context, repo, id):
+    if kb.has_privilege_for_repo(context, repo):
         status = 'OK'
         p_idx = get_request_param('idx')
         try:

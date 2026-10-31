@@ -28,6 +28,4 @@ default_data_encryption = True
 data_encryption_key = 'xyz'
 default_encryption_key = 'xyz'
 
-token_valid_sec = 259200
-token_keys = ['1']
 api_tokens = ['']

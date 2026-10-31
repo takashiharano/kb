@@ -66,7 +66,6 @@ kb.pw = {
   toSave: null
 };
 kb.data_bak = null;
-kb.urlOfData = '';
 kb.dndHandler = null;
 kb.areaSize = {
   orgY: 0,
@@ -79,7 +78,6 @@ kb.requestedId = null;
 kb.loadPendingTmrId = 0;
 kb.dataLoadingTmrId = 0;
 kb.clipboardEnabled = false;
-kb.mode = kb.mode || null;
 kb.toolsWindow = null;
 kb.logicEditorWindow = null;
 kb.repoList = [];
@@ -93,13 +91,8 @@ $onReady = function(e) {
   if (!fontSize) fontSize = kb.DEFAULT_FONT_SIZE;
   kb.setFontSize(fontSize);
   util.clock('#clock');
-  if (kb.mode == 'view') {
-    kb.view.init();
-    kb.onAppReady();
-  } else {
-    $el('#content-header').hide();
-    kb.init();
-  }
+  $el('#content-header').hide();
+  kb.init();
   util.addKeyHandler('D', 'down', kb.keyHandlerD, {ctrl: true, alt: true});
   util.addKeyHandler('E', 'down', kb.keyHandlerE, {ctrl: true, alt: true});
   util.addKeyHandler('L', 'down', kb.keyHandlerL, {ctrl: false, alt: true});
@@ -117,9 +110,7 @@ $onReady = function(e) {
 
 kb.onAppReady = function() {
   $el('#body1').style.display = 'block';
-  if (kb.mode != 'view') {
-    kb.onAppReady1();
-  }
+  kb.onAppReady1();
 };
 
 kb.onAppReady1 = function() {
@@ -780,9 +771,6 @@ kb._getData = function(reload) {
     repo: kb.repo,
     id: id
   };
-  if (kb.token) {
-    param.token = kb.token;
-  }
   if (reload) {
     param.reload = '1';
   }
@@ -800,7 +788,7 @@ kb.onGetData = function(xhr, res, req) {
     return;
   } else if (res.status != 'OK') {
     if (res.status == 'NO_ACCESS_RIGHTS') {
-      kb.view.onNoRights();
+      kb.onNoRights();
     } else {
       kb.showInfotip(res.status, 3000);
     }
@@ -930,9 +918,7 @@ kb.buildStatusHTML = function(status) {
   html += 'background:' + stBackground + ';';
   html += 'border:' + stBorder + ';';
   html += '"';
-  if (kb.mode != 'view') {
-    html += ' onclick="kb.fieldSearch(\'status\', \'' + status + '\');"';
-  }
+  html += ' onclick="kb.fieldSearch(\'status\', \'' + status + '\');"';
   html += '>';
   html += status;
   html += '</span>';
@@ -1018,12 +1004,11 @@ kb.buildItemsHTML = function(keyname, items, snipN, snipL) {
   if (items) {
     dataList = items.replace(/\s{2,}/g, ' ').split(' ');
   }
-  var clickable = (kb.mode != 'view');
   var html = '';
   for (var i = 0; i < dataList.length; i++) {
     var item = util.escHtml(dataList[i]);
     var snip = ((snipN > 0) && (i >= snipN));
-    html += kb.createLabel(keyname, item, snip, snipL, clickable);
+    html += kb.createLabel(keyname, item, snip, snipL, true);
   }
   return html;
 };
@@ -2641,25 +2626,7 @@ kb.getUrl4Id = function(id) {
 kb.showUrl = function() {
   var id = kb.data.id;
   var url = kb.getUrl4Id(id);
-  kb.urlOfData = url;
   var m = '<span id="content-url" class="pseudo-link" onclick="kb.copyUrl();" data-tooltip2="Click to copy">' + url + '</span>\n\n';
-  if (kb.isSysAdmin && !kb.data.content.PRIVS) {
-    var listTokens = '<div style="width:100%;text-align:left;line-height:1.8em;">';
-    listTokens += 'Token: ';
-    listTokens +=  '<span id="valid-until"></span>\n';
-      var tokenKeys = [];
-    if (kb.configInfo && kb.configInfo.token_keys) {
-      tokenKeys = kb.configInfo.token_keys;
-    }
-    listTokens += '<div style="margin-left:16px;">';
-    for (var i = 0; i < tokenKeys.length; i++) {
-      var tokenKey = tokenKeys[i];
-      listTokens += '<span class="pseudo-link" onclick="kb.applyToken(\'' + id + '\', \'' + tokenKey + '\')">' + tokenKey  + '</span>\n';
-    }
-    listTokens += '</div>';
-    listTokens += '</div>';
-    m += listTokens;
-  }
   util.alert(m)
 };
 
@@ -2673,25 +2640,6 @@ kb.copyUrl = function() {
   var url = $el('#content-url').innerText;
   kb.copy(url);
   kb.contntUrl = '';
-};
-
-kb.applyToken = function(id, tokenKey) {
-  if (tokenKey == null) {
-    $el('#content-url').innerText = kb.urlOfData;
-    $el('#valid-until').innerText = '';
-    return;
-  }
-  var now = Date.now();
-  var validUntilTime = now + kb.configInfo.token_valid_sec * 1000;
-  var validUntil = util.getDateTimeString(validUntilTime, '%YYYY-%MM-%DD %HH:%mm:%SS %Z');
-  var srcToken = kb.repo + ':' + id + ':' + tokenKey + ':' + now;
-  var token = util.bsb64.encode(srcToken, 0);
-  token = encodeURIComponent(token);
-  var url = kb.urlOfData + '&token=' + token;
-  var until = 'Valid until ' + validUntil;
-  until += '<span class="pseudo-link" style="margin-left:16px;" onclick="kb.applyToken(\'' + id + '\', null)">&lt;X&gt;</span>';
-  $el('#content-url').innerText = url;
-  $el('#valid-until').innerHTML = until;
 };
 
 kb.copy = function(s, f) {
@@ -2786,16 +2734,12 @@ kb._dlContent = function(data) {
   kb.dlB64Content(data.id, data.idx);
 };
 kb.dlB64Content = function(id, idx) {
-  var token = util.getQuery('token');
   param = {
     act: 'dlb64content',
     id: id
   };
   if (idx != undefined) {
     param.idx = idx;
-  }
-  if (token) {
-    param.token = token;
   }
   util.postSubmit('api.cgi', param);
 };
@@ -3183,7 +3127,7 @@ kb.keyHandlerE = function(e) {
   kb.openXB64Dialog(t, true);
 };
 kb.keyHandlerL = function(e) {
-  if ((kb.status & kb.ST_EDITING) || (kb.mode == 'view')) return;
+  if (kb.status & kb.ST_EDITING) return;
   kb.getDataListAll();
 };
 kb.keyHandlerP = function(e) {
@@ -3191,15 +3135,13 @@ kb.keyHandlerP = function(e) {
   kb.editRepoProps(kb.activeRepoId);
 };
 kb.keyHandlerS = function(e) {
-  if ((kb.status & kb.ST_EDITING) || (kb.mode == 'view')) return;
+  if (kb.status & kb.ST_EDITING) return;
   kb.openRepoDialog();
 };
 kb.keyHandlerT = function(e) {
-  if (kb.mode == 'view') return;
   kb.openTools();
 };
 kb.keyHandlerW = function(e) {
-  if (kb.mode == 'view') return;
   kb.openNewWindow();
 };
 kb.keyHandlerTab = function(e) {
@@ -3724,18 +3666,10 @@ logic.dialog = function(s) {
   };
   return util.alert(s, opt);
 };
-//-----------------------------
-kb.view = {};
-kb.view.init = function() {
-  $el('.for-view').hide();
-  var id = util.getQuery('id');
-  kb.getData(id);
-};
 
-kb.view.onNoRights = function() {
+kb.onNoRights = function() {
   var msg = 'ERROR: NO_ACCESS_RIGHTS\n\n';
-  msg += 'You do not have permission to access.\n';
-  msg += 'Please contact the administrator and get valid token.';
+  msg += 'You do not have permission to access.';
   $el('#content-body').textseq(msg, {cursor: 3});
 };
 
