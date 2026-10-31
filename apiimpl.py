@@ -291,7 +291,7 @@ def proc_mod_props(context):
     return result
 
 def filter_update_props(new_content, org_content):
-    for key in new_content:
+    for key in list(new_content):
         if key in kb.RESTRICTED_PROP_KEYS:
             if key in org_content:
                 new_content[key] = org_content[key]
