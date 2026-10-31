@@ -545,7 +545,7 @@ def proc_export_html(context):
 #------------------------------------------------------------------------------
 def proc_export_data(context):
     repo = get_req_param_repo()
-    if not kb.has_privilege_for_repo(context, repo):
+    if not kb.has_privilege_for_repo(context, repo) or not kb.can_operate(context, repo, 'export'):
         kblog.write_operation_log(context, 'EXPORT_DATA:FORBIDDEN', repo, dataid='')
         send_error_text('NO_ACCESS_RIGHTS:repo=' + repo)
         return None
