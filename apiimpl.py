@@ -136,29 +136,25 @@ def proc_data_list(context):
 #------------------------------------------------------------------------------
 def proc_search(context):
     repo = get_req_param_repo()
-    id = get_request_param('id')
 
     if not kb.repo_exists(repo):
-        kblog.write_operation_log(context, 'SEARCH:REPOSITORY_NOT_FOUND', repo, id)
+        kblog.write_operation_log(context, 'SEARCH:REPOSITORY_NOT_FOUND', repo, dataid='')
         return create_result_object('REPOSITORY_NOT_FOUND')
 
     if not kb.has_privilege_for_repo(context, repo):
-        kblog.write_operation_log(context, 'SEARCH:FORBIDDEN', repo, id)
+        kblog.write_operation_log(context, 'SEARCH:FORBIDDEN', repo, dataid='')
         return create_result_object('NO_ACCESS_RIGHTS')
 
-    q = None
-    if id is None:
-        q = get_request_param('q')
-        q = util.decode_base64(q)
-        limit = get_request_param_as_int('limit')
-        detail = kb.search_data(context, repo, q, list_max=limit)
-    else:
-        kblog.write_operation_log(context, 'SEARCH', repo, id)
-        detail = kb.get_data(context, repo, id, need_encode_b64=True)
+    q = get_request_param('q')
+    if q is None:
+        return create_result_object('INVALID_REQUEST')
 
-    if q is not None:
-      info = 'q=' + q + ' : ' + 'cnt=' + str(detail['total_count'])
-      kblog.write_operation_log(context, 'SEARCH', repo, id, info=info)
+    q = util.decode_base64(q)
+    limit = get_request_param_as_int('limit')
+    detail = kb.search_data(context, repo, q, list_max=limit)
+
+    info = 'q=' + q + ' : ' + 'cnt=' + str(detail['total_count'])
+    kblog.write_operation_log(context, 'SEARCH', repo, dataid='', info=info)
 
     result = create_result_object('OK', detail)
     return result
