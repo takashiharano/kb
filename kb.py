@@ -7,6 +7,7 @@ import os
 import sys
 import re
 import copy
+import contextlib
 
 import appconfig
 
@@ -54,6 +55,25 @@ RESTRICTED_PROP_KEYS = [
 SP_KEYWORD_NANIDS = '*nanids'
 DEFAULT_REPO_ID = '0'
 ANONYMOUS_USER_NAME = 'Anonymous'
+
+class RepoLockTimeout(TimeoutError):
+    pass
+
+@contextlib.contextmanager
+def repo_write_lock(repo):
+    if not is_valid_repo_id(repo):
+        raise ValueError('ILLEGAL_REPO_ID')
+
+    lock_path = os.path.join(WORKSPACE_PATH, 'locks', repo + '.lockdir')
+    os.makedirs(os.path.dirname(lock_path), exist_ok=True)
+
+    if not util.file_lock(lock_path, retry=40, wait=0.25):
+        raise RepoLockTimeout('REPO_LOCK_TIMEOUT:repo=' + repo)
+
+    try:
+        yield
+    finally:
+        util.file_unlock(lock_path)
 
 #------------------------------------------------------------------------------
 def get_workspace_path():
@@ -177,7 +197,10 @@ def repo_exists(repo):
 def create_repo(repo, props):
     if not is_valid_repo_id(repo):
         return 'ILLEGAL_REPO_ID'
+    with repo_write_lock(repo):
+        return _create_repo_locked(repo, props)
 
+def _create_repo_locked(repo, props):
     if repo_exists(repo):
         return 'REPO_ALREADY_EXISTS'
 
@@ -187,6 +210,12 @@ def create_repo(repo, props):
     return 'OK'
 
 def delete_repo(repo):
+    if not is_valid_repo_id(repo):
+        return 'REPO_NOT_FOUND'
+    with repo_write_lock(repo):
+        return _delete_repo_locked(repo)
+
+def _delete_repo_locked(repo):
     if not repo_exists(repo):
         return 'REPO_NOT_FOUND'
     path = get_repo_dir_path(repo)
@@ -200,7 +229,7 @@ def delete_repo(repo):
 #------------------------------------------------------------------------------
 def save_repo_props(repo, json_text):
     path = get_props_file_path(repo)
-    util.write_text_file(path, json_text)
+    util.write_file_atomically(path, json_text)
 
 #------------------------------------------------------------------------------
 def get_all_data_id_list(repo):
@@ -915,8 +944,16 @@ def parse_content(text, head_only=False):
     return content
 
 #------------------------------------------------------------------------------
-def save_data(repo, id, new_data, user='', as_anonymous=False):
-    if id == '':
+def save_data(repo, id, new_data, user='', as_anonymous=False, context=None):
+    with repo_write_lock(repo):
+        return _save_data_locked(repo, id, new_data, user, as_anonymous, context)
+
+def _save_data_locked(repo, id, new_data, user, as_anonymous, context):
+    if not repo_exists(repo):
+        return {'status': 'REPOSITORY_NOT_FOUND', 'id': id, 'data': None}
+
+    creating = id == ''
+    if creating:
         id = get_next_id(repo)
 
     now = util.get_unixtime_millis()
@@ -928,8 +965,24 @@ def save_data(repo, id, new_data, user='', as_anonymous=False):
         user = ANONYMOUS_USER_NAME
 
     data = load_data(repo, id)
-    if data['status'] != 'OK':
+    if not creating and data['status'] == 'DATA_NOT_FOUND' and new_data['org_u_date'] == '':
+        creating = True
+
+    if creating and data['status'] == 'OK':
+        return {'status': 'CONFLICT', 'id': id, 'data': data}
+
+    if not creating:
+        if data['status'] != 'OK':
+            return {'status': data['status'], 'id': id, 'data': data}
+
+        if context is not None and not has_data_privilege(context, data['content']):
+            return {'status': 'NO_ACCESS_RIGHTS', 'id': id, 'data': data}
+
+        if data['content']['U_DATE'] != new_data['org_u_date']:
+            return {'status': 'CONFLICT', 'id': id, 'data': data}
+    else:
         data = {
+            'encrypted': False,
             'content': {
                 'C_DATE': now,
                 'C_USER': user
@@ -994,6 +1047,7 @@ def save_data(repo, id, new_data, user='', as_anonymous=False):
     write_data(repo, id, content, encryption_key)
 
     saved_data = {
+        'status': 'OK',
         'id': id,
         'data': data
     }
@@ -1003,6 +1057,83 @@ def del_if_filed_is_empty(obj, key):
     if key in obj and obj[key] == '':
         del obj[key]
     return obj
+
+def touch_data(repo, ids, keep_updated_by, user, context):
+    with repo_write_lock(repo):
+        for id in ids:
+            data = get_data(context, repo, id)
+            if data['status'] != 'OK':
+                continue
+
+            content = data['content']
+            content['U_DATE'] = util.get_unixtime_millis()
+            if not keep_updated_by:
+                content['U_USER'] = user
+
+            encryption_key = DATA_ENCRYPTION_KEY if data['encrypted'] else None
+            write_data(repo, id, content, encryption_key)
+
+
+def mod_data_props(repo, id, org_u_date, props_text, context):
+    with repo_write_lock(repo):
+        data = load_data(repo, id)
+        if data['status'] != 'OK':
+            return {'status': data['status']}
+
+        content = data['content']
+        if content['U_DATE'] != org_u_date:
+            detail = {'U_DATE': content['U_DATE'], 'U_USER': content['U_USER']}
+            return {'status': 'CONFLICT', 'detail': detail}
+
+        new_content = parse_content(props_text, head_only=True)
+        if not context.is_admin() and not context.has_permission('sysadmin'):
+            new_content = filter_update_props(new_content, content)
+
+        if 'LOGIC' in content:
+            new_content['LOGIC'] = content['LOGIC']
+
+        new_content['BODY'] = content['BODY']
+        encryption_key = DATA_ENCRYPTION_KEY if data['encrypted'] else None
+        write_data(repo, id, new_content, encryption_key)
+        return {'status': 'OK', 'data': data}
+
+
+def filter_update_props(new_content, org_content):
+    for key in list(new_content):
+        if key in RESTRICTED_PROP_KEYS:
+            if key in org_content:
+                new_content[key] = org_content[key]
+            else:
+                del new_content[key]
+    return new_content
+
+
+def save_logic(repo, id, org_u_date, b64logic, silent, user):
+    with repo_write_lock(repo):
+        data = load_data(repo, id)
+        if data['status'] != 'OK':
+            return {'status': data['status']}
+
+        content = data['content']
+        if content['U_DATE'] != org_u_date:
+            detail = {'U_DATE': content['U_DATE'], 'U_USER': content['U_USER']}
+            return {'status': 'CONFLICT', 'detail': detail, 'data': data}
+
+        content['LOGIC'] = b64logic
+        if not silent:
+            content['U_DATE'] = util.get_unixtime_millis()
+            content['U_USER'] = user
+
+        encryption_key = DATA_ENCRYPTION_KEY if data['encrypted'] else None
+        write_data(repo, id, content, encryption_key)
+
+        detail = {
+            'saved_id': id,
+            'U_DATE': str(content['U_DATE']),
+            'U_USER': content['U_USER']
+        }
+
+        return {'status': 'OK', 'detail': detail, 'data': data}
 
 #------------------------------------------------------------------------------
 def to_set(s):
@@ -1041,9 +1172,13 @@ def write_data(repo, id, content, encryption_key=None, path=None):
     if path is None:
         path = get_datafile_path(repo, id)
 
-    util.write_text_file(path, text)
+    util.write_file_atomically(path, text)
 
 def delete_data(repo, id):
+    with repo_write_lock(repo):
+        return _delete_data_locked(repo, id)
+
+def _delete_data_locked(repo, id):
     if id == '':
         return 'ERR_ROOT_PATH'
     if not is_valid_data_id(id):
@@ -1126,6 +1261,10 @@ def get_vacant_ids(repo):
     return result
 
 def change_data_id(repo, id_fm, id_to):
+    with repo_write_lock(repo):
+        return _change_data_id_locked(repo, id_fm, id_to)
+
+def _change_data_id_locked(repo, id_fm, id_to):
     if not is_valid_data_id(id_fm) or not is_valid_data_id(id_to):
         return 'ILLEGAL_DATA_ID'
 
@@ -1187,6 +1326,10 @@ def encrypt_data(repo, dst_base_dir, encryption_key=DATA_ENCRYPTION_KEY):
     encdec_data(repo, dst_base_dir, encryption_key)
 
 def encdec_data(repo, dst_base_dir, encryption_key):
+    with repo_write_lock(repo):
+        return _encdec_data_locked(repo, dst_base_dir, encryption_key)
+
+def _encdec_data_locked(repo, dst_base_dir, encryption_key):
     data_id_list = get_all_data_id_list(repo)
     for i in range(len(data_id_list)):
         id = data_id_list[i]

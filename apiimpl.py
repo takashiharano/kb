@@ -20,8 +20,6 @@ import appconfig
 import kb
 import kblog
 
-DATA_ENCRYPTION_KEY = appconfig.data_encryption_key
-
 #------------------------------------------------------------------------------
 # Returns None if the value not found
 def get_request_param(key, default=None):
@@ -174,39 +172,33 @@ def proc_save_data(context):
 
     data_json = get_request_param('data')
     new_data = util.from_json(data_json)
+    user = kb.get_user_name(context)
+    as_anonymous = get_request_param('as_anonymous', '0') == '1'
+    saved_obj = kb.save_data(repo, id, new_data, user, as_anonymous, context)
+    status = saved_obj['status']
 
-    content = None
-    if id != '':
-        data = kb.get_data(context, repo, id)
-        content = data['content']
-
-    if id == '' or content is not None and content['U_DATE'] == new_data['org_u_date']:
-        status = 'OK'
-        user = kb.get_user_name(context)
-
-        p_as_anonymous = get_request_param('as_anonymous', '0')
-        as_anonymous = True if p_as_anonymous == '1' else False
-
-        saved_obj = kb.save_data(repo, id, new_data, user, as_anonymous)
+    if status == 'OK':
         saved_data = saved_obj['data']
         saved_content = saved_data['content']
-        saved_id = saved_obj['id']
-        saved_date = str(saved_content['U_DATE'])
-        saved_user = saved_content['U_USER']
+
+        detail = {
+            'saved_id': saved_obj['id'],
+            'U_DATE': str(saved_content['U_DATE']),
+            'U_USER': saved_content['U_USER']
+        }
 
         kblog.write_save_log(context, repo, id, new_data, saved_obj)
+    elif status == 'CONFLICT':
+        saved_data = saved_obj['data']
+        saved_content = saved_data['content']
+        detail = {
+            'saved_id': None,
+            'U_DATE': saved_content['U_DATE'],
+            'U_USER': saved_content['U_USER']
+        }
+        kblog.write_operation_log(context, 'SAVE_DATA:CONFLICT', repo, id, data=saved_data)
     else:
-        status = 'CONFLICT'
-        saved_id = None
-        saved_date = content['U_DATE']
-        saved_user = content['U_USER']
-        kblog.write_operation_log(context, 'SAVE_DATA:CONFLICT', repo, id, data=data)
-
-    detail = {
-        'saved_id': saved_id,
-        'U_DATE': saved_date,
-        'U_USER': saved_user
-    }
+        return create_result_object(status)
 
     result = create_result_object(status, detail)
     return result
@@ -225,20 +217,8 @@ def proc_touch(context):
 
     ids = p_ids.split(',')
     user = kb.get_user_name(context)
+    kb.touch_data(repo, ids, keep_updated_by, user, context)
     kblog.write_operation_log(context, 'TOUCH', repo, p_ids, info=info)
-    for i in range(len(ids)):
-        id = ids[i]
-        data = kb.get_data(context, repo, id)
-        if data['status'] != 'OK':
-            continue
-        now = util.get_unixtime_millis()
-        content = data['content']
-        content['U_DATE'] = now
-        if not keep_updated_by:
-            content['U_USER'] = user
-        secure = data['encrypted']
-        encryption_key = DATA_ENCRYPTION_KEY if secure else None
-        kb.write_data(repo, id, content, encryption_key)
 
     result = create_result_object('OK')
     return result
@@ -257,47 +237,14 @@ def proc_mod_props(context):
     p_props = util.decode_base64(p_props)
     p_props = util.replace(p_props, ' {2,}', ' ')
 
-    data = kb.load_data(repo, id)
-    if data['status'] != 'OK':
-        result = create_result_object('ERROR:' + data['status'])
-        return result
-
-    content = data['content']
-    if content['U_DATE'] != org_u_date:
-        detail = {
-            'U_DATE': content['U_DATE'],
-            'U_USER': content['U_USER']
-        }
-        result = create_result_object('CONFLICT', detail)
-        return result
-
-    new_content = kb.parse_content(p_props, head_only=True)
-
-    if not context.is_admin() and not context.has_permission('sysadmin'):
-        new_content = filter_update_props(new_content, content)
-
-    if 'LOGIC' in content:
-        new_content['LOGIC'] = content['LOGIC']
-
-    new_content['BODY'] = content['BODY']
-
-    secure = data['encrypted']
-    encryption_key = DATA_ENCRYPTION_KEY if secure else None
-    kb.write_data(repo, id, new_content, encryption_key)
-
-    kblog.write_operation_log(context, 'MOD_PROPS', repo, id, data=data)
-
-    result = create_result_object('OK')
-    return result
-
-def filter_update_props(new_content, org_content):
-    for key in list(new_content):
-        if key in kb.RESTRICTED_PROP_KEYS:
-            if key in org_content:
-                new_content[key] = org_content[key]
-            else:
-                del new_content[key]
-    return new_content
+    outcome = kb.mod_data_props(repo, id, org_u_date, p_props, context)
+    status = outcome['status']
+    if status == 'OK':
+        kblog.write_operation_log(context, 'MOD_PROPS', repo, id, data=outcome['data'])
+        return create_result_object('OK')
+    if status == 'CONFLICT':
+        return create_result_object('CONFLICT', outcome['detail'])
+    return create_result_object('ERROR:' + status)
 
 #------------------------------------------------------------------------------
 def proc_save_logic(context):
@@ -311,44 +258,16 @@ def proc_save_logic(context):
     org_u_date = get_request_param('org_u_date')
     p_b64logic = get_request_param('logic')
     p_silent = get_request_param('silent')
-
-    data = kb.load_data(repo, id)
-    if data['status'] != 'OK':
-        result = create_result_object('ERROR:' + data['status'])
-        return result
-
-    content = data['content']
-    if content['U_DATE'] != org_u_date:
-        detail = {
-            'U_DATE': content['U_DATE'],
-            'U_USER': content['U_USER']
-        }
-        kblog.write_operation_log(context, 'SAVE_LOGIC:CONFLICT', repo, id, data=data)
-        result = create_result_object('CONFLICT', detail)
-        return result
-
-    new_content = content
-    new_content['LOGIC'] = p_b64logic
-
-    if p_silent != '1':
-        now = util.get_unixtime_millis()
-        user = kb.get_user_name(context)
-        new_content['U_DATE'] = now
-        new_content['U_USER'] = user
-
-    secure = data['encrypted']
-    encryption_key = DATA_ENCRYPTION_KEY if secure else None
-    kb.write_data(repo, id, new_content, encryption_key)
-
-    kblog.write_operation_log(context, 'SAVE_LOGIC', repo, id, data=data)
-
-    detail = {
-        'saved_id': id,
-        'U_DATE': str(new_content['U_DATE']),
-        'U_USER': new_content['U_USER']
-    }
-    result = create_result_object('OK', detail)
-    return result
+    user = kb.get_user_name(context)
+    outcome = kb.save_logic(repo, id, org_u_date, p_b64logic, p_silent == '1', user)
+    status = outcome['status']
+    if status == 'OK':
+        kblog.write_operation_log(context, 'SAVE_LOGIC', repo, id, data=outcome['data'])
+        return create_result_object('OK', outcome['detail'])
+    if status == 'CONFLICT':
+        kblog.write_operation_log(context, 'SAVE_LOGIC:CONFLICT', repo, id, data=outcome['data'])
+        return create_result_object('CONFLICT', outcome['detail'])
+    return create_result_object('ERROR:' + status)
 
 #------------------------------------------------------------------------------
 def proc_delete(context):
@@ -679,7 +598,10 @@ def proc_api(context, act):
     func_name = 'proc_' + act
     g = globals()
     if func_name in g:
-        result = g[func_name](context)
+        try:
+            result = g[func_name](context)
+        except kb.RepoLockTimeout:
+            result = create_result_object('REPO_BUSY')
     else:
         # from url query string w/o encryption
         act = websys.get_raw_request_param('act')
