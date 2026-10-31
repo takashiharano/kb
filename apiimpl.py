@@ -146,6 +146,7 @@ def proc_search(context):
         kblog.write_operation_log(context, 'SEARCH:FORBIDDEN', repo, id)
         return create_result_object('NO_ACCESS_RIGHTS')
 
+    q = None
     if id is None:
         q = get_request_param('q')
         q = util.decode_base64(q)
@@ -155,8 +156,9 @@ def proc_search(context):
         kblog.write_operation_log(context, 'SEARCH', repo, id)
         detail = kb.get_data(context, repo, id, need_encode_b64=True)
 
-    info = 'q=' + q + ' : ' + 'cnt=' + str(detail['total_count'])
-    kblog.write_operation_log(context, 'SEARCH', repo, id, info=info)
+    if q is not None:
+      info = 'q=' + q + ' : ' + 'cnt=' + str(detail['total_count'])
+      kblog.write_operation_log(context, 'SEARCH', repo, id, info=info)
 
     result = create_result_object('OK', detail)
     return result
