@@ -376,36 +376,36 @@ kb.buildDataListRow = function(data, fixed, cnt) {
 
   var cDateStr = kb.toDateTimeString(cDate);
   var cUser = (content.C_USER ? content.C_USER : '');
-  var cUserLabel = cUser;
+  var cUserLabel = util.escHtml(cUser);
   if (cUser == kb.ANONYMOUS_USER_NAME) {
     cUserLabel = '<span class="text-muted">' + cUserLabel + '</span>';
   }
   var cUserLink = '';
   if (cUser) {
-    cUserLink = '<span class="pseudo-link" onclick="kb.fieldSearch(\'created_by\', \'' + cUser + '\');">' + cUserLabel + '</span>';
+    cUserLink = '<span class="pseudo-link" onclick="kb.fieldSearch(\'created_by\', this.textContent);">' + cUserLabel + '</span>';
   }
 
   var uDateStr = kb.toDateTimeString(uDate);
   var uUser = (content.U_USER ? content.U_USER : '');
-  var uUserLabel = uUser;
+  var uUserLabel = util.escHtml(uUser);
   if (uUser == kb.ANONYMOUS_USER_NAME) {
     uUserLabel = '<span class="text-muted">' + uUserLabel + '</span>';
   }
   var uUserLink = '';
   if (uUser) {
-    uUserLink = '<span class="pseudo-link" onclick="kb.fieldSearch(\'updated_by\', \'' + uUser + '\');">' + uUserLabel + '</span>';
+    uUserLink = '<span class="pseudo-link" onclick="kb.fieldSearch(\'updated_by\', this.textContent);">' + uUserLabel + '</span>';
   }
 
   var dataPrivs = content.PRIVS || '';
 
   if (!title) {
-    title = '&lt;NO TITLE&gt;';
+    title = '<NO TITLE>';
   }
   var statusLabel = '';
   if (data_status == 'OK') {
     statusLabel = kb.buildStatusHTML(status);
   } else {
-    statusLabel = '<span class="status-label-err">' + data_status + '</span>';
+    statusLabel = '<span class="status-label-err">' + util.escHtml(data_status) + '</span>';
   }
   var size = (data.size == undefined ? '' : util.formatNumber(data.size));
   var hasLogic = '';
@@ -436,6 +436,7 @@ kb.buildDataListRow = function(data, fixed, cnt) {
   var idLabel = (fixed ? '<span style="color:#888;cursor:default;" data-tooltip2="Fixed">*</span>' : '') + id;
   var catLabel = kb.getCategory(labels);
   var titleLabel = '';
+  var escTitle = util.escHtml(title);
   if (data_status == 'OK') {
     titleLabel += '<span style="display:inline-block;width:100%;overflow:hidden;text-overflow:ellipsis;" class="title pseudo-link" onclick="kb.onClickTitle(\'' + id + '\');">';
   } else {
@@ -443,10 +444,9 @@ kb.buildDataListRow = function(data, fixed, cnt) {
   }
   titleLabel += '<span';
   if (util.lenW(title) > 76) {
-    var escTitle = util.escHtml(title);
     titleLabel += ' data-tooltip="' + escTitle + '"';
   }
-  titleLabel += '>' + title + '</span>';
+  titleLabel += '>' + escTitle + '</span>';
   titleLabel += '</span>';
 
   var html = '<tr id="row-' + id + '" class="data-list-row text-muted ' + rowClass + '">';
@@ -914,13 +914,13 @@ kb.buildStatusHTML = function(status) {
   var stBorder = (st.border ? st.border : '1px solid ' + stColor);
   html = '<span class="status"';
   html += ' style="';
-  html += 'color:' + stColor + ';';
-  html += 'background:' + stBackground + ';';
-  html += 'border:' + stBorder + ';';
+  html += 'color:' + util.escHtml(stColor) + ';';
+  html += 'background:' + util.escHtml(stBackground) + ';';
+  html += 'border:' + util.escHtml(stBorder) + ';';
   html += '"';
-  html += ' onclick="kb.fieldSearch(\'status\', \'' + status + '\');"';
+  html += ' onclick="kb.fieldSearch(\'status\', this.textContent);"';
   html += '>';
-  html += status;
+  html += util.escHtml(status);
   html += '</span>';
   return html;
 };
@@ -933,8 +933,8 @@ kb.getCategory = function(labels) {
   var alt = cat.alt;
   if (cat.image) {
     var imgPath = 'res/' + cat.image;
-    catLabel = '<img src="' + imgPath + '" class="cat-img"';
-    if (name) catLabel += 'data-tooltip-1500="' + name + '"';
+    catLabel = '<img src="' + util.escHtml(imgPath) + '" class="cat-img"';
+    if (name) catLabel += ' data-tooltip-1500="' + util.escHtml(name) + '"';
     catLabel += '>';
   } else {
     catLabel = kb.buildCategoryHTML(name, cat.color, alt)
@@ -986,13 +986,13 @@ kb.buildCategoryHTML = function(name, color, alt) {
   var stColor = (color ? color : '#ccc');
   var html = '<span class="category"';
   html += ' style="';
-  html += 'color:' + stColor + ';';
-  html += 'border: 1px solid ' + stColor + ';';
+  html += 'color:' + util.escHtml(stColor) + ';';
+  html += 'border: 1px solid ' + util.escHtml(stColor) + ';';
   html += 'cursor:default;';
   html += '"';
-  if (alt) html += 'data-tooltip-1500="' + alt + '"';
+  if (alt) html += ' data-tooltip-1500="' + util.escHtml(alt) + '"';
   html += '>';
-  html += name;
+  html += util.escHtml(name || '');
   html += '</span>';
   return html;
 };
@@ -1016,7 +1016,8 @@ kb.createLabel = function(keyname, text, snip, snipL, clickable) {
   var dispLabel = (snip ? dispLabel = util.snip(text, snipL, 0) : text);
   var html = '<span class="label"';
   if (clickable) {
-    html += ' onclick="kb.fieldSearch(\'' + keyname + '\', \'' + text + '\');"';
+    html += ' data-value="' + text + '"';
+    html += ' onclick="kb.fieldSearch(\'' + keyname + '\', this.dataset.value);"';
     if (snip) html += ' data-tooltip="' + text + '"';
   }
   html += '>' + dispLabel + '</span>';
@@ -1289,7 +1290,7 @@ kb.buildConflictMsg = function(data) {
   var m = 'The data is already updated.\n\n'
   m += '<div style="text-align:left;">';
   m += 'DATE: ' + dt + '\n';
-  m += 'BY  : ' + data.U_USER;
+  m += 'BY  : ' + util.escHtml(data.U_USER);
   m += '</div>';
   return m;
 }
@@ -1417,7 +1418,7 @@ kb.drawData = function(data) {
   var idLabel = '';
   if (id != '') idLabel = '<span class="pseudo-link" onclick="kb.showData(\'' + id + '\');" data-tooltip2="Reload">' + id + '</span>:';
   var escTitle =  util.escHtml(title);
-  var titleLabel = '<span class="pseudo-link" onclick="kb.copyTitleAndUrl(\'' + kb.repo + '\', \'' + id + '\', \'' + title + '\');" data-tooltip2="Copy title">' + escTitle + '</span>';
+  var titleLabel = '<span class="pseudo-link" onclick="kb.copyTitleAndUrl(kb.repo, kb.data.id, this.textContent);" data-tooltip2="Copy title">' + escTitle + '</span>';
 
   $el('#content-id').innerHTML = idLabel;
   $el('#content-title').innerHTML = titleLabel;
@@ -1434,9 +1435,9 @@ kb.drawData = function(data) {
     $el('#content-updated-by').innerHTML = '';
   } else {
     $el('#content-created-date').innerHTML = cDateStr;
-    $el('#content-created-by').innerHTML = 'by ' + content.C_USER;
+    $el('#content-created-by').textContent = 'by ' + content.C_USER;
     $el('#content-updated-date').innerHTML = uDateStr;
-    $el('#content-updated-by').innerHTML = 'by ' + content.U_USER;
+    $el('#content-updated-by').textContent = 'by ' + content.U_USER;
   }
 
   $el('#exec-logic-button').disabled = (content.LOGIC ? false : true);
@@ -1445,7 +1446,7 @@ kb.drawData = function(data) {
   if (data_status == 'OK') {
     statusLabel = kb.buildStatusHTML(status);
   } else if (data_status != 'EMPTY') {
-    statusLabel = '<span class="status-label-err">' + data_status + '</span>';
+    statusLabel = '<span class="status-label-err">' + util.escHtml(data_status) + '</span>';
   }
   $el('#status').innerHTML = statusLabel;
 
@@ -1548,28 +1549,28 @@ kb.linkDataUrl = function(s, f, index) {
 };
 
 kb.decodeB64Image = function(s) {
-  var m = s.match(/^\n*data:image\/.+;base64,\n?[A-za-z0-9+/=][A-za-z0-9+/=\n]+$/);
+  var m = s.match(/^\n*data:image\/[A-Za-z0-9.+-]+;base64,\n?[A-za-z0-9+/=][A-za-z0-9+/=\n]+$/);
   if (m) {
     var w =m[0].replace(/\n/g, '');
-    s = s.replace(/data:image\/.+;base64,\n?[A-za-z0-9+/=][A-za-z0-9+/=\n]+/, '<img src="' + w + '" class="imgdata">');
+    s = s.replace(/data:image\/[A-Za-z0-9.+-]+;base64,\n?[A-za-z0-9+/=][A-za-z0-9+/=\n]+/, '<img src="' + w + '" class="imgdata">');
     return s;
   }
-  m = s.match(/data:image\/.+;base64,\n?[A-za-z0-9+/=][A-za-z0-9+/=\n]+\n\n/g);
+  m = s.match(/data:image\/[A-Za-z0-9.+-]+;base64,\n?[A-za-z0-9+/=][A-za-z0-9+/=\n]+\n\n/g);
   if (!m) {
-    s = s.replace(/(data:image\/.+;base64,\n?[A-za-z0-9+/=][A-za-z0-9+/=\n]+)$/, '<img src="$1" class="imgdata">');
+    s = s.replace(/(data:image\/[A-Za-z0-9.+-]+;base64,\n?[A-za-z0-9+/=][A-za-z0-9+/=\n]+)$/, '<img src="$1" class="imgdata">');
     return s;
   }
   var imgs = [];
   for (var i = 0; i < m.length; i++) {
     var a = m[i];
-    var b = a.match(/(data:image\/.+;base64,)\n?([A-za-z0-9+/=][A-za-z0-9+/=\n]+)\n\n/);
+    var b = a.match(/(data:image\/[A-Za-z0-9.+-]+;base64,)\n?([A-za-z0-9+/=][A-za-z0-9+/=\n]+)\n\n/);
     w = b[1] + b[2].replace(/\n/g, '');
     imgs.push(w);
   }
   for (i = 0; i < imgs.length; i++) {
-    s = s.replace(/(?<!")data:image\/.+;base64,\n?[A-za-z0-9+/=][A-za-z0-9+/=\n]+\n\n/, '\n<img src="' + imgs[i] + '" class="imgdata">\n\n');
+    s = s.replace(/(?<!")data:image\/[A-Za-z0-9.+-]+;base64,\n?[A-za-z0-9+/=][A-za-z0-9+/=\n]+\n\n/, '\n<img src="' + imgs[i] + '" class="imgdata">\n\n');
   }
-  s = s.replace(/(data:image\/.+;base64,\n?[A-za-z0-9+/=][A-za-z0-9+/=\n]+)$/, '<img src="$1" class="imgdata">');
+  s = s.replace(/(data:image\/[A-Za-z0-9.+-]+;base64,\n?[A-za-z0-9+/=][A-za-z0-9+/=\n]+)$/, '<img src="$1" class="imgdata">');
   return s;
 };
 
@@ -2148,7 +2149,7 @@ kb.buildRepoListHtml = function(repoData, i) {
   html += '</td>';
   html += '<td style="padding-right:20px;white-space:nowrap;">';
   html += '<span style="display:inline-block;width:100%;overflow:hidden;text-overflow:ellipsis;" class="title pseudo-link" onclick="kb.switchRepo(\'' + repoId + '\');">';
-  html += '<span class="pseudo-link link">' + name + '</span>\n';
+  html += '<span class="pseudo-link link">' + util.escHtml(name) + '</span>\n';
   html += '</span>';
   html += '</td>';
 
@@ -3090,13 +3091,12 @@ kb.openResultDialog = function(s) {
 };
 
 kb.maskText = function(s) {
-  var v = s.replace(/\\/g, '\\\\').replace(/'/g, '\\\'').replace(/"/g, '&quot;');
   var r = '';
   r += '<div style="display:inline-block;position:relative;min-width:110px;margin-left:50px;">';
   r += '<div style="display:inline-block;position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(90deg, #aaa, #888 30%);cursor:pointer;" onclick="kb.peel(this);"></div>';
-  r += s;
+  r += util.escHtml(s);
   r += '</div>';
-  r += '<button class="small-button" style="margin-left:8px;margin-right:16px;" onclick="kb.copy(\'' + v + '\', true);" data-tooltip="Copy">&#x29C9;</button>';
+  r += '<button class="small-button" style="margin-left:8px;margin-right:16px;" onclick="kb.copy(this.previousElementSibling.textContent, true);" data-tooltip="Copy">&#x29C9;</button>';
   return r;
 };
 kb.peel = function(el) {
