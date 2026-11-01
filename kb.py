@@ -243,12 +243,13 @@ def _save_repo_props_locked(repo, json_text):
 #------------------------------------------------------------------------------
 def get_all_data_id_list(repo):
     datadir = get_data_dir_path(repo)
-    files = util.list_files(datadir, '.txt')
+    files = util.list_files(datadir, r'\.txt$')
     data_id_list = []
     for i in range(len(files)):
         filename = files[i]
-        id = util.replace(filename, '.txt', '')
-        data_id_list.append(id)
+        id = filename[:-4]
+        if is_valid_data_id(id):
+            data_id_list.append(id)
     return data_id_list
 
 #------------------------------------------------------------------------------
