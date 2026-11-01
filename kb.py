@@ -23,7 +23,8 @@ import websys
 
 WORKSPACE_PATH = appconfig.workspace_path
 DATA_BASE_DIR_PATH = WORKSPACE_PATH + 'repos/'
-WK_PATH = WORKSPACE_PATH + 'wk/'
+TMP_PATH = os.path.join(WORKSPACE_PATH, 'tmp')
+LOCKS_PATH = os.path.join(TMP_PATH, 'locks')
 PROPS_FILENAME = 'properties.txt'
 CATEGORIES_FILENAME = 'categories.json'
 
@@ -65,8 +66,8 @@ def repo_write_lock(repo):
     if not is_valid_repo_id(repo):
         raise ValueError('ILLEGAL_REPO_ID')
 
-    lock_path = os.path.join(WORKSPACE_PATH, 'locks', repo + '.lockdir')
-    os.makedirs(os.path.dirname(lock_path), exist_ok=True)
+    lock_path = os.path.join(LOCKS_PATH, repo + '.lockdir')
+    os.makedirs(LOCKS_PATH, exist_ok=True)
 
     if not util.file_lock(lock_path, retry=40, wait=0.25):
         raise RepoLockTimeout('REPO_LOCK_TIMEOUT:repo=' + repo)
@@ -1301,8 +1302,8 @@ def export_data(repo, decrypt=False):
     if not decrypt:
         return util.zip(None, data_dir_path)
 
-    util.mkdir(WK_PATH)
-    with tempfile.TemporaryDirectory(dir=WK_PATH) as tmp_dir:
+    util.mkdir(TMP_PATH)
+    with tempfile.TemporaryDirectory(prefix='export-', dir=TMP_PATH) as tmp_dir:
         wk_data_path = os.path.join(tmp_dir, 'data', '')
         util.mkdir(wk_data_path)
         decrypt_data(repo, wk_data_path)
@@ -1313,8 +1314,8 @@ def export_all_data(context, decrypt=False):
     if not decrypt:
         return util.zip(None, DATA_BASE_DIR_PATH)
 
-    util.mkdir(WK_PATH)
-    with tempfile.TemporaryDirectory(dir=WK_PATH) as tmp_dir:
+    util.mkdir(TMP_PATH)
+    with tempfile.TemporaryDirectory(prefix='export-', dir=TMP_PATH) as tmp_dir:
         target_path = os.path.join(tmp_dir, 'kbdata', '')
         util.mkdir(target_path)
         repo_list = get_repo_list(context)
