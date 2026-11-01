@@ -634,7 +634,7 @@ def proc_api(context, act):
         try:
             result = handler(context)
         except kb.RepoLockTimeout:
-            if act == 'export':
+            if handler in (proc_export_data, proc_export_data_all):
                 send_error_text('REPO_BUSY')
                 return
             result = create_result_object('REPO_BUSY')
