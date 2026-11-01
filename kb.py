@@ -8,6 +8,7 @@ import sys
 import re
 import copy
 import contextlib
+import tempfile
 
 import appconfig
 
@@ -1297,40 +1298,40 @@ def _change_data_id_locked(repo, id_fm, id_to):
 
 def export_data(repo, decrypt=False):
     data_dir_path = get_data_dir_path(repo)
-    if decrypt:
-        wk_data_path = WK_PATH + repo + '/data/'
+    if not decrypt:
+        return util.zip(None, data_dir_path)
+
+    util.mkdir(WK_PATH)
+    with tempfile.TemporaryDirectory(dir=WK_PATH) as tmp_dir:
+        wk_data_path = os.path.join(tmp_dir, 'data', '')
         util.mkdir(wk_data_path)
         decrypt_data(repo, wk_data_path)
-        target_path = wk_data_path
-    else:
-        target_path = data_dir_path
-
-    b = util.zip(None, target_path)
-    util.delete(WK_PATH, True)
-    return b
+        b = util.zip(None, wk_data_path)
+        return b
 
 def export_all_data(context, decrypt=False):
-    util.delete(WK_PATH, True)
-    if decrypt:
-        target_path = WK_PATH + 'kbdata/'
+    if not decrypt:
+        return util.zip(None, DATA_BASE_DIR_PATH)
+
+    util.mkdir(WK_PATH)
+    with tempfile.TemporaryDirectory(dir=WK_PATH) as tmp_dir:
+        target_path = os.path.join(tmp_dir, 'kbdata', '')
+        util.mkdir(target_path)
         repo_list = get_repo_list(context)
 
         for i in range(len(repo_list)):
             repo_data = repo_list[i]
             repo = repo_data['id']
             src_repo_props_path = get_props_file_path(repo)
-            wk_repo_path = target_path + repo + '/'
-            wk_data_path = wk_repo_path + 'data/'
+            wk_repo_path = os.path.join(target_path, repo, '')
+            wk_data_path = os.path.join(wk_repo_path, 'data', '')
             util.mkdir(wk_data_path)
             decrypt_data(repo, wk_data_path)
             if util.path_exists(src_repo_props_path):
                 util.copy(src_repo_props_path, wk_repo_path)
-    else:
-        target_path = DATA_BASE_DIR_PATH
 
-    b = util.zip(None, target_path)
-    util.delete(WK_PATH, True)
-    return b
+        b = util.zip(None, target_path)
+        return b
 
 def decrypt_data(repo, dst_base_dir):
     encdec_data(repo, dst_base_dir, encryption_key=None)
