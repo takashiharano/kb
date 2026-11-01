@@ -118,13 +118,19 @@ def is_valid_data_id(id):
     return bool(id) and re.fullmatch(r'[A-Za-z0-9_-]+', id) is not None
 
 #------------------------------------------------------------------------------
-def get_repo_list(context):
+def get_all_repo_id_list():
     dirs = util.list_dirs(DATA_BASE_DIR_PATH)
+    repo_list = []
+    for repo in dirs:
+        if is_valid_repo_id(repo):
+            repo_list.append(repo)
+    return repo_list
+
+def get_repo_list(context):
+    dirs = get_all_repo_id_list()
     repo_list = []
     for i in range(len(dirs)):
         repo = dirs[i]
-        if not is_valid_repo_id(repo):
-            continue
         if has_privilege_for_repo(context, repo):
             props = load_repo_props(repo)
             repo_data = {
@@ -1311,7 +1317,7 @@ def export_data(repo, decrypt=False):
         b = util.zip(None, wk_data_path)
         return b
 
-def export_all_data(context, decrypt=False):
+def export_all_data(decrypt=False):
     if not decrypt:
         return util.zip(None, DATA_BASE_DIR_PATH)
 
@@ -1319,11 +1325,9 @@ def export_all_data(context, decrypt=False):
     with tempfile.TemporaryDirectory(prefix='export-', dir=TMP_PATH) as tmp_dir:
         target_path = os.path.join(tmp_dir, 'kbdata', '')
         util.mkdir(target_path)
-        repo_list = get_repo_list(context)
+        repo_ids = get_all_repo_id_list()
 
-        for i in range(len(repo_list)):
-            repo_data = repo_list[i]
-            repo = repo_data['id']
+        for repo in repo_ids:
             src_repo_props_path = get_props_file_path(repo)
             wk_repo_path = os.path.join(target_path, repo, '')
             wk_data_path = os.path.join(wk_repo_path, 'data', '')
@@ -1585,13 +1589,8 @@ def cmd_export():
         print('Usage: python kb.py export <REPO> <DEST_FILE_PATH> [-decrypt]')
         return
 
-    user_info = {'uid': 'system', 'is_admin': True}
-    context = websys.WebContext()
-    context.set_user_info(user_info)
-    context.set_authorized(True)
-
     if repo == '-all':
-        data_bytes = export_all_data(context, decrypt)
+        data_bytes = export_all_data(decrypt)
     else:
         data_bytes = export_data(repo, decrypt)
 
