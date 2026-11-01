@@ -510,13 +510,14 @@ def proc_export_data_all(context):
         kblog.write_operation_log(context, 'EXPORT_ALL_DATA:FORBIDDEN', repo='', dataid='')
         send_error_text('NO_ACCESS_RIGHTS')
         return None
+
     p_decrypt = websys.get_raw_request_param('decrypt')
     decrypt = p_decrypt == '1'
 
     timestamp = util.get_datetime_str(fmt='%Y%m%dT%H%M%S')
     fllename = 'kbdata-all-' + timestamp + '.zip'
 
-    b = kb.export_all_data(context, decrypt)
+    b = kb.export_all_data(decrypt)
 
     kblog.write_operation_log(context, 'EXPORT_ALL_DATA', repo='', dataid='')
 
