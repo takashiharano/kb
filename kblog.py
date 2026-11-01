@@ -16,7 +16,7 @@ util.append_system_path(__file__, ROOT_PATH + 'websys')
 import websys
 
 LOG_FILE_PATH = appconfig.workspace_path + 'kb.log'
-LOCK_FILE_PATH = appconfig.workspace_path + 'lock'
+LOCK_FILE_PATH = os.path.join(appconfig.workspace_path, 'tmp', 'locks', 'kblog.lock')
 
 #----------------------------------------------------------
 # Read log
@@ -116,6 +116,7 @@ def append_info(info, s):
 
 #----------------------------------------------------------
 def synchronize_start():
+    os.makedirs(os.path.dirname(LOCK_FILE_PATH), exist_ok=True)
     if util.file_lock(LOCK_FILE_PATH, 15, 0.2):
         return True
     return False
