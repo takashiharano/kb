@@ -206,7 +206,7 @@ def _create_repo_locked(repo, props):
 
     path = get_repo_dir_path(repo)
     util.mkdir(path)
-    save_repo_props(repo, props)
+    _save_repo_props_locked(repo, props)
     return 'OK'
 
 def delete_repo(repo):
@@ -228,6 +228,13 @@ def _delete_repo_locked(repo):
 
 #------------------------------------------------------------------------------
 def save_repo_props(repo, json_text):
+    with repo_write_lock(repo):
+        if not repo_exists(repo):
+            return 'REPOSITORY_NOT_FOUND'
+        _save_repo_props_locked(repo, json_text)
+        return 'OK'
+
+def _save_repo_props_locked(repo, json_text):
     path = get_props_file_path(repo)
     util.write_file_atomically(path, json_text)
 

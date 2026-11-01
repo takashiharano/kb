@@ -383,7 +383,11 @@ def proc_save_repo_props(context):
     repo = get_req_param_repo()
     b64props = get_request_param('props')
     props = util.decode_base64(b64props)
-    kb.save_repo_props(repo, props)
+    status = kb.save_repo_props(repo, props)
+    if status != 'OK':
+        send_result_json(status)
+        return None
+
     result_data = {
         'repo': repo
     }
