@@ -513,12 +513,13 @@ def proc_export_data_all(context):
     p_decrypt = websys.get_raw_request_param('decrypt')
     decrypt = p_decrypt == '1'
 
-    kblog.write_operation_log(context, 'EXPORT_ALL_DATA', repo='', dataid='')
-
     timestamp = util.get_datetime_str(fmt='%Y%m%dT%H%M%S')
     fllename = 'kbdata-all-' + timestamp + '.zip'
 
     b = kb.export_all_data(context, decrypt)
+
+    kblog.write_operation_log(context, 'EXPORT_ALL_DATA', repo='', dataid='')
+
     util.send_as_file(b, filename=fllename)
     return None
 
@@ -615,24 +616,28 @@ def proc_api(context, act):
     func_name = 'proc_' + act
     g = globals()
     if func_name in g:
-        try:
-            result = g[func_name](context)
-        except kb.RepoLockTimeout:
-            result = create_result_object('REPO_BUSY')
+        handler = g[func_name]
     else:
         # from url query string w/o encryption
         act = websys.get_raw_request_param('act')
         if act == 'export':
-            all = websys.get_raw_request_param('all', '')
-            if all == '1':
-                # api.cgi?act=export&all=1&decrypt=1
-                proc_export_data_all(context)
-            else:
-                # api.cgi?act=export&repo=xyz&decrypt=1
-                proc_export_data(context)
-            return
+            # api.cgi?act=export&all=1&decrypt=1
+            # api.cgi?act=export&repo=abc&decrypt=1
+            export_all = websys.get_raw_request_param('all', '') == '1'
+            handler = proc_export_data_all if export_all else proc_export_data
         else:
-            result = create_result_object('NO_SUCH_ACTION')
+            handler = None
+
+    if handler is None:
+        result = create_result_object('NO_SUCH_ACTION')
+    else:
+        try:
+            result = handler(context)
+        except kb.RepoLockTimeout:
+            if act == 'export':
+                send_error_text('REPO_BUSY')
+                return
+            result = create_result_object('REPO_BUSY')
 
     if result is not None:
         if result['type'] == 'octet-stream':
