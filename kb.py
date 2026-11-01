@@ -67,7 +67,7 @@ def repo_write_lock(repo):
         raise ValueError('ILLEGAL_REPO_ID')
 
     lock_path = os.path.join(LOCKS_PATH, repo + '.lockdir')
-    os.makedirs(LOCKS_PATH, exist_ok=True)
+    util.mkdir(LOCKS_PATH)
 
     if not util.file_lock(lock_path, retry=40, wait=0.25):
         raise RepoLockTimeout('REPO_LOCK_TIMEOUT:repo=' + repo)

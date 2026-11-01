@@ -27,8 +27,10 @@ def get_log():
 # Write Log
 def write_log(data):
     if synchronize_start():
-        util.append_line_to_text_file(LOG_FILE_PATH, data, max=1000)
-        synchronize_end()
+        try:
+            util.append_line_to_text_file(LOG_FILE_PATH, data, max=1000)
+        finally:
+            synchronize_end()
 
 #----------------------------------------------------------
 def write_app_log(user, op_type, repo, dataid, info=''):
@@ -116,7 +118,7 @@ def append_info(info, s):
 
 #----------------------------------------------------------
 def synchronize_start():
-    os.makedirs(os.path.dirname(LOCK_FILE_PATH), exist_ok=True)
+    util.mkdir(os.path.dirname(LOCK_FILE_PATH))
     if util.file_lock(LOCK_FILE_PATH, 15, 0.2):
         return True
     return False
