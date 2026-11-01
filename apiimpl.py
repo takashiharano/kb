@@ -494,10 +494,11 @@ def proc_export_data(context):
     decrypt = p_decrypt == '1'
     b = kb.export_data(repo, decrypt)
 
+    timestamp = util.get_datetime_str(fmt='%Y%m%dT%H%M%S')
     filename = 'kbdata'
     if repo != kb.get_default_repo_id():
-        filename += '_' + repo
-    filename += '.zip'
+        filename += '-' + repo
+    filename += '-' + timestamp + '.zip'
 
     kblog.write_operation_log(context, 'EXPORT_DATA', repo, dataid='')
 
