@@ -11,7 +11,7 @@ import style
 
 ROOT_PATH = appconfig.root_path
 
-sys.path.append(os.path.join(os.path.dirname(__file__), ROOT_PATH + 'libs'))
+sys.path.append(appconfig.libs_path)
 import util
 
 util.append_system_path(__file__, ROOT_PATH + 'websys')
@@ -35,15 +35,18 @@ def build_main_screen(context, repo):
 <meta name="referrer" content="never">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 '''
+    libs_url = appconfig.libs_url_path
+
     html += '<title>' + appconfig.title + '</title>'
     html += '<link rel="stylesheet" href="./style.css" />'
     html += '<style>' + style.build_css() + '</style>'
-    html += '<script src="' + ROOT_PATH + 'libs/sha.js"></script>'
-    html += '<script src="' + ROOT_PATH + 'libs/debug.js"></script>'
-    html += '<script src="' + ROOT_PATH + 'libs/util.js"></script>'
+    html += '<script src="' + libs_url + 'sha.js"></script>'
+    html += '<script src="' + libs_url + 'debug.js"></script>'
+    html += '<script src="' + libs_url + 'util.js"></script>'
     html += '<script src="' + ROOT_PATH + 'websys/websys.js"></script>'
     html += '<script src="kb.js"></script>'
     html += '<script src="./?res=js&repo=' + repo + '"></script>'
+
     html += '''
 </head>
 <body>

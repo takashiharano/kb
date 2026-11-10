@@ -9,7 +9,7 @@ import sys
 import appconfig
 ROOT_PATH = appconfig.root_path
 
-sys.path.append(os.path.join(os.path.dirname(__file__), ROOT_PATH + 'libs'))
+sys.path.append(appconfig.libs_path)
 import util
 
 util.append_system_path(__file__, ROOT_PATH + 'websys')

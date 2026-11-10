@@ -1,4 +1,10 @@
 root_path = '../'
+
+import os
+libs_dir = 'libs'
+libs_path = os.path.join(os.path.dirname(__file__), root_path, libs_dir)
+libs_url_path = root_path + libs_dir + '/'
+
 workspace_path = root_path + '../private/kb/'
 home_path = root_path
 user_name_lang = 'en'

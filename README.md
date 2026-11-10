@@ -110,6 +110,9 @@ Settings are defined in `public/kb/appconfig.py`.
 | Setting | Purpose |
 | --- | --- |
 | `root_path` | Relative path from `kb/` to the shared public directories |
+| `libs_dir` | Shared libraries directory relative to the public root |
+| `libs_path` | Path to the shared Python libraries directory |
+| `libs_url_path` | URL path to the shared JavaScript libraries |
 | `workspace_path` | Location of the private KB data directory |
 | `home_path` | Destination of the HOME link |
 | `access_control` | Authentication and operation-permission mode; defaults to `auth` |
