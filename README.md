@@ -130,12 +130,12 @@ Repository settings are stored in `private/kb/repos/<repo-id>/properties.txt` as
 ```json
 {
   "name": "Main",
-  "privs": "",
+  "privileges": "",
   "encrypt": true
 }
 ```
 
-The `privs` property controls repository access using WebSys privileges; an empty value imposes no additional repository-level privilege requirement on authenticated users. The `encrypt` property selects the default encoding setting for new entries in that repository. Repositories can also have their own `categories.json`; otherwise the shared file under `private/kb/` is used.
+The `privileges` property controls repository access using WebSys privileges; an empty value imposes no additional repository-level privilege requirement on authenticated users. The `encrypt` property selects the default encoding setting for new entries in that repository. Repositories can also have their own `categories.json`; otherwise the shared file under `private/kb/` is used.
 
 ## Usage
 
