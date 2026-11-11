@@ -1492,7 +1492,7 @@ def has_privilege(context, target_priv):
     access_control = appconfig.access_control
 
     if access_control == 'auth':
-        # target_priv = kb.xxx
+        # e.g., target_priv = kb.xxx
         return context.has_permission(target_priv)
 
     if util.has_item_value(access_control, 'auth', separator='|'):
@@ -1502,11 +1502,13 @@ def has_privilege(context, target_priv):
     if access_control == 'full':
         return True
 
-    if target_priv == 'kb':
+    if target_priv == appconfig.app_id:
         # public-mode
         return True
 
-    target_priv = util.replace(target_priv, 'kb\\.', '')
+    priv_prefix = appconfig.app_id + '.'
+    if target_priv.startswith(priv_prefix):
+        target_priv = target_priv[len(priv_prefix):]
     return util.has_item_value(access_control, target_priv, separator='|')
 
 def has_data_privilege(context, content):
@@ -1533,10 +1535,11 @@ def satisfy_privs(context, required_privs):
     return True
 
 def can_operate(context, repo, operation_name):
-    repo_kb_admin_priv = repo + '.kb.admin'
-    kb_op_priv = 'kb.' + operation_name
-    repo_kb_op_priv = repo + '.' + kb_op_priv
-    privs = ['sysadmin', 'kb.admin', repo_kb_admin_priv, kb_op_priv, repo_kb_op_priv]
+    app_priv = appconfig.app_id
+    repo_admin_priv = repo + '.' + app_priv + '.admin'
+    op_priv = app_priv + '.' + operation_name
+    repo_op_priv = repo + '.' + op_priv
+    privs = ['sysadmin', app_priv + '.admin', repo_admin_priv, op_priv, repo_op_priv]
     for priv in privs:
         if has_privilege(context, priv):
             return True

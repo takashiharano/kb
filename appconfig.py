@@ -1,4 +1,5 @@
 root_path = '../'
+app_id = 'kb'
 
 import os
 libs_dir = 'libs'
