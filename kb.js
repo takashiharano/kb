@@ -396,7 +396,7 @@ kb.buildDataListRow = function(data, fixed, cnt) {
     uUserLink = '<span class="pseudo-link" onclick="kb.fieldSearch(\'updated_by\', this.textContent);">' + uUserLabel + '</span>';
   }
 
-  var dataPrivs = content.PRIVS || '';
+  var dataPrivileges = content.PRIVS || '';
 
   if (!title) {
     title = '<NO TITLE>';
@@ -426,7 +426,7 @@ kb.buildDataListRow = function(data, fixed, cnt) {
     dlLink = '<span class="dl-link" onclick="kb.dlContent(\'' + id + '\');" data-tooltip="Download">&#x1F517;</span>';
   }
   var labelsHTML = kb.buildItemsHTML('label', labels);
-  var privsHTML = kb.buildItemsHTML('priv', dataPrivs);
+  var privilegesHTML = kb.buildItemsHTML('privilege', dataPrivileges);
   var rowClass = ((cnt % 2 == 0) ? 'row-even' : 'row-odd');
 
   var chkBox = '<input type="checkbox" onchange="kb.checkItem(\'' + id + '\', this)"';
@@ -463,7 +463,7 @@ kb.buildDataListRow = function(data, fixed, cnt) {
   html += '<td>' + labelsHTML + '</td>';
   html += '<td style="text-align:right;padding-left:0.5em;padding-right:0.5em;">' + score + '</td>';
   html += '<td style="text-align:right;padding-left:0.5em;padding-right:0.5em;">' + size + '</td>';
-  if (kb.LIST_COLUMNS[kb.toSortIndex('PRIVS')].forAdmin && kb.isSysAdmin) html += '<td>' + privsHTML + '</td>';
+  if (kb.LIST_COLUMNS[kb.toSortIndex('PRIVS')].forAdmin && kb.isSysAdmin) html += '<td>' + privilegesHTML + '</td>';
   html += '<td style="text-align:center;cursor:default;">' + hasLogic + '</td>';
   html += '<td style="padding-right:16px;text-align:center;">' + dlLink + '</td>';
   html += '<td style="text-align:center;width:16px;cursor:default;">' + encrypted + '</td>';
@@ -2194,7 +2194,7 @@ kb.setActiveRepo = function(id) {
 kb.newRepo = function() {
   var html = kb.buildRepoEditor(null, 'kb.createRepo');
   util.dialog.open(html);
-  $el('#repo-props').value = '{\n  "name": "",\n  "privs": "",\n  "encrypt": ' + kb.config.default_data_encryption + '\n}\n';
+  $el('#repo-props').value = '{\n  "name": "",\n  "privileges": "",\n  "encrypt": ' + kb.config.default_data_encryption + '\n}\n';
   $el('#repo-id').focus();
 };
 kb.buildRepoEditor = function(repo, cbFncName) {

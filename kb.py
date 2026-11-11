@@ -146,9 +146,9 @@ def has_privilege_for_repo(context, repo):
         return False
     props = load_repo_props(repo)
     if is_authorized(context):
-        if not 'privs' in props:
+        if not 'privileges' in props:
             return True
-        if satisfy_privs(context, props['privs']):
+        if satisfy_privileges(context, props['privileges']):
             return True
     if is_anonymous_allowed(repo):
         return True
@@ -690,8 +690,8 @@ def calc_data_macthed_score(data, keyword):
         keyword = get_field_sraech_keyword(keyword, 'updated_by')
         score = is_target_matches(content['U_USER'], keyword, True)
 
-    elif keyword_lc.startswith('priv:'):
-        keyword = get_field_sraech_keyword(keyword, 'priv')
+    elif keyword_lc.startswith('privilege:'):
+        keyword = get_field_sraech_keyword(keyword, 'privilege')
         if is_matches_items(content, 'PRIVS', keyword):
             score = 10
 
@@ -1488,60 +1488,60 @@ def is_authorized(context):
         return True
     return False
 
-def has_privilege(context, target_priv):
+def has_privilege(context, target_privilege):
     access_control = appconfig.access_control
 
     if access_control == 'auth':
-        # e.g., target_priv = kb.xxx
-        return context.has_permission(target_priv)
+        # e.g., target_privilege = kb.xxx
+        return context.has_permission(target_privilege)
 
     if util.has_item_value(access_control, 'auth', separator='|'):
-        if context.has_permission(target_priv):
+        if context.has_permission(target_privilege):
             return True
 
     if access_control == 'full':
         return True
 
-    if target_priv == appconfig.app_id:
+    if target_privilege == appconfig.app_id:
         # public-mode
         return True
 
-    priv_prefix = appconfig.app_id + '.'
-    if target_priv.startswith(priv_prefix):
-        target_priv = target_priv[len(priv_prefix):]
-    return util.has_item_value(access_control, target_priv, separator='|')
+    privilege_prefix = appconfig.app_id + '.'
+    if target_privilege.startswith(privilege_prefix):
+        target_privilege = target_privilege[len(privilege_prefix):]
+    return util.has_item_value(access_control, target_privilege, separator='|')
 
 def has_data_privilege(context, content):
     if context.is_admin():
         return True
-    dataprivs = content['PRIVS'] if 'PRIVS' in content else ''
-    return satisfy_privs(context, dataprivs)
+    data_privileges = content['PRIVS'] if 'PRIVS' in content else ''
+    return satisfy_privileges(context, data_privileges)
 
-def satisfy_privs(context, required_privs):
+def satisfy_privileges(context, required_privileges):
     if context.is_admin():
         return True
-    if required_privs == '':
+    if required_privileges == '':
         return True
-    required_privs = required_privs.lower()
-    privs = required_privs.split(' ')
-    for i in range(len(privs)):
-        priv = privs[i]
-        if priv.startswith('-'):
-            priv = priv[1:]
-            if context.has_permission(priv):
+    required_privileges = required_privileges.lower()
+    privileges = required_privileges.split(' ')
+    for i in range(len(privileges)):
+        privilege = privileges[i]
+        if privilege.startswith('-'):
+            privilege = privilege[1:]
+            if context.has_permission(privilege):
                 return False
-        elif not context.has_permission(priv):
+        elif not context.has_permission(privilege):
             return False
     return True
 
 def can_operate(context, repo, operation_name):
-    app_priv = appconfig.app_id
-    repo_admin_priv = repo + '.' + app_priv + '.admin'
-    op_priv = app_priv + '.' + operation_name
-    repo_op_priv = repo + '.' + op_priv
-    privs = ['sysadmin', app_priv + '.admin', repo_admin_priv, op_priv, repo_op_priv]
-    for priv in privs:
-        if has_privilege(context, priv):
+    app_privilege = appconfig.app_id
+    repo_admin_privilege = repo + '.' + app_privilege + '.admin'
+    op_privilege = app_privilege + '.' + operation_name
+    repo_op_privilege = repo + '.' + op_privilege
+    privileges = ['sysadmin', app_privilege + '.admin', repo_admin_privilege, op_privilege, repo_op_privilege]
+    for privilege in privileges:
+        if has_privilege(context, privilege):
             return True
 
     if is_anonymous_op_allowed(repo, operation_name):
@@ -1557,18 +1557,18 @@ def is_anonymous_op_allowed(repo, operation_name):
         return False
 
     props = load_repo_props(repo)
-    if not 'privs' in props:
+    if not 'privileges' in props:
         return False
 
-    repo_privs = props['privs']
-    if repo_privs == 'anonymous':
+    repo_privileges = props['privileges']
+    if repo_privileges == 'anonymous':
         return True
 
-    repo_privs = repo_privs.lower()
-    privs = repo_privs.split(' ')
-    for i in range(len(privs)):
-        priv = privs[i]
-        w = priv.split('.')
+    repo_privileges = repo_privileges.lower()
+    privileges = repo_privileges.split(' ')
+    for i in range(len(privileges)):
+        privilege = privileges[i]
+        w = privilege.split('.')
         if len(w) == 2:
             if w[0] == 'anonymous':
                 if operation_name == '*' or w[1] == operation_name:
