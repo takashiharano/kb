@@ -232,12 +232,12 @@ def proc_mod_props(context):
         kblog.write_operation_log(context, 'MOD_PROPS:FORBIDDEN', repo, id)
         return create_result_object('NO_ACCESS_RIGHTS')
 
-    org_u_date = get_request_param('org_u_date')
+    org_updated_at = get_request_param('org_updated_at')
     p_props = get_request_param('props')
     p_props = util.decode_base64(p_props)
     p_props = util.replace(p_props, ' {2,}', ' ')
 
-    outcome = kb.mod_data_props(repo, id, org_u_date, p_props, context)
+    outcome = kb.mod_data_props(repo, id, org_updated_at, p_props, context)
     status = outcome['status']
 
     if status == 'OK':
@@ -261,11 +261,11 @@ def proc_save_logic(context):
         kblog.write_operation_log(context, 'SAVE_LOGIC:FORBIDDEN', repo, id)
         return create_result_object('NO_ACCESS_RIGHTS')
 
-    org_u_date = get_request_param('org_u_date')
+    org_updated_at = get_request_param('org_updated_at')
     p_b64logic = get_request_param('logic')
     p_silent = get_request_param('silent')
     user = kb.get_user_name(context)
-    outcome = kb.save_logic(repo, id, org_u_date, p_b64logic, p_silent == '1', user, context)
+    outcome = kb.save_logic(repo, id, org_updated_at, p_b64logic, p_silent == '1', user, context)
     status = outcome['status']
 
     if status == 'OK':

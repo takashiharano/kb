@@ -981,7 +981,7 @@ def _save_data_locked(repo, id, new_data, user, as_anonymous, context):
         user = ANONYMOUS_USER_NAME
 
     data = load_data(repo, id)
-    if not creating and data['status'] == 'DATA_NOT_FOUND' and new_data['org_u_date'] == '':
+    if not creating and data['status'] == 'DATA_NOT_FOUND' and new_data['org_updated_at'] == '':
         creating = True
 
     if creating and data['status'] == 'OK':
@@ -994,7 +994,7 @@ def _save_data_locked(repo, id, new_data, user, as_anonymous, context):
         if context is not None and not has_data_privilege(context, data['content']):
             return {'status': 'NO_ACCESS_RIGHTS', 'id': id, 'data': data}
 
-        if data['content']['updated_at'] != new_data['org_u_date']:
+        if data['content']['updated_at'] != new_data['org_updated_at']:
             return {'status': 'CONFLICT', 'id': id, 'data': data}
     else:
         data = {
@@ -1090,7 +1090,7 @@ def touch_data(repo, ids, keep_updated_by, user, context):
             write_data(repo, id, content, encryption_key)
 
 
-def mod_data_props(repo, id, org_u_date, props_text, context):
+def mod_data_props(repo, id, org_updated_at, props_text, context):
     with repo_write_lock(repo):
         data = load_data(repo, id)
         if data['status'] != 'OK':
@@ -1100,7 +1100,7 @@ def mod_data_props(repo, id, org_u_date, props_text, context):
         if not has_data_privilege(context, content):
             return {'status': 'NO_ACCESS_RIGHTS'}
 
-        if content['updated_at'] != org_u_date:
+        if content['updated_at'] != org_updated_at:
             detail = {'updated_at': content['updated_at'], 'updated_by': content['updated_by']}
             return {'status': 'CONFLICT', 'detail': detail}
 
@@ -1127,7 +1127,7 @@ def filter_update_props(new_content, org_content):
     return new_content
 
 
-def save_logic(repo, id, org_u_date, b64logic, silent, user, context):
+def save_logic(repo, id, org_updated_at, b64logic, silent, user, context):
     with repo_write_lock(repo):
         data = load_data(repo, id)
         if data['status'] != 'OK':
@@ -1137,7 +1137,7 @@ def save_logic(repo, id, org_u_date, b64logic, silent, user, context):
         if not has_data_privilege(context, content):
             return {'status': 'NO_ACCESS_RIGHTS'}
 
-        if content['updated_at'] != org_u_date:
+        if content['updated_at'] != org_updated_at:
             detail = {'updated_at': content['updated_at'], 'updated_by': content['updated_by']}
             return {'status': 'CONFLICT', 'detail': detail, 'data': data}
 
