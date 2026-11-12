@@ -98,7 +98,7 @@ Numbers in brackets indicate example file permissions (octal notation). Actual p
 3. Install the required shared libraries in `public/libs/`.
 4. Set the first-line shebang in `index.cgi` and `api.cgi` to the Python 3 executable used by your web server, and enable CGI execution for those files.
 5. Create `private/kb/repos/0/data/` for the default repository. Ensure the CGI process can read and write under `private/kb/`, including repository files, logs, and temporary lock files.
-6. Review `public/kb/appconfig.py`, especially `root_path`, `workspace_path`, `access_control`, and `data_encryption_key`. The default relative paths assume the layout above.
+6. Review `public/kb/appconfig.py`, especially `root_path`, `app_id`, `workspace_path`, `access_control`, and `data_encryption_key`. The default relative paths assume the layout above.
 7. In WebSys, grant the appropriate KB permissions to users who need to create, modify, delete, or export entries.
 
 Configure `data_encryption_key` before creating encoded entries. Changing it afterward without converting existing data prevents those entries from being decoded with the new key.
@@ -110,6 +110,7 @@ Settings are defined in `public/kb/appconfig.py`.
 | Setting | Purpose |
 | --- | --- |
 | `root_path` | Relative path from `kb/` to the shared public directories |
+| `app_id` | Application identifier and privilege namespace |
 | `libs_dir` | Shared libraries directory relative to the public root |
 | `libs_path` | Path to the shared Python libraries directory |
 | `libs_url_path` | URL path to the shared JavaScript libraries |
@@ -118,12 +119,14 @@ Settings are defined in `public/kb/appconfig.py`.
 | `access_control` | Authentication and operation-permission mode; defaults to `auth` |
 | `title`, `system_name` | Browser title and displayed application name |
 | `list_max`, `list_height` | Default list limit and list-pane height |
-| `state_list` | Available entry statuses and display colors |
+| `state_list` | Available entry status values, display labels, and colors |
 | `default_data_encryption` | Default encoding option for newly created entries |
 | `data_encryption_key` | Key used to encode and decode stored XB64 entries |
 | `default_encryption_key` | Default key supplied to browser-side encoding tools |
 | `user_name_lang` | Preferred display name language from WebSys |
 | `api_tokens` | Optional tokens accepted for selected API operations |
+
+Each entry in `state_list` defines a stored `value`, a display `label`, and optional styling properties. Status values are stored independently of their display labels.
 
 Repository settings are stored in `private/kb/repos/<repo-id>/properties.txt` as JSON. For example:
 
@@ -150,7 +153,7 @@ Use the keyword field to search entry content and metadata. For example:
 | `network` | Entries containing the keyword `network` in their title, labels, or body |
 | `title:network` | Entries whose titles contain `network` |
 | `label:reference` | Entries with the `reference` label |
-| `status:TODO` | Entries marked `TODO` |
+| `status:todo` | Entries with the `todo` status (displayed as `TODO`) |
 | `id:1-20` | Entries with IDs in the specified range |
 | `created_by:alice` | Entries matching the specified creator |
 
@@ -167,7 +170,7 @@ http(s)://SERVER/kb/?repo=notes&id=123
 
 ### Permissions and storage
 
-KB uses WebSys privileges for operation-level access, including `kb.write`, `kb.delete`, `kb.export`, and `kb.admin`. Repository-specific privileges can use the `<repo-id>.kb.write` pattern. The `sysadmin` privilege also grants KB operation permissions. Repository and entry `PRIVS` fields can impose additional access requirements.
+KB uses WebSys privileges for operation-level access, including `kb.write`, `kb.delete`, `kb.export`, and `kb.admin` by default. The privilege prefix is determined by `app_id` in `appconfig.py`. Repository-specific privileges can use the `<repo-id>.<app_id>.write` pattern. The `sysadmin` privilege also grants KB operation permissions. The repository `privileges` property and entry `privileges` field can impose additional access requirements.
 
 An entry's optional password prompt is enforced in the browser; use WebSys privileges to restrict access to the underlying data through the server API.
 
