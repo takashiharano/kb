@@ -33,25 +33,25 @@ DATA_ENCRYPTION_KEY = appconfig.data_encryption_key
 DEFAULT_ENCRYPTION_KEY = appconfig.default_encryption_key
 
 DEFAULT_CONTENT = {
-    'TITLE': '',
-    'C_DATE': '',
-    'C_USER': '',
-    'U_DATE': '',
-    'U_USER': '',
-    'LABELS': '',
-    'STATUS': '',
-    'FLAGS': '',
-    'PRIVS': ''
+    'title': '',
+    'created_at': '',
+    'created_by': '',
+    'updated_at': '',
+    'updated_by': '',
+    'labels': '',
+    'status': '',
+    'flags': '',
+    'privileges': ''
 }
 
 RESTRICTED_PROP_KEYS = [
-    'TITLE',
-    'C_DATE',
-    'C_USER',
-    'U_DATE',
-    'U_USER',
-    'PRIVS',
-    'PASSWORD'
+    'title',
+    'created_at',
+    'created_by',
+    'updated_at',
+    'updated_by',
+    'privileges',
+    'password'
 ]
 
 SP_KEYWORD_NANIDS = '*nanids'
@@ -297,7 +297,7 @@ def get_data_list(context, repo, target_id=None, list_max=None, include_hidden=F
     fixed_data_list_len = len(fixed_data_list)
     total_count = fixed_data_list_len + len(data_list)
     if list_max > 0 and total_count > list_max:
-        sorted_data_list = sorted(data_list, key=lambda x: x['content']['U_DATE'], reverse=True)
+        sorted_data_list = sorted(data_list, key=lambda x: x['content']['updated_at'], reverse=True)
         data_list = []
         data_list_max = list_max - fixed_data_list_len
         cnt = 0
@@ -376,7 +376,7 @@ def is_nan_id(id):
     return False
 
 def has_flag(content, flag_name):
-    if 'FLAGS' in content and _has_flag(content['FLAGS'], flag_name):
+    if 'flags' in content and _has_flag(content['flags'], flag_name):
         return True
     return False
 
@@ -522,9 +522,9 @@ def search_data(context, repo, q, list_max=None):
     if list_max > 0 and total_count > list_max:
         if len(keywords) == 1:
             if keywords[0].startswith('created_by'):
-                data_list2 = sorted(data_list, key=lambda x: x['content']['C_DATE'], reverse=True)
+                data_list2 = sorted(data_list, key=lambda x: x['content']['created_at'], reverse=True)
             elif keywords[0].startswith('updated_by'):
-                data_list2 = sorted(data_list, key=lambda x: x['content']['U_DATE'], reverse=True)
+                data_list2 = sorted(data_list, key=lambda x: x['content']['updated_at'], reverse=True)
             else:
                 data_list2 = sorted(data_list, key=lambda x: x['score'], reverse=True)
         else:
@@ -571,8 +571,8 @@ def _search(context, repo, data_id_list, id_filtering, incl_nan_id, include_hidd
 
             # Keep original metadata since search content is normalized below.
             original_content = copy.copy(content)
-            if 'BODY' in original_content:
-                del original_content['BODY']
+            if 'body' in original_content:
+                del original_content['body']
             original_content_map[id] = original_content
 
             # Normalize search target only once.
@@ -637,12 +637,12 @@ def _search(context, repo, data_id_list, id_filtering, incl_nan_id, include_hidd
     return data_list
 
 def convert_data_to_half_width(content):
-    if 'TITLE' in content:
-        content['TITLE'] = util.to_half_width(content['TITLE'])
-    if 'LABELS' in content:
-        content['LABELS'] = util.to_half_width(content['LABELS'])
-    if 'BODY' in content:
-        content['BODY'] = util.to_half_width(content['BODY'])
+    if 'title' in content:
+        content['title'] = util.to_half_width(content['title'])
+    if 'labels' in content:
+        content['labels'] = util.to_half_width(content['labels'])
+    if 'body' in content:
+        content['body'] = util.to_half_width(content['body'])
     return content
 
 def calc_data_macthed_score(data, keyword):
@@ -657,56 +657,56 @@ def calc_data_macthed_score(data, keyword):
 
     elif keyword_lc.startswith('title:'):
         keyword = get_field_sraech_keyword(keyword, 'title')
-        score = is_matches_title(content['TITLE'], keyword)
+        score = is_matches_title(content['title'], keyword)
 
     elif keyword_lc.startswith('label:'):
         keyword = get_field_sraech_keyword(keyword, 'label')
-        if is_matches_items(content, 'LABELS', keyword):
+        if is_matches_items(content, 'labels', keyword):
             score = 10
 
     elif keyword_lc.startswith('status:'):
         keyword_lc = get_field_sraech_keyword(keyword_lc, 'status')
         status_lc = ''
-        if 'STATUS' in content and content['STATUS']:
-            status_lc = content['STATUS'].lower()
+        if 'status' in content and content['status']:
+            status_lc = content['status'].lower()
         if status_lc == keyword_lc:
             score = 10
 
     elif keyword_lc.startswith('created_at:'):
         keyword = get_field_sraech_keyword(keyword, 'created_at')
-        if is_date_matches(content['C_DATE'], keyword):
+        if is_date_matches(content['created_at'], keyword):
             score = 10
 
     elif keyword_lc.startswith('updated_at:'):
         keyword = get_field_sraech_keyword(keyword, 'updated_at')
-        if is_date_matches(content['U_DATE'], keyword):
+        if is_date_matches(content['updated_at'], keyword):
             score = 10
 
     elif keyword_lc.startswith('created_by:'):
         keyword = get_field_sraech_keyword(keyword, 'created_by')
-        score = is_target_matches(content['C_USER'], keyword, True)
+        score = is_target_matches(content['created_by'], keyword, True)
 
     elif keyword_lc.startswith('updated_by:'):
         keyword = get_field_sraech_keyword(keyword, 'updated_by')
-        score = is_target_matches(content['U_USER'], keyword, True)
+        score = is_target_matches(content['updated_by'], keyword, True)
 
     elif keyword_lc.startswith('privilege:'):
         keyword = get_field_sraech_keyword(keyword, 'privilege')
-        if is_matches_items(content, 'PRIVS', keyword):
+        if is_matches_items(content, 'privileges', keyword):
             score = 10
 
     elif keyword_lc.startswith('body:'):
         keyword = get_field_sraech_keyword(keyword, 'body')
-        score = count_matched_key(content['BODY'], keyword)
+        score = count_matched_key(content['body'], keyword)
 
     else:
-        score += is_matches_title(content['TITLE'], keyword) * 2
-        score += count_matched_key(content['TITLE'], keyword) * 300
-        score += count_matched_key(content['LABELS'], keyword) * 100
+        score += is_matches_title(content['title'], keyword) * 2
+        score += count_matched_key(content['title'], keyword) * 300
+        score += count_matched_key(content['labels'], keyword) * 100
 
-        if not 'DATA_TYPE' in content or content['DATA_TYPE'] != 'dataurl':
-            score += count_matched_key(content['BODY'], keyword)
-            score -= count_matched_key_in_dataurl(content['BODY'], keyword)
+        if not 'data_type' in content or content['data_type'] != 'dataurl':
+            score += count_matched_key(content['body'], keyword)
+            score -= count_matched_key_in_dataurl(content['body'], keyword)
 
     return score
 
@@ -885,8 +885,8 @@ def get_data(context, repo, id, need_encode_b64=False):
         return data
 
     if need_encode_b64:
-        if 'BODY' in content:
-            content['BODY'] = util.encode_base64(content['BODY'])
+        if 'body' in content:
+            content['body'] = util.encode_base64(content['body'])
         data['content'] = content
 
     return data
@@ -952,10 +952,10 @@ def parse_content(text, head_only=False):
         content[field_name] = fielf_value
 
     if head_only:
-        if 'LOGIC' in content and content['LOGIC'] != '':
-            content['LOGIC'] = 'Y'
+        if 'logic' in content and content['logic'] != '':
+            content['logic'] = 'Y'
     else:
-        content['BODY'] = ''.join(line + '\n' for line in lines[idx:])
+        content['body'] = ''.join(line + '\n' for line in lines[idx:])
 
     return content
 
@@ -994,68 +994,68 @@ def _save_data_locked(repo, id, new_data, user, as_anonymous, context):
         if context is not None and not has_data_privilege(context, data['content']):
             return {'status': 'NO_ACCESS_RIGHTS', 'id': id, 'data': data}
 
-        if data['content']['U_DATE'] != new_data['org_u_date']:
+        if data['content']['updated_at'] != new_data['org_u_date']:
             return {'status': 'CONFLICT', 'id': id, 'data': data}
     else:
         data = {
             'encrypted': False,
             'content': {
-                'C_DATE': now,
-                'C_USER': user
+                'created_at': now,
+                'created_by': user
             }
         }
         silent = False
 
     content = data['content']
 
-    if not 'C_DATE' in content:
-        content['C_DATE'] = ''
-    if not 'C_USER' in content:
-        content['C_USER'] = ''
-    if not 'FLAGS' in content:
-        content['FLAGS'] = ''
+    if not 'created_at' in content:
+        content['created_at'] = ''
+    if not 'created_by' in content:
+        content['created_by'] = ''
+    if not 'flags' in content:
+        content['flags'] = ''
 
-    labels = new_content['LABELS']
+    labels = new_content['labels']
     labels = to_set(labels)
 
     if new_data['only_labels']:
-        content['LABELS'] = labels
+        content['labels'] = labels
         secure = data['encrypted']
     else:
-        title = new_content['TITLE']
-        body = util.decode_base64(new_content['BODY'])
+        title = new_content['title']
+        body = util.decode_base64(new_content['body'])
         isdataurl = is_dataurl(body)
         secure = True if new_data['encryption'] == '1' else False
 
-        content['TITLE'] = title
-        content['LABELS'] = labels
-        content['STATUS'] = new_content['STATUS']
-        content['FLAGS'] = new_content['FLAGS']
+        content['title'] = title
+        content['labels'] = labels
+        content['status'] = new_content['status']
+        content['flags'] = new_content['flags']
 
-        if 'PRIVS' in new_content:
-            content['PRIVS'] = new_content['PRIVS']
+        if 'privileges' in new_content:
+            content['privileges'] = new_content['privileges']
 
         if isdataurl:
-            content['DATA_TYPE'] = 'dataurl'
+            content['data_type'] = 'dataurl'
         else:
-            content['DATA_TYPE'] = ''
+            content['data_type'] = ''
 
-        if 'PASSWORD' in new_content and new_content['PASSWORD'] != '':
-            content['PASSWORD'] = new_content['PASSWORD']
+        if 'password' in new_content and new_content['password'] != '':
+            content['password'] = new_content['password']
         else:
-            content['PASSWORD'] = ''
+            content['password'] = ''
 
-        content['LOGIC'] = new_content['LOGIC']
+        content['logic'] = new_content['logic']
 
-        content = del_if_filed_is_empty(content, 'LOGIC')
-        content = del_if_filed_is_empty(content, 'PASSWORD')
-        content = del_if_filed_is_empty(content, 'DATA_TYPE')
+        content = del_if_filed_is_empty(content, 'logic')
+        content = del_if_filed_is_empty(content, 'password')
+        content = del_if_filed_is_empty(content, 'data_type')
 
-        content['BODY'] = body
+        content['body'] = body
 
     if not silent:
-        content['U_DATE'] = now
-        content['U_USER'] = user
+        content['updated_at'] = now
+        content['updated_by'] = user
 
     data['content'] = content
     encryption_key = DATA_ENCRYPTION_KEY if secure else None
@@ -1082,9 +1082,9 @@ def touch_data(repo, ids, keep_updated_by, user, context):
                 continue
 
             content = data['content']
-            content['U_DATE'] = util.get_unixtime_millis()
+            content['updated_at'] = util.get_unixtime_millis()
             if not keep_updated_by:
-                content['U_USER'] = user
+                content['updated_by'] = user
 
             encryption_key = DATA_ENCRYPTION_KEY if data['encrypted'] else None
             write_data(repo, id, content, encryption_key)
@@ -1100,18 +1100,18 @@ def mod_data_props(repo, id, org_u_date, props_text, context):
         if not has_data_privilege(context, content):
             return {'status': 'NO_ACCESS_RIGHTS'}
 
-        if content['U_DATE'] != org_u_date:
-            detail = {'U_DATE': content['U_DATE'], 'U_USER': content['U_USER']}
+        if content['updated_at'] != org_u_date:
+            detail = {'updated_at': content['updated_at'], 'updated_by': content['updated_by']}
             return {'status': 'CONFLICT', 'detail': detail}
 
         new_content = parse_content(props_text, head_only=True)
         if not context.is_admin() and not context.has_permission('sysadmin'):
             new_content = filter_update_props(new_content, content)
 
-        if 'LOGIC' in content:
-            new_content['LOGIC'] = content['LOGIC']
+        if 'logic' in content:
+            new_content['logic'] = content['logic']
 
-        new_content['BODY'] = content['BODY']
+        new_content['body'] = content['body']
         encryption_key = DATA_ENCRYPTION_KEY if data['encrypted'] else None
         write_data(repo, id, new_content, encryption_key)
         return {'status': 'OK', 'data': data}
@@ -1137,22 +1137,22 @@ def save_logic(repo, id, org_u_date, b64logic, silent, user, context):
         if not has_data_privilege(context, content):
             return {'status': 'NO_ACCESS_RIGHTS'}
 
-        if content['U_DATE'] != org_u_date:
-            detail = {'U_DATE': content['U_DATE'], 'U_USER': content['U_USER']}
+        if content['updated_at'] != org_u_date:
+            detail = {'updated_at': content['updated_at'], 'updated_by': content['updated_by']}
             return {'status': 'CONFLICT', 'detail': detail, 'data': data}
 
-        content['LOGIC'] = b64logic
+        content['logic'] = b64logic
         if not silent:
-            content['U_DATE'] = util.get_unixtime_millis()
-            content['U_USER'] = user
+            content['updated_at'] = util.get_unixtime_millis()
+            content['updated_by'] = user
 
         encryption_key = DATA_ENCRYPTION_KEY if data['encrypted'] else None
         write_data(repo, id, content, encryption_key)
 
         detail = {
             'saved_id': id,
-            'U_DATE': str(content['U_DATE']),
-            'U_USER': content['U_USER']
+            'updated_at': str(content['updated_at']),
+            'updated_by': content['updated_by']
         }
 
         return {'status': 'OK', 'detail': detail, 'data': data}
@@ -1181,12 +1181,12 @@ def write_data(repo, id, content, encryption_key=None, path=None):
     text = ''
 
     for key in content:
-        if key != 'BODY':
+        if key != 'body':
             value = str(content[key])
             text += key + ': ' + value + '\n'
 
     text += '\n'
-    text += content['BODY']
+    text += content['body']
 
     if encryption_key is not None:
         text = DATA_ENCRYPTION_HEAD + xb64.encode(text, encryption_key)
@@ -1371,7 +1371,7 @@ def download_b64content(context, repo, id, idx=None):
 
     data = get_data(context, repo, id)
     content = data['content']
-    s = get_dataurl_content(content['BODY'], idx)
+    s = get_dataurl_content(content['body'], idx)
     if s is None:
         send_error_file('NO_BASE64_CONTENT')
         return
@@ -1514,7 +1514,7 @@ def has_privilege(context, target_privilege):
 def has_data_privilege(context, content):
     if context.is_admin():
         return True
-    data_privileges = content['PRIVS'] if 'PRIVS' in content else ''
+    data_privileges = content['privileges'] if 'privileges' in content else ''
     return satisfy_privileges(context, data_privileges)
 
 def satisfy_privileges(context, required_privileges):

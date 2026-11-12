@@ -230,7 +230,7 @@ def get_default_message(repo):
     data = kb.load_data(repo, 'info')
     if data['status'] == 'OK':
         content = data['content']
-        message = content['BODY']
+        message = content['body']
 
     return message
 

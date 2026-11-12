@@ -26,19 +26,19 @@ kb.DEFAULT_FONT_SIZE = 14;
 kb.LIST_COLUMNS = [
   {key: 'id', label: 'ID', meta: true},
   {key: 'category', label: '&nbsp;', align: 'c', sort: false},
-  {key: 'TITLE', label: 'TITLE'},
-  {key: 'PASSWORD', label: '', align: 'c'},
-  {key: 'C_DATE', label: 'CREATED'},
-  {key: 'C_USER', label: 'BY'},
-  {key: 'U_DATE', label: 'UPDATED'},
-  {key: 'U_USER', label: 'BY'},
-  {key: 'STATUS', label: 'STATUS'},
-  {key: 'LABELS', label: 'LABELS'},
+  {key: 'title', label: 'TITLE'},
+  {key: 'password', label: '', align: 'c'},
+  {key: 'created_at', label: 'CREATED'},
+  {key: 'created_by', label: 'BY'},
+  {key: 'updated_at', label: 'UPDATED'},
+  {key: 'updated_by', label: 'BY'},
+  {key: 'status', label: 'STATUS'},
+  {key: 'labels', label: 'LABELS'},
   {key: 'score', label: 'SCORE', align: 'r', meta: true},
   {key: 'size', label: 'SIZE', align: 'r', meta: true},
-  {key: 'PRIVS', label: 'PRIVS', forAdmin: true},
-  {key: 'LOGIC', label: '&nbsp;'},
-  {key: 'DATA_TYPE', label: 'DL', align: 'c'},
+  {key: 'privileges', label: 'PRIVS', forAdmin: true},
+  {key: 'logic', label: '&nbsp;'},
+  {key: 'data_type', label: 'DL', align: 'c'},
   {key: 'encrypted', label: '&nbsp;', meta: true}
 ];
 
@@ -49,7 +49,7 @@ kb.onselectstart = document.onselectstart;
 kb.status = 0;
 kb.uiStatus = kb.UI_ST_NONE;
 kb.listStatus = {
-  sortKey: 'U_DATE',
+  sortKey: 'updated_at',
   sortOrder: 2
 };
 kb.configInfo = null;
@@ -367,36 +367,36 @@ kb.buildDataListRow = function(data, fixed, cnt) {
   var data_status = data.status;
   var content = data.content || {};
 
-  var status = content.STATUS;
-  var title = ((content.TITLE == undefined) ? '' : content.TITLE);
-  var labels = content.LABELS;
-  var cDate = content.C_DATE;
-  var uDate = content.U_DATE;
+  var status = content.status;
+  var title = ((content.title == undefined) ? '' : content.title);
+  var labels = content.labels;
+  var createdAt = content.created_at;
+  var updatedAt = content.updated_at;
   var score = (data.score == undefined ? '' : data.score);
 
-  var cDateStr = kb.toDateTimeString(cDate);
-  var cUser = (content.C_USER ? content.C_USER : '');
-  var cUserLabel = util.escHtml(cUser);
-  if (cUser == kb.ANONYMOUS_USER_NAME) {
-    cUserLabel = '<span class="text-muted">' + cUserLabel + '</span>';
+  var createdAtStr = kb.toDateTimeString(createdAt);
+  var createdBy = (content.created_by ? content.created_by : '');
+  var createdByLabel = util.escHtml(createdBy);
+  if (createdBy == kb.ANONYMOUS_USER_NAME) {
+    createdByLabel = '<span class="text-muted">' + createdByLabel + '</span>';
   }
-  var cUserLink = '';
-  if (cUser) {
-    cUserLink = '<span class="pseudo-link" onclick="kb.fieldSearch(\'created_by\', this.textContent);">' + cUserLabel + '</span>';
-  }
-
-  var uDateStr = kb.toDateTimeString(uDate);
-  var uUser = (content.U_USER ? content.U_USER : '');
-  var uUserLabel = util.escHtml(uUser);
-  if (uUser == kb.ANONYMOUS_USER_NAME) {
-    uUserLabel = '<span class="text-muted">' + uUserLabel + '</span>';
-  }
-  var uUserLink = '';
-  if (uUser) {
-    uUserLink = '<span class="pseudo-link" onclick="kb.fieldSearch(\'updated_by\', this.textContent);">' + uUserLabel + '</span>';
+  var createdByLink = '';
+  if (createdBy) {
+    createdByLink = '<span class="pseudo-link" onclick="kb.fieldSearch(\'created_by\', this.textContent);">' + createdByLabel + '</span>';
   }
 
-  var dataPrivileges = content.PRIVS || '';
+  var updatedAtStr = kb.toDateTimeString(updatedAt);
+  var updatedBy = (content.updated_by ? content.updated_by : '');
+  var updatedByLabel = util.escHtml(updatedBy);
+  if (updatedBy == kb.ANONYMOUS_USER_NAME) {
+    updatedByLabel = '<span class="text-muted">' + updatedByLabel + '</span>';
+  }
+  var updatedByLink = '';
+  if (updatedBy) {
+    updatedByLink = '<span class="pseudo-link" onclick="kb.fieldSearch(\'updated_by\', this.textContent);">' + updatedByLabel + '</span>';
+  }
+
+  var dataPrivileges = content.privileges || '';
 
   if (!title) {
     title = '<NO TITLE>';
@@ -409,11 +409,11 @@ kb.buildDataListRow = function(data, fixed, cnt) {
   }
   var size = (data.size == undefined ? '' : util.formatNumber(data.size));
   var hasLogic = '';
-  if (content.LOGIC) {
+  if (content.logic) {
     hasLogic = '<span data-tooltip="Logic">&lt;/&gt;</span>';
   }
   var isPwReq = '';
-  if (content.PASSWORD) {
+  if (content.password) {
     isPwReq = '&#x1F512;';
     isPwReq = '<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAYhJREFUOE+dkj1IA0EQhd9sUupZ2Xu3OWwVS1PERhQvp4XpYylaq51JJ9aKpfax0MuBYKOClqKt3E+0TmWwTHZkYwLJeZHgwLLszptvZ2eGkGJR5OQBOgIw23O/AXwgpf+YlFPyIgzdRSLuC5s9/7TemSmfy3lPgzEpAOeaiFyAt4X4utBipSbKAJ0xs5fL+esjAUGwagiR/SSiV8vy5geFcey+MPOcUu0p275p9X1DGQSBUxCC7pTiqm37lUFAEDgVIehQiIxpmlfvvwBh6K4IwfvMKBDhPq24fR8RKqZZf9CabgZR5J4AvJMWNPqOTqX0dqnZdCdbLW7pVzsdro4DyWToUGdjGGTQX/8eBevXQyleGgloNDZmlOo0NCRZuLEAP7UpdtslZd1I68ifGeiAOHaP9W5Z3t6/AGHoXOvA5PQNfeHjY81qt0UE4ELK+lbipYI+27Y/NBdRVDwHUM5mlezNQfESwDIRnsdpIzMWANxKWd/sAuLYLTFzCYBe41iNiGqW5dW+AQ941btDhiwFAAAAAElFTkSuQmCC" style="width:14px;margin-right:8px;">';
   }
@@ -422,7 +422,7 @@ kb.buildDataListRow = function(data, fixed, cnt) {
     encrypted = '<span data-tooltip="Encrypted">*</span>';
   }
   var dlLink = '';
-  if (content.DATA_TYPE == 'dataurl') {
+  if (content.data_type == 'dataurl') {
     dlLink = '<span class="dl-link" onclick="kb.dlContent(\'' + id + '\');" data-tooltip="Download">&#x1F517;</span>';
   }
   var labelsHTML = kb.buildItemsHTML('label', labels);
@@ -455,15 +455,15 @@ kb.buildDataListRow = function(data, fixed, cnt) {
   html += '<td style="padding-right:4px;text-align:center;">' + catLabel + '</td>';
   html += '<td style="min-width:300px;max-width:550px;">' + titleLabel + '</td>';
   html += '<td style="text-align:center;width:16px;cursor:default;">' + isPwReq + '</td>';
-  html += '<td style="width:145px;padding-right:0.5em;">' + cDateStr + '</td>';
-  html += '<td style="padding-right:16px;">' + cUserLink + '</td>';
-  html += '<td style="width:145px;padding-right:0.5em;">' + uDateStr + '</td>';
-  html += '<td style="padding-right:16px;">' + uUserLink + '</td>';
+  html += '<td style="width:145px;padding-right:0.5em;">' + createdAtStr + '</td>';
+  html += '<td style="padding-right:16px;">' + createdByLink + '</td>';
+  html += '<td style="width:145px;padding-right:0.5em;">' + updatedAtStr + '</td>';
+  html += '<td style="padding-right:16px;">' + updatedByLink + '</td>';
   html += '<td style="padding-right:0.5em;">' + statusLabel + '</td>';
   html += '<td>' + labelsHTML + '</td>';
   html += '<td style="text-align:right;padding-left:0.5em;padding-right:0.5em;">' + score + '</td>';
   html += '<td style="text-align:right;padding-left:0.5em;padding-right:0.5em;">' + size + '</td>';
-  if (kb.LIST_COLUMNS[kb.toSortIndex('PRIVS')].forAdmin && kb.isSysAdmin) html += '<td>' + privilegesHTML + '</td>';
+  if (kb.LIST_COLUMNS[kb.toSortIndex('privileges')].forAdmin && kb.isSysAdmin) html += '<td>' + privilegesHTML + '</td>';
   html += '<td style="text-align:center;cursor:default;">' + hasLogic + '</td>';
   html += '<td style="padding-right:16px;text-align:center;">' + dlLink + '</td>';
   html += '<td style="text-align:center;width:16px;cursor:default;">' + encrypted + '</td>';
@@ -583,7 +583,7 @@ kb.getDataListAll = function() {
 };
 kb.listAll = function(reload, limit, inclHidden) {
   if (!kb.isListLoading()) {
-    kb.listStatus.sortKey = 'U_DATE';
+    kb.listStatus.sortKey = 'updated_at';
     kb.listStatus.sortOrder = 2;
     kb.getDataList(null, reload, limit, inclHidden);
   }
@@ -643,9 +643,9 @@ kb.searchByIds = function(ids, reload, limit) {
 };
 kb.searchByKeyword = function(q, reload, limit) {
   if (q.match(/^label:[^\s]+?$/) || q.match(/^status:[^\s]+?$/) || q.match(/^updated_..:.+?$/)) {
-    kb.listStatus.sortKey = 'U_DATE';
+    kb.listStatus.sortKey = 'updated_at';
   } else if (q.match(/^created_..:.+?$/)) {
-    kb.listStatus.sortKey = 'C_DATE';
+    kb.listStatus.sortKey = 'created_at';
   } else {
     kb.listStatus.sortKey = 'score';
   }
@@ -813,17 +813,17 @@ kb.onGetData = function(xhr, res, req) {
 
   var content = data.content;
   if (content) {
-    var title = ((content.TITLE == undefined) ? '' : content.TITLE);
-    var labels = content.LABELS;
-    var b64Body = content.BODY;
+    var title = ((content.title == undefined) ? '' : content.title);
+    var labels = content.labels;
+    var b64Body = content.body;
     var body = util.decodeBase64(b64Body);
-    kb.data.content.TITLE = title;
-    kb.data.content.LABELS = labels;
-    kb.data.content.LOGIC = (content.LOGIC ? util.decodeBase64(content.LOGIC) : '');
-    kb.data.content.BODY = body;
+    kb.data.content.title = title;
+    kb.data.content.labels = labels;
+    kb.data.content.logic = (content.logic ? util.decodeBase64(content.logic) : '');
+    kb.data.content.body = body;
   }
 
-  if (kb.hasFieldValue(content, 'PASSWORD') && !kb.pw.toView) {
+  if (kb.hasFieldValue(content, 'password') && !kb.pw.toView) {
     kb.openPasswordInputDialog();
   } else {
     kb.showReceivedData();
@@ -846,7 +846,7 @@ kb.openPasswordInputDialog = function() {
   util.dialog.text('Enter password', kb.showDataWithPassword, kb.showDataWithPasswordC, opt);
 };
 kb.showDataWithPassword = function(pw) {
-  var pw0 = kb.data.content.PASSWORD;
+  var pw0 = kb.data.content.password;
   var pw1 = kb.getHash(pw);
   if (pw0 != pw1) {
     setTimeout(kb.openPasswordInputDialog, 0);
@@ -866,7 +866,7 @@ kb.onPwClose = function(pw) {
   kb.showDataWithPasswordC();
 };
 kb.onPwMismatched = function() {
-  kb.data.content.BODY = '';
+  kb.data.content.body = '';
   kb.showReceivedData();
   kb.disableButtons4View();
   if (kb.isAdmin) $el('#props-button').disabled = false;
@@ -1102,9 +1102,9 @@ kb.edit = function() {
   var data = kb.data;
   var content = data.content;
 
-  $el('#content-title-edt').value = content.TITLE;
-  $el('#content-body-edt').value = content.BODY;
-  $el('#content-labels-edt').value = content.LABELS;
+  $el('#content-title-edt').value = content.title;
+  $el('#content-body-edt').value = content.body;
+  $el('#content-labels-edt').value = content.labels;
   $el('#chk-encryption').checked = data.encrypted;
   $el('#chk-silent').checked = false;
 
@@ -1183,7 +1183,7 @@ kb.saveData = function() {
     }
   }
 
-  var orgUdate = kb.data.content.U_DATE;
+  var orgUpdatedAt = kb.data.content.updated_at;
   var encryption = ($el('#chk-encryption').checked ? '1' : '0');
   var silent = ($el('#chk-silent').checked ? '1' : '0');
   var title = $el('#content-title-edt').value;
@@ -1191,7 +1191,7 @@ kb.saveData = function() {
   var labels = $el('#content-labels-edt').value.trim();
   labels = labels.replace(/\s{2,}/g, ' ');
   var status = $el('#select-status').value;
-  var logic = kb.data.content.LOGIC;
+  var logic = kb.data.content.logic;
 
   if (!title) {
     kb.showInfotip('Title is required', 3000);
@@ -1203,16 +1203,16 @@ kb.saveData = function() {
   if (kb.pw.toSave) {
     hash = kb.getHash(kb.pw.toSave);
   }
-  kb.data.content.PASSWORD = hash;
+  kb.data.content.password = hash;
   if (kb.pw.toSave != null) {
     kb.pw.toView = kb.pw.toSave;
   }
 
   kb.data.id = id;
-  kb.data.content.TITLE = title;
-  kb.data.content.BODY = body;
-  kb.data.content.LABELS = labels;
-  kb.data.content.STATUS = status;
+  kb.data.content.title = title;
+  kb.data.content.body = body;
+  kb.data.content.labels = labels;
+  kb.data.content.status = status;
 
   var b64Logic = util.encodeBase64(logic);
   var b64Body = util.encodeBase64(body);
@@ -1221,20 +1221,20 @@ kb.saveData = function() {
   var content = {};
   if (kb.status & kb.ST_EDIT_ONLY_LABELS) {
     only_labels = true;
-    content.LABELS = labels;
+    content.labels = labels;
   } else {
     only_labels = false;
-    content.TITLE = title;
-    content.LABELS = labels;
-    content.STATUS = status;
-    content.FLAGS = kb.data.content.FLAGS;
-    content.PASSWORD = kb.data.content.PASSWORD;
-    content.LOGIC = b64Logic;
-    content.BODY = b64Body;
+    content.title = title;
+    content.labels = labels;
+    content.status = status;
+    content.flags = kb.data.content.flags;
+    content.password = kb.data.content.password;
+    content.logic = b64Logic;
+    content.body = b64Body;
   }
 
   var data = {
-    org_u_date: orgUdate,
+    org_updated_at: orgUpdatedAt,
     encryption: encryption,
     only_labels: only_labels,
     silent: silent,
@@ -1268,7 +1268,7 @@ kb.onSaveData = function(xhr, res, req) {
       kb.status &= ~kb.ST_EXIT;
     }
     kb.data.id = id;
-    kb.data.content.U_DATE = savedData.U_DATE;
+    kb.data.content.updated_at = savedData.updated_at;
     $el('#edit-logic-button').disabled = false;
     kb.showInfotip('OK');
   } else if (res.status == 'CONFLICT') {
@@ -1286,11 +1286,11 @@ kb.cancelSave = function() {
 };
 
 kb.buildConflictMsg = function(data) {
-  var dt = util.getDateTimeString(+data.U_DATE);
+  var dt = util.getDateTimeString(+data.updated_at);
   var m = 'The data is already updated.\n\n'
   m += '<div style="text-align:left;">';
   m += 'DATE: ' + dt + '\n';
-  m += 'BY  : ' + util.escHtml(data.U_USER);
+  m += 'BY  : ' + util.escHtml(data.updated_by);
   m += '</div>';
   return m;
 }
@@ -1335,7 +1335,7 @@ kb.cancelTouch = function() {
 };
 
 kb.reloadListAndData = function(id) {
-  kb.listStatus.sortKey = 'U_DATE';
+  kb.listStatus.sortKey = 'updated_at';
   kb.listStatus.sortOrder = 2;
   kb.search(true);
   kb.getData(id, true);
@@ -1399,17 +1399,17 @@ kb.cancelCancel = function() {
 kb.drawData = function(data) {
   var content = data.content;
   var id = data.id;
-  var cDate = content.C_DATE;
-  var uDate = content.U_DATE;
-  var title = content.TITLE;
-  var labels = content.LABELS;
-  var status = content.STATUS;
-  var fontFamily = content.FONT;
+  var createdAt = content.created_at;
+  var updatedAt = content.updated_at;
+  var title = content.title;
+  var labels = content.labels;
+  var status = content.status;
+  var fontFamily = content.font;
   var data_status = data.status;
-  var contentBody = content.BODY;
+  var contentBody = content.body;
 
-  var cDateStr = kb.toDateTimeString(cDate);
-  var uDateStr = kb.toDateTimeString(uDate);
+  var createdAtStr = kb.toDateTimeString(createdAt);
+  var updatedAtStr = kb.toDateTimeString(updatedAt);
   var labelsHTML = kb.buildItemsHTML('label', labels, 3, 3);
 
   var drawMode = $el('#draw-mode').value;
@@ -1434,13 +1434,13 @@ kb.drawData = function(data) {
     $el('#content-updated-date').innerHTML = '';
     $el('#content-updated-by').innerHTML = '';
   } else {
-    $el('#content-created-date').innerHTML = cDateStr;
-    $el('#content-created-by').textContent = 'by ' + content.C_USER;
-    $el('#content-updated-date').innerHTML = uDateStr;
-    $el('#content-updated-by').textContent = 'by ' + content.U_USER;
+    $el('#content-created-date').innerHTML = createdAtStr;
+    $el('#content-created-by').textContent = 'by ' + content.created_by;
+    $el('#content-updated-date').innerHTML = updatedAtStr;
+    $el('#content-updated-by').textContent = 'by ' + content.updated_by;
   }
 
-  $el('#exec-logic-button').disabled = (content.LOGIC ? false : true);
+  $el('#exec-logic-button').disabled = (content.logic ? false : true);
 
   var statusLabel = '';
   if (data_status == 'OK') {
@@ -1457,7 +1457,7 @@ kb.drawData = function(data) {
     $el('.for-view').hide();
   }
 
-  if (kb.hasFlag(content.FLAGS, 'NODELETE')) {
+  if (kb.hasFlag(content.flags, 'NODELETE')) {
     $el('#delete-button').hide();
     $el('#clear-button').show();
   } else {
@@ -1657,18 +1657,18 @@ kb.clearContent = function() {
     id: '',
     status: 'EMPTY',
     content: {
-      C_DATE: '',
-      C_USER: '',
-      U_DATE: '',
-      U_USER: '',
-      TITLE: '',
-      LABELS: '',
-      STATUS: '',
-      FLAGS: '',
-      DATA_TYPE: '',
-      PRIVS: '',
-      LOGIC: '',
-      BODY: ''
+      created_at: '',
+      created_by: '',
+      updated_at: '',
+      updated_by: '',
+      title: '',
+      labels: '',
+      status: '',
+      flags: '',
+      data_type: '',
+      privileges: '',
+      logic: '',
+      body: ''
     }
   };
 };
@@ -1782,7 +1782,7 @@ kb.editProps = function() {
 };
 
 kb.isPropFieldAllowed = function(k) {
-  if ((k == 'BODY') || (k == 'LOGIC')) return false;
+  if ((k == 'body') || (k == 'logic')) return false;
   if (kb.isAdmin) return true;
   if (kb.RESTRICTED_PROP_KEYS.includes(k)) return false;
   return true;
@@ -1796,11 +1796,11 @@ kb.saveProps = function() {
   props = props.replace(/\n{2,}/g, '\n');
   props = props.replace(/^\n/, '');
   var p = util.encodeBase64(props);
-  var orgUdate = kb.data.content.U_DATE;
+  var orgUpdatedAt = kb.data.content.updated_at;
   var param = {
     repo: kb.repo,
     id: kb.data.id,
-    org_u_date: orgUdate,
+    org_updated_at: orgUpdatedAt,
     props: p
   };
   kb.callApi('mod_props', param, kb.onSaveProps);
@@ -1934,7 +1934,7 @@ kb.validateId = function(id) {
 };
 
 kb.getCurrentLogicParamCode = function() {
-  var l = ((kb.data.content && kb.data.content.LOGIC) ? kb.data.content.LOGIC : '');
+  var l = ((kb.data.content && kb.data.content.logic) ? kb.data.content.logic : '');
   var w = util.split(l, '\t', 2);
   var logic = {
     param: w[0],
@@ -2021,12 +2021,12 @@ kb.saveLogic = function() {
   if (logicParam || logicCode) logic = logicParam + '\t' + logicCode;
   kb.savingLogic = logic;
   var b64logic = util.encodeBase64(logic);
-  var orgUdate = kb.data.content.U_DATE;
+  var orgUpdatedAt = kb.data.content.updated_at;
   var silent = ($el('#chk-silent').checked ? '1' : '0');
   var param = {
     repo: kb.repo,
     id: kb.data.id,
-    org_u_date: orgUdate,
+    org_updated_at: orgUpdatedAt,
     silent: silent,
     logic: b64logic
   };
@@ -2042,9 +2042,9 @@ kb.onSaveLogic = function(xhr, res, req) {
     kb.closeLogicEditorWindow();
     kb.onEditLogicEnd();
     kb.showInfotip('OK');
-    kb.data.content.LOGIC = kb.savingLogic;
+    kb.data.content.logic = kb.savingLogic;
     kb.savingLogic = '';
-    kb.data.content.U_DATE = savedInfo.U_DATE;
+    kb.data.content.updated_at = savedInfo.updated_at;
   } else if (res.status == 'CONFLICT') {
     kb.status |= kb.ST_CONFLICTING;
     var data = res.body;
@@ -2590,7 +2590,7 @@ kb.onAreaResizeEnd = function(e) {
 
 kb.copyContent = function() {
   if (kb.data && kb.data.content) {
-    kb.copy(kb.data.content.BODY);
+    kb.copy(kb.data.content.body);
   }
 };
 

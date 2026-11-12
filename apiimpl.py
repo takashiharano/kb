@@ -183,8 +183,8 @@ def proc_save_data(context):
 
         detail = {
             'saved_id': saved_obj['id'],
-            'U_DATE': str(saved_content['U_DATE']),
-            'U_USER': saved_content['U_USER']
+            'updated_at': str(saved_content['updated_at']),
+            'updated_by': saved_content['updated_by']
         }
 
         kblog.write_save_log(context, repo, id, new_data, saved_obj)
@@ -193,8 +193,8 @@ def proc_save_data(context):
         saved_content = saved_data['content']
         detail = {
             'saved_id': None,
-            'U_DATE': saved_content['U_DATE'],
-            'U_USER': saved_content['U_USER']
+            'updated_at': saved_content['updated_at'],
+            'updated_by': saved_content['updated_by']
         }
         kblog.write_operation_log(context, 'SAVE_DATA:CONFLICT', repo, id, data=saved_data)
     else:
