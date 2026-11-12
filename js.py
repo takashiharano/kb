@@ -42,16 +42,7 @@ def build_js(context, repo):
 
     js += 'kb.configInfo = {\n'
     js += '  user_name_lang: \'' + appconfig.user_name_lang + '\',\n'
-    js += '  state_list: [\n'
-    for i in range(len(appconfig.state_list)):
-        obj = appconfig.state_list[i]
-        if i > 0:
-            js += ','
-        js += '{'
-        for key in obj:
-            js += '  ' + key + ': \'' + obj[key] + '\', '
-        js += '}'
-    js += ']\n'
+    js += '  state_list: ' + util.to_json(appconfig.state_list) + '\n'
 
     js += '};\n'
 

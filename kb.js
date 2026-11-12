@@ -155,7 +155,7 @@ kb.init = function() {
   util.addSelectOption('#select-status', '');
   for (var i = 0; i < stateList.length; i++) {
     var state = stateList[i];
-    util.addSelectOption('#select-status', state.name);
+    util.addSelectOption('#select-status', state.label, state.value);
   }
 };
 
@@ -903,24 +903,26 @@ kb.buildStatusHTML = function(status) {
   }
   for (var i = 0; i < stateList.length; i++) {
     var state = stateList[i];
-    if (state.name == status) {
+    if (state.value == status) {
       st = state;
       break;
     }
   }
 
+  var statusLabel = (st.label ? st.label : status);
   var stColor = (st.color ? st.color : '#ccc');
   var stBackground = (st.background ? st.background : '');
   var stBorder = (st.border ? st.border : '1px solid ' + stColor);
   html = '<span class="status"';
+  html += ' data-value="' + util.escHtml(status) + '"';
   html += ' style="';
   html += 'color:' + util.escHtml(stColor) + ';';
   html += 'background:' + util.escHtml(stBackground) + ';';
   html += 'border:' + util.escHtml(stBorder) + ';';
   html += '"';
-  html += ' onclick="kb.fieldSearch(\'status\', this.textContent);"';
+  html += ' onclick="kb.fieldSearch(\'status\', this.dataset.value);"';
   html += '>';
-  html += util.escHtml(status);
+  html += util.escHtml(statusLabel);
   html += '</span>';
   return html;
 };
@@ -1457,7 +1459,7 @@ kb.drawData = function(data) {
     $el('.for-view').hide();
   }
 
-  if (kb.hasFlag(content.flags, 'NODELETE')) {
+  if (kb.hasFlag(content.flags, 'no_delete')) {
     $el('#delete-button').hide();
     $el('#clear-button').show();
   } else {

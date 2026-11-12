@@ -363,12 +363,12 @@ def should_omit_content(context, content=None, include_hidden=False):
     if content is not None:
         if not has_data_privilege(context, content):
             return True
-        if not include_hidden and has_flag(content, 'HIDDEN'):
+        if not include_hidden and has_flag(content, 'hidden'):
             return True
     return False
 
 def is_fixed_data(content):
-    return has_flag(content, 'FIXED')
+    return has_flag(content, 'fixed')
 
 def is_nan_id(id):
     if util.match(id, '[^0-9]'):
