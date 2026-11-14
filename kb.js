@@ -3676,7 +3676,13 @@ kb.onNoRights = function() {
 };
 
 kb.openAboutDialog = function() {
-  util.alert('Knowledge Base System\n\n&copy; 2021 Takashi Harano\nMIT License\n\n<a href="https://github.com/takashiharano/kb" target="_blank">GitHub</a>');
+  var msg = 'Knowledge Base System\n\n&copy; 2021 Takashi Harano\nMIT License\n\n<a href="https://github.com/takashiharano/kb" target="_blank">GitHub</a>';
+  var opt = {
+    style: {
+      'min-width': '260px'
+    }
+  };
+  util.alert(msg, opt);
 };
 
 //-------------------------------------------------------------------------
