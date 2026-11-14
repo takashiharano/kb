@@ -931,31 +931,24 @@ def load_data(repo, id, head_only=False):
     return data
 
 def parse_content(text, head_only=False):
+    ht = util.parse_headered_text(text, header_only=head_only)
+    if head_only:
+        headers = ht
+    else:
+        headers = ht['headers']
+
     content = DEFAULT_CONTENT.copy()
-    lines = util.text2list(text)
-    idx = 0
 
-    for i in range(len(lines)):
-        line = lines[i]
-        if line == '':
-            idx = i + 1
-            break
-
-        line = str.strip(line)
-
-        p = line.find(':')
-        if p == -1:
-            continue
-
-        field_name = line[0:p]
-        fielf_value = str.strip(line[p + 1:])
-        content[field_name] = fielf_value
+    content.update(headers)
 
     if head_only:
         if 'logic' in content and content['logic'] != '':
             content['logic'] = 'Y'
     else:
-        content['body'] = ''.join(line + '\n' for line in lines[idx:])
+        body = ht['body']
+        if body is None:
+            body = ''
+        content['body'] = body
 
     return content
 
@@ -1178,15 +1171,13 @@ def is_dataurl(s):
 
 #------------------------------------------------------------------------------
 def write_data(repo, id, content, encryption_key=None, path=None):
-    text = ''
-
-    for key in content:
-        if key != 'body':
-            value = str(content[key])
-            text += key + ': ' + value + '\n'
-
-    text += '\n'
-    text += content['body']
+    headers = content.copy()
+    body = headers.pop('body')
+    headered_data = {
+        'headers': headers,
+        'body': body
+    }
+    text = util.serialize_headered_text(headered_data)
 
     if encryption_key is not None:
         text = DATA_ENCRYPTION_HEAD + xb64.encode(text, encryption_key)
