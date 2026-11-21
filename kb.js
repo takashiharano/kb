@@ -949,7 +949,7 @@ kb._getCategory = function(labels) {
   if (!labels) return cat;
   var labelList = labels.replace(/\s{2,}/g, ' ').split(' ');
   var label = labelList[0];
-  var macted;
+  var matched;
   for (var i = 0; i < kb.categories.length; i++) {
     var category = kb.categories[i];
     var catLabels = category.labels.replace(/\s/g, '');
