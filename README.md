@@ -153,7 +153,7 @@ Use the keyword field to search entry content and metadata. For example:
 | `network` | Entries containing the keyword `network` in their title, labels, or body |
 | `title:network` | Entries whose titles contain `network` |
 | `label:reference` | Entries with the `reference` label |
-| `status:todo` | Entries with the `todo` status (displayed as `TODO`) |
+| `status:draft` | Entries with the `draft` status (displayed as `DRAFT`) |
 | `id:1-20` | Entries with IDs in the specified range |
 | `created_by:alice` | Entries matching the specified creator |
 
