@@ -40,7 +40,7 @@ def get_req_param_repo():
 
 #------------------------------------------------------------------------------
 def send_result_json(status, body=None):
-    websys.send_result_json(status, body, encryption=True)
+    websys.send_result_json(status, body, scramble=True)
 
 #------------------------------------------------------------------------------
 def has_valid_api_token():
@@ -619,7 +619,7 @@ def proc_api(context, act):
     if func_name in g:
         handler = g[func_name]
     else:
-        # from url query string w/o encryption
+        # from url query string w/o scrambling
         act = websys.get_raw_request_param('act')
         if act == 'export':
             # api.cgi?act=export&all=1&unscramble=1
