@@ -39,7 +39,7 @@ kb.LIST_COLUMNS = [
   {key: 'privileges', label: 'PRIVS', forAdmin: true},
   {key: 'logic', label: '&nbsp;'},
   {key: 'data_type', label: 'DL', align: 'c'},
-  {key: 'encrypted', label: '&nbsp;', meta: true}
+  {key: 'scrambled', label: '&nbsp;', meta: true}
 ];
 
 kb.ANONYMOUS_USER_NAME = 'Anonymous';
@@ -417,9 +417,9 @@ kb.buildDataListRow = function(data, fixed, cnt) {
     isPwReq = '&#x1F512;';
     isPwReq = '<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAYhJREFUOE+dkj1IA0EQhd9sUupZ2Xu3OWwVS1PERhQvp4XpYylaq51JJ9aKpfax0MuBYKOClqKt3E+0TmWwTHZkYwLJeZHgwLLszptvZ2eGkGJR5OQBOgIw23O/AXwgpf+YlFPyIgzdRSLuC5s9/7TemSmfy3lPgzEpAOeaiFyAt4X4utBipSbKAJ0xs5fL+esjAUGwagiR/SSiV8vy5geFcey+MPOcUu0p275p9X1DGQSBUxCC7pTiqm37lUFAEDgVIehQiIxpmlfvvwBh6K4IwfvMKBDhPq24fR8RKqZZf9CabgZR5J4AvJMWNPqOTqX0dqnZdCdbLW7pVzsdro4DyWToUGdjGGTQX/8eBevXQyleGgloNDZmlOo0NCRZuLEAP7UpdtslZd1I68ifGeiAOHaP9W5Z3t6/AGHoXOvA5PQNfeHjY81qt0UE4ELK+lbipYI+27Y/NBdRVDwHUM5mlezNQfESwDIRnsdpIzMWANxKWd/sAuLYLTFzCYBe41iNiGqW5dW+AQ941btDhiwFAAAAAElFTkSuQmCC" style="width:14px;margin-right:8px;">';
   }
-  var encrypted = '';
-  if (data.encrypted) {
-    encrypted = '<span data-tooltip="Encrypted">*</span>';
+  var scrambled = '';
+  if (data.scrambled) {
+    scrambled = '<span data-tooltip="Scrambled">*</span>';
   }
   var dlLink = '';
   if (content.data_type == 'dataurl') {
@@ -466,7 +466,7 @@ kb.buildDataListRow = function(data, fixed, cnt) {
   if (kb.LIST_COLUMNS[kb.toSortIndex('privileges')].forAdmin && kb.isSysAdmin) html += '<td>' + privilegesHTML + '</td>';
   html += '<td style="text-align:center;cursor:default;">' + hasLogic + '</td>';
   html += '<td style="padding-right:16px;text-align:center;">' + dlLink + '</td>';
-  html += '<td style="text-align:center;width:16px;cursor:default;">' + encrypted + '</td>';
+  html += '<td style="text-align:center;width:16px;cursor:default;">' + scrambled + '</td>';
 
   if (data_status != 'OK') {
     html += '<td class="center"><span class="pseudo-link text-red" data-tooltip="Delete" onclick="kb.delete(\'' + id + '\');">X</span></td>';
@@ -1032,11 +1032,11 @@ kb.createNew = function() {
   kb.clearPwValue();
   kb._clear();
   kb.edit();
-  var encrypt = kb.config.default_data_encryption;
-  if ('encrypt' in kb.repoProps) {
-    encrypt = kb.repoProps.encrypt;
+  var scramble = kb.config.default_data_scramble;
+  if ('scramble' in kb.repoProps) {
+    scramble = kb.repoProps.scramble;
   }
-  $el('#chk-encryption').checked = encrypt;
+  $el('#chk-scramble').checked = scramble;
   $el('#content-title-edt').focus();
   $el('#chk-silent').disabled = true;
 };
@@ -1047,11 +1047,11 @@ kb.duplicate = function() {
   kb.data.id = '';
   kb.drawData(kb.data);
   kb.edit();
-  var encrypt = kb.config.default_data_encryption;
-  if ('encrypt' in kb.repoProps) {
-    encrypt = kb.repoProps.encrypt;
+  var scramble = kb.config.default_data_scramble;
+  if ('scramble' in kb.repoProps) {
+    scramble = kb.repoProps.scramble;
   }
-  $el('#chk-encryption').checked = encrypt;
+  $el('#chk-scramble').checked = scramble;
   $el('#content-title-edt').focus();
   $el('#chk-silent').disabled = true;
 };
@@ -1063,7 +1063,7 @@ kb.editLabels = function() {
   $el('#content-body-edt').disabled = true;
   $el('#select-status').disabled = true;
   $el('#set-pw-button').disabled = true;
-  $el('#chk-encryption').disabled = true;
+  $el('#chk-scramble').disabled = true;
   $el('#chk-silent').checked = true;
   $el('#edit-logic-button').disabled = true;
   $el('#content-labels-edt').focus();
@@ -1096,7 +1096,7 @@ kb.edit = function() {
   $el('#content-body-edt').disabled = false;
   $el('#select-status').disabled = false;
   $el('#set-pw-button').disabled = false;
-  $el('#chk-encryption').disabled = false;
+  $el('#chk-scramble').disabled = false;
   $el('#chk-silent').disabled = false;
   $el('#edit-logic-button').disabled = ((kb.status & kb.ST_NEW) ? true : false);
   $el('#preview-mode').checked = false;
@@ -1107,7 +1107,7 @@ kb.edit = function() {
   $el('#content-title-edt').value = content.title;
   $el('#content-body-edt').value = content.body;
   $el('#content-labels-edt').value = content.labels;
-  $el('#chk-encryption').checked = data.encrypted;
+  $el('#chk-scramble').checked = data.scrambled;
   $el('#chk-silent').checked = false;
 
   var pw = kb.pw.toView;
@@ -1186,7 +1186,7 @@ kb.saveData = function() {
   }
 
   var orgUpdatedAt = kb.data.content.updated_at;
-  var encryption = ($el('#chk-encryption').checked ? '1' : '0');
+  var scramble = ($el('#chk-scramble').checked ? '1' : '0');
   var silent = ($el('#chk-silent').checked ? '1' : '0');
   var title = $el('#content-title-edt').value;
   var body = $el('#content-body-edt').value;
@@ -1237,7 +1237,7 @@ kb.saveData = function() {
 
   var data = {
     org_updated_at: orgUpdatedAt,
-    encryption: encryption,
+    scramble: scramble,
     only_labels: only_labels,
     silent: silent,
     content: content
@@ -1741,7 +1741,7 @@ kb.export = function() {
   if (kb.isAdmin) {
     s += '<input type="checkbox" id="chk-export-all" checked><label for="chk-export-all">All repository</label>\n'
   }
-  s += '<input type="checkbox" id="chk-decrypt" checked><label for="chk-decrypt">Decrypt</label>'
+  s += '<input type="checkbox" id="chk-unscramble" checked><label for="chk-unscramble">Unscramble</label>'
   s += '</div>';
   util.confirm(s, kb._export);
 };
@@ -1752,8 +1752,8 @@ kb._export = function() {
   } else {
     param.repo = kb.repo;
   }
-  if ($el('#chk-decrypt').checked) {
-    param.decrypt = '1';
+  if ($el('#chk-unscramble').checked) {
+    param.unscramble = '1';
   }
   util.postSubmit('api.cgi', param);
 };
@@ -2196,7 +2196,7 @@ kb.setActiveRepo = function(id) {
 kb.newRepo = function() {
   var html = kb.buildRepoEditor(null, 'kb.createRepo');
   util.dialog.open(html);
-  $el('#repo-props').value = '{\n  "name": "",\n  "privileges": "",\n  "encrypt": ' + kb.config.default_data_encryption + '\n}\n';
+  $el('#repo-props').value = '{\n  "name": "",\n  "privileges": "",\n  "scramble": ' + kb.config.default_data_scramble + '\n}\n';
   $el('#repo-id').focus();
 };
 kb.buildRepoEditor = function(repo, cbFncName) {
@@ -3058,7 +3058,7 @@ kb.openXB64Dialog = function(t, enc) {
   util.dialog.text(m, kb.xb64DialogCb, opt);
 };
 kb.getDefaultKey = function() {
-  return util.bsb64.decodeToString(kb.config.default_encryption_key, 1);
+  return util.bsb64.decodeToString(kb.config.default_scramble_key, 1);
 };
 kb.applyDefaultKey = function() {
   $el('.dialog-textbox')[0].value = kb.getDefaultKey();
@@ -3192,7 +3192,7 @@ kb.extractSelectedText = function() {
 
 kb.openSetPwDialog = function() {
   var html = '';
-  html += 'Set password for data encryption\n\n';
+  html += 'Set password for viewing data\n\n';
   html += '<table>';
   html += '<tr>';
   html += '<td>Password:</td>';

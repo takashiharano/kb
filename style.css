@@ -301,7 +301,7 @@ th {
   width: 150px;
 }
 
-#chk-encryption {
+#chk-scramble {
   margin-left: 8px;
 }
 
@@ -374,7 +374,7 @@ th {
   background: #300406;
 }
 
-.status-label-encrypted {
+.status-label-scrambled {
   color: #ecf4eb;
   background: #081c0d;
 }

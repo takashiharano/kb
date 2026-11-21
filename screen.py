@@ -146,7 +146,7 @@ def build_main_screen(context, repo):
 '''
 
     if context.has_permission('sysadmin'):
-        html += '          <input type="checkbox" id="chk-encryption"><label for="chk-encryption">Encrypt</label>'
+        html += '          <input type="checkbox" id="chk-scramble"><label for="chk-scramble">Scramble</label>'
         html += '          <input type="checkbox" id="chk-silent"><label for="chk-silent">Silent</label>'
 
     html += '''

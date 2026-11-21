@@ -490,9 +490,9 @@ def proc_export_data(context):
         send_error_text('NO_ACCESS_RIGHTS:repo=' + repo)
         return None
 
-    p_decrypt = websys.get_raw_request_param('decrypt')
-    decrypt = p_decrypt == '1'
-    b = kb.export_data(repo, decrypt)
+    p_unscramble = websys.get_raw_request_param('unscramble')
+    unscramble = p_unscramble == '1'
+    b = kb.export_data(repo, unscramble)
 
     timestamp = util.get_datetime_str(fmt='%Y%m%dT%H%M%S')
     filename = 'kbdata'
@@ -511,13 +511,13 @@ def proc_export_data_all(context):
         send_error_text('NO_ACCESS_RIGHTS')
         return None
 
-    p_decrypt = websys.get_raw_request_param('decrypt')
-    decrypt = p_decrypt == '1'
+    p_unscramble = websys.get_raw_request_param('unscramble')
+    unscramble = p_unscramble == '1'
 
     timestamp = util.get_datetime_str(fmt='%Y%m%dT%H%M%S')
     fllename = 'kbdata-all-' + timestamp + '.zip'
 
-    b = kb.export_all_data(decrypt)
+    b = kb.export_all_data(unscramble)
 
     kblog.write_operation_log(context, 'EXPORT_ALL_DATA', repo='', dataid='')
 
@@ -622,8 +622,8 @@ def proc_api(context, act):
         # from url query string w/o encryption
         act = websys.get_raw_request_param('act')
         if act == 'export':
-            # api.cgi?act=export&all=1&decrypt=1
-            # api.cgi?act=export&repo=abc&decrypt=1
+            # api.cgi?act=export&all=1&unscramble=1
+            # api.cgi?act=export&repo=abc&unscramble=1
             export_all = websys.get_raw_request_param('all', '') == '1'
             handler = proc_export_data_all if export_all else proc_export_data
         else:

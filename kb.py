@@ -28,9 +28,9 @@ LOCKS_PATH = os.path.join(TMP_PATH, 'locks')
 PROPS_FILENAME = 'properties.txt'
 CATEGORIES_FILENAME = 'categories.json'
 
-DATA_ENCRYPTION_HEAD = '#DATA'
-DATA_ENCRYPTION_KEY = appconfig.data_encryption_key
-DEFAULT_ENCRYPTION_KEY = appconfig.default_encryption_key
+DATA_SCRAMBLE_HEAD = '#DATA'
+DATA_SCRAMBLE_KEY = appconfig.data_scramble_key
+DEFAULT_SCRAMBLE_KEY = appconfig.default_scramble_key
 
 DEFAULT_CONTENT = {
     'title': '',
@@ -909,7 +909,7 @@ def load_data(repo, id, head_only=False):
         'id': id,
         'status': 'OK',
         'size': 0,
-        'encrypted': False,
+        'scrambled': False,
         'content': None
     }
 
@@ -923,9 +923,9 @@ def load_data(repo, id, head_only=False):
     if fileinfo is not None:
         data['size'] = fileinfo['size']
 
-    if text.startswith(DATA_ENCRYPTION_HEAD):
-        text = xb64.decode_to_string(text[len(DATA_ENCRYPTION_HEAD):], DATA_ENCRYPTION_KEY)
-        data['encrypted'] = True
+    if text.startswith(DATA_SCRAMBLE_HEAD):
+        text = xb64.decode_to_string(text[len(DATA_SCRAMBLE_HEAD):], DATA_SCRAMBLE_KEY)
+        data['scrambled'] = True
 
     data['content'] = parse_content(text, head_only)
     return data
@@ -991,7 +991,7 @@ def _save_data_locked(repo, id, new_data, user, as_anonymous, context):
             return {'status': 'CONFLICT', 'id': id, 'data': data}
     else:
         data = {
-            'encrypted': False,
+            'scrambled': False,
             'content': {
                 'created_at': now,
                 'created_by': user
@@ -1013,12 +1013,12 @@ def _save_data_locked(repo, id, new_data, user, as_anonymous, context):
 
     if new_data['only_labels']:
         content['labels'] = labels
-        secure = data['encrypted']
+        scramble = data['scrambled']
     else:
         title = new_content['title']
         body = util.decode_base64(new_content['body'])
         isdataurl = is_dataurl(body)
-        secure = True if new_data['encryption'] == '1' else False
+        scramble = new_data['scramble'] == '1'
 
         content['title'] = title
         content['labels'] = labels
@@ -1051,9 +1051,9 @@ def _save_data_locked(repo, id, new_data, user, as_anonymous, context):
         content['updated_by'] = user
 
     data['content'] = content
-    encryption_key = DATA_ENCRYPTION_KEY if secure else None
+    scramble_key = DATA_SCRAMBLE_KEY if scramble else None
 
-    write_data(repo, id, content, encryption_key)
+    write_data(repo, id, content, scramble_key)
 
     saved_data = {
         'status': 'OK',
@@ -1079,8 +1079,8 @@ def touch_data(repo, ids, keep_updated_by, user, context):
             if not keep_updated_by:
                 content['updated_by'] = user
 
-            encryption_key = DATA_ENCRYPTION_KEY if data['encrypted'] else None
-            write_data(repo, id, content, encryption_key)
+            scramble_key = DATA_SCRAMBLE_KEY if data['scrambled'] else None
+            write_data(repo, id, content, scramble_key)
 
 
 def mod_data_props(repo, id, org_updated_at, props_text, context):
@@ -1105,8 +1105,8 @@ def mod_data_props(repo, id, org_updated_at, props_text, context):
             new_content['logic'] = content['logic']
 
         new_content['body'] = content['body']
-        encryption_key = DATA_ENCRYPTION_KEY if data['encrypted'] else None
-        write_data(repo, id, new_content, encryption_key)
+        scramble_key = DATA_SCRAMBLE_KEY if data['scrambled'] else None
+        write_data(repo, id, new_content, scramble_key)
         return {'status': 'OK', 'data': data}
 
 
@@ -1139,8 +1139,8 @@ def save_logic(repo, id, org_updated_at, b64logic, silent, user, context):
             content['updated_at'] = util.get_unixtime_millis()
             content['updated_by'] = user
 
-        encryption_key = DATA_ENCRYPTION_KEY if data['encrypted'] else None
-        write_data(repo, id, content, encryption_key)
+        scramble_key = DATA_SCRAMBLE_KEY if data['scrambled'] else None
+        write_data(repo, id, content, scramble_key)
 
         detail = {
             'saved_id': id,
@@ -1170,7 +1170,7 @@ def is_dataurl(s):
   return util.match(s, '^data:.+;base64,[A-Za-z0-9+/=\n]+$')
 
 #------------------------------------------------------------------------------
-def write_data(repo, id, content, encryption_key=None, path=None):
+def write_data(repo, id, content, scramble_key=None, path=None):
     headers = content.copy()
     body = headers.pop('body')
     headered_data = {
@@ -1179,8 +1179,8 @@ def write_data(repo, id, content, encryption_key=None, path=None):
     }
     text = util.serialize_headered_text(headered_data)
 
-    if encryption_key is not None:
-        text = DATA_ENCRYPTION_HEAD + xb64.encode(text, encryption_key)
+    if scramble_key is not None:
+        text = DATA_SCRAMBLE_HEAD + xb64.encode(text, scramble_key)
 
     if path is None:
         path = get_datafile_path(repo, id)
@@ -1295,21 +1295,21 @@ def _change_data_id_locked(repo, id_fm, id_to):
         return 'OK'
     return 'FAILED:NEED_TO_FILE_CHECK_ON_THE_SERVER'
 
-def export_data(repo, decrypt=False):
+def export_data(repo, unscramble=False):
     data_dir_path = get_data_dir_path(repo)
-    if not decrypt:
+    if not unscramble:
         return util.zip(None, data_dir_path)
 
     util.mkdir(TMP_PATH)
     with tempfile.TemporaryDirectory(prefix='export-', dir=TMP_PATH) as tmp_dir:
         wk_data_path = os.path.join(tmp_dir, 'data', '')
         util.mkdir(wk_data_path)
-        decrypt_data(repo, wk_data_path)
+        unscramble_data(repo, wk_data_path)
         b = util.zip(None, wk_data_path)
         return b
 
-def export_all_data(decrypt=False):
-    if not decrypt:
+def export_all_data(unscramble=False):
+    if not unscramble:
         return util.zip(None, DATA_BASE_DIR_PATH)
 
     util.mkdir(TMP_PATH)
@@ -1323,24 +1323,24 @@ def export_all_data(decrypt=False):
             wk_repo_path = os.path.join(target_path, repo, '')
             wk_data_path = os.path.join(wk_repo_path, 'data', '')
             util.mkdir(wk_data_path)
-            decrypt_data(repo, wk_data_path)
+            unscramble_data(repo, wk_data_path)
             if util.path_exists(src_repo_props_path):
                 util.copy(src_repo_props_path, wk_repo_path)
 
         b = util.zip(None, target_path)
         return b
 
-def decrypt_data(repo, dst_base_dir):
-    encdec_data(repo, dst_base_dir, encryption_key=None)
+def unscramble_data(repo, dst_base_dir):
+    rewrite_data(repo, dst_base_dir, scramble_key=None)
 
-def encrypt_data(repo, dst_base_dir, encryption_key=DATA_ENCRYPTION_KEY):
-    encdec_data(repo, dst_base_dir, encryption_key)
+def scramble_data(repo, dst_base_dir, scramble_key=DATA_SCRAMBLE_KEY):
+    rewrite_data(repo, dst_base_dir, scramble_key)
 
-def encdec_data(repo, dst_base_dir, encryption_key):
+def rewrite_data(repo, dst_base_dir, scramble_key):
     with repo_write_lock(repo):
-        return _encdec_data_locked(repo, dst_base_dir, encryption_key)
+        return _rewrite_data_locked(repo, dst_base_dir, scramble_key)
 
-def _encdec_data_locked(repo, dst_base_dir, encryption_key):
+def _rewrite_data_locked(repo, dst_base_dir, scramble_key):
     data_id_list = get_all_data_id_list(repo)
     for i in range(len(data_id_list)):
         id = data_id_list[i]
@@ -1348,7 +1348,7 @@ def _encdec_data_locked(repo, dst_base_dir, encryption_key):
         data = load_data(repo, id)
         if data['status'] == 'OK':
             content = data['content']
-            write_data(repo, id, content, encryption_key=encryption_key, path=dst_path)
+            write_data(repo, id, content, scramble_key=scramble_key, path=dst_path)
         else:
             text = '!ERROR! ' + data['status'] + '\n---\n'
             text += load_data_as_text(repo, id)
@@ -1574,32 +1574,32 @@ def cmd_export():
 
     repo = arg1
     dest_path = arg2
-    decrypt = False
-    if arg3 == '-decrypt':
-        decrypt = True
+    unscramble = False
+    if arg3 == '-unscramble':
+        unscramble = True
 
     if dest_path == '' or dest_path.startswith('-'):
         print('Dest file path is required. (e.g., /tmp/data.zip)')
-        print('Usage: python kb.py export <REPO> <DEST_FILE_PATH> [-decrypt]')
+        print('Usage: python kb.py export <REPO> <DEST_FILE_PATH> [-unscramble]')
         return
 
     if repo == '-all':
-        data_bytes = export_all_data(decrypt)
+        data_bytes = export_all_data(unscramble)
     else:
-        data_bytes = export_data(repo, decrypt)
+        data_bytes = export_data(repo, unscramble)
 
     util.write_binary_file(dest_path, data_bytes)
 
 #------------------------------------------------------------------------------
-# To encrypt the entier data:
+# To scramble the entier data:
 # Store the plain text data file into the data folder.
 # Execute the following command.
 #
-# > python kb.py encrypt <REPO> <KEY>
+# > python kb.py scramble <REPO> <KEY>
 #
-# e.g.,> python kb.py encrypt 0 xyz
+# e.g.,> python kb.py scramble 0 xyz
 #
-def cmd_encrypt():
+def cmd_scramble():
     arg1 = util.get_arg(2)
     arg2 = util.get_arg(3)
 
@@ -1609,13 +1609,13 @@ def cmd_encrypt():
     print('key=' + key)
 
     if util.get_args_len() < 3:
-        print('Usage: python kb.py cmd_encrypt <REPO> <KEY>')
+        print('Usage: python kb.py scramble <REPO> <KEY>')
         return
 
-    # Decrypt
+    # Unscramble
     target_path = get_data_dir_path(repo)
-    decrypt_data(repo, target_path)
-    encrypt_data(repo, target_path, key)
+    unscramble_data(repo, target_path)
+    scramble_data(repo, target_path, key)
 
 #------------------------------------------------------------------------------
 def main():
@@ -1626,7 +1626,7 @@ def main():
         g[func_name]()
     else:
         print('Usage: python kb.py <COMMAND> [<ARG>]')
-        print('Commands: export, encrypt')
+        print('Commands: export, scramble')
 
 if __name__ == '__main__':
     main()

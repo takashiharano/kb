@@ -31,8 +31,8 @@ state_list = [
     {'value': 'obsolete', 'label': 'OBSOLETE', 'color': '#a29f9b', 'background': '#474645', 'border': 'none'}
 ]
 
-default_data_encryption = True
-data_encryption_key = 'xyz'
-default_encryption_key = 'xyz'
+default_data_scramble = True
+data_scramble_key = 'xyz'
+default_scramble_key = 'xyz'
 
 api_tokens = ['']
