@@ -43,7 +43,7 @@ def build_main_screen(context, repo):
     html += '<script src="' + libs_url + 'sha.js"></script>'
     html += '<script src="' + libs_url + 'debug.js"></script>'
     html += '<script src="' + libs_url + 'util.js"></script>'
-    html += '<script src="' + ROOT_PATH + 'websys/websys.js"></script>'
+    html += '<script src="' + ROOT_PATH + 'websys/js.cgi"></script>'
     html += '<script src="kb.js"></script>'
     html += '<script src="./?res=js&repo=' + repo + '"></script>'
 
