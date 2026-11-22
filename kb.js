@@ -3058,7 +3058,7 @@ kb.openXB64Dialog = function(t, enc) {
   util.dialog.text(m, kb.xb64DialogCb, opt);
 };
 kb.getDefaultKey = function() {
-  return util.bsb64.decodeToString(kb.config.default_scramble_key, 1);
+  return kb.config.default_scramble_key;
 };
 kb.applyDefaultKey = function() {
   $el('.dialog-textbox')[0].value = kb.getDefaultKey();

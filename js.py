@@ -12,7 +12,6 @@ ROOT_PATH = appconfig.root_path
 
 sys.path.append(appconfig.libs_path)
 import util
-import bsb64
 
 util.append_system_path(__file__, ROOT_PATH + 'websys')
 import websys
@@ -22,7 +21,6 @@ import kb
 #------------------------------------------------------------------------------
 def build_js(context, repo):
     content_height_adj = appconfig.list_height + 32
-    default_scramble_key = bsb64.encode(kb.DEFAULT_SCRAMBLE_KEY, 1)
     categories = kb.load_categories(repo)
 
     js = ''
@@ -35,10 +33,8 @@ def build_js(context, repo):
     js += 'kb.config = {\n'
     js += '  list_max: ' + str(appconfig.list_max) + ',\n';
     js += '  default_data_scramble: ' + ('true' if appconfig.default_data_scramble else 'false') + ',\n'
-    js += '  default_scramble_key: \'' + default_scramble_key + '\'\n'
+    js += '  default_scramble_key: \'' + kb.DEFAULT_SCRAMBLE_KEY + '\'\n'
     js += '};\n'
-
-    js += 'kb.bsb64 = {n: 1};\n'
 
     js += 'kb.configInfo = {\n'
     js += '  user_name_lang: \'' + appconfig.user_name_lang + '\',\n'
