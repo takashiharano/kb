@@ -904,7 +904,7 @@ def get_datafile_info(repo, id):
         return None
     return util.get_file_info(path)
 
-def load_data(repo, id, head_only=False):
+def load_data(repo, id, head_only=False, scramble_key=DATA_SCRAMBLE_KEY):
     data = {
         'id': id,
         'status': 'OK',
@@ -924,7 +924,7 @@ def load_data(repo, id, head_only=False):
         data['size'] = fileinfo['size']
 
     if text.startswith(DATA_SCRAMBLE_HEAD):
-        text = xb64.decode_to_string(text[len(DATA_SCRAMBLE_HEAD):], DATA_SCRAMBLE_KEY)
+        text = xb64.decode_to_string(text[len(DATA_SCRAMBLE_HEAD):], scramble_key)
         data['scrambled'] = True
 
     data['content'] = parse_content(text, head_only)
@@ -1304,7 +1304,7 @@ def export_data(repo, unscramble=False):
     with tempfile.TemporaryDirectory(prefix='export-', dir=TMP_PATH) as tmp_dir:
         wk_data_path = os.path.join(tmp_dir, 'data', '')
         util.mkdir(wk_data_path)
-        unscramble_data(repo, wk_data_path)
+        unscramble_data(repo, wk_data_path, DATA_SCRAMBLE_KEY)
         b = util.zip(None, wk_data_path)
         return b
 
@@ -1323,29 +1323,29 @@ def export_all_data(unscramble=False):
             wk_repo_path = os.path.join(target_path, repo, '')
             wk_data_path = os.path.join(wk_repo_path, 'data', '')
             util.mkdir(wk_data_path)
-            unscramble_data(repo, wk_data_path)
+            unscramble_data(repo, wk_data_path, DATA_SCRAMBLE_KEY)
             if util.path_exists(src_repo_props_path):
                 util.copy(src_repo_props_path, wk_repo_path)
 
         b = util.zip(None, target_path)
         return b
 
-def unscramble_data(repo, dst_base_dir):
-    rewrite_data(repo, dst_base_dir, scramble_key=None)
+def unscramble_data(repo, dst_base_dir, decode_key=DATA_SCRAMBLE_KEY):
+    rewrite_data(repo, dst_base_dir, decode_key=decode_key, scramble_key=None)
 
 def scramble_data(repo, dst_base_dir, scramble_key=DATA_SCRAMBLE_KEY):
     rewrite_data(repo, dst_base_dir, scramble_key)
 
-def rewrite_data(repo, dst_base_dir, scramble_key):
+def rewrite_data(repo, dst_base_dir, scramble_key, decode_key=DATA_SCRAMBLE_KEY):
     with repo_write_lock(repo):
-        return _rewrite_data_locked(repo, dst_base_dir, scramble_key)
+        return _rewrite_data_locked(repo, dst_base_dir, decode_key, scramble_key)
 
-def _rewrite_data_locked(repo, dst_base_dir, scramble_key):
+def _rewrite_data_locked(repo, dst_base_dir, decode_key, scramble_key):
     data_id_list = get_all_data_id_list(repo)
     for i in range(len(data_id_list)):
         id = data_id_list[i]
         dst_path = dst_base_dir + id + '.txt'
-        data = load_data(repo, id)
+        data = load_data(repo, id, scramble_key=decode_key)
         if data['status'] == 'OK':
             content = data['content']
             write_data(repo, id, content, scramble_key=scramble_key, path=dst_path)
@@ -1600,22 +1600,62 @@ def cmd_export():
 # e.g.,> python kb.py scramble 0 xyz
 #
 def cmd_scramble():
-    arg1 = util.get_arg(2)
-    arg2 = util.get_arg(3)
-
-    repo = arg1
-    key = arg2
-    print('repo=' + repo)
-    print('key=' + key)
-
-    if util.get_args_len() < 3:
+    if util.get_args_len() < 4:
         print('Usage: python kb.py scramble <REPO> <KEY>')
         return
 
-    # Unscramble
+    repo = util.get_arg(2)
+    key = util.get_arg(3)
+    print('repo=' + repo)
+    print('key=' + key)
+
+    if key == '':
+        key = DATA_SCRAMBLE_KEY
+
     target_path = get_data_dir_path(repo)
-    unscramble_data(repo, target_path)
+    unscramble_data(repo, target_path, DATA_SCRAMBLE_KEY)
     scramble_data(repo, target_path, key)
+
+#------------------------------------------------------------------------------
+# Unscramble data
+# > python kb.py unscramble <REPO> [<KEY>]
+#
+# e.g.,> python kb.py unscramble 0 xyz
+#
+def cmd_unscramble():
+    if util.get_args_len() < 3:
+        print('Usage: python kb.py unscramble <REPO> [<KEY>]')
+        return
+
+    repo = util.get_arg(2)
+    key = util.get_arg(3)
+    if key == '':
+        key = DATA_SCRAMBLE_KEY
+
+    print('repo=' + repo)
+
+    target_path = get_data_dir_path(repo)
+    unscramble_data(repo, target_path, key)
+
+#------------------------------------------------------------------------------
+# Re-key
+# > python kb.py rekey <REPO> <OLD_KEY> <NEW_KEY>
+#
+# e.g.,> python kb.py rekey 0 xyz abc
+#
+def cmd_rekey():
+    if util.get_args_len() < 5:
+        print('Usage: python kb.py rekey <REPO> <OLD_KEY> <NEW_KEY>')
+        return
+
+    repo = util.get_arg(2)
+    old_key = util.get_arg(3)
+    new_key = util.get_arg(4)
+
+    print('repo=' + repo)
+
+    target_path = get_data_dir_path(repo)
+    rewrite_data(repo, target_path, scramble_key=new_key, decode_key=old_key)
 
 #------------------------------------------------------------------------------
 def main():
@@ -1626,7 +1666,7 @@ def main():
         g[func_name]()
     else:
         print('Usage: python kb.py <COMMAND> [<ARG>]')
-        print('Commands: export, scramble')
+        print('Commands: export|scramble|unscramble|rekey')
 
 if __name__ == '__main__':
     main()
