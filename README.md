@@ -178,4 +178,4 @@ Entries are stored as `.txt` files under `private/kb/repos/<repo-id>/data/`. Eac
 
 ## License
 
-Knowledge Base System is released under the MIT License.
+[MIT License](LICENSE)
