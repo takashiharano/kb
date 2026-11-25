@@ -50,8 +50,7 @@ RESTRICTED_PROP_KEYS = [
     'created_by',
     'updated_at',
     'updated_by',
-    'privileges',
-    'password'
+    'privileges'
 ]
 
 SP_KEYWORD_NANIDS = '*nanids'
@@ -526,26 +525,15 @@ def search_data(context, repo, q, list_max=None):
     data_list = _search(context, repo, data_id_list, id_filtering, incl_nan_id, include_hidden, keywords)
 
     total_count = len(data_list)
+
+    date_key = 'updated_at'
+    if len(keywords) == 1 and keywords[0].startswith('created_by'):
+        date_key = 'created_at'
+
+    data_list.sort(key=lambda x: (x['score'], x['content'][date_key]), reverse=True)
+
     if list_max > 0 and total_count > list_max:
-        if len(keywords) == 1:
-            if keywords[0].startswith('created_by'):
-                data_list2 = sorted(data_list, key=lambda x: x['content']['created_at'], reverse=True)
-            elif keywords[0].startswith('updated_by'):
-                data_list2 = sorted(data_list, key=lambda x: x['content']['updated_at'], reverse=True)
-            else:
-                data_list2 = sorted(data_list, key=lambda x: x['score'], reverse=True)
-        else:
-            data_list2 = sorted(data_list, key=lambda x: x['score'], reverse=True)
-
-        data_list = []
-        cnt = 0
-        for i in range(len(data_list2)):
-            if cnt >= list_max:
-                break
-
-            data = data_list2[i]
-            data_list.append(data)
-            cnt += 1
+        data_list = data_list[:list_max]
 
     time_e = util.get_timestamp()
     elapsed = time_e - time_s
@@ -1034,15 +1022,9 @@ def _save_data_locked(repo, id, new_data, user, as_anonymous, context):
         else:
             content['data_type'] = ''
 
-        if 'password' in new_content and new_content['password'] != '':
-            content['password'] = new_content['password']
-        else:
-            content['password'] = ''
-
         content['logic'] = new_content['logic']
 
         content = del_if_filed_is_empty(content, 'logic')
-        content = del_if_filed_is_empty(content, 'password')
         content = del_if_filed_is_empty(content, 'data_type')
 
         content['body'] = body

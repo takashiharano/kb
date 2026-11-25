@@ -27,7 +27,6 @@ kb.LIST_COLUMNS = [
   {key: 'id', label: 'ID', meta: true},
   {key: 'category', label: '&nbsp;', align: 'c', sort: false},
   {key: 'title', label: 'TITLE'},
-  {key: 'password', label: '', align: 'c'},
   {key: 'created_at', label: 'CREATED'},
   {key: 'created_by', label: 'BY'},
   {key: 'updated_at', label: 'UPDATED'},
@@ -61,10 +60,6 @@ kb.pendingId = null;
 kb.repo = '';
 kb.repoProps = null;
 kb.data = null;
-kb.pw = {
-  toView: null,
-  toSave: null
-};
 kb.data_bak = null;
 kb.dndHandler = null;
 kb.areaSize = {
@@ -412,11 +407,6 @@ kb.buildDataListRow = function(data, fixed, cnt) {
   if (content.logic) {
     hasLogic = '<span data-tooltip="Logic">&lt;/&gt;</span>';
   }
-  var isPwReq = '';
-  if (content.password) {
-    isPwReq = '&#x1F512;';
-    isPwReq = '<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAYhJREFUOE+dkj1IA0EQhd9sUupZ2Xu3OWwVS1PERhQvp4XpYylaq51JJ9aKpfax0MuBYKOClqKt3E+0TmWwTHZkYwLJeZHgwLLszptvZ2eGkGJR5OQBOgIw23O/AXwgpf+YlFPyIgzdRSLuC5s9/7TemSmfy3lPgzEpAOeaiFyAt4X4utBipSbKAJ0xs5fL+esjAUGwagiR/SSiV8vy5geFcey+MPOcUu0p275p9X1DGQSBUxCC7pTiqm37lUFAEDgVIehQiIxpmlfvvwBh6K4IwfvMKBDhPq24fR8RKqZZf9CabgZR5J4AvJMWNPqOTqX0dqnZdCdbLW7pVzsdro4DyWToUGdjGGTQX/8eBevXQyleGgloNDZmlOo0NCRZuLEAP7UpdtslZd1I68ifGeiAOHaP9W5Z3t6/AGHoXOvA5PQNfeHjY81qt0UE4ELK+lbipYI+27Y/NBdRVDwHUM5mlezNQfESwDIRnsdpIzMWANxKWd/sAuLYLTFzCYBe41iNiGqW5dW+AQ941btDhiwFAAAAAElFTkSuQmCC" style="width:14px;margin-right:8px;">';
-  }
   var scrambled = '';
   if (data.scrambled) {
     scrambled = '<span data-tooltip="Scrambled">*</span>';
@@ -454,7 +444,6 @@ kb.buildDataListRow = function(data, fixed, cnt) {
   html += '<td style="text-align:right;padding-right:8px;">' + idLabel + '</td>';
   html += '<td style="padding-right:4px;text-align:center;">' + catLabel + '</td>';
   html += '<td style="min-width:300px;max-width:550px;">' + titleLabel + '</td>';
-  html += '<td style="text-align:center;width:16px;cursor:default;">' + isPwReq + '</td>';
   html += '<td style="width:145px;padding-right:0.5em;">' + createdAtStr + '</td>';
   html += '<td style="padding-right:16px;">' + createdByLink + '</td>';
   html += '<td style="width:145px;padding-right:0.5em;">' + updatedAtStr + '</td>';
@@ -752,21 +741,11 @@ kb.cancelAndGetDataN = function() {
   kb.pendingKey = null;
 };
 
-kb.clearPwValue = function() {
-  kb.pw = {
-    toView: null,
-    toSave: null
-  };
-};
-
 kb._getData = function(reload) {
   var id = kb.pendingId;
   if (id == null) return;
   kb.pendingId = null;
   kb.requestedId = id;
-  if (!reload) {
-    kb.clearPwValue();
-  }
   var param = {
     repo: kb.repo,
     id: id
@@ -820,74 +799,12 @@ kb.onGetData = function(xhr, res, req) {
     kb.data.content.logic = (content.logic ? util.decodeBase64(content.logic) : '');
   }
 
-  if (kb.hasFieldValue(content, 'password') && !kb.pw.toView) {
-    kb.openPasswordInputDialog();
-  } else {
-    kb.showReceivedData();
-  }
-  kb.enableButtons4View();
+  kb.showReceivedData();
 };
 kb.showReceivedData = function() {
   kb.drawData(kb.data);
   $el('#content-header').show();
   $el('.for-view').show();
-};
-
-kb.openPasswordInputDialog = function() {
-  var opt = {
-    secure: true,
-    closeAnywhere: true,
-    onenter: kb.onPwEnter,
-    onclose: kb.onPwClose
-  };
-  util.dialog.text('Enter password', kb.showDataWithPassword, kb.showDataWithPasswordC, opt);
-};
-kb.showDataWithPassword = function(pw) {
-  var pw0 = kb.data.content.password;
-  var pw1 = kb.getHash(pw);
-  if (pw0 != pw1) {
-    setTimeout(kb.openPasswordInputDialog, 0);
-    return;
-  }
-  kb.pw.toView = pw;
-  kb.pw.toSave = pw;
-  kb.showReceivedData();
-};
-kb.showDataWithPasswordC = function() {
-  kb.onPwMismatched();
-};
-kb.onPwEnter = function(pw) {
-  kb.showDataWithPassword(pw);
-};
-kb.onPwClose = function(pw) {
-  kb.showDataWithPasswordC();
-};
-kb.onPwMismatched = function() {
-  kb.data.content.body = '';
-  kb.showReceivedData();
-  kb.disableButtons4View();
-  if (kb.isAdmin) $el('#props-button').disabled = false;
-};
-kb.disableButtons4View = function() {
-  kb.switchButtons4View(true);
-};
-kb.enableButtons4View = function() {
-  kb.switchButtons4View(false);
-};
-kb.switchButtons4View = function(f) {
-  var ids = ['edit-button', 'edit-labels-button', 'exec-logic-button', 'props-button', 'copy-text-button', 'save-html-button', 'dup-button'];
-  for (var i = 0; i < ids.length; i++) {
-    $el('#' + ids[i]).disabled = f;
-  }
-};
-
-kb.getHash = function(src) {
-  var SALT = 'kb';
-  var shaObj = new jsSHA('SHA-256', 'TEXT');
-  shaObj.update(src);
-  shaObj.update(SALT);
-  var hash = shaObj.getHash('HEX');
-  return hash;
 };
 
 kb.buildStatusHTML = function(status) {
@@ -1026,7 +943,6 @@ kb.createLabel = function(keyname, text, snip, snipL, clickable) {
 kb.createNew = function() {
   kb.status |= kb.ST_NEW;
   $el('#content-header').show();
-  kb.clearPwValue();
   kb._clear();
   kb.edit();
   var scramble = kb.config.default_data_scramble;
@@ -1059,7 +975,6 @@ kb.editLabels = function() {
   $el('#content-title-edt').disabled = true;
   $el('#content-body-edt').disabled = true;
   $el('#select-status').disabled = true;
-  $el('#set-pw-button').disabled = true;
   $el('#chk-scramble').disabled = true;
   $el('#chk-silent').checked = true;
   $el('#edit-logic-button').disabled = true;
@@ -1092,7 +1007,6 @@ kb.edit = function() {
   $el('#content-title-edt').disabled = false;
   $el('#content-body-edt').disabled = false;
   $el('#select-status').disabled = false;
-  $el('#set-pw-button').disabled = false;
   $el('#chk-scramble').disabled = false;
   $el('#chk-silent').disabled = false;
   $el('#edit-logic-button').disabled = ((kb.status & kb.ST_NEW) ? true : false);
@@ -1106,10 +1020,6 @@ kb.edit = function() {
   $el('#content-labels-edt').value = content.labels;
   $el('#chk-scramble').checked = data.scrambled;
   $el('#chk-silent').checked = false;
-
-  var pw = kb.pw.toView;
-  kb.pw.toSave = pw;
-  kb.drawPwStatus(pw);
 };
 
 kb.onEditEnd = function() {
@@ -1117,7 +1027,6 @@ kb.onEditEnd = function() {
   kb.status &= ~kb.ST_EDIT_ONLY_LABELS;
   kb.status &= ~kb.ST_NEW;
   kb.data_bak = null;
-  kb.pw.toSave = null;
 
   kb.closeLogicEditorWindow();
 
@@ -1198,15 +1107,6 @@ kb.saveData = function() {
     return;
   }
 
-  var hash = '';
-  if (kb.pw.toSave) {
-    hash = kb.getHash(kb.pw.toSave);
-  }
-  kb.data.content.password = hash;
-  if (kb.pw.toSave != null) {
-    kb.pw.toView = kb.pw.toSave;
-  }
-
   kb.data.id = id;
   kb.data.content.title = title;
   kb.data.content.body = body;
@@ -1226,7 +1126,6 @@ kb.saveData = function() {
     content.labels = labels;
     content.status = status;
     content.flags = kb.data.content.flags;
-    content.password = kb.data.content.password;
     content.logic = b64Logic;
     content.body = body;
   }
@@ -3179,61 +3078,6 @@ kb.getRepoIdxFromId = function(id) {
 kb.extractSelectedText = function() {
   var s = window.getSelection();
   return s.toString();
-};
-
-kb.openSetPwDialog = function() {
-  var html = '';
-  html += 'Set password for viewing data\n\n';
-  html += '<table>';
-  html += '<tr>';
-  html += '<td>Password:</td>';
-  html += '<td><input type="password" id="pw1" style="width:150px;"></td>';
-  html += '</tr>';
-  html += '<tr>';
-  html += '<td>Re-type:</td>';
-  html += '<td><input type="password" id="pw2" style="width:150px;"></td>';
-  html += '</tr>';
-  html += '</table>\n';
-  html += '<div style="margin-top:8px;">';
-  html += '<button onclick="kb.setDataPw();">OK</button>';
-  html += '<button style="margin-left:8px;" onclick="kb.closeDialog();">Cancel</button>';
-  html += '</div>';
-  util.dialog.open(html);
-
-  var pw = '';
-  if (kb.pw.toSave != null) {
-    pw = kb.pw.toSave;
-  } else if (kb.pw.toView != null) {
-    pw = kb.pw.toView;
-  }
-  $el('#pw1').value = pw;
-  $el('#pw2').value = pw;
-  $el('#pw1').focus();
-};
-kb.setDataPw = function() {
-  var pw1 = $el('#pw1').value;
-  var pw2 = $el('#pw2').value;
-  if (pw1 != pw2) {
-    kb.showInfotip('Password mismatch!');
-    return;
-  }
-
-  kb.pw.toSave = pw1;
-  kb.closeDialog();
-
-  if (pw1) {
-    kb.drawPwStatus(true);
-  } else {
-    kb.drawPwStatus(false);
-  }
-};
-
-kb.drawPwStatus = function(f) {
-  $el('#pw-status').innerHTML = (f ? '&#x1F512;' : '');
-};
-
-kb.hasFieldValue = function(content, key) {
-  return ((key in content) && (content[key]));
 };
 
 kb.hasFlag = function(flgs, flag) {

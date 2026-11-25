@@ -141,8 +141,7 @@ def build_main_screen(context, repo):
           <span style="margin-left:12px;">STATUS:</span>
           <select id="select-status"></select>
 
-          <button id="set-pw-button" style="margin-left:16px;" onclick="kb.openSetPwDialog();">PW</button><div id="pw-status" style="display:inline-block;margin-left:2px;width:16px;"></div>
-          <button id="edit-logic-button" style="margin-left:2px;" onclick="kb.openLogicEditor();" disabled>LOGIC</button>
+          <button id="edit-logic-button" style="margin-left:16px;" onclick="kb.openLogicEditor();" disabled>LOGIC</button>
 '''
 
     if context.has_permission('sysadmin'):

@@ -73,9 +73,6 @@ def write_operation_log(context, op_type, repo, dataid=None, info='', data=None)
         if 'content' in data:
             content = data['content']
             if content is not None:
-                if 'password' in content and content['password'] != '':
-                    info = append_info(info, '[PW]')
-
                 if 'title' in content:
                     info = append_info(info, 'Title:' +  content['title'])
 
@@ -101,10 +98,6 @@ def write_save_log(context, repo, dataid, new_data, saved_obj):
 
     if 'content' in saved_data:
         content = saved_data['content']
-
-        if 'password' in content and content['password'] != '':
-            info = append_info(info, '[PW]')
-
         if 'title' in content:
             info = append_info(info, 'Title:' +  content['title'])
 
