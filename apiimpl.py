@@ -28,8 +28,8 @@ def get_request_param(key, default=None):
 def get_request_param_as_int(key, default=None):
     return websys.get_request_param_as_int(key, default=default)
 
-def get_request_param_as_bool(key, default=None):
-    return websys.get_request_param_as_bool(key, as_true='1')
+def get_request_param_as_bool(key, as_true='1'):
+    return websys.get_request_param_as_bool(key, as_true=as_true)
 
 #------------------------------------------------------------------------------
 def get_req_param_repo():
@@ -39,8 +39,61 @@ def get_req_param_repo():
     return repo
 
 #------------------------------------------------------------------------------
-def send_result_json(status, body=None):
+def send_ui_api_response(status, body=None):
     websys.send_result_json(status, body)
+
+#------------------------------------------------------------------------------
+def send_response(act, status, data=None):
+    if get_request_param_as_bool('ui', 'true') or act not in ('get', 'data_list', 'search'):
+        send_ui_api_response(status, data)
+    else:
+        send_api_response(act, status, data)
+
+#------------------------------------------------------------------------------
+def send_api_response(act, status, data=None):
+    result = None
+
+    if status == 'OK':
+        if act == 'get':
+            status = data['status']
+            if status == 'OK':
+                result = data['content']
+        else:
+            data_list = data.get('fixed_data_list', []) + data['data_list']
+            result = build_api_data_list(data_list)
+
+    http_status = 200
+
+    if status != 'OK':
+        status_map = {
+            'INVALID_REQUEST': 400,
+            'ILLEGAL_DATA_ID': 400,
+            'FORBIDDEN': 403,
+            'NO_ACCESS_RIGHTS': 403,
+            'DATA_FORBIDDEN': 403,
+            'REPOSITORY_NOT_FOUND': 404,
+            'DATA_NOT_FOUND': 404,
+            'REPO_BUSY': 503
+        }
+        http_status = status_map.get(status, 500)
+        result = {'error': status if http_status != 500 else 'INTERNAL_ERROR'}
+
+    websys.send_response(result, 'application/json', status=http_status, scramble=False)
+
+#------------------------------------------------------------------------------
+def build_api_data_list(data_list):
+    result = []
+
+    for data in data_list:
+        if data['status'] != 'OK':
+            continue
+
+        content = data['content'].copy()
+        content['id'] = data['id']
+        content.pop('logic', None)
+        result.append(content)
+
+    return result
 
 #------------------------------------------------------------------------------
 def has_valid_api_token():
@@ -67,7 +120,7 @@ def proc_get_data(context):
         status = 'NO_ACCESS_RIGHTS'
         result_data = None
 
-    send_result_json(status, result_data)
+    send_response('get', status, result_data)
     return None
 
 #------------------------------------------------------------------------------
@@ -102,7 +155,7 @@ def proc_on_forbidden(act):
     if act == 'export':
         util.send_result_json('FORBIDDEN', None)
     else:
-        send_result_json('FORBIDDEN', None)
+        send_response(act, 'FORBIDDEN')
     return None
 
 #------------------------------------------------------------------------------
@@ -117,7 +170,12 @@ def proc_data_list(context):
     if kb.has_privilege_for_repo(context, repo):
         limit = get_request_param_as_int('limit')
         include_hidden = get_request_param_as_bool('include_hidden')
-        detail = kb.get_data_list(context, repo, id, list_max=limit, include_hidden=include_hidden)
+
+        include_storage_sizes = False
+        if get_request_param_as_bool('ui', 'true'):
+            include_storage_sizes = True
+
+        detail = kb.get_data_list(context, repo, id, list_max=limit, include_hidden=include_hidden, include_storage_sizes=include_storage_sizes)
         result = create_result_object('OK', detail)
 
         info = ''
@@ -348,7 +406,7 @@ def proc_check_id(context):
 #------------------------------------------------------------------------------
 def proc_get_repo_list(context):
     repo_list = kb.get_repo_list(context)
-    send_result_json('OK', repo_list)
+    send_ui_api_response('OK', repo_list)
     return None
 
 #------------------------------------------------------------------------------
@@ -356,7 +414,7 @@ def proc_get_repo_props(context):
     repo = get_req_param_repo()
 
     if not kb.has_privilege_for_repo(context, repo):
-        send_result_json('NO_ACCESS_RIGHTS')
+        send_ui_api_response('NO_ACCESS_RIGHTS')
         return None
 
     props = kb.read_repo_props_as_text(repo)
@@ -368,20 +426,20 @@ def proc_get_repo_props(context):
         'props': props
     }
 
-    send_result_json('OK', result_data)
+    send_ui_api_response('OK', result_data)
     return None
 
 #------------------------------------------------------------------------------
 def proc_save_repo_props(context):
     if not context.is_admin() and not context.has_permission('sysadmin'):
-        send_result_json('FORBIDDEN')
+        send_ui_api_response('FORBIDDEN')
         return None
 
     repo = get_req_param_repo()
     props = get_request_param('props')
     status = kb.save_repo_props(repo, props)
     if status != 'OK':
-        send_result_json(status)
+        send_ui_api_response(status)
         return None
 
     result_data = {
@@ -390,13 +448,13 @@ def proc_save_repo_props(context):
 
     kblog.write_operation_log(context, 'MOD_REPO_PROPS', repo)
 
-    send_result_json('OK', result_data)
+    send_ui_api_response('OK', result_data)
     return None
 
 #------------------------------------------------------------------------------
 def proc_create_repo(context):
     if not context.is_admin() and not context.has_permission('sysadmin'):
-        send_result_json('FORBIDDEN')
+        send_ui_api_response('FORBIDDEN')
         return None
 
     repo = get_req_param_repo()
@@ -408,13 +466,13 @@ def proc_create_repo(context):
 
     kblog.write_operation_log(context, 'CREATE_REPO', repo)
 
-    send_result_json(status, result_data)
+    send_ui_api_response(status, result_data)
     return None
 
 #------------------------------------------------------------------------------
 def proc_delete_repo(context):
     if not context.is_admin() and not context.has_permission('sysadmin'):
-        send_result_json('FORBIDDEN')
+        send_ui_api_response('FORBIDDEN')
         return None
 
     repo = get_req_param_repo()
@@ -425,7 +483,7 @@ def proc_delete_repo(context):
 
     kblog.write_operation_log(context, 'DELETE_REPO', repo)
 
-    send_result_json(status, result_data)
+    send_ui_api_response(status, result_data)
     return None
 
 #------------------------------------------------------------------------------
@@ -536,7 +594,7 @@ def proc_get_kb_log(context):
         status = 'NO_PRIVILEGE'
         logs = None
 
-    send_result_json(status, body=logs)
+    send_ui_api_response(status, body=logs)
 
 #------------------------------------------------------------------------------
 def _build_css(fontsize='14', fontfamily='', with_color=False):
@@ -640,7 +698,7 @@ def proc_api(context, act):
             return
         status = result['status']
         result_data = result['detail']
-        send_result_json(status, result_data)
+        send_response(act, status, result_data)
 
 #------------------------------------------------------------------------------
 def main():
@@ -660,7 +718,7 @@ def main():
         'delete_repo'
     )
     if act in mutating_actions and not websys.is_valid_api_request():
-        send_result_json('FORBIDDEN')
+        send_ui_api_response('FORBIDDEN')
         return
 
     if act is None:

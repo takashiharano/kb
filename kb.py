@@ -260,7 +260,7 @@ def get_all_data_id_list(repo):
 
 #------------------------------------------------------------------------------
 # list_max: None=default, 0=no limit
-def get_data_list(context, repo, target_id=None, list_max=None, include_hidden=False):
+def get_data_list(context, repo, target_id=None, list_max=None, include_hidden=False, include_storage_sizes=True):
     time_s = util.get_timestamp()
 
     if list_max is None:
@@ -313,17 +313,24 @@ def get_data_list(context, repo, target_id=None, list_max=None, include_hidden=F
     all_data_size = sizes['all']
     repo_data_size = sizes['repo']
 
+    sizes = None
+    if include_storage_sizes:
+        sizes = get_storage_sizes(repo)
+
+
     time_e = util.get_timestamp()
     elapsed = time_e - time_s
 
     data_list_obj = {
-        'all_data_size': all_data_size,
-        'repo_data_size': repo_data_size,
         'total_count': total_count,
         'fixed_data_list': fixed_data_list,
         'data_list': data_list,
         'elapsed': elapsed
     }
+
+    if sizes is not None:
+        data_list_obj['all_data_size'] = sizes['all']
+        data_list_obj['repo_data_size'] = sizes['repo']
 
     return data_list_obj
 

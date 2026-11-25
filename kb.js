@@ -201,7 +201,7 @@ kb.onFileLoadError = function() {
 };
 
 kb.callApi = function(act, params, cb) {
-  var data = {act: act};
+  var data = {act: act, ui: 'true'};
   if (params) {
     for (var k in params) {
       data[k] = params[k];
