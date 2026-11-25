@@ -90,6 +90,8 @@ def build_api_data_list(data_list):
 
         content = data['content'].copy()
         content['id'] = data['id']
+        if 'score' in data:
+            content['score'] = data['score']
         content.pop('logic', None)
         result.append(content)
 
