@@ -652,7 +652,7 @@ kb.searchByKeyword = function(q, reload, limit) {
   kb.listStatus.sortOrder = 2;
   var param = {
     repo: kb.repo,
-    q: util.encodeBase64(q)
+    q: q
   };
   if (reload) param.reload = '1';
   if (limit != undefined) param.limit = limit;
@@ -815,12 +815,9 @@ kb.onGetData = function(xhr, res, req) {
   if (content) {
     var title = ((content.title == undefined) ? '' : content.title);
     var labels = content.labels;
-    var b64Body = content.body;
-    var body = util.decodeBase64(b64Body);
     kb.data.content.title = title;
     kb.data.content.labels = labels;
     kb.data.content.logic = (content.logic ? util.decodeBase64(content.logic) : '');
-    kb.data.content.body = body;
   }
 
   if (kb.hasFieldValue(content, 'password') && !kb.pw.toView) {
@@ -1217,7 +1214,6 @@ kb.saveData = function() {
   kb.data.content.status = status;
 
   var b64Logic = util.encodeBase64(logic);
-  var b64Body = util.encodeBase64(body);
 
   var only_labels;
   var content = {};
@@ -1232,7 +1228,7 @@ kb.saveData = function() {
     content.flags = kb.data.content.flags;
     content.password = kb.data.content.password;
     content.logic = b64Logic;
-    content.body = b64Body;
+    content.body = body;
   }
 
   var data = {
@@ -1797,13 +1793,12 @@ kb.saveProps = function() {
   var props = $el('#props').value;
   props = props.replace(/\n{2,}/g, '\n');
   props = props.replace(/^\n/, '');
-  var p = util.encodeBase64(props);
   var orgUpdatedAt = kb.data.content.updated_at;
   var param = {
     repo: kb.repo,
     id: kb.data.id,
     org_updated_at: orgUpdatedAt,
-    props: p
+    props: props
   };
   kb.callApi('mod_props', param, kb.onSaveProps);
 };
@@ -2226,10 +2221,9 @@ kb.createRepo = function() {
     return;
   }
   var props = $el('#repo-props').value.trim();
-  var b64props = util.encodeBase64(props);
   var params = {
     repo: repoId,
-    props: b64props
+    props: props
   };
   kb.callApi('create_repo', params, kb.onCreateRepo);
 };
@@ -2267,8 +2261,7 @@ kb.onGetRepoProps = function(xhr, res, req) {
     kb.showInfotip(res.status);
     return;
   }
-  var b64props = res.body.props;
-  var props = util.decodeBase64(b64props);
+  var props = res.body.props;
   if (!props) props = '{}';
   kb.repoProps = util.fromJSON(props);
 };
@@ -2282,18 +2275,15 @@ kb.onGetRepoPropsForEdit = function(xhr, res, req) {
     kb.showInfotip(res.status);
     return;
   }
-  var b64props = res.body.props;
-  var props = util.decodeBase64(b64props);
-  $el('#repo-props').value = props;
+  $el('#repo-props').value = res.body.props;
 };
 
 kb.saveRepoProps = function() {
   var repoId = $el('#repo-id').value.trim();
   var props = $el('#repo-props').value.trim() + '\n';
-  var b64props = util.encodeBase64(props);
   var params = {
     repo: repoId,
-    props: b64props
+    props: props
   };
   kb.callApi('save_repo_props', params, kb.onSaveRepoProps);
 };

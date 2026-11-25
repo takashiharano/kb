@@ -871,7 +871,7 @@ def count_matched_key_in_dataurl(target, keyword):
     return count
 
 #------------------------------------------------------------------------------
-def get_data(context, repo, id, need_encode_b64=False):
+def get_data(context, repo, id):
     data = load_data(repo, id)
     if data['status'] != 'OK':
         return data
@@ -882,12 +882,6 @@ def get_data(context, repo, id, need_encode_b64=False):
             'id': id,
             'status': 'DATA_FORBIDDEN'
         }
-        return data
-
-    if need_encode_b64:
-        if 'body' in content:
-            content['body'] = util.encode_base64(content['body'])
-        data['content'] = content
 
     return data
 
@@ -1016,7 +1010,7 @@ def _save_data_locked(repo, id, new_data, user, as_anonymous, context):
         scramble = data['scrambled']
     else:
         title = new_content['title']
-        body = util.decode_base64(new_content['body'])
+        body = new_content['body']
         isdataurl = is_dataurl(body)
         scramble = new_data['scramble'] == '1'
 

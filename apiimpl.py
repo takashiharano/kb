@@ -60,7 +60,7 @@ def proc_get_data(context):
     repo = get_req_param_repo()
     if kb.has_privilege_for_repo(context, repo):
         status = 'OK'
-        result_data = kb.get_data(context, repo, id, need_encode_b64=True)
+        result_data = kb.get_data(context, repo, id)
         kblog.write_operation_log(context, 'GET_DATA', repo, id, data=result_data)
     else:
         kblog.write_operation_log(context, 'GET_DATA:FORBIDDEN', repo, id)
@@ -147,7 +147,6 @@ def proc_search(context):
     if q is None:
         return create_result_object('INVALID_REQUEST')
 
-    q = util.decode_base64(q)
     limit = get_request_param_as_int('limit')
     detail = kb.search_data(context, repo, q, list_max=limit)
 
@@ -234,7 +233,6 @@ def proc_mod_props(context):
 
     org_updated_at = get_request_param('org_updated_at')
     p_props = get_request_param('props')
-    p_props = util.decode_base64(p_props)
     p_props = util.replace(p_props, ' {2,}', ' ')
 
     outcome = kb.mod_data_props(repo, id, org_updated_at, p_props, context)
@@ -365,10 +363,9 @@ def proc_get_repo_props(context):
     if props is None:
         props = ''
 
-    b64props = util.encode_base64(props)
     result_data = {
         'repo': repo,
-        'props': b64props
+        'props': props
     }
 
     send_result_json('OK', result_data)
@@ -381,8 +378,7 @@ def proc_save_repo_props(context):
         return None
 
     repo = get_req_param_repo()
-    b64props = get_request_param('props')
-    props = util.decode_base64(b64props)
+    props = get_request_param('props')
     status = kb.save_repo_props(repo, props)
     if status != 'OK':
         send_result_json(status)
@@ -404,8 +400,7 @@ def proc_create_repo(context):
         return None
 
     repo = get_req_param_repo()
-    b64props = get_request_param('props')
-    props = util.decode_base64(b64props)
+    props = get_request_param('props')
     status = kb.create_repo(repo, props)
     result_data = {
         'repo': repo
