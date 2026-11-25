@@ -45,6 +45,10 @@ def build_js(context, repo):
     js += 'kb.isAdmin = ' + ('true' if context.is_admin() else 'false') + ';\n'
     js += 'kb.isSysAdmin = ' + ('true' if context.has_permission('sysadmin') else 'false') + ';\n'
     js += 'kb.contentHeightAdj = ' + str(content_height_adj) + ';\n';
+
+    default_http_scramble = 'true' if appconfig.default_http_scramble else 'false'
+    js += 'kb.defaultHttpScramble = ' + default_http_scramble + ';\n'
+
     js += 'websys.init(\'' + appconfig.app_id + '\', \'' + ROOT_PATH + '\');'
     return js
 

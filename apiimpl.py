@@ -40,7 +40,7 @@ def get_req_param_repo():
 
 #------------------------------------------------------------------------------
 def send_result_json(status, body=None):
-    websys.send_result_json(status, body, scramble=True)
+    websys.send_result_json(status, body)
 
 #------------------------------------------------------------------------------
 def has_valid_api_token():
@@ -649,6 +649,7 @@ def proc_api(context, act):
 
 #------------------------------------------------------------------------------
 def main():
+    websys.init(scramble=appconfig.default_http_scramble)
     context = websys.on_access()
 
     act = get_request_param('act')

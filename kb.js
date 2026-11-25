@@ -2987,6 +2987,7 @@ kb.onMouseUp = function(e) {
 };
 
 kb.http = function(req, cb) {
+  req.scramble = kb.defaultHttpScramble;
   req.cb = cb;
   websys.http(req);
 };
