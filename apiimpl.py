@@ -649,7 +649,7 @@ def proc_api(context, act):
 
 #------------------------------------------------------------------------------
 def main():
-    websys.init(scramble=appconfig.default_http_scramble)
+    websys.init(http_scramble=appconfig.default_http_scramble)
     context = websys.on_access()
 
     act = get_request_param('act')
