@@ -244,7 +244,7 @@ def main():
     res = util.get_request_param('res')
     if res == 'js':
         res = util.get_request_param('res')
-        js.main(repo)
+        js.main(context, repo)
         return
 
     if kb.is_authorized(context) or kb.is_anonymous_allowed(repo):

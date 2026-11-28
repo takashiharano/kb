@@ -53,7 +53,6 @@ def build_js(context, repo):
     return js
 
 #------------------------------------------------------------------------------
-def main(repo):
-    context = websys.on_access()
+def main(context, repo):
     js = build_js(context, repo)
     util.send_response(js, 'text/javascript')

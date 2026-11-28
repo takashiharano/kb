@@ -719,7 +719,9 @@ def main():
         'create_repo',
         'delete_repo'
     )
-    if act in mutating_actions and not websys.is_valid_api_request():
+
+    method = os.environ.get('REQUEST_METHOD')
+    if act in mutating_actions and method != 'POST':
         send_ui_api_response('FORBIDDEN')
         return
 
